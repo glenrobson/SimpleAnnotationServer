@@ -1,0 +1,24 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "motivation": ["oa:commenting"],
+    "resource": [{
+        "@type": "dctypes:Text",
+        "format": "text/html",
+        "chars": "<p>este<\/p>"
+    }],
+    "on": {
+        "@type": "oa:SpecificResource",
+        "full": "http://oculus-dev.harvardx.harvard.edu/manifests/drs:14033171/canvas/canvas-14033925.json",
+        "selector": {
+            "@type": "oa:FragmentSelector",
+            "value": "xywh=212,801,146,80"
+        },
+        "scope": {
+            "@context": "http://www.harvard.edu/catch/oa.json",
+            "@type": "catch:Viewport",
+            "value": "xywh=-358,214,2420,1234"
+        }
+    },
+    "@id": "http://dev.llgc.org.uk/annotation/1433532904891"
+}

@@ -1,0 +1,10 @@
+{
+    "@context" : "contexts/iiif-2.0.json",
+    "@type": "oa:Annotation",
+    "resource" : {
+        "@embed" : true
+    },
+    "on" : {
+        "@embed" : true
+    }
+}

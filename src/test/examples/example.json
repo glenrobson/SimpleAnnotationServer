@@ -1,0 +1,27 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "http://dams.llgc.org.uk/iiif//annotation/list/ART1.json",
+    "@type": "sc:AnnotationList",
+    "resources": [
+        {
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "format": "text/plain",
+                "chars": "Just Published, tent free fir the amount in Stamps."
+            },
+            "on": "http://dams.llgc.org.uk/iiif/3100021/canvas/3100022#xywh=307,971,905,57"
+        },
+        {
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "format": "text/plain",
+                "chars": "HOW TO BREW SPLENDID STRONG ALE at 7d."
+            },
+            "on": "http://dams.llgc.org.uk/iiif/3100021/canvas/3100022#xywh=247,1019,1032,82"
+        }
+    ]
+}
