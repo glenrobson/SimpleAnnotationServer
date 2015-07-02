@@ -12,6 +12,6 @@ To install:
  3. mvn jetty:run
  4. Navigate to [http://localhost:8888/index.html](http://localhost:8888/index.html)
 
-You should now see Mirador with the default objects. You can choose any manifest to start annotating 
+You should now see Mirador with the default objects. You can choose any manifest to start annotating.
 
 
