@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.github.jsonldjava.utils.JsonUtils;
-import com.github.jsonldjava.utils.Obj;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.core.JsonLdError;
@@ -111,7 +110,7 @@ public class AnnotationUtils {
 
 	@SuppressWarnings("unchecked") 
 	protected Map<String, Object> buildAnnotationListHead() {
-		Map<String, Object> tRoot = (Map<String, Object>)Obj.newMap();
+		Map<String, Object> tRoot = (Map<String, Object>)new HashMap<String,Object>();
 		tRoot.put("@context", "http://iiif.io/api/presentation/2/context.json");
 		String tPageId = "tmp";
 		tRoot.put("@id", "http://dams.llgc.org.uk/iiif/annotation/list/" + tPageId);// current URL TODO make better id and resolvable
