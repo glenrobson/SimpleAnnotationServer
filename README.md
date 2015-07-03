@@ -10,19 +10,19 @@ a copy of Mirador so you can get started creating annotations straight away. The
 
 To begin working with Mirador and the Simple Annotation Server do the following:
 
- 1. Download code
+ * Download code
 
 ```git clone https://github.com/glenrobson/SimpleAnnotationServer.git```
 
- 2. Move into the SimpleAnnotationServer directory.
+ * Move into the SimpleAnnotationServer directory.
 
 ```cd SimpleAnnotationServer```
 
- 3. Start the jetty http server
+ * Start the jetty http server
 
 ```mvn jetty:run```
 
- 4. Start Annotating 
+ * Start Annotating 
 
 Navigate to [http://localhost:8888/index.html](http://localhost:8888/index.html)
 
@@ -34,7 +34,7 @@ If you make any changes to the HTML, Javascript, css (anything apart from the Ja
 
 ## Adding your own Manifests
 
-You can add your own Manifests by creating a HTML page in the [webapp]((tree/master/src/main/webapp) directory. For example if you wanted to add the following NLW Newspaper Manifest:
+You can add your own Manifests by creating a HTML page in the [webapp](tree/master/src/main/webapp) directory. For example if you wanted to add the following NLW Newspaper Manifest:
 
 [http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json](http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json)
 
