@@ -3802,4 +3802,27 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
     height: 75px !important;
 }
 
+span.rank { 
+	color: red;
+	font-weight: bold;
+}
 
+span.name { 
+	color: black;
+	font-weight: bold;
+}
+
+span.ship {
+	color: green;
+	font-weight: bold;
+}
+
+span.place {
+	color: blue;
+	font-weight: bold;
+}
+
+span.service {
+	color: brown;
+	font-weight: bold;
+}

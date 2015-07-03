@@ -5507,11 +5507,12 @@ window.Mirador = window.Mirador || function(config) {
         //add rich text editor
         tinymce.init({
                   selector : 'form.annotation-tooltip textarea',
-                  plugins: "image link media",
+                  plugins: "bor_markup",
+		  content_css: 'mirador/css/bor.css',
                   menubar: false,
-                  statusbar: false,
-                  toolbar_items_size: 'small',
-                  toolbar: "bold italic | bullist numlist | link image media"
+		  statusbar: false,
+		  toolbar_items_size: 'small',
+                  toolbar: "rank | name | ship | place | service"
                 });
     },
     
@@ -5824,11 +5825,12 @@ window.Mirador = window.Mirador || function(config) {
                 
                 tinymce.init({
                   selector : 'form.annotation-tooltip textarea',
-                  plugins: "image link media",
+                  plugins: "bor_markup",
                   menubar: false,
-                  statusbar: false,
-                  toolbar_items_size: 'small',
-                  toolbar: "bold italic | bullist numlist | link image media"
+		  statusbar: false,
+		  content_css: 'mirador/css/bor.css',
+		  toolbar_items_size: 'small',
+                  toolbar: "rank | name | ship | place | service"
                 });
                       
                 jQuery('.annotation-tooltip').on("submit", function(event) {
