@@ -93,7 +93,7 @@ you would create the following file:
 </html>
 ```
 
-and if you saved it as demo.html in the [webapp]((tree/master/src/main/webapp) directory you could access it at [http://localhost:8888/demo.html](http://localhost:8888/demo.html).
+and if you saved it as demo.html in the [webapp](tree/master/src/main/webapp) directory you could access it at [http://localhost:8888/demo.html](http://localhost:8888/demo.html).
 
 ## Populating the Annotation Store with IIIF Annotation List
 
