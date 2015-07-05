@@ -17,6 +17,8 @@ import com.hp.hpl.jena.query.ResultSet;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
+import uk.org.llgc.annotation.store.data.PageAnnoCount;
+
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -94,6 +96,32 @@ public class StoreAdapter {
 			Resource tAnnoId = soln.getResource("annoId") ; // Get a result variable - must be a resource
 
 			tAnnotations.add(_dataset.getNamedModel(tAnnoId.getURI()));
+		} 
+		_dataset.end();
+
+		return tAnnotations;
+	}
+
+	public List<PageAnnoCount> listAnnoPages() {
+		String tQueryString = "select ?pageId (count(?annoId) as ?count) where {" 
+										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ."
+										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
+									+ "}group by ?pageId order by ?pageId";
+
+		Query tQuery = QueryFactory.create(tQueryString);
+		QueryExecution tExec = QueryExecutionFactory.create(tQuery, _dataset);
+
+		_dataset.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		int i = 0;
+		List<PageAnnoCount> tAnnotations = new ArrayList<PageAnnoCount>();
+		while (results.hasNext()) {
+			QuerySolution soln = results.nextSolution() ;
+			Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
+			int tCount = soln.getLiteral("count").getInt();
+			System.out.println("Found " + tPageId + " count " + tCount);
+
+			tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
 		} 
 		_dataset.end();
 
