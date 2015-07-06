@@ -1,6 +1,6 @@
 ## Adding your own Manifests
 
-You can add your own Manifests by creating a HTML page in the [webapp](tree/master/src/main/webapp) directory. For example if you wanted to add the following NLW Newspaper Manifest:
+You can add your own Manifests by creating a HTML page in the [webapp](../src/main/webapp) directory. For example if you wanted to add the following NLW Newspaper Manifest:
 
 [http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json](http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json)
 
@@ -59,5 +59,5 @@ you would create the following file:
 </html>
 ```
 
-and if you saved it as demo.html in the [webapp](tree/master/src/main/webapp) directory you could access it at [http://localhost:8888/demo.html](http://localhost:8888/demo.html).
+and if you saved it as demo.html in the [webapp](../src/main/webapp) directory you could access it at [http://localhost:8888/demo.html](http://localhost:8888/demo.html).
 
