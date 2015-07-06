@@ -36,7 +36,7 @@ If you make any changes to the HTML, Javascript, css (anything apart from the Ja
 
 For further details on the SimpleAnnotationServer see:
 
- * (Adding your own Manifests)[doc/NewManifests.md] 
+ * [Adding your own Manifests](doc/NewManifests.md) 
 
 ## Populating the Annotation Store with IIIF Annotation List
 
