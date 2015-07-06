@@ -9,4 +9,4 @@ buildNumber.properties
 .mvn/timing.properties
 src/main/webapp/demo.html
 *.swp
-data
+/data
