@@ -4,6 +4,6 @@ If you make any changes to the HTML, Javascript, css (anything apart from the Ja
 
 ## Updating Mirador
 
-Mirador is included in the SimpleAnnotationServer to aid quick deployment. If you would like to update Mirador follow the instructions on the [Mirador Site](https://github.com/IIIF/mirador) and copy everything from mirador/build/mirador/* to [src/main/webapp/mirador](tree/master/src/main/webapp/mirador).
+Mirador is included in the SimpleAnnotationServer to aid quick deployment. If you would like to update Mirador follow the instructions on the [Mirador Site](https://github.com/IIIF/mirador) and copy everything from mirador/build/mirador/* to [src/main/webapp/mirador](../src/main/webapp/mirador).
 
 
