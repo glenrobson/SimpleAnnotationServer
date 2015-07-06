@@ -1,6 +1,6 @@
 ## Jetty auto deploy changes
 
-If you make any changes to the HTML, Javascript, css (anything apart from the Java files) Jetty will automatically pick up the changes so a browser refersh should get the new content. There is no need to restart jetty. If you change any Java files running mvn compile while also running mvn jetty:run jetty will ensure jetty picks up any changes
+If you make any changes to the HTML, Javascript, css (anything apart from the Java files) Jetty will automatically pick up the changes so a browser refresh should get the new content. There is no need to restart jetty. If you change any Java files running mvn compile while also running mvn jetty:run jetty will ensure jetty picks up any changes
 
 ## Updating Mirador
 
