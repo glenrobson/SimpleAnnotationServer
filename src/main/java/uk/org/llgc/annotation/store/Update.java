@@ -13,8 +13,6 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Model;
 
 public class Update extends HttpServlet {
@@ -23,9 +21,8 @@ public class Update extends HttpServlet {
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
-		Dataset tDataset = TDBFactory.createDataset(super.getServletContext().getInitParameter("data_dir"));
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("contexts")));
-		_store = new StoreAdapter(tDataset);
+		_store = StoreConfig.getConfig().getStore();
 	}
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		System.out.println("get called");

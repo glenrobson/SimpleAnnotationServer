@@ -5,11 +5,22 @@
 <web-app>
   <display-name>Simple Annotation Server</display-name>
   <context-param>
-	  <description>Sets the directory containing TDB RDF database</description>
-	  <param-name>data_dir</param-name>
-	  <param-value>data</param-value>
   </context-param>
-
+	<servlet>
+		<servlet-name>InitServer</servlet-name>
+		<servlet-class>uk.org.llgc.annotation.store.StoreConfig</servlet-class>
+		<init-param>
+			<description>RDF Store to use</description>
+			<param-name>store</param-name>
+			<param-value>jena</param-value><!--sesame -->
+		</init-param>
+		<init-param>
+			<description>Sets the directory containing TDB RDF database</description>
+			<param-name>data_dir</param-name>
+			<param-value>data</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
+	</servlet>
 
     <servlet>
         <servlet-name>Search</servlet-name>
