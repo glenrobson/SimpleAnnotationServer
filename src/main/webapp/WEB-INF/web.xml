@@ -3,14 +3,20 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>Simple Annotation Server</display-name>
-  <context-param>
-	  <description>Sets the directory containing TDB RDF database</description>
-	  <param-name>data_dir</param-name>
-	  <param-value>data</param-value>
-  </context-param>
-
-
+    <display-name>Simple Annotation Server</display-name>
+    <context-param>
+        <param-name>data_dir</param-name>
+        <param-value>data</param-value>
+        <description>Sets the directory containing TDB RDF database</description>
+    </context-param>
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>uk.org.llgc.annotation.store.filters.CorsFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <servlet>
         <servlet-name>Search</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.Search</servlet-class>
