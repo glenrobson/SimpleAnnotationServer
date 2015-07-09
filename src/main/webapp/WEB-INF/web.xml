@@ -4,20 +4,28 @@
 
 <web-app>
   <display-name>Simple Annotation Server</display-name>
-  <context-param>
-  </context-param>
 	<servlet>
 		<servlet-name>InitServer</servlet-name>
 		<servlet-class>uk.org.llgc.annotation.store.StoreConfig</servlet-class>
+	    <!--<init-param>
+	        <param-name>store</param-name>
+	        <param-value>sesame</param-value>
+	        <description>RDF Store to use</description>
+	    </init-param>
+	    <init-param>
+	        <param-name>repo_url</param-name>
+	        <param-value>http://hostname:port/openrdf-sesame/repositories/annotations </param-value>
+	        <description>Set the http URL to use to the Sesame Repository</description>
+	    </init-param>-->
 		<init-param>
-			<description>RDF Store to use</description>
 			<param-name>store</param-name>
-			<param-value>jena</param-value><!--sesame -->
+		    <param-value>jena</param-value>
+		    <description>RDF Store to use</description>
 		</init-param>
 		<init-param>
-			<description>Sets the directory containing TDB RDF database</description>
 			<param-name>data_dir</param-name>
-			<param-value>data</param-value>
+		    <param-value>data</param-value>
+		    <description>Sets the directory containing TDB RDF database</description>
 		</init-param>
 		<load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
 	</servlet>

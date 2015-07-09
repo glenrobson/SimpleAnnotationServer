@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Enumeration;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.query.Dataset;
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.adapters.JenaStore;
+import uk.org.llgc.annotation.store.adapters.SesameStore;
 
 public class StoreConfig extends HttpServlet {
 	protected Map<String,String> _props = null;
@@ -27,9 +28,11 @@ public class StoreConfig extends HttpServlet {
 	public StoreAdapter getStore() {
 		StoreAdapter tAdapter = null;
 		if (_props.get("store").equals("jena")) {
-			Dataset tDataset = TDBFactory.createDataset(_props.get("data_dir"));
-			tAdapter = new StoreAdapter(tDataset);
+			tAdapter = new JenaStore(_props.get("data_dir"));
 		}	
+		if (_props.get("store").equals("sesame")) {
+			tAdapter = new SesameStore(_props.get("repo_url"));
+		}
 
 		return tAdapter;
 	}

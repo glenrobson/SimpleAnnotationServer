@@ -10,6 +10,8 @@ import java.io.IOException;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+
 public class Destroy extends HttpServlet {
 	protected StoreAdapter _store = null;
 

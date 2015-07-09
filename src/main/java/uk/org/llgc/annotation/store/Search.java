@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+
 public class Search extends HttpServlet {
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
