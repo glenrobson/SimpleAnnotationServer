@@ -26,9 +26,9 @@
 
     jQuery.extend(this, {
       token:     null,
-      prefix:    'annotation', /**/
-      urls:      null,
+     // prefix:    'annotation', /**/
       uri:       null,
+		url:		  options.url,	
       dfd:       null,
       annotationsList: [],        //OA list for Mirador use
       idMapper: new Object() //internal list for module use to map id to URI
@@ -58,13 +58,14 @@
     //Search endpoint for all annotations with a given URI
     search: function(uri) {
       var _this = this;
+		
       this.annotationsList = []; //clear out current list
       jQuery.ajax({
-        url: this.prefix+"/search",
+        url: _this.url + "/search", // this.prefix+
         type: 'GET',
         dataType: 'json',
         headers: {
-          "x-annotator-auth-token": this.token
+          //"x-annotator-auth-token": this.token
         },
         data: {
           uri: uri,
@@ -93,11 +94,11 @@
     deleteAnnotation: function(annotationID, returnSuccess, returnError) {          
 			 var _this = this;
           jQuery.ajax({
-             url: this.prefix+"/destroy?uri=" + _this.idMapper[annotationID],
+             url: _this.url + "/destroy?uri=" + _this.idMapper[annotationID], // this.prefix+
              type: 'DELETE',
              dataType: 'json',
              headers: {
-               "x-annotator-auth-token": this.token
+               //"x-annotator-auth-token": this.token
              },
 				 data: {
 					 uri: annotationID,
@@ -124,11 +125,11 @@
 		delete annotation.fullId;
       delete annotation.endpoint;
       jQuery.ajax({
-        url: this.prefix+"/update/"+annotationID,
+        url: _this.url + "/update/"+annotationID, //this.prefix+
         type: 'POST',
         dataType: 'json',
         headers: {
-          "x-annotator-auth-token": this.token
+          //"x-annotator-auth-token": this.token
         },
         data: JSON.stringify(annotation),
         contentType: "application/json; charset=utf-8",
@@ -151,11 +152,11 @@
       _this = this;
       
       jQuery.ajax({
-        url: this.prefix+"/create",
+        url: _this.url + "/create", //this.prefix+
         type: 'POST',
         dataType: 'json',
         headers: {
-          "x-annotator-auth-token": this.token
+          //"x-annotator-auth-token": this.token
         },
         data: JSON.stringify(annotation),
         contentType: "application/json; charset=utf-8",

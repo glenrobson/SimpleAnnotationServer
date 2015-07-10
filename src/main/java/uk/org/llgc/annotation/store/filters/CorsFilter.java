@@ -19,7 +19,8 @@ public class CorsFilter implements Filter {
 		pChain.doFilter(pReq, pRes);
 
 		((HttpServletResponse)pRes).addHeader("Access-Control-Allow-Origin", "*");
-		((HttpServletResponse)pRes).addHeader("Access-Control-Allow-Headers", "X-Requested-With");
+		((HttpServletResponse)pRes).addHeader("Access-Control-Allow-Headers", "X-Requested-With,Content-Type");
+		((HttpServletResponse)pRes).addHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
 	}
 
 	public void destroy() {

@@ -36,6 +36,7 @@ For further details on the SimpleAnnotationServer see:
  * [Developing Mirador with SimpleAnnotationServer](doc/DevGuide.md)
  * [Deploying to tomcat](doc/tomcat.md)
  * [Using the Sesame RDF store](doc/Sesame.md)
+ * [Remote Annotation Store](doc/RemoteStore.md)
 
 ## Missing Functions
 

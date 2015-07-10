@@ -47,9 +47,7 @@ you would create the following file:
 					name: 'Simple Annotation Store Endpoint',
 					module: 'SimpleASEndpoint',
 					options: {
-						url: '/api/annotation',
-						storeId: 'comparison',
-						APIKey: 'user_auth'
+						url: 'annotation',
 					}
 				}
 	});
