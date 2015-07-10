@@ -35,6 +35,7 @@ For further details on the SimpleAnnotationServer see:
  * [Populating the Annotation Store with IIIF Annotation List](doc/PopulatingAnnotations.md)
  * [Developing Mirador with SimpleAnnotationServer](doc/DevGuide.md)
  * [Deploying to tomcat](doc/tomcat.md)
+ * [Using the Sesame RDF store](doc/Sesame.md)
 
 ## Missing Functions
 

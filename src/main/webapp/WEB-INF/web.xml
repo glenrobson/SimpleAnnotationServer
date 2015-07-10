@@ -4,11 +4,6 @@
 
 <web-app>
     <display-name>Simple Annotation Server</display-name>
-    <context-param>
-        <param-name>data_dir</param-name>
-        <param-value>data</param-value>
-        <description>Sets the directory containing TDB RDF database</description>
-    </context-param>
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>uk.org.llgc.annotation.store.filters.CorsFilter</filter-class>
@@ -17,6 +12,31 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+	<servlet>
+		<servlet-name>InitServer</servlet-name>
+		<servlet-class>uk.org.llgc.annotation.store.StoreConfig</servlet-class>
+	    <!--<init-param>
+	        <param-name>store</param-name>
+	        <param-value>sesame</param-value>
+	        <description>RDF Store to use</description>
+	    </init-param>
+	    <init-param>
+	        <param-name>repo_url</param-name>
+	        <param-value>http://hostname:port/openrdf-sesame/repositories/annotations </param-value>
+	        <description>Set the http URL to use to the Sesame Repository</description>
+	    </init-param>-->
+		<init-param>
+			<param-name>store</param-name>
+		    <param-value>jena</param-value>
+		    <description>RDF Store to use</description>
+		</init-param>
+		<init-param>
+			<param-name>data_dir</param-name>
+		    <param-value>data</param-value>
+		    <description>Sets the directory containing TDB RDF database</description>
+		</init-param>
+		<load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
+	</servlet>
     <servlet>
         <servlet-name>Search</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.Search</servlet-class>

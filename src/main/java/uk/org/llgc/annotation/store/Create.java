@@ -13,9 +13,9 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Model;
+
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 
 public class Create extends HttpServlet {
 	protected AnnotationUtils _annotationUtils = null;
@@ -23,9 +23,8 @@ public class Create extends HttpServlet {
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
-		Dataset tDataset = TDBFactory.createDataset(super.getServletContext().getInitParameter("data_dir"));
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("contexts")));
-		_store = new StoreAdapter(tDataset);
+		_store = StoreConfig.getConfig().getStore();
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {

@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.adapters;
 
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -32,11 +32,11 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import java.nio.charset.Charset;
 
-public class StoreAdapter {
+public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 	protected Dataset _dataset = null;
 
-	public StoreAdapter(final Dataset pData) {
-		_dataset = pData;
+	public JenaStore(final String pDataDir) {
+		_dataset = TDBFactory.createDataset(pDataDir);
 	}
 
 	public Model addAnnotation(final Map<String,Object> pJson) throws IOException {
@@ -78,7 +78,20 @@ public class StoreAdapter {
 		_dataset.commit();
 	}
 
-	public List<Model> getAnnotationsFromPage(final String pPageId) {
+	protected QueryExecution getQueryExe(final String pQuery) {
+		return QueryExecutionFactory.create(pQuery, _dataset);
+	}
+	protected Model getNamedModel(final String pContext) throws IOException {
+		return _dataset.getNamedModel(pContext);
+	}
+
+	protected void begin(final ReadWrite pWrite) {
+		_dataset.begin(pWrite);
+	}
+	protected void end() {
+		_dataset.end();
+	}
+	/*public List<Model> getAnnotationsFromPage(final String pPageId) {
 		String tQueryString = "select ?annoId ?graph where {" 
 										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> <" + pPageId + "> ."
 										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
@@ -126,5 +139,5 @@ public class StoreAdapter {
 		_dataset.end();
 
 		return tAnnotations;
-	}
+	}*/
 }

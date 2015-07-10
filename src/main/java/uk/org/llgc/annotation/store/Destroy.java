@@ -8,17 +8,16 @@ import javax.servlet.ServletException;
 
 import java.io.IOException;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Model;
+
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 
 public class Destroy extends HttpServlet {
 	protected StoreAdapter _store = null;
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
-		Dataset tDataset = TDBFactory.createDataset(super.getServletContext().getInitParameter("data_dir"));
-		_store = new StoreAdapter(tDataset);
+		_store = StoreConfig.getConfig().getStore();
 	}
 
 	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
