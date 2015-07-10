@@ -67,14 +67,16 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
 		int i = 0;
 		List<PageAnnoCount> tAnnotations = new ArrayList<PageAnnoCount>();
-		while (results.hasNext()) {
-			QuerySolution soln = results.nextSolution() ;
-			Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
-			int tCount = soln.getLiteral("count").getInt();
-			System.out.println("Found " + tPageId + " count " + tCount);
+		if (results != null) {
+			while (results.hasNext()) {
+				QuerySolution soln = results.nextSolution() ;
+				Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
+				int tCount = soln.getLiteral("count").getInt();
+				System.out.println("Found " + tPageId + " count " + tCount);
 
-			tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
-		} 
+				tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
+			} 
+		}	
 		this.end();
 
 		return tAnnotations;
