@@ -33,6 +33,26 @@
 			<artifactId>jsonld-java</artifactId>
 			<version>0.5.1</version>
 		</dependency>
+		<!--<dependency>
+			<groupId>net.rootdev</groupId>
+			<artifactId>java-rdfa</artifactId>
+			<version>0.4.2</version>
+		</dependency>-->
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+			<version>2.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>1.1.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>saxpath</artifactId>
+			<version>1.0-FCS</version>
+		</dependency>
       <!--<dependency>
           <groupId>com.github.jsonld-java</groupId>
           <artifactId>jsonld-java</artifactId>

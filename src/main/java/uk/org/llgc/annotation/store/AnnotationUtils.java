@@ -21,11 +21,15 @@ import org.apache.jena.riot.Lang;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
+import uk.org.llgc.annotation.store.encoders.Encoder;
+
 public class AnnotationUtils {
 	protected File _contextDir = null;
+	protected Encoder _encoder = null;
 
-	public AnnotationUtils(final File pContextDir) {
+	public AnnotationUtils(final File pContextDir, final Encoder pEncoder) {
 		_contextDir = pContextDir;
+		_encoder = pEncoder;
 	}
 
 	/**
@@ -35,6 +39,8 @@ public class AnnotationUtils {
 	 */
 	public List<Map<String,Object>> readAnnotationList(final InputStream pStream) throws IOException {
 		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
+		/**/System.out.println("Original untouched annotation:");
+		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
 		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
 
 		String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
@@ -75,6 +81,10 @@ public class AnnotationUtils {
 			tSelector.put("value", tOnStr[1]);
 
 			tAnno.put("on", tOnObj);
+
+			if (_encoder != null) {
+				_encoder.encode(tAnno);
+			}
 		}
 		return tAnnotations;
 	}
@@ -100,6 +110,9 @@ public class AnnotationUtils {
 		tOn.remove("source");
 		tOn.put("full", tSource);
 
+		if (_encoder != null) {
+			_encoder.encode(tRoot);
+		}
 		return tRoot;
 	}
 
@@ -155,6 +168,9 @@ public class AnnotationUtils {
 				tOn.remove("full");
 				tOn.put("source", tFull);
 
+				if (_encoder != null) {
+					_encoder.decode(tJsonLd);
+				}
 				tResources.add(tJsonLd);
 			} catch (JsonLdError tExcpt) {
 				System.out.println("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);

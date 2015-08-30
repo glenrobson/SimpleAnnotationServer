@@ -16,6 +16,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.encoders.Encoder;
 
 public class Update extends HttpServlet {
 	protected AnnotationUtils _annotationUtils = null;
@@ -23,7 +24,8 @@ public class Update extends HttpServlet {
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
-		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")));
+		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
+		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
 	}
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
