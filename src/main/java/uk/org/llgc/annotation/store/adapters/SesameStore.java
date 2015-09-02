@@ -62,8 +62,12 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	public Model addAnnotation(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
-		pJson.put("@context","http://iiif.io/api/presentation/2/context.json"); // must have a remote context for a remote repo
+		pJson.put("@context","http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
+		Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
+		tOn.remove("scope");
 		String tJson = JsonUtils.toString(pJson);
+		System.out.println("Seasme json:");
+		System.out.println(tJson);
 
 		RepositoryConnection tConn = null;
 		InputStream tInput = null;

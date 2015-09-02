@@ -1,0 +1,33 @@
+/* NLW Book of Peace - These styles are used by tinymce to style the markup
+   when in editor mode. Preview styles are in mirador.css
+---------------------------------------------------------------------------- */
+span.heading {
+	color: cadetblue;
+	font-weight: bold;
+}
+span.rank {
+	color: red;
+	font-weight: bold;
+}
+
+span.name {
+	color: black;
+	font-weight: bold;
+}
+span.place {
+	color: brown;
+	font-weight: bold;
+}
+span.unit {
+	color: darkorange;
+	font-weight: bold;
+}
+
+span.ship {
+	color: blue;
+	font-weight: bold;
+}
+span.medal {
+	color: goldenrod;
+	font-weight: bold;
+}
