@@ -95,37 +95,6 @@ body {
   border-bottom-color: #fff;
 }
 
-@media (min-width: 768px) {
-  .masthead-brand {
-    float: left;
-  }
-  .masthead-nav {
-    float: right;
-  }
-}
-
-
-/*
- * Cover
- */
-
-.cover {
-  padding: 0 20px;
-}
-.cover .btn-lg {
-  padding: 10px 20px;
-  font-weight: bold;
-}
-
-
-/*
- * Footer
- */
-
-.mastfoot {
-  color: #999; /* IE8 proofing */
-  color: rgba(255,255,255,.5);
-}
 
 
 /*
@@ -161,3 +130,9 @@ body {
     width: 700px;
   }
 }
+/*some min heights on the rows */
+@media screen and (min-height: 480px) {
+  .row > [class*="col-"] {
+        margin-bottom:3%;
+  }
+}}
