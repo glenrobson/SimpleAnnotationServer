@@ -10,3 +10,4 @@ buildNumber.properties
 src/main/webapp/demo.html
 *.swp
 /data
+/mirador_full
