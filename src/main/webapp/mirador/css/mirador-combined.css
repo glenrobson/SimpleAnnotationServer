@@ -3745,6 +3745,7 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
 }
 .annotation-tooltip .save, .annotation-tooltip .cancel {
   margin-left: 12px;
+  margin-right: 50px;
   /* padding: 5px 7px; */
   /* border-radius: 2px; */
   /* text-decoration: underline; */
