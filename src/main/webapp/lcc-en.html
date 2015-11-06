@@ -23,8 +23,8 @@
         "layout": "1x1",
 		  "mainMenuSettings" :
 		  {
-		  		"show": true,
-		  		"buttons" : {"bookmark" : true, "layout" : true},
+		  		"show": false,
+		  		"buttons" : {"bookmark" : false, "layout" : false, "options" : false, "fullScreenViewer": false},
 		  		"userLogo": {"label": "Home", "attributes": {"href": "index.html"}}
 		  },
 		  'showAddFromURLBox' : false,
@@ -32,7 +32,14 @@
         "data": [
           { "manifestUri": "http://dams.llgc.org.uk/iiif/2.0/4642022/manifest.json", "location": "National Library of Wales"}
         ],
-        "windowObjects": [],
+        "windowObjects": [{
+            "loadedManifest": "http://dams.llgc.org.uk/iiif/2.0/4642022/manifest.json",
+            "viewType" : "ImageView",
+            "displayLayout": false,
+            "overlay" : false,
+            "fullscreen" : false
+            }
+         ],
 		  /** Testing Annotations **/
 		  annotationEndpoint: {
 				name: 'Simple Annotation Store Endpoint',

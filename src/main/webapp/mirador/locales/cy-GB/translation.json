@@ -1,14 +1,16 @@
 {
     "addItem": "Ychwanegu Eitem",
     "changeLayout": "Newid Gosodiad",
+    "home": "Adref",
+    "object Metadata": "something here",
     "selectGrid": "Dewiswch grid isod",
     "bookmark": "Nodi Tudalen",
     "close": "Cau",
     "bookmarkTitle": "Nodi Tudalen neu Rhannu'ch Gweithle",
     "filterObjects": "Hidlo gwrthrychau ",
     "addNewObject": "Ychwanegu gwrthrych newydd o URL",
-    "more": "mwy",
-    "items": "eitemau",
+    "more": "yn fwy",
+    "items": "eitem",
     "details": "Manylion",
     "rights": "Hawliau",
     "rightsStatus": "Statws Hawliau",
@@ -31,6 +33,5 @@
     "edit": "Golygu",
     "delete": "Dileu",
     "url": "URL",
-    "newObject": "Gwrthrych Newydd",
-    "rank": "welsh rank test"
+    "newObject": "Gwrthrych Newydd"
 }
