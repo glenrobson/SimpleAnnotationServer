@@ -7,8 +7,8 @@
     "bookmarkTitle": "Nodi Tudalen neu Rhannu'ch Gweithle",
     "filterObjects": "Hidlo gwrthrychau ",
     "addNewObject": "Ychwanegu gwrthrych newydd o URL",
-    "more": "mwy",
-    "items": "eitemau",
+    "more": "yn fwy",
+    "items": "eitem",
     "details": "Manylion",
     "rights": "Hawliau",
     "rightsStatus": "Statws Hawliau",
@@ -32,5 +32,6 @@
     "delete": "Dileu",
     "url": "URL",
     "newObject": "Gwrthrych Newydd",
-    "rank": "welsh rank test"
+    "Home": "Adref",
+    "Object Metadata": "something here"
 }
