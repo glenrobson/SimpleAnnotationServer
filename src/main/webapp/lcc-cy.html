@@ -9,6 +9,10 @@
     body { padding: 0; margin: 0; overflow: hidden; font-size: 70%; }
     #viewer { background: #333 url(mirador/images/debut_dark.png) left top repeat; width: 100%; height: 100%; position: fixed; }
   </style>
+  <!-- BEGIN TRACKJS -->
+  <script type="text/javascript">window._trackJs = { token: '0a0cd156ca5c4926aab7962f81ea4aab' };</script>
+  <script type="text/javascript" src="https://d2zah9y47r7bi2.cloudfront.net/releases/current/tracker.js"></script>
+  <!-- END TRACKJS -->
 </head>
 <body>
   <div id="viewer"></div>
@@ -24,16 +28,23 @@
         "layout": "1x1",
 		  "mainMenuSettings" :
 		  {
-		  		"show": true,
-		  		"buttons" : {"bookmark" : true, "layout" : true},
-		  		"userLogo": {"label": "Home", "attributes": {"href": "index.html"}}
+		  		"show": false,
+		  		"buttons" : {"bookmark" : false, "layout" : false, "options" : false, "fullScreenViewer": false},
+		  		"userLogo": {"label": "Adref", "attributes": {"href": "index.html"}}
 		  },
 		  'showAddFromURLBox' : false,
 		  "saveSession": true,
         "data": [
-          { "manifestUri": "http://dams.llgc.org.uk/iiif/2.0/4642022/manifest.json", "location": "National Library of Wales"}
+          { "manifestUri": "http://dams.llgc.org.uk/iiif/2.0/4642022/manifest.json", "location": "Llyfrgell Genedlaethol Cymru"}
         ],
-        "windowObjects": [],
+        "windowObjects": [{
+            "loadedManifest": "http://dams.llgc.org.uk/iiif/2.0/4642022/manifest.json",
+            "viewType" : "ImageView",
+            "displayLayout": false,
+            "overlay" : false,
+            "fullscreen" : false
+            }
+         ],
 		  /** Testing Annotations **/
 		  annotationEndpoint: {
 				name: 'Simple Annotation Store Endpoint',
