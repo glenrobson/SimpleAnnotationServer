@@ -1,8 +1,8 @@
 ## Populating the Annotation Store with IIIF Annotation List
 
-If you already have an IIIF Annotation List you can populate the Annotation Server with this data. This might be the case if you had an Annotation List generated from OCR data but wanted to correct it in Mirador. There is an example Annotation List for a NLW Newspaper created by [azaroth42](https://github.com/azaroth42) at:
+If you already have an IIIF Annotation List you can populate the Annotation Server with this data. This might be the case if you had an Annotation List generated from OCR data but wanted to correct it in Mirador. There is an example Annotation List for a NLW Newspaper inspired by the work of [azaroth42](https://github.com/azaroth42) at:
 
-[http://showcase.iiif.io/shims/wales/potter/list/3100187.json](http://showcase.iiif.io/shims/wales/potter/list/3100187.json)
+[http://dev.llgc.org.uk/iiif/examples/newspapers/3100187-anno.json](http://dev.llgc.org.uk/iiif/examples/newspapers/3100187-anno.json)
 
 To load this navigate to:
 
