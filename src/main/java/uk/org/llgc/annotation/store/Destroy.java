@@ -26,5 +26,6 @@ public class Destroy extends HttpServlet {
 		System.out.println("limit " + pReq.getParameter("limit"));
 		String tURI = pReq.getParameter("uri");
 		_store.deleteAnnotation(tURI);
+		pRes.setStatus(pRes.SC_NO_CONTENT);
 	}
 }

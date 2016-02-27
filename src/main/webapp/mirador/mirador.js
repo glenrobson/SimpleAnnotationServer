@@ -6075,8 +6075,8 @@ window.Mirador = window.Mirador || function(config) {
         var bounds = _this.osdViewer.viewport.getBounds(true);
         var scope = _this.osdViewer.viewport.viewportToImageRectangle(bounds);
         //bounds is giving negative values?
-        //update scope
-        oaAnno.on.scope.value = "xywh="+Math.round(scope.x)+","+Math.round(scope.y)+","+Math.round(scope.width)+","+Math.round(scope.height); //osd bounds
+        //update scope gmr
+        //oaAnno.on.scope.value = "xywh="+Math.round(scope.x)+","+Math.round(scope.y)+","+Math.round(scope.width)+","+Math.round(scope.height); //osd bounds
                   
         var motivation = [],
         resource = [];
@@ -6651,7 +6651,7 @@ window.Mirador = window.Mirador || function(config) {
           uri: annotationID,
         },
         contentType: "application/json; charset=utf-8",
-        success: function(data) {
+        success: function() { // gmr data
           returnSuccess();
         },
         error: function() {
