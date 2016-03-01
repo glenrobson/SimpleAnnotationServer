@@ -2200,7 +2200,7 @@ a {
 }
 
 /* jquery-ui-dialog theming/customisation (overrides to reset neutral defaults)
----------------------------------------------------------------------------- 
+----------------------------------------------------------------------------
  */
   .ui-dialog-titlebar {
     display:none;
@@ -2249,7 +2249,7 @@ a {
 
 /*----------------------------------------------------------------------------
 /* Mirador styles
----------------------------------------------------------------------------- 
+----------------------------------------------------------------------------
  */
 
   .mirador-viewer, .mirador-main-menu-bar, .mirador-status-bar {
@@ -2268,6 +2268,19 @@ a {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+/* media-queries
++---------------------------------------------------------------------------- */
+
+@media screen and (max-width: 768px) {
+  #load-controls form {
+    float: none;
+  }
+  
+  #url-load-form {
+    margin-bottom: 5px; 
+  }
 }
 
 
@@ -2404,9 +2417,9 @@ a {
 }
 
 
-/* main menu select menu 
+/* main menu select menu
 ---------------------------------------------------------------------------- */
-  #manifest-select-menu, #workspace-select-menu, #workspaceContainer {
+#workspace-select-menu, #workspaceContainer {
     position: absolute;
     height: 100%;
     width: 100%;
@@ -2414,6 +2427,20 @@ a {
     display: none;
     overflow: hidden;
     z-index: 5;
+}
+#manifest-select-menu {
+  position: absolute;
+  margin: 6px;
+  display: block;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  display: none;
+  overflow: hidden;
+  z-index: 101;
+  background-color: #fff;
+  box-shadow: 0 0 6px #333;
 }
 #bookmark-panel {
   position: absolute;
@@ -2425,6 +2452,7 @@ a {
   z-index: 5;
   right: 0;
   top: 0;
+  padding: 10px;
 }
 #bookmark-panel span {
   width: 100%;
@@ -2441,7 +2469,7 @@ a {
   position: relative;
   width: 100%;
   height:100%;
-  padding-left: 30px;
+  padding: 10px 4px 10px 10px;
   box-sizing: border-box;
   overflow: hidden;
   margin:0 auto;
@@ -2449,18 +2477,21 @@ a {
 .items-listing {
   margin: 0;
   padding-left: 0;
-  padding-bottom: 30px;
   box-sizing: border-box;
 }
 .items-listing li {
   list-style-type: none;
   overflow: hidden;
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid #d3d3d3;
   padding-top: 10px;
   padding-bottom: 10px;
   position: relative;
   padding-left: 5px;
-  margin-right: 10px;
+  transition: background-color 0.3s ease-out;
+}
+.items-listing li:hover {
+  background-color: #ddd;
+  cursor: pointer;
 }
 .manifest-load-status-indicator {
   width:100%;
@@ -2496,16 +2527,16 @@ a {
   bottom:0;
   width:100%;
 }
-.items-listing li:hover {
-  background: #dddddd;
-  cursor: pointer;
-}
 .select-metadata {
-  width:200px;
+  width: 45%;
+  max-width: 450px;
+  min-width: 300px;
+  position: relative;
+  /*width:200px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow:hidden;
-  position: relative;
+  position: relative;*/
 }
 .repo-image {
   position:relative;
@@ -2523,15 +2554,46 @@ a {
   margin: 0;
   font-weight: normal;
   color:rgba(0,0,0,0.7);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow:hidden;
 }
 .items-listing h3 {
   color:rgba(0,0,0,0.8);
-  font-weight:bold;
   margin-top:2px;
-  font-weight: bold;
+  font-size: 1em;
+}
+.manifest-title h3 {
+  line-height: 1.2em;
+  height: 3.6em;
+  position: relative;
+  overflow: hidden;
+}
+.manifest-title h3:after {
+  content: "";
+  text-align: right;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20%;
+  height: 1.2em;
+  /*background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);*/
+}
+.item-info {
+  position: absolute;
+  bottom: 0;
+  display: table;
+  width: 100%;
+}
+.item-info-row {
+  display: table-row;
+}
+.repo-label, .canvas-count {
+  display: table-cell;
+  white-space: nowrap;
+  font-size: .85em;
+  vertical-align: bottom;
+  color: gray;
+}
+.canvas-count {
+  text-align: right;
 }
 .repo-image, .select-metadata, .preview-images {
   float:left;
@@ -2549,6 +2611,7 @@ a {
   margin-right:15px;
   min-height: 25px;
   min-width: 25px;
+  /*transition: all 0.1s ease-out; ?*/
 }
 
 .preview-image:hover {
@@ -2577,54 +2640,65 @@ li.highlight {
   padding-left: 8px !important;
   padding-right: 8px !important;
 }
-
-.remaining-items {
+.remaining {
+  line-height:80px;
   opacity: 0.5;
   text-align: center;
-  position: absolute;
-  right: 0;
-  height:80px;
-  margin-right: 10px;
-}
-.remaining-items h3 {
-  margin-top: 30px;
-  font-weight: bold;
+  box-sizing: border-box;
+  vertical-align: middle;
+  width: 20px;
 }
 #load-controls {
-  float: left;
-  height:100%;
-  width: 19%;
+  margin-top: 20px;
 }
-#load-controls label {
-  font-weight: bold;
+#load-controls:after {
+  content: "";
+  display: table;
+  clear: both;
 }
 #load-controls input {
   height:25px;
-  /*font-size:18px;*/
-  border:3px solid gray;
-  margin:0 auto;
-  width:100%;
+  border:1px solid #d3d3d3;
+  color: gray;
+  background:none;
+  border-radius: 2px;
+  transition: border-color 0.3s ease-out;
 }
 #manifest-select-menu .remove-object-option {
   cursor: pointer;
-  margin-top:20px;
-  display: block;
+  display: inline-block;
+  font-size: .9em;
+  font-weight: bold;
+  transition: color 0.2s ease-out;
+}
+#manifest-select-menu .remove-object-option:hover {
+  color: rgb( 146, 145, 145 );
 }
 #manifest-search-form {
-  margin-top: 30px;
+  float:left;
 }
-#manifest-search-form input {
-  background:none;
-  /*border:none;
-  border-bottom:2px solid black;*/
-  width: 100%;
+#manifest-search-form label {
+  margin-right: 6px;
+}
+#url-load-form {
+  float: right; 
+}
+#url-load-form input[type="text"] {
+  width: 250px;
+  margin: 0 5px;
+}
+#load-controls input[type="submit"]{
+  height: 29px;
 }
 #manifest-search i {
   position:absolute;
   left:0;
   color:black;
 }
-#manifest-search-form input:focus, #url-load-form input:focus {
+#manifest-search-form input:focus, #url-load-form input:focus,
+#manifest-search-form input:focus, 
+#url-load-form input:focus,
+#url-load-form input[type="submit"]:hover{
   outline:none;
   border-color:deepskyblue;
 }
@@ -2636,10 +2710,10 @@ li.highlight {
 }
 
 .select-results {
-  margin-left: 20%;
   height:100%;
   overflow-y: scroll;
-  padding-top: 30px;
+  margin-top: 10px;
+  border-top: 1px solid gray;
 }
 
 /* main-menu workspaces-panel */
@@ -2812,18 +2886,103 @@ li.highlight {
   box-sizing: border-box;
 }
 
+
 .sidePanel {
+    position:absolute;
+  width:280px;
+  left: 0;
+  bottom: 0;
+  top:0;
+  background-color: #efefef;
+  border-right: 1px solid lightgray;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  padding: 10px;
+  opacity:1;
+  transition: all 0.2s ease-out;
+  transform: translateX(0);
+}
+
+.sidePanel.minimized {
+    transition: all 0.2s ease-out;
+    transform: translateX(-280px);
+    opacity:0;
+    border:none;
+}
+
+.tabContentArea {
   position: relative;
   width:280px;
   height:100%;
   float: left;
   background-color: #efefef;
   border-right: 1px solid lightgray;
-  /*display: none;*/
   box-sizing: border-box;
   overflow: hidden;
-  transition: all 0s ease;
+  transition: all 0.3s ease;
 }
+
+.sidePanel .tabGroup {
+    list-style-type:none;
+    margin:0;
+    padding:0;
+}
+
+.sidePanel .tab {
+    padding: 4px 6px;
+    border-left:0;
+    border-bottom: 2px solid black;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 3px 3px 0 0;
+}
+
+.sidePanel .tab:not(.selected):hover {
+    border: 2px solid rgba(0,0,0,0.3);
+    border-bottom: 2px solid black;
+    padding:4px 4px;
+}
+
+.sidePanel .tab.selected {
+    border: 2px solid black;
+    border-bottom:0;
+    border-radius: 3px 3px 0 0;
+    margin: 0 -2px;
+}
+.annotationsPanel ul {
+    padding:0;
+    margin:0;
+ }
+.sidePanel .annotationListItem {
+    list-style-type: none;
+    border-left:0;
+    border-right:0;
+    padding:10px 10px 0 10px;
+}
+.sidePanel .annotationListItem:after {
+                 content: "";
+                 height: 1px;
+                 background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(147,147,147,1) 50%,rgba(0,0,0,0) 100%);
+
+                 display: block;
+                 margin-top: 10px;
+             }
+.sidePanel .annotationListItem.focused {
+    background-color: #ddd;
+    border-left: 3px solid lightBlue;
+}
+
+.sidePanel .annotationListItem:hover {
+    background-color: #ddd;
+    border-left: 3px solid lightBlue;
+}
+
+.sidePanel .annotationListItem.selected {
+    background-color: #ccc;
+    border-left: 3px solid deepskyblue;
+}
+
 .sidePanel a:hover {
   text-decoration: none;
 }
@@ -3086,7 +3245,7 @@ li.highlight {
 
 /* Canvas HUD
 ----------------------- */
-  .mirador-canvas-hud { 
+  .mirador-canvas-hud {
     position:absolute;
     left: 0;
     top:0;
@@ -3398,7 +3557,7 @@ text {
 }
 .annotation, .osd-select-rectangle {
   border: 2px solid deepSkyBlue;
-  box-shadow: 0px 0px 5px white; 
+  box-shadow: 0px 0px 5px white;
   box-sizing: border-box;
 }
 .annotation.selected {
@@ -3721,14 +3880,14 @@ ul.dropdown {
   margin:0;
   cursor: pointer;
   box-sizing: border-box;
-  background-color: #dddddd;  
+  background-color: #dddddd;
   padding: 10px;
   width:100%;
   text-align:left;
 }
 .dropdown li:hover {
   border-left: 3px solid deepskyblue;
-  background-color: #dddddd;  
+  background-color: #dddddd;
   padding-left: 7px;
   font-weight: bold;
 }
@@ -3785,8 +3944,8 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
   color: black;
 }
 
-.mirador-viewer a.mirador-icon-image-view.selected, 
-.mirador-viewer a.mirador-icon-thumbs-view.selected, 
+.mirador-viewer a.mirador-icon-image-view.selected,
+.mirador-viewer a.mirador-icon-thumbs-view.selected,
 .mirador-viewer a.mirador-icon-toc.selected,
 .mirador-viewer a.mirador-icon-metadata-view.selected {
   color: black;
@@ -3816,7 +3975,7 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
   overflow: auto;
 }
 .annotation-tooltip {
-  padding: 7px; 
+  padding: 7px;
 }
 .annotation-display {
   position:relative;
@@ -3884,7 +4043,7 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
   color: #222;
   border-radius: 6px;
   padding: 0 5px;
-  margin-right:5px; 
+  margin-right:5px;
   margin-bottom: 5px;
   text-align: center;
   font-size: 12;
@@ -3896,4 +4055,3 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
 .mce-edit-area iframe {
     height: 75px !important;
 }
-
