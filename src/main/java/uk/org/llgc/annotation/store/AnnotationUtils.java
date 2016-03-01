@@ -94,11 +94,6 @@ public class AnnotationUtils {
 		}	
 		// Change context to local for quick processing
 		tRoot.put("@context", this.getContext());
-		// Fix Mirador bug (rename source to full):
-		Map<String, Object> tOn = (Map<String, Object>)tRoot.get("on");
-		Object tSource = tOn.get("source");
-		tOn.remove("source");
-		tOn.put("full", tSource);
 
 		return tRoot;
 	}
@@ -148,13 +143,6 @@ public class AnnotationUtils {
 				Map tJsonLd = (Map)((List)((Map)framed).get("@graph")).get(0);
 				//tJsonLd.put("@context","http://iiif.io/api/presentation/2/context.json");
 				//this.colapseFragement(tJsonLd);
-				// Fix Mirador bug (rename full back to source):
-				//**/System.out.println(JsonUtils.toPrettyString(tJsonLd));
-				Map<String, Object> tOn = (Map<String, Object>)tJsonLd.get("on");
-				Object tFull = tOn.get("full");
-				tOn.remove("full");
-				tOn.put("source", tFull);
-
 				tResources.add(tJsonLd);
 			} catch (JsonLdError tExcpt) {
 				System.out.println("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
