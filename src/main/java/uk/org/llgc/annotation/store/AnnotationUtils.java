@@ -49,9 +49,10 @@ public class AnnotationUtils {
 				tBuff.append(tAnnoCount++);
 				tAnno.put("@id", tBuff.toString());
 
-				tAnno.put("@context", this.getContext());
-			}// do I need to change the format to html?
-
+			}
+			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
+			
+			// do I need to change the format to html?
 			((Map<String, Object>)tAnno.get("resource")).put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
 			((Map<String, Object>)tAnno.get("resource")).put("format","text/html");
 			String tText = (String)((Map<String, Object>)tAnno.get("resource")).get("chars");
