@@ -61,6 +61,7 @@ public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 
 			Model tJsonLDModel = ModelFactory.createDefaultModel();
 			RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
+			//RDFDataMgr.write(System.out, tJsonLDModel, Lang.NTRIPLES);
 
 			_dataset.addNamedModel((String)tAnno.get("@id"), tJsonLDModel);
 
@@ -82,7 +83,19 @@ public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 		return QueryExecutionFactory.create(pQuery, _dataset);
 	}
 	protected Model getNamedModel(final String pContext) throws IOException {
-		return _dataset.getNamedModel(pContext);
+		boolean tLocaltransaction = !_dataset.isInTransaction();
+		if (tLocaltransaction) {
+			_dataset.begin(ReadWrite.READ);
+		}	
+		Model tAnnotation = _dataset.getNamedModel(pContext);
+		if (tLocaltransaction) {
+			_dataset.end();
+		}	
+		if (tAnnotation.isEmpty()) {
+			return null; // annotation wasn't found
+		} else {
+			return tAnnotation;
+		}	
 	}
 
 	protected void begin(final ReadWrite pWrite) {

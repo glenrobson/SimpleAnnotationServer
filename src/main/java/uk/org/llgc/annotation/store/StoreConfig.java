@@ -14,6 +14,15 @@ import uk.org.llgc.annotation.store.adapters.SesameStore;
 
 public class StoreConfig extends HttpServlet {
 	protected Map<String,String> _props = null;
+
+	public StoreConfig() {
+		_props = null;
+	}
+
+	public StoreConfig(final Map<String, String> pProps) {
+		_props = pProps;
+	}
+
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
 		_props = new HashMap<String,String>();

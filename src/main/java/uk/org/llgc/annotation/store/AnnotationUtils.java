@@ -37,6 +37,10 @@ public class AnnotationUtils {
 		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
 		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
 
+		if (tAnnotationList.get("@id") == null) {
+			System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+			throw new IOException("Annotation list must have a @id at root");
+		}
 		String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
 		String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
 		int tAnnoCount = 0;

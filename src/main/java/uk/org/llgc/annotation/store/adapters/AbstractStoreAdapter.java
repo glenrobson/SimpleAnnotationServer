@@ -47,6 +47,10 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		return tAnnotations;
 	}
 
+	public Model getAnnotation(final String pId) throws IOException {
+		return getNamedModel(pId);
+	}
+
 	protected abstract Model getNamedModel(final String pName) throws IOException;
 	protected abstract QueryExecution getQueryExe(final String pQuery);
 

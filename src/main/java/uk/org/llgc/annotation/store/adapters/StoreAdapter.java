@@ -37,6 +37,12 @@ public interface StoreAdapter {
 
 	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException;
 
+	/**
+	 * Return the annotaiton with the given id
+	 * @return the annotation with id. If there is no annotation with that id return null
+	 */
+	public Model getAnnotation(final String pId) throws IOException;
+
 	public void deleteAnnotation(final String pAnnoId) throws IOException;
 
 	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException;

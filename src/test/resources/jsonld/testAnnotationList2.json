@@ -1,0 +1,26 @@
+{
+    "@id" : "http://example.com/anno/2",
+    "@type" : "oa:AnnotationList",
+    "resources": [
+        {
+            "on": "http://example.com/image2#xywh=0,132,102,10",
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1a"
+            },
+            "@id": "http://example.com/annotation/2",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting"
+        },
+        {
+            "@id": "http://example.com/annotation/3",
+            "on": "http://example.com/image2#xywh=1873,132,102,10",
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test Content 2a"
+            },
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting"
+        }
+    ]
+}
