@@ -33,21 +33,22 @@ public class Update extends HttpServlet {
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream()); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq)); 
 		/**/System.out.println("JSON in:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationJSON));
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
 
 		_store.deleteAnnotation(tAnnoId);
 		
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Model tModel = _store.updateAnnotation(tAnnotationJSON);
 
 		Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
 
 		pRes.setStatus(HttpServletResponse.SC_CREATED);
-		pRes.setContentType("application/ld+json");
+		pRes.setContentType("application/ld+json; charset=UTF-8");
+		pRes.setCharacterEncoding("UTF-8");
 		/**/System.out.println("JSON out:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
-		pRes.getOutputStream().println(JsonUtils.toPrettyString(tAnnotationList));
+		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
 	}
 }

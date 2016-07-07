@@ -17,6 +17,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 public class Create extends HttpServlet {
 	protected AnnotationUtils _annotationUtils = null;
@@ -30,18 +31,26 @@ public class Create extends HttpServlet {
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream()); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq)); 
 		/**/System.out.println("JSON in:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationJSON));
 
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		try {
+			Model tModel = _store.addAnnotation(tAnnotationJSON);
 
-		Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
+			Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
 
-		pRes.setStatus(HttpServletResponse.SC_CREATED);
-		pRes.setContentType("application/ld+json");
-		/**/System.out.println("JSON out:");
-		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
-		pRes.getOutputStream().println(JsonUtils.toPrettyString(tAnnotationList));
+			pRes.setStatus(HttpServletResponse.SC_CREATED);
+			pRes.setContentType("application/ld+json; charset=UTF-8");
+			pRes.setCharacterEncoding("UTF-8");
+			/**/System.out.println("JSON out:");
+			/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
+		} catch (IDConflictException tException) {
+			tException.printStackTrace();
+			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			pRes.setContentType("text/plain");
+			pRes.getOutputStream().println("Failed to load annotation due to conflict in ID: " + tException.toString());
+		}
 	}
 }

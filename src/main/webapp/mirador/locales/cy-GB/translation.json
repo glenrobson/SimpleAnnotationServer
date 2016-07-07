@@ -33,5 +33,7 @@
     "url": "URL",
     "newObject": "Gwrthrych Newydd",
     "Home": "Adref",
-    "Object Metadata": "something here"
+    "objectMetadata": "Object Metadata",
+    "fullScreen": "Full Screen",
+    "logo": "Logo"
 }

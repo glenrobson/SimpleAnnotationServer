@@ -15,6 +15,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 import java.io.IOException;
 
@@ -45,6 +46,25 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		this.end();
 
 		return tAnnotations;
+	}
+
+
+	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException {
+		if (this.getNamedModel((String)pJson.get("@id")) != null) {
+			throw new IDConflictException("There is already an annotation with id " + pJson.get("@id"));
+		} else {
+			return addAnnotationSafe(pJson);
+		}
+	}
+	
+	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException {
+		return addAnnotationSafe(pJson);
+	}
+
+	public abstract Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException;
+
+	public Model getAnnotation(final String pId) throws IOException {
+		return getNamedModel(pId);
 	}
 
 	protected abstract Model getNamedModel(final String pName) throws IOException;

@@ -37,27 +37,32 @@ public class AnnotationUtils {
 	 * identifiers
 	 * @param InputStream the input stream to read to get the IIIF annotation list
 	 */
-	public List<Map<String,Object>> readAnnotationList(final InputStream pStream) throws IOException {
+	public List<Map<String,Object>> readAnnotationList(final InputStream pStream, final String pBaseURL) throws IOException {
 		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
 		/**/System.out.println("Original untouched annotation:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
 		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
 
+		if (tAnnotationList.get("@id") == null) {
+			System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+			throw new IOException("Annotation list must have a @id at root");
+		}
 		String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
 		String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
 			if (tAnno.get("@id") == null) {
-				StringBuffer tBuff = new StringBuffer(this.getBaseAnnoId());
+				StringBuffer tBuff = new StringBuffer(pBaseURL);
 				tBuff.append("/");
 				tBuff.append(tBucketId);
 				tBuff.append("/");
 				tBuff.append(tAnnoCount++);
 				tAnno.put("@id", tBuff.toString());
 
-				tAnno.put("@context", this.getContext());
-			}// do I need to change the format to html?
-
+			}
+			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
+			
+			// do I need to change the format to html?
 			((Map<String, Object>)tAnno.get("resource")).put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
 			((Map<String, Object>)tAnno.get("resource")).put("format","text/html");
 			String tText = (String)((Map<String, Object>)tAnno.get("resource")).get("chars");
@@ -89,26 +94,17 @@ public class AnnotationUtils {
 		return tAnnotations;
 	}
 
-	protected String getBaseAnnoId() {
-		return "http://dev.llgc.org.uk/annotation/";// todo change this for the hostname of the web app
-	}
-
 	@SuppressWarnings("unchecked") 
-	public Map<String, Object> readAnnotaion(final InputStream pStream) throws IOException {
+	public Map<String, Object> readAnnotaion(final InputStream pStream, final String pBaseURL) throws IOException {
 		Object tAnnotation = JsonUtils.fromInputStream(pStream);
 		Map<String, Object> tRoot = (Map<String,Object>)tAnnotation;
 
 		if (tRoot.get("@id") == null) { 
-			String tID = this.getBaseAnnoId() + this.generateAnnoId();
+			String tID = pBaseURL + this.generateAnnoId();
 			tRoot.put("@id", tID);
 		}	
 		// Change context to local for quick processing
 		tRoot.put("@context", this.getContext());
-		// Fix Mirador bug (rename source to full):
-		Map<String, Object> tOn = (Map<String, Object>)tRoot.get("on");
-		Object tSource = tOn.get("source");
-		tOn.remove("source");
-		tOn.put("full", tSource);
 
 		if (_encoder != null) {
 			_encoder.encode(tRoot);
@@ -161,21 +157,12 @@ public class AnnotationUtils {
 				Map tJsonLd = (Map)((List)((Map)framed).get("@graph")).get(0);
 				//tJsonLd.put("@context","http://iiif.io/api/presentation/2/context.json");
 				//this.colapseFragement(tJsonLd);
-				// Fix Mirador bug (rename full back to source):
-				//**/System.out.println(JsonUtils.toPrettyString(tJsonLd));
 				Map<String, Object> tOn = (Map<String, Object>)tJsonLd.get("on");
 				// Check if this is a valid annotation
 				// if it is valid it should have one source, one fragment selector
 				if (((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 					System.out.println("Annotation is broken " + tJsonLd.get("@id"));
 				} else {
-					Object tFull = tOn.get("full");
-					tOn.remove("full");
-					tOn.put("source", tFull);
-					if (_encoder != null) {
-						_encoder.decode(tJsonLd);
-					}
-
 					tResources.add(tJsonLd);
 				}	
 			} catch (JsonLdError tExcpt) {

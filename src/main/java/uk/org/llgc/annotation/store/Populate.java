@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 public class Populate extends HttpServlet {
 	protected AnnotationUtils _annotationUtils = null;
@@ -41,14 +42,21 @@ public class Populate extends HttpServlet {
 		} else {
 			tAnnotationList = pReq.getInputStream();
 		}
-		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList); //annotaiton list
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList, StoreConfig.getConfig().getBaseURI(pReq)); //annotaiton list
 		/**/System.out.println("JSON in:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationListJSON));
 
-		_store.addAnnotationList(tAnnotationListJSON);
+		try {
+			_store.addAnnotationList(tAnnotationListJSON);
 
-		pRes.setStatus(HttpServletResponse.SC_CREATED);
-		pRes.setContentType("text/plain");
-		pRes.getOutputStream().println("SUCCESS");
+			pRes.setStatus(HttpServletResponse.SC_CREATED);
+			pRes.setContentType("text/plain");
+			pRes.getOutputStream().println("SUCCESS");
+		} catch (IDConflictException tException) {
+			tException.printStackTrace();
+			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			pRes.setContentType("text/plain");
+			pRes.getOutputStream().println("Failed to load annotation list as there was a conflict in ids " + tException.toString());
+		}
 	}
 }

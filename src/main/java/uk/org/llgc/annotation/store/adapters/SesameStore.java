@@ -36,6 +36,7 @@ import org.openrdf.rio.Rio;
 
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 import java.util.Map;
 import java.util.List;
@@ -60,7 +61,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 		System.out.println(((HTTPRepository)_repo).getPreferredRDFFormat());
 	}
 
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException {
+	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
 		pJson.put("@context","http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
 		Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
@@ -144,7 +145,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 		return tJsonLDModel;
 	}
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException {
+	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException {
 		List<Model> tAnnos = new ArrayList<Model>();
 		for (Map<String, Object> tJsonObj : pJson) {
 			tAnnos.add(this.addAnnotation(tJsonObj));

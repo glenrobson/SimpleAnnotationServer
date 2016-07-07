@@ -38,8 +38,9 @@ public class Search extends HttpServlet {
 		List<Model> tAnnotations = _store.getAnnotationsFromPage(pReq.getParameter("uri"));
 		List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
 
-		pRes.setContentType("application/ld+json");
+		pRes.setContentType("application/ld+json; charset=UTF-8");
+		pRes.setCharacterEncoding("UTF-8");
 		//**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
-		pRes.getOutputStream().println(JsonUtils.toPrettyString(tAnnotationList));
+		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
 	}
 }
