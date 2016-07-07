@@ -1,0 +1,19 @@
+{
+  "@context" : "file:///Users/gmr/development/mvn/SAS/master/SimpleAnnotationServer/src/main/webapp/contexts/iiif-2.0.json",
+  "@id":"http://example.com/annotation/clash",
+  "@type" : "oa:Annotation",
+  "motivation" : [ "oa:commenting" ],
+  "resource" : {
+    "@type" : "dctypes:Text",
+    "format" : "text/html",
+    "chars" : "<p>Bob Smith</p>"
+  },
+  "on" : {
+    "@type" : "oa:SpecificResource",
+    "full" : "http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json",
+    "selector" : {
+      "@type" : "oa:FragmentSelector",
+      "value" : "xywh=5626,1853,298,355"
+    }
+  }
+}
