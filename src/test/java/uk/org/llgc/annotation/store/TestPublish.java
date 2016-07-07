@@ -41,7 +41,7 @@ public class TestPublish {
 	public TestPublish() throws IOException {
 		super();
 		_testFolder = new File(new File(getClass().getResource("/").toString()),"tmp");
-		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()));
+		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), null);
 	}
 	@Before 
    public void setup() throws IOException {
