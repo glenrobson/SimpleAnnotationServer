@@ -163,6 +163,9 @@ public class AnnotationUtils {
 				if (((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 					System.out.println("Annotation is broken " + tJsonLd.get("@id"));
 				} else {
+					if (_encoder != null) {
+ 						_encoder.decode(tJsonLd);
+ 					}
 					tResources.add(tJsonLd);
 				}	
 			} catch (JsonLdError tExcpt) {

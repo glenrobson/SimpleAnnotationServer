@@ -6197,7 +6197,8 @@ window.Mirador = window.Mirador || function(config) {
                     place: {inline: 'span', style:{color: "brown"}, attributes: {property: "ns:place", class: "place"}},
                     unit: {inline: 'span', style:{color: "darkorange"}, attributes: {property: "ns:unit", class: "unit"}},
                     ship: {inline: 'span', style:{color: "blue"}, attributes: {property: "ns:ship", class: "ship"}},
-                    medal: {inline: 'span', style:{color: "goldenred"}, attributes: {property: "ns:medal", class: "medal"}},
+                    medal: {inline: 'span', style:{color: "goldenred"}, attributes: {property: "ns:medal", class: "medal"}}
+						},
                   setup : function(editor) {
                     editor.on('init', function(args) {
                       tinymce.execCommand('mceFocus', false, args.target.id); //make sure tinymce focuses on the editor after initialization                    
@@ -6548,7 +6549,6 @@ window.Mirador = window.Mirador || function(config) {
       return true;
     },
     
->>>>>>> master
     //Currently the rect is
     // kept in openSeaDragon format until it is returned on "onDrawFinish".
     // The intent here is to update the annotation continuously rather than
@@ -6613,9 +6613,11 @@ window.Mirador = window.Mirador || function(config) {
                   selector : selector+' textarea',
                   //plugins: "image link media",
                   plugins: "bor_markup",
+                  content_css: 'mirador/css/bor.css',
                   menubar: false,
                   statusbar: false,
                   toolbar_items_size: 'small',
+						extended_valid_elements : "span[property|class],p[resource|typeof]",
 						toolbar: "heading | rank | name | place | unit | ship | medal |",
                   formats: {
                     heading: {inline: 'span', style:{color: "cadetblue"}, attributes: {property: "ns:heading", class: "heading"}},
@@ -6953,7 +6955,6 @@ window.Mirador = window.Mirador || function(config) {
         }
       });
     },
->>>>>>> master
 
     set: function(prop, value, options) {
       if (options) {
@@ -7186,7 +7187,6 @@ window.Mirador = window.Mirador || function(config) {
                                  '<a class="addItemLink" role="button" aria-label="Add item"></a>',
                                  '<a class="remove-slot-option"><i class="fa fa-times fa-lg fa-fw"></i> {{t "close"}}</a>',
       '<a class="dropMask"></a>',
->>>>>>> master
                                  '</div>'
     ].join(''))
   };
