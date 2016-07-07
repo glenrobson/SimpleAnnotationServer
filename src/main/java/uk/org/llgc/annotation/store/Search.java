@@ -39,7 +39,7 @@ public class Search extends HttpServlet {
 		List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
 
 		pRes.setContentType("application/ld+json");
-		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+		//**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
 		pRes.getOutputStream().println(JsonUtils.toPrettyString(tAnnotationList));
 	}
 }

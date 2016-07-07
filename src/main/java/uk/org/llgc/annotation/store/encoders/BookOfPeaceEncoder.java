@@ -179,6 +179,12 @@ public class BookOfPeaceEncoder implements Encoder {
 	 * Decode RDF into RDFa/HTML for mirador
 	 */
 	public void decode(final Map<String, Object> pModel) {
+		/*try {
+	 System.out.println(com.github.jsonldjava.utils.JsonUtils.toPrettyString(pModel));	
+	 } catch (Exception tExcpt) { 
+	 	System.out.println("Couldn't print json " + tExcpt);
+	 }*/
+
 		Object tBodyThing = pModel.get("resource");
 		Map<String, Object> tBody = null;
 		if (tBodyThing instanceof List) {
@@ -207,37 +213,37 @@ public class BookOfPeaceEncoder implements Encoder {
 
 				if (tPerson.get("http://rdf.muninn-project.org/ontologies/military#heldRank") != null) {
 					tHTML.append("<span property=\"ns:rank\" class=\"rank\">");
-					tHTML.append(((Map<String, Object>)tPerson.get("http://rdf.muninn-project.org/ontologies/military#heldRank")).get("@value"));
+					tHTML.append(this.getContent(tPerson.get("http://rdf.muninn-project.org/ontologies/military#heldRank")));
 					tHTML.append("</span> ");
 				}
 
 				if (tPerson.get("foaf:name") != null) {
 					tHTML.append("<span property=\"ns:name\" class=\"name\">");
-					tHTML.append(((Map<String, Object>)tPerson.get("foaf:name")).get("@value"));
+					tHTML.append(this.getContent(tPerson.get("foaf:name")));
 					tHTML.append("</span> ");
 				}
 
 				if (tPerson.get("foaf:based_near") != null) {
 					tHTML.append("<span property=\"ns:place\" class=\"place\">");
-					tHTML.append(((Map<String, Object>)tPerson.get("foaf:based_near")).get("@value"));
+					tHTML.append(this.getContent(tPerson.get("foaf:based_near")));
 					tHTML.append("</span> ");
 				}
 
 				if (tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit") != null) {
 					tHTML.append("<span property=\"ns:unit\" class=\"unit\">");
-					tHTML.append(((Map<String, Object>)tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit")).get("@value"));
+					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit")));
 					tHTML.append("</span> ");
 				}
 
 				if (tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip") != null) {
 					tHTML.append("<span property=\"ns:ship\" class=\"ship\">");
-					tHTML.append(((Map<String, Object>)tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip")).get("@value"));
+					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip")));
 					tHTML.append("</span> ");
 				}
 
 				if (tPerson.get("http://data.llgc.org.uk/waw/def#awarded") != null) {
 					tHTML.append("<span property=\"ns:medal\" class=\"medal\">");
-					tHTML.append(((Map<String, Object>)tPerson.get("http://data.llgc.org.uk/waw/def#awarded")).get("@value"));
+					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip")));
 					tHTML.append("</span> ");
 				}
 
@@ -249,4 +255,28 @@ public class BookOfPeaceEncoder implements Encoder {
 			tBody.put("chars",tHTML.toString());
 		}	
 	}	
+
+	protected String getContent(Object pContent) {
+		if (pContent == null) {
+			return "";
+		} else if (pContent instanceof Map) {
+			return this.getContent((Map<String,Object>)pContent);
+		} else {
+			return this.getContent((List<Map<String,Object>>)pContent);
+		}
+	}
+
+	protected String getContent(Map<String, Object> pContent) {
+		return (String)pContent.get("@value");
+	}	
+
+	protected String getContent(List<Map<String, Object>> pContent) {
+		StringBuffer tContentStr = new StringBuffer();
+		// join list of ranks together 
+		for (Map<String,Object> tContentItem: pContent) {
+			tContentStr.append((String)tContentItem.get("@value") + " ");
+		}
+
+		return tContentStr.toString();
+	}
 }

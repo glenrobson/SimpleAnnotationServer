@@ -164,14 +164,20 @@ public class AnnotationUtils {
 				// Fix Mirador bug (rename full back to source):
 				//**/System.out.println(JsonUtils.toPrettyString(tJsonLd));
 				Map<String, Object> tOn = (Map<String, Object>)tJsonLd.get("on");
-				Object tFull = tOn.get("full");
-				tOn.remove("full");
-				tOn.put("source", tFull);
+				// Check if this is a valid annotation
+				// if it is valid it should have one source, one fragment selector
+				if (((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
+					System.out.println("Annotation is broken " + tJsonLd.get("@id"));
+				} else {
+					Object tFull = tOn.get("full");
+					tOn.remove("full");
+					tOn.put("source", tFull);
+					if (_encoder != null) {
+						_encoder.decode(tJsonLd);
+					}
 
-				if (_encoder != null) {
-					_encoder.decode(tJsonLd);
-				}
-				tResources.add(tJsonLd);
+					tResources.add(tJsonLd);
+				}	
 			} catch (JsonLdError tExcpt) {
 				System.out.println("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
 				tExcpt.printStackTrace();
