@@ -33,7 +33,7 @@ public class AnnotationUtils {
 	 * identifiers
 	 * @param InputStream the input stream to read to get the IIIF annotation list
 	 */
-	public List<Map<String,Object>> readAnnotationList(final InputStream pStream) throws IOException {
+	public List<Map<String,Object>> readAnnotationList(final InputStream pStream, final String pBaseURL) throws IOException {
 		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
 		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
 
@@ -46,7 +46,7 @@ public class AnnotationUtils {
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
 			if (tAnno.get("@id") == null) {
-				StringBuffer tBuff = new StringBuffer(this.getBaseAnnoId());
+				StringBuffer tBuff = new StringBuffer(pBaseURL);
 				tBuff.append("/");
 				tBuff.append(tBucketId);
 				tBuff.append("/");
@@ -84,17 +84,13 @@ public class AnnotationUtils {
 		return tAnnotations;
 	}
 
-	protected String getBaseAnnoId() {
-		return "http://dev.llgc.org.uk/annotation/";// todo change this for the hostname of the web app
-	}
-
 	@SuppressWarnings("unchecked") 
-	public Map<String, Object> readAnnotaion(final InputStream pStream) throws IOException {
+	public Map<String, Object> readAnnotaion(final InputStream pStream, final String pBaseURL) throws IOException {
 		Object tAnnotation = JsonUtils.fromInputStream(pStream);
 		Map<String, Object> tRoot = (Map<String,Object>)tAnnotation;
 
 		if (tRoot.get("@id") == null) { 
-			String tID = this.getBaseAnnoId() + this.generateAnnoId();
+			String tID = pBaseURL + this.generateAnnoId();
 			tRoot.put("@id", tID);
 		}	
 		// Change context to local for quick processing

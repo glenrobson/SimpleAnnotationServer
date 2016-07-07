@@ -31,7 +31,7 @@ public class Update extends HttpServlet {
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream()); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq)); 
 		/**/System.out.println("JSON in:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationJSON));
 		String tAnnoId = (String)tAnnotationJSON.get("@id");

@@ -39,7 +39,7 @@ public class Populate extends HttpServlet {
 		} else {
 			tAnnotationList = pReq.getInputStream();
 		}
-		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList); //annotaiton list
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList, StoreConfig.getConfig().getBaseURI(pReq)); //annotaiton list
 		/**/System.out.println("JSON in:");
 		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationListJSON));
 

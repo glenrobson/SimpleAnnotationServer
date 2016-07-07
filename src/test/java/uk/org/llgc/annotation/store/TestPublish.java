@@ -48,6 +48,7 @@ public class TestPublish {
 		File tDataDir = new File(_testFolder, "data");
 		tDataDir.mkdirs();
 		tProps.put("data_dir",tDataDir.getPath());
+		tProps.put("baseURI","http://dev.llgc.org.uk/annotation/");
 
 		StoreConfig tConfig = new StoreConfig(tProps);
 		StoreConfig.initConfig(tConfig);
@@ -60,7 +61,7 @@ public class TestPublish {
 
 	@Test
 	public void testPublish() throws IOException {
-		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile())); //annotaiton list
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		List<Model> tAnnosAsModel = _store.addAnnotationList(tAnnotationListJSON);
 		// add models to single model and use sparql or something to test for valid content
@@ -85,7 +86,7 @@ public class TestPublish {
 
 	@Test
 	public void testCreate() throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile())); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		
@@ -95,7 +96,7 @@ public class TestPublish {
 	// test reuse of id
 	@Test
 	public void testDelete() throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile())); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		Iterator<Resource> tSubjects = tModel.listSubjects();
@@ -114,7 +115,7 @@ public class TestPublish {
 
 	@Test
 	public void testUpdate() throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile())); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		_store.addAnnotation(tAnnotationJSON);
 
@@ -127,7 +128,7 @@ public class TestPublish {
 
 	@Test
 	public void testPage() throws IOException {
-		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile())); 
+		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		for (Map<String,Object> tAnnotation : tAnnotationList) {
 			_store.addAnnotation(tAnnotation);
@@ -145,7 +146,7 @@ public class TestPublish {
 
 	@Test
 	public void testUTF8() throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile())); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 

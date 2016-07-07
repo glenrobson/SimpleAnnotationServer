@@ -12,6 +12,8 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.JenaStore;
 import uk.org.llgc.annotation.store.adapters.SesameStore;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class StoreConfig extends HttpServlet {
 	protected Map<String,String> _props = null;
 
@@ -21,6 +23,22 @@ public class StoreConfig extends HttpServlet {
 
 	public StoreConfig(final Map<String, String> pProps) {
 		_props = pProps;
+	}
+
+	public String getBaseURI(final HttpServletRequest pRequest) {
+		if (_props.containsKey("baseURI")) {
+			return _props.get("baseURI");
+		} else {
+			StringBuffer tURL = new StringBuffer(pRequest.getScheme());
+			tURL.append("://");
+			tURL.append(pRequest.getServerName());
+			tURL.append(":");
+			tURL.append(pRequest.getServerPort());
+			tURL.append("/");
+			tURL.append(pRequest.getServletPath().split("/")[1]);
+			tURL.append("/");
+			return tURL.toString();
+		}
 	}
 
 	public void init(final ServletConfig pConfig) throws ServletException {
