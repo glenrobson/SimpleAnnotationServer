@@ -39,7 +39,7 @@ public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 		_dataset = TDBFactory.createDataset(pDataDir);
 	}
 
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException {
+	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		String tJson = JsonUtils.toString(pJson);
 
 		Model tJsonLDModel = ModelFactory.createDefaultModel();

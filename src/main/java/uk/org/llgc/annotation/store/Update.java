@@ -38,7 +38,7 @@ public class Update extends HttpServlet {
 
 		_store.deleteAnnotation(tAnnoId);
 		
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Model tModel = _store.updateAnnotation(tAnnotationJSON);
 
 		Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
 

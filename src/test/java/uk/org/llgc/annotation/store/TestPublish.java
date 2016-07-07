@@ -16,8 +16,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -56,11 +58,24 @@ public class TestPublish {
 	}
 
    @After
-   public void tearDown() {
+   public void tearDown() throws IOException {
+		File tDataDir = new File(_testFolder, "data");
+		this.delete(tDataDir);
+	}
+
+	protected void delete(File f) throws IOException {
+		if (f.isDirectory()) {
+			for (File c : f.listFiles()) {
+				this.delete(c);
+			}	
+		}
+		if (!f.delete()) {
+			throw new IOException("Failed to delete file: " + f);
+		}	
 	}
 
 	@Test
-	public void testPublish() throws IOException {
+	public void testPublish() throws IOException, IDConflictException {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		List<Model> tAnnosAsModel = _store.addAnnotationList(tAnnotationListJSON);
@@ -85,7 +100,7 @@ public class TestPublish {
 
 
 	@Test
-	public void testCreate() throws IOException {
+	public void testCreate() throws IOException, IDConflictException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -95,7 +110,7 @@ public class TestPublish {
 
 	// test reuse of id
 	@Test
-	public void testDelete() throws IOException {
+	public void testDelete() throws IOException, IDConflictException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -114,20 +129,20 @@ public class TestPublish {
 	}
 
 	@Test
-	public void testUpdate() throws IOException {
+	public void testUpdate() throws IOException, IDConflictException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		_store.addAnnotation(tAnnotationJSON);
 
 		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
 
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Model tModel = _store.updateAnnotation(tAnnotationJSON);
 
 		this.testAnnotation(tModel, "New String","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355"); 
 	}
 
 	@Test
-	public void testPage() throws IOException {
+	public void testPage() throws IOException, IDConflictException {
 		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		for (Map<String,Object> tAnnotation : tAnnotationList) {
@@ -145,12 +160,21 @@ public class TestPublish {
 	}
 
 	@Test
-	public void testUTF8() throws IOException {
+	public void testUTF8() throws IOException, IDConflictException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 
 		this.testAnnotation(tModel, "http://example.com/annotation/utf-8", new String("UTF 8 test â".getBytes("UTF8"),"UTF8"),"http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891217.json#xywh=5626,1853,298,355"); 
+	}
+
+	@Test(expected=IDConflictException.class)
+	public void testDuplicate() throws IOException, IDConflictException, InterruptedException {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+
+		_store.addAnnotation(tAnnotationJSON);
+		_store.addAnnotation(tAnnotationJSON2);
 	}
 
 	protected void testAnnotation(final Model pModel, final String pValue, final String pTarget) {

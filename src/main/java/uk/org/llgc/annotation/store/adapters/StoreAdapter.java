@@ -18,6 +18,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 import java.util.Map;
 import java.util.List;
@@ -33,9 +34,10 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.nio.charset.Charset;
 
 public interface StoreAdapter {
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException;
+	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException;
+	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException;
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException;
+	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException;
 
 	/**
 	 * Return the annotaiton with the given id
