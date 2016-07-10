@@ -22,7 +22,7 @@
 	    </init-param>
 	    <init-param>
 	        <param-name>repo_url</param-name>
-	        <param-value>http://data.llgc.org.uk:8080/openrdf-sesame/repositories/bor-annotations</param-value>
+	        <param-value>http://localhost:8080/openrdf-sesame/repositories/bor-annotations</param-value>
 	        <description>Set the http URL to use to the Sesame Repository</description>
 	    </init-param>
 		<!--<init-param>
