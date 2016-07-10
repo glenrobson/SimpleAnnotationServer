@@ -1,0 +1,19 @@
+{
+  "@context" : "file:///Users/gmr/development/mvn/SAS/master/SimpleAnnotationServer/src/main/webapp/contexts/iiif-2.0.json",
+  "@id":"http://example.com/anno/bor/1",
+  "@type" : "oa:Annotation",
+  "motivation" : [ "oa:commenting" ],
+  "resource" : {
+    "@type" : "dctypes:Text",
+    "format" : "text/html",
+    "chars" : "<p><span property=\"ns:rank\" class=\"rank\">Engr.Capt.</span> <span property=\"ns:name\" class=\"name\">Walter Ken Williams,</span> <span property=\"ns:place\" class=\"place\">Cardiff</span> <span property=\"ns:medal\" class=\"medal\">M.V.O</span> <span property=\"ns:unit\" class=\"unit\">R.N.</span> <span property=\"ns:ship\" class=\"ship\">Bulwark</span></p>"
+  },
+  "on" : {
+    "@type" : "oa:SpecificResource",
+    "full" : "http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json",
+    "selector" : {
+      "@type" : "oa:FragmentSelector",
+      "value" : "xywh=5626,1853,298,355"
+    }
+  }
+}
