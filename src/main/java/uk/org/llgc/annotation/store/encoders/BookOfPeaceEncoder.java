@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store.encoders;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -20,6 +23,8 @@ import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.core.JsonLdError;
 
 public class BookOfPeaceEncoder implements Encoder {
+	protected static Logger _logger = LogManager.getLogger(BookOfPeaceEncoder.class.getName()); 
+
 	protected Map<String,String> _props = null;
 	protected Map<String,Object> _context = null;
 	public BookOfPeaceEncoder() {
@@ -59,7 +64,7 @@ public class BookOfPeaceEncoder implements Encoder {
 		try {
 			_context = (Map<String,Object>)JsonUtils.fromString(tContextString.toString());
 		} catch (IOException tError) {
-			System.err.println("Couldn't parse context due to " + tError);
+			_logger.error("Couldn't parse context due to " + tError);
 			tError.printStackTrace();
 		}
 	}
@@ -88,7 +93,7 @@ public class BookOfPeaceEncoder implements Encoder {
 	 * Encode RDFa as RDF
 	 */
 	public void encode(final Map<String, Object> pModel) {
-		System.out.println("ENCODE");
+		_logger.debug("ENCODE");
 		Object tBodyThing = pModel.get("resource");
 		Map<String, Object> tBody = null;
 		if (tBodyThing instanceof List) {
@@ -100,7 +105,7 @@ public class BookOfPeaceEncoder implements Encoder {
 		// Need to parse into XML 
 		SAXBuilder tBuilder = new SAXBuilder();
 		try {
-			System.out.println("Chars" + tChars);
+			_logger.debug("Chars" + tChars);
 			Document tContent = tBuilder.build(new StringReader(tChars));
 			Map<String,Object> tPerson = new HashMap<String, Object>();
 			this.saveField(tPerson, "heldRank", this.getField(tContent, "//span[@property='ns:rank']"));
@@ -142,12 +147,12 @@ public class BookOfPeaceEncoder implements Encoder {
 				tHeading.put("label", tHeadingValue);
 			}
 		} catch (JDOMException tExcpt) {
-			System.err.println("Couldn't parseInput:");
-			System.err.println(tChars);
+			_logger.error("Couldn't parseInput:");
+			_logger.error(tChars);
 			tExcpt.printStackTrace();
 		} catch (IOException tExcpt) {	
-			System.err.println("Couldn't parseInput:");
-			System.err.println(tChars);
+			_logger.error("Couldn't parseInput:");
+			_logger.error(tChars);
 			tExcpt.printStackTrace();
 		}
 	}
@@ -180,9 +185,9 @@ public class BookOfPeaceEncoder implements Encoder {
 	 */
 	public void decode(final Map<String, Object> pModel) {
 		/*try {
-	 System.out.println(com.github.jsonldjava.utils.JsonUtils.toPrettyString(pModel));	
+	 _logger.debug(com.github.jsonldjava.utils.JsonUtils.toPrettyString(pModel));	
 	 } catch (Exception tExcpt) { 
-	 	System.out.println("Couldn't print json " + tExcpt);
+	 	_logger.error("Couldn't print json " + tExcpt);
 	 }*/
 
 		Object tBodyThing = pModel.get("resource");
@@ -243,7 +248,7 @@ public class BookOfPeaceEncoder implements Encoder {
 
 				if (tPerson.get("http://data.llgc.org.uk/waw/def#awarded") != null) {
 					tHTML.append("<span property=\"ns:medal\" class=\"medal\">");
-					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip")));
+					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/waw/def#awarded")));
 					tHTML.append("</span> ");
 				}
 

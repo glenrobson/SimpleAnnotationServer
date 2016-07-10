@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store.adapters;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
+	protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName()); 
 
 	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException {
 		String tQueryString = "select ?annoId ?graph where {" 
@@ -31,6 +35,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
 									+ "}";
 
+	//	_logger.debug("Query " + tQueryString);
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
 		this.begin(ReadWrite.READ);
@@ -51,7 +56,11 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException {
 		if (this.getNamedModel((String)pJson.get("@id")) != null) {
-			throw new IDConflictException("There is already an annotation with id " + pJson.get("@id"));
+			pJson.put("@id",(String)pJson.get("@id") + "1");
+			if (((String)pJson.get("@id")).length() > 400) {
+				throw new IDConflictException("Tried multiple times to make this id unique but have failed " + (String)pJson.get("@id"));
+			}
+			return this.addAnnotation(pJson);
 		} else {
 			return addAnnotationSafe(pJson);
 		}
@@ -92,7 +101,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 				QuerySolution soln = results.nextSolution() ;
 				Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
 				int tCount = soln.getLiteral("count").getInt();
-				System.out.println("Found " + tPageId + " count " + tCount);
+				_logger.debug("Found " + tPageId + " count " + tCount);
 
 				tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
 			} 

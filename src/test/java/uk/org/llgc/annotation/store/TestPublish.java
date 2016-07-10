@@ -168,13 +168,15 @@ public class TestPublish {
 		this.testAnnotation(tModel, "http://example.com/annotation/utf-8", new String("UTF 8 test â".getBytes("UTF8"),"UTF8"),"http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891217.json#xywh=5626,1853,298,355"); 
 	}
 
-	@Test(expected=IDConflictException.class)
+//	@Test(expected=IDConflictException.class)
+	@Test
 	public void testDuplicate() throws IOException, IDConflictException, InterruptedException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		_store.addAnnotation(tAnnotationJSON);
-		_store.addAnnotation(tAnnotationJSON2);
+		Model tSecondAnno = _store.addAnnotation(tAnnotationJSON2);
+		this.testAnnotation(tSecondAnno,"http://example.com/annotation/clash1","Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
 	}
 
 	protected void testAnnotation(final Model pModel, final String pValue, final String pTarget) {

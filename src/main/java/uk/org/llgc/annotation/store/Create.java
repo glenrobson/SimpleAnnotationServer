@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +23,7 @@ import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 public class Create extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(Create.class.getName()); 
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -32,8 +36,8 @@ public class Create extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq)); 
-		/**/System.out.println("JSON in:");
-		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationJSON));
+		_logger.debug("JSON in:");
+		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 
 		try {
 			Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -43,8 +47,8 @@ public class Create extends HttpServlet {
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");
 			pRes.setCharacterEncoding("UTF-8");
-			/**/System.out.println("JSON out:");
-			/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+			_logger.debug("JSON out:");
+			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
 			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
 		} catch (IDConflictException tException) {
 			tException.printStackTrace();

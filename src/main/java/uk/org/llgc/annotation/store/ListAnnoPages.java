@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.File;
 import java.io.FileReader;
@@ -22,6 +25,7 @@ import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 
 public class ListAnnoPages extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(ListAnnoPages.class.getName()); 
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -33,7 +37,7 @@ public class ListAnnoPages extends HttpServlet {
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		List<PageAnnoCount> tAnnotations = _store.listAnnoPages();
-		System.out.println(tAnnotations);
+		_logger.debug(tAnnotations);
 
 		StringBuffer tContent = new StringBuffer();
 		for (PageAnnoCount tPage : tAnnotations) {

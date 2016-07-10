@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +27,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 
 public class AnnotationUtils {
+	protected static Logger _logger = LogManager.getLogger(AnnotationUtils.class.getName()); 
+
 	protected File _contextDir = null;
 	protected Encoder _encoder = null;
 
@@ -39,12 +44,12 @@ public class AnnotationUtils {
 	 */
 	public List<Map<String,Object>> readAnnotationList(final InputStream pStream, final String pBaseURL) throws IOException {
 		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
-		/**/System.out.println("Original untouched annotation:");
-		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+		_logger.debug("Original untouched annotation:");
+		_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
 		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
 
 		if (tAnnotationList.get("@id") == null) {
-			System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
 			throw new IOException("Annotation list must have a @id at root");
 		}
 		String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
@@ -161,7 +166,7 @@ public class AnnotationUtils {
 				// Check if this is a valid annotation
 				// if it is valid it should have one source, one fragment selector
 				if (((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
-					System.out.println("Annotation is broken " + tJsonLd.get("@id"));
+					_logger.error("Annotation is broken " + tJsonLd.get("@id"));
 				} else {
 					if (_encoder != null) {
  						_encoder.decode(tJsonLd);
@@ -169,7 +174,7 @@ public class AnnotationUtils {
 					tResources.add(tJsonLd);
 				}	
 			} catch (JsonLdError tExcpt) {
-				System.out.println("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
+				_logger.error("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
 				tExcpt.printStackTrace();
 			}
 		}
