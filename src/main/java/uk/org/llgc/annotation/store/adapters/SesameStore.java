@@ -126,7 +126,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 			} else {
 				tByteOut = new ByteArrayOutputStream();
 				Rio.write((Iterable<Statement>)tAnno, tByteOut, RDFFormat.N3);
-			}	
+			}
 		} catch (RepositoryException tExcpt) {
 			_logger.error("Problem connecting to Sesame " + tExcpt.getMessage());
 			tExcpt.printStackTrace();
