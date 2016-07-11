@@ -32,35 +32,59 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.query.* ;
 
+import org.openrdf.repository.http.HTTPRepository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+
+import java.util.Properties;
+
 public class TestPublish {
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 	//@Rule
 	protected File _testFolder = null;
+	protected Map<String,String> _props = null;
 
 	public TestPublish() throws IOException {
 		super();
 		_testFolder = new File(new File(getClass().getResource("/").toString()),"tmp");
-		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), null);
+		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()));
+
+		Properties tProps = new Properties();
+		tProps.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
+		_props = new HashMap<String,String>();
+		for (String tKey : tProps.stringPropertyNames()) {
+			_props.put(tKey, tProps.getProperty(tKey));
+		}
 	}
 	@Before 
    public void setup() throws IOException {
-		Map<String,String> tProps = new HashMap<String,String>(); 
-		tProps.put("store","jena");
-		File tDataDir = new File(_testFolder, "data");
-		tDataDir.mkdirs();
-		tProps.put("data_dir",tDataDir.getPath());
-		tProps.put("baseURI","http://dev.llgc.org.uk/annotation/");
+		if (_props.get("store").equals("jena")) {
+			File tDataDir = new File(_testFolder, "data");
+			tDataDir.mkdirs();
+			_props.put("data_dir",tDataDir.getPath());
+		}	
 
-		StoreConfig tConfig = new StoreConfig(tProps);
+		StoreConfig tConfig = new StoreConfig(_props);
 		StoreConfig.initConfig(tConfig);
 		_store = StoreConfig.getConfig().getStore();
 	}
 
    @After
    public void tearDown() throws IOException {
-		File tDataDir = new File(_testFolder, "data");
-		this.delete(tDataDir);
+		if (_props.get("store").equals("jena")) {
+			File tDataDir = new File(_testFolder, "data");
+			this.delete(tDataDir);
+		}	else {
+			try {
+				HTTPRepository tRepo = new HTTPRepository(_props.get("repo_url"));
+				RepositoryConnection tConn = tRepo.getConnection();
+				tConn.clear();
+			} catch (RepositoryException tExcpt) {
+				tExcpt.printStackTrace();
+				throw new IOException(tExcpt.getMessage());
+			}
+		}
 	}
 
 	protected void delete(File f) throws IOException {
@@ -134,6 +158,7 @@ public class TestPublish {
 
 		_store.addAnnotation(tAnnotationJSON);
 
+		System.out.println("ID : " + (String)tAnnotationJSON.get("@id"));
 		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
 
 		Model tModel = _store.updateAnnotation(tAnnotationJSON);

@@ -66,6 +66,12 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 		_logger.debug("Prefered RDF Format " + ((HTTPRepository)_repo).getPreferredRDFFormat());
 	}
 
+	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException {
+		// delete first as a update on an existing context retains the original data
+		this.deleteAnnotation((String)pJson.get("@id"));
+		return addAnnotationSafe(pJson);
+	}
+
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
 		pJson.put("@context","http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
