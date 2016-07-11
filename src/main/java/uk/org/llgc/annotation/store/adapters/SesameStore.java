@@ -58,7 +58,13 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	public SesameStore(final String pRepositoryURL) {
 		_repo = new HTTPRepository(pRepositoryURL);
-		System.out.println(((HTTPRepository)_repo).getPreferredRDFFormat());
+		System.out.println("Preferred Format "+ ((HTTPRepository)_repo).getPreferredRDFFormat());
+	}
+
+	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException {
+		// delete first as a update on an existing context retains the original data
+		this.deleteAnnotation((String)pJson.get("@id"));
+		return addAnnotationSafe(pJson);
 	}
 
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
@@ -111,8 +117,12 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 			tConn = _repo.getConnection();
 			RepositoryResult<Statement> tStatements = tConn.getStatements(null, null, null, false, pContext); //really want to add statments to jena model statement by statement
 			org.openrdf.model.Model tAnno = Iterations.addAll(tStatements, new LinkedHashModel());
-			tByteOut = new ByteArrayOutputStream();
-			Rio.write((Iterable<Statement>)tAnno, tByteOut, RDFFormat.N3);
+			if (tAnno.isEmpty()) {
+				return null;
+			} else {
+				tByteOut = new ByteArrayOutputStream();
+				Rio.write((Iterable<Statement>)tAnno, tByteOut, RDFFormat.N3);
+			}
 		} catch (RepositoryException tExcpt) {
 			System.err.println("Problem connecting to Sesame " + tExcpt.getMessage());
 			tExcpt.printStackTrace();
