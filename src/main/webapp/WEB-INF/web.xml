@@ -22,7 +22,7 @@
 	    </init-param>
 	    <init-param>
 	        <param-name>repo_url</param-name>
-	        <param-value>http://hostname:port/openrdf-sesame/repositories/annotations </param-value>
+	        <param-value>http://hostname:port/openrdf-sesame/repositories/annotations</param-value>
 	        <description>Set the http URL to use to the Sesame Repository</description>
 	    </init-param>-->
 		<init-param>
