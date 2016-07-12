@@ -48,8 +48,8 @@ public class TestUtils {
 	protected static Logger _logger = LogManager.getLogger(TestUtils.class.getName()); 
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
-	//@Rule
-	protected File _testFolder = null;
+	@Rule
+	public TemporaryFolder _testFolder = new TemporaryFolder();
 	protected Map<String,String> _props = null;
 
 	public TestUtils() throws IOException {
@@ -57,7 +57,6 @@ public class TestUtils {
 	}
 
 	public TestUtils(final Encoder pEncoder) throws IOException {
-		_testFolder = new File(new File(getClass().getResource("/").toString()),"tmp");
 		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), pEncoder);
 
 		Properties tProps = new Properties();
@@ -70,7 +69,7 @@ public class TestUtils {
 
    public void setup() throws IOException {
 		if (_props.get("store").equals("jena")) {
-			File tDataDir = new File(_testFolder, "data");
+			File tDataDir = new File(_testFolder.getRoot(), "data");
 			tDataDir.mkdirs();
 			_props.put("data_dir",tDataDir.getPath());
 		}	
@@ -95,7 +94,7 @@ public class TestUtils {
 
    public void tearDown() throws IOException {
 		if (_props.get("store").equals("jena")) {
-			File tDataDir = new File(_testFolder, "data");
+			File tDataDir = new File(_testFolder.getRoot(), "data");
 			this.delete(tDataDir);
 		}	else {
 			try {
