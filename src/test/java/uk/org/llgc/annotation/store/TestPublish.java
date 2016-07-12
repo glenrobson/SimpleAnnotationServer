@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
@@ -38,64 +41,21 @@ import org.openrdf.repository.RepositoryException;
 
 import java.util.Properties;
 
-public class TestPublish {
-	protected AnnotationUtils _annotationUtils = null;
-	protected StoreAdapter _store = null;
-	//@Rule
-	protected File _testFolder = null;
-	protected Map<String,String> _props = null;
+public class TestPublish extends TestUtils {
+	protected static Logger _logger = LogManager.getLogger(TestPublish.class.getName()); 
 
 	public TestPublish() throws IOException {
 		super();
-		_testFolder = new File(new File(getClass().getResource("/").toString()),"tmp");
-		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()));
-
-		Properties tProps = new Properties();
-		tProps.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
-		_props = new HashMap<String,String>();
-		for (String tKey : tProps.stringPropertyNames()) {
-			_props.put(tKey, tProps.getProperty(tKey));
-		}
 	}
+
 	@Before 
    public void setup() throws IOException {
-		if (_props.get("store").equals("jena")) {
-			File tDataDir = new File(_testFolder, "data");
-			tDataDir.mkdirs();
-			_props.put("data_dir",tDataDir.getPath());
-		}	
-
-		StoreConfig tConfig = new StoreConfig(_props);
-		StoreConfig.initConfig(tConfig);
-		_store = StoreConfig.getConfig().getStore();
+		super.setup();
 	}
 
    @After
    public void tearDown() throws IOException {
-		if (_props.get("store").equals("jena")) {
-			File tDataDir = new File(_testFolder, "data");
-			this.delete(tDataDir);
-		}	else {
-			try {
-				HTTPRepository tRepo = new HTTPRepository(_props.get("repo_url"));
-				RepositoryConnection tConn = tRepo.getConnection();
-				tConn.clear();
-			} catch (RepositoryException tExcpt) {
-				tExcpt.printStackTrace();
-				throw new IOException(tExcpt.getMessage());
-			}
-		}
-	}
-
-	protected void delete(File f) throws IOException {
-		if (f.isDirectory()) {
-			for (File c : f.listFiles()) {
-				this.delete(c);
-			}	
-		}
-		if (!f.delete()) {
-			throw new IOException("Failed to delete file: " + f);
-		}	
+		super.tearDown();
 	}
 
 	@Test
@@ -138,18 +98,10 @@ public class TestPublish {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
-		Iterator<Resource> tSubjects = tModel.listSubjects();
-		Resource tAnnoId = null;
-		while (tSubjects.hasNext()) {
-			Resource tSubject = tSubjects.next();
-			if (tSubject.getURI() != null && tSubject.getURI().contains("http://")) {
-				tAnnoId = tSubject;
-				break;
-			}
-		}
-		_store.deleteAnnotation(tAnnoId.getURI());
+		String tAnnoID = super.getAnnoId(tModel);
+		_store.deleteAnnotation(tAnnoID);
 		//RDFDataMgr.write(System.out, tDelModel, Lang.NQUADS);
-		assertNull("Annotation should be deleted but it isn't.", _store.getAnnotation(tAnnoId.getURI()));
+		assertNull("Annotation should be deleted but it isn't.", _store.getAnnotation(tAnnoID));
 	}
 
 	@Test
@@ -158,7 +110,7 @@ public class TestPublish {
 
 		_store.addAnnotation(tAnnotationJSON);
 
-		System.out.println("ID : " + (String)tAnnotationJSON.get("@id"));
+		_logger.debug("ID : " + (String)tAnnotationJSON.get("@id"));
 		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
 
 		Model tModel = _store.updateAnnotation(tAnnotationJSON);
@@ -193,61 +145,15 @@ public class TestPublish {
 		this.testAnnotation(tModel, "http://example.com/annotation/utf-8", new String("UTF 8 test â".getBytes("UTF8"),"UTF8"),"http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891217.json#xywh=5626,1853,298,355"); 
 	}
 
-//	@Test(expected=IDConflictException.class)
+	//@Test(expected=IDConflictException.class)
 	@Test
 	public void testDuplicate() throws IOException, IDConflictException, InterruptedException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		_store.addAnnotation(tAnnotationJSON);
-		Model tSecondAnno = _store.addAnnotation(tAnnotationJSON2);
-		this.testAnnotation(tSecondAnno,"http://example.com/annotation/clash1","Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
-	}
 
-	protected void testAnnotation(final Model pModel, final String pValue, final String pTarget) {
-		String tQuery = "PREFIX oa: <http://www.w3.org/ns/oa#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX cnt: <http://www.w3.org/2011/content#> select ?content ?uri ?fragement where { ?annoId oa:hasTarget ?target . ?target oa:hasSource ?uri . ?target oa:hasSelector ?fragmentCont . ?fragmentCont rdf:value ?fragement . ?annoId oa:hasBody ?body . ?body cnt:chars ?content }";
-		this.queryAnnotation(pModel,tQuery, pValue, pTarget);
-	}
-
-	protected void testAnnotation(final Model pModel, final String pId, final String pValue, final String pTarget) {
-		String tQuery = "PREFIX oa: <http://www.w3.org/ns/oa#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX cnt: <http://www.w3.org/2011/content#> select ?content ?uri ?fragement where { <$id> oa:hasTarget ?target . ?target oa:hasSource ?uri . ?target oa:hasSelector ?fragmentCont . ?fragmentCont rdf:value ?fragement . <$id> oa:hasBody ?body . ?body cnt:chars ?content }".replaceAll("\\$id",pId);
-		this.queryAnnotation(pModel, tQuery, pValue, pTarget);
-	}	
-
-	protected ResultSet queryAnnotation(final Model pModel, final String pQuery, final String pValue, final String pTarget) {
-		Query query = QueryFactory.create(pQuery) ;
-		ResultSetRewindable results = null;
-		try (QueryExecution qexec = QueryExecutionFactory.create(query,pModel)) {
-		
-			results = ResultSetFactory.copyResults(qexec.execSelect());
-			for ( ; results.hasNext() ; )
-			{
-				QuerySolution soln = results.nextSolution() ;
-				assertEquals("Content doesn't match.", "<p>" + pValue + "</p>", soln.getLiteral("content").toString());
-
-				String tURI = soln.getResource("uri").toString() + "#" + soln.getLiteral("fragement");
-				assertEquals("Target doesn't match", pTarget, tURI);
-			}
-		}
-		results.reset();
-		return results;
-	}
-
-	protected Statement matchesValue(final Model pModel, final Resource pResource, final String pProp, final String pValue) {
-		StmtIterator tResults = pModel.listStatements(pResource, pModel.createProperty(pProp), (Resource)null);
-		assertTrue("Missing " + pProp + " for resource " + pResource.getURI(), tResults.hasNext());
-		Statement tResult = tResults.nextStatement();
-		assertEquals("Value mismatch", pValue, tResult.getString());
-
-		return tResult;
-	}
-
-	protected Statement matchesValue(final Model pModel, final Resource pResource, final String pProp, final Resource pValue) {
-		StmtIterator tResults = pModel.listStatements(pResource, pModel.createProperty(pProp), (Resource)null);
-		assertTrue("Missing " + pProp + " for resource " + pResource.getURI(), tResults.hasNext());
-		Statement tResult = tResults.nextStatement();
-		assertEquals("Value mismatch", pValue.getURI(), tResult.getResource().getURI());
-
-		return tResult;
+		 Model tSecondAnno = _store.addAnnotation(tAnnotationJSON2);
+		 this.testAnnotation(tSecondAnno,"http://example.com/annotation/clash1","Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
 	}
 }

@@ -56,12 +56,14 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException {
 		if (this.getNamedModel((String)pJson.get("@id")) != null) {
+			_logger.debug("Found existing annotation with id " + pJson.get("@id").toString());
 			pJson.put("@id",(String)pJson.get("@id") + "1");
 			if (((String)pJson.get("@id")).length() > 400) {
 				throw new IDConflictException("Tried multiple times to make this id unique but have failed " + (String)pJson.get("@id"));
 			}
 			return this.addAnnotation(pJson);
 		} else {
+			_logger.debug("No conflicting id");
 			return addAnnotationSafe(pJson);
 		}
 	}

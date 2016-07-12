@@ -10,6 +10,15 @@
 		<Logger name="uk.org.llgc.annotation.store.TestBOR" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.SesameStore" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.TestUtils" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
 	    <Logger name="org.apache.jena.info" level="INFO" additivity="false">
 	        <AppenderRef ref="Console"/>
 	    </Logger>

@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.net.URL;
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -74,7 +76,12 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
-		pJson.put("@context","http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
+		// Convert remote Json-Ld context to a local one by embedding context in json
+		if (pJson.get("@context") instanceof String) {
+			URL tContextURL = new URL(pJson.get("@context").toString());
+			Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(tContextURL.openStream());
+			pJson.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
+		}	
 		Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
 		tOn.remove("scope");
 		String tJson = JsonUtils.toString(pJson);
