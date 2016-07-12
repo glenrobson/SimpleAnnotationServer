@@ -27,6 +27,7 @@ public class StoreConfig extends HttpServlet {
 
 	public StoreConfig(final Map<String, String> pProps) {
 		_props = pProps;
+		initConfig(this);
 	}
 
 	public String getBaseURI(final HttpServletRequest pRequest) {

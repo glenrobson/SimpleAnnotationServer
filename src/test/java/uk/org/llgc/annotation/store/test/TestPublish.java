@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.test;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +22,7 @@ import java.io.IOException;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 import org.apache.jena.riot.RDFDataMgr;
