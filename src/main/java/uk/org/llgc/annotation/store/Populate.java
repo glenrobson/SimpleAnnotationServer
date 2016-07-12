@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,29 +23,32 @@ import com.github.jsonldjava.utils.JsonUtils;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 public class Populate extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(Populate.class.getName()); 
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
-		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")));
+		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
+		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		InputStream tAnnotationList = null;
 		if (pReq.getParameter("uri") != null) {
-			System.out.println("Reading from " + pReq.getParameter("uri"));
+			_logger.debug("Reading from " + pReq.getParameter("uri"));
 			tAnnotationList = new URL(pReq.getParameter("uri")).openStream();
 		} else {
 			tAnnotationList = pReq.getInputStream();
 		}
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList, StoreConfig.getConfig().getBaseURI(pReq)); //annotaiton list
-		/**/System.out.println("JSON in:");
-		/**/System.out.println(JsonUtils.toPrettyString(tAnnotationListJSON));
+		_logger.debug("JSON in:");
+		_logger.debug(JsonUtils.toPrettyString(tAnnotationListJSON));
 
 		try {
 			_store.addAnnotationList(tAnnotationListJSON);

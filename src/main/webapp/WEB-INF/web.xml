@@ -35,6 +35,11 @@
 		    <param-value>data</param-value>
 		    <description>Sets the directory containing TDB RDF database</description>
 		</init-param>
+		<!--<init-param>
+			<param-name>encoder</param-name>
+		    <param-value>uk.org.llgc.annotation.store.encoders.BookOfPeaceEncoder</param-value>
+		    <description>Changes the Linked data that is stored in the RDF Store. Also decodes it back into a format mirador understands</description>
+		</init-param> -->
 		<init-param>
 			<param-name>baseURI</param-name>
 		    <param-value>http://dev.llgc.org.uk/annotation/</param-value>

@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store.adapters;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -33,6 +36,8 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.nio.charset.Charset;
 
 public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
+	protected static Logger _logger = LogManager.getLogger(JenaStore.class.getName()); 
+
 	protected Dataset _dataset = null;
 
 	public JenaStore(final String pDataDir) {
@@ -145,7 +150,7 @@ public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 			QuerySolution soln = results.nextSolution() ;
 			Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
 			int tCount = soln.getLiteral("count").getInt();
-			System.out.println("Found " + tPageId + " count " + tCount);
+			_logger.debug("Found " + tPageId + " count " + tCount);
 
 			tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
 		} 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="[%d{dd/MMM/yyyy:HH:mm:ss,SSS}] %-5level %logger{36}(%t):%L '%msg'%n"/>
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="uk.org.llgc.annotation.store.test.TestBOR" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.SesameStore" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.test.TestUtils" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+	    <Logger name="org.apache.jena.info" level="INFO" additivity="false">
+	        <AppenderRef ref="Console"/>
+	    </Logger>
+		<Root level="error">
+			<AppenderRef ref="Console"/>
+		</Root>
+	</Loggers>
+</Configuration>

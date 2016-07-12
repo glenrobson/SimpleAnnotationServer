@@ -1,5 +1,8 @@
 package uk.org.llgc.annotation.store.adapters;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
@@ -42,6 +45,8 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.net.URL;
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -54,11 +59,13 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.nio.charset.Charset;
 
 public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
+	protected static Logger _logger = LogManager.getLogger(SesameStore.class.getName()); 
+
 	protected Repository _repo = null;
 
 	public SesameStore(final String pRepositoryURL) {
 		_repo = new HTTPRepository(pRepositoryURL);
-		System.out.println("Preferred Format "+ ((HTTPRepository)_repo).getPreferredRDFFormat());
+		_logger.debug("Prefered RDF Format " + ((HTTPRepository)_repo).getPreferredRDFFormat());
 	}
 
 	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException {
@@ -69,8 +76,17 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
-		pJson.put("@context","http://iiif.io/api/presentation/2/context.json"); // must have a remote context for a remote repo
+		// Convert remote Json-Ld context to a local one by embedding context in json
+		if (pJson.get("@context") instanceof String) {
+			URL tContextURL = new URL(pJson.get("@context").toString());
+			Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(tContextURL.openStream());
+			pJson.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
+		}	
+		Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
+		tOn.remove("scope");
 		String tJson = JsonUtils.toString(pJson);
+		_logger.debug("Seasme json:");
+		_logger.debug(tJson);
 
 		RepositoryConnection tConn = null;
 		InputStream tInput = null;
@@ -79,11 +95,12 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 			tInput = new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8")));
 			tConn.add(tInput, null, RDFFormat.JSONLD, tContext);
 		} catch (RepositoryException tExcpt) {
-			System.err.println("Problem connecting to Sesame " + tExcpt.getMessage());
+			_logger.error("Problem connecting to Sesame " + tExcpt.getMessage());
+
 			tExcpt.printStackTrace();
 			throw new IOException("Problem connecting to Sesame " + tExcpt.getMessage());
 		} catch (RDFParseException tExcpt) {
-			System.err.println("Problem parsing Json " + tExcpt.getMessage());
+			_logger.error("Problem parsing Json " + tExcpt.getMessage());
 			tExcpt.printStackTrace();
 			throw new IOException("Problem connecting to Sesame " + tExcpt.getMessage());
 		} finally {
@@ -92,7 +109,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 					tConn.close();
 				}	
 			} catch (RepositoryException tExcpt) {
-				System.err.println("Problem closing the connecting to Sesame " + tExcpt.getMessage());
+				_logger.error("Problem closing the connecting to Sesame " + tExcpt.getMessage());
 				tExcpt.printStackTrace();
 				throw new IOException("Problem closing connecting to Sesame " + tExcpt.getMessage());
 			} finally {
@@ -124,11 +141,11 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 				Rio.write((Iterable<Statement>)tAnno, tByteOut, RDFFormat.N3);
 			}
 		} catch (RepositoryException tExcpt) {
-			System.err.println("Problem connecting to Sesame " + tExcpt.getMessage());
+			_logger.error("Problem connecting to Sesame " + tExcpt.getMessage());
 			tExcpt.printStackTrace();
 			throw new IOException("Problem connecting to Sesame " + tExcpt.getMessage());
 		} catch (RDFHandlerException tExcpt) {
-			System.err.println("Problem retrieving anno from Sesame " + tExcpt.getMessage());
+			_logger.error("Problem retrieving anno from Sesame " + tExcpt.getMessage());
 			tExcpt.printStackTrace();
 			throw new IOException("Problem retrieving anno from Sesame " + tExcpt.getMessage());
 		} finally {
@@ -137,7 +154,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 					tConn.close();
 				}	
 			} catch (RepositoryException tExcpt) {
-				System.err.println("Problem closing the connecting to Sesame " + tExcpt.getMessage());
+				_logger.error("Problem closing the connecting to Sesame " + tExcpt.getMessage());
 				tExcpt.printStackTrace();
 				throw new IOException("Problem closing connecting to Sesame " + tExcpt.getMessage());
 			} finally {
@@ -166,7 +183,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 			tConn = _repo.getConnection();
 			tConn.clear(tContext);
 		} catch (RepositoryException tExcpt) {
-			System.err.println("Problem connecting to Sesame " + tExcpt.getMessage());
+			_logger.error("Problem connecting to Sesame " + tExcpt.getMessage());
 			tExcpt.printStackTrace();
 			throw new IOException("Problem connecting to Sesame " + tExcpt.getMessage());
 		} finally {
@@ -175,7 +192,7 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 					tConn.close();
 				}	
 			} catch (RepositoryException tExcpt) {
-				System.err.println("Problem closing the connecting to Sesame " + tExcpt.getMessage());
+				_logger.error("Problem closing the connecting to Sesame " + tExcpt.getMessage());
 				tExcpt.printStackTrace();
 				throw new IOException("Problem closing connecting to Sesame " + tExcpt.getMessage());
 			} finally {

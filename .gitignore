@@ -9,4 +9,6 @@ buildNumber.properties
 .mvn/timing.properties
 src/main/webapp/demo.html
 *.swp
+.DS_Store
 /data
+/mirador_full

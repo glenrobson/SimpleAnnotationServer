@@ -11,6 +11,10 @@ import java.util.Enumeration;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.JenaStore;
 import uk.org.llgc.annotation.store.adapters.SesameStore;
+import uk.org.llgc.annotation.store.encoders.Encoder;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,6 +27,7 @@ public class StoreConfig extends HttpServlet {
 
 	public StoreConfig(final Map<String, String> pProps) {
 		_props = pProps;
+		initConfig(this);
 	}
 
 	public String getBaseURI(final HttpServletRequest pRequest) {
@@ -53,6 +58,7 @@ public class StoreConfig extends HttpServlet {
 	}
 
 	public StoreAdapter getStore() {
+		
 		StoreAdapter tAdapter = null;
 		if (_props.get("store").equals("jena")) {
 			tAdapter = new JenaStore(_props.get("data_dir"));
@@ -64,9 +70,30 @@ public class StoreConfig extends HttpServlet {
 		return tAdapter;
 	}
 
+	public Encoder getEncoder() throws ServletException {
+		Encoder tEncoder = null;
+		if (_props.get("encoder") != null) {
+			try {
+				Class tClass = Class.forName(_props.get("encoder"));
+				tEncoder = (Encoder)tClass.newInstance();
+				tEncoder.init(_props);
+			} catch (ClassNotFoundException tExcpt) {
+				throw new ServletException("The Encoder you specified in the configuration is either incorrect or dosn't exist in the classpath " + _props.get("encoder"));
+			} catch (InstantiationException tExcpt) {
+				throw new ServletException("The Encoder must have a default constructor " + _props.get("encoder"));
+			} catch (IllegalAccessException tExcpt) {
+				throw new ServletException("The default constructor must be public " + _props.get("encoder"));
+			}
+		}
+		return tEncoder;
+	}
+
+	public Map<String,String> getProps() {
+		return _props;
+	}
 
 	protected static StoreConfig _config = null;
-	public static void initConfig(final StoreConfig pConfig) {
+	protected static void initConfig(final StoreConfig pConfig) {
 		_config = pConfig;
 	}
 
