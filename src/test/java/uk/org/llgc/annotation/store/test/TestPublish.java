@@ -33,7 +33,8 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.query.* ;
 
 import org.openrdf.repository.http.HTTPRepository;
@@ -56,7 +57,7 @@ public class TestPublish extends TestUtils {
 
    @After
    public void tearDown() throws IOException {
-		super.tearDown();
+	//	super.tearDown();
 	}
 
 	@Test
@@ -157,4 +158,36 @@ public class TestPublish extends TestUtils {
 		 Model tSecondAnno = _store.addAnnotation(tAnnotationJSON2);
 		 this.testAnnotation(tSecondAnno,"http://example.com/annotation/clash1","Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
 	}
+
+	@Test
+	public void testDates() throws IOException, IDConflictException, InterruptedException {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		
+		String tAnnoId = (String)tAnnotationJSON.get("@id");
+		_logger.debug("ID " + tAnnoId);
+		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Resource tAnnoRes = tModel.getResource(tAnnoId);
+		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
+		assertNotNull("Annotation missing created date", tCreatedSt);
+		String tCreatedDate = tCreatedSt.getString();
+
+		Statement tModifiedSt = tAnnoRes.getProperty(DCTerms.modified);
+		assertNull("Annotation has a modification date and it shouldn't",tModifiedSt);
+
+		_logger.debug("ID : " + (String)tAnnotationJSON.get("@id"));
+		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
+		Thread.sleep(1000);
+
+		tModel = _store.updateAnnotation(tAnnotationJSON);
+		tAnnoRes = tModel.getResource(tAnnoId);
+		
+		tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
+		assertNotNull("Annotation missing created date after update.", tCreatedSt);
+		assertEquals("Created date is different on update.", tCreatedDate, tCreatedSt.getString());
+
+		tModifiedSt = tAnnoRes.getProperty(DCTerms.modified);
+		assertNotNull("Annotation is missing modification date after update. ", tModifiedSt);
+		System.out.println("Created date " + tCreatedSt + " modified date " + tModifiedSt);
+	}
+
 }

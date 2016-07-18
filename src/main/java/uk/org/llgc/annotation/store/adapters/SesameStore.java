@@ -68,12 +68,6 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 		_logger.debug("Prefered RDF Format " + ((HTTPRepository)_repo).getPreferredRDFFormat());
 	}
 
-	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException {
-		// delete first as a update on an existing context retains the original data
-		this.deleteAnnotation((String)pJson.get("@id"));
-		return addAnnotationSafe(pJson);
-	}
-
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
 		// Convert remote Json-Ld context to a local one by embedding context in json
@@ -85,8 +79,6 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 		Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
 		tOn.remove("scope");
 		String tJson = JsonUtils.toString(pJson);
-		_logger.debug("Seasme json:");
-		_logger.debug(tJson);
 
 		RepositoryConnection tConn = null;
 		InputStream tInput = null;

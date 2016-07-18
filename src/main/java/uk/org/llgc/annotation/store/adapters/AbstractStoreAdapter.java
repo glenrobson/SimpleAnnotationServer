@@ -7,6 +7,8 @@ import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.ReadWrite;
@@ -17,6 +19,8 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
+import com.github.jsonldjava.utils.JsonUtils;
+
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
@@ -25,9 +29,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName()); 
+	protected SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
 
 	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException {
 		String tQueryString = "select ?annoId ?graph where {" 
@@ -64,11 +72,34 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 			return this.addAnnotation(pJson);
 		} else {
 			_logger.debug("No conflicting id");
+
+			this.addMetadata(pJson);
 			return addAnnotationSafe(pJson);
 		}
 	}
-	
+
+	public void addMetadata(final Map<String,Object> pJson) {
+		// Add create date if it doesn't already have one
+		if (pJson.get("dcterms:created") == null && pJson.get("created") == null && pJson.get("http://purl.org/dc/terms/created") == null) {
+			pJson.put(DCTerms.created.getURI(), _dateFormatter.format(new Date()));
+		}
+	}
+
 	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException {
+		_logger.debug("processing " + JsonUtils.toPrettyString(pJson));
+		// add modified date and retrieve created date
+		String tAnnoId = (String)pJson.get("@id");
+		_logger.debug("ID " + tAnnoId);
+		Model tStoredAnno = this.getNamedModel(tAnnoId);
+		Resource tAnnoRes = tStoredAnno.getResource(tAnnoId); 
+		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
+		if (tCreatedSt != null) {
+			String tCreatedDate = tCreatedSt.getString();
+			pJson.put(DCTerms.created.getURI(), tCreatedDate);
+		}	
+		pJson.put(DCTerms.modified.getURI(), _dateFormatter.format(new Date()));
+		_logger.debug("Modified annotation " + JsonUtils.toPrettyString(pJson));
+		deleteAnnotation(tAnnoId);
 		return addAnnotationSafe(pJson);
 	}
 

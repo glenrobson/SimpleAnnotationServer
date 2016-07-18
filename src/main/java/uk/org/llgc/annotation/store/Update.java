@@ -43,8 +43,6 @@ public class Update extends HttpServlet {
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
 
-		_store.deleteAnnotation(tAnnoId);
-		
 		Model tModel = _store.updateAnnotation(tAnnotationJSON);
 
 		Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
