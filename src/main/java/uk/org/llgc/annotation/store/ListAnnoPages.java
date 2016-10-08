@@ -31,8 +31,9 @@ public class ListAnnoPages extends HttpServlet {
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
-		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), null);
+		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")),StoreConfig.getConfig().getEncoder());
 		_store = StoreConfig.getConfig().getStore();
+		_store.init(_annotationUtils);
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {

@@ -7,7 +7,7 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="uk.org.llgc.annotation.store" level="DEBUG" additivity="false">
+		<Logger name="uk.org.llgc.annotation.store" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
 	    <Logger name="org.apache.jena.info" level="INFO" additivity="false">

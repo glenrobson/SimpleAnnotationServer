@@ -39,8 +39,10 @@ import org.openrdf.rio.Rio;
 
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -58,7 +60,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import java.nio.charset.Charset;
 
-public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
+public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(SesameStore.class.getName()); 
 
 	protected Repository _repo = null;
@@ -160,14 +162,6 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 		return tJsonLDModel;
 	}
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException {
-		List<Model> tAnnos = new ArrayList<Model>();
-		for (Map<String, Object> tJsonObj : pJson) {
-			tAnnos.add(this.addAnnotation(tJsonObj));
-		}
-		return tAnnos;
-	}
-
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI(pAnnoId);
 		RepositoryConnection tConn = null;
@@ -192,6 +186,56 @@ public class SesameStore extends AbstractStoreAdapter implements StoreAdapter {
 			}
 		}
 	}
+
+	/**
+	 * index manifest but no need to check if the short id is unique as this has been checked else where
+	 */
+	protected String indexManifestOnly(final String pShortId, Map<String,Object> pManifest) throws IOException {
+		Resource tContext = _repo.getValueFactory().createURI((String)pManifest.get("@id"));
+
+		String tJson = JsonUtils.toString(pManifest);
+		System.out.println(tJson);
+		
+		RepositoryConnection tConn = null;
+		InputStream tInput = null;
+		try {
+			tConn = _repo.getConnection();
+
+			Model tJsonLDModel = ModelFactory.createDefaultModel();
+			RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
+			ByteArrayOutputStream tOutputStream = new ByteArrayOutputStream();
+			RDFDataMgr.write(tOutputStream, tJsonLDModel, Lang.N3);
+			tInput = new ByteArrayInputStream(tOutputStream.toByteArray());
+			tConn.add(tInput, null, RDFFormat.N3, tContext);
+		} catch (RepositoryException tExcpt) {
+			_logger.error("Problem connecting to Sesame " + tExcpt.getMessage());
+
+			tExcpt.printStackTrace();
+			throw new IOException("Problem connecting to Sesame " + tExcpt.getMessage());
+		} catch (RDFParseException tExcpt) {
+			_logger.error("Problem parsing Json " + tExcpt.getMessage());
+			tExcpt.printStackTrace();
+			throw new IOException("Problem parsing JSON " + tExcpt.getMessage());
+		} finally {
+			try {
+				if (tConn != null) {
+					tConn.close();
+				}	
+			} catch (RepositoryException tExcpt) {
+				_logger.error("Problem closing the connecting to Sesame " + tExcpt.getMessage());
+				tExcpt.printStackTrace();
+				throw new IOException("Problem closing connecting to Sesame " + tExcpt.getMessage());
+			} finally {
+				tConn = null;
+			}
+			if (tInput != null) {
+				tInput.close();
+			}	
+		} 
+
+		return pShortId;
+	}
+
 
 
 	protected QueryExecution getQueryExe(final String pQuery) {

@@ -32,10 +32,11 @@ public class Create extends HttpServlet {
 		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
+		_store.init(_annotationUtils);
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq)); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
 		_logger.debug("JSON in:");
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 

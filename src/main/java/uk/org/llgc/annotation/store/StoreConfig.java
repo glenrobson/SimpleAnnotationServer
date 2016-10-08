@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.JenaStore;
 import uk.org.llgc.annotation.store.adapters.SesameStore;
+import uk.org.llgc.annotation.store.adapters.SolrStore;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 
 import java.lang.reflect.Constructor;
@@ -30,19 +31,33 @@ public class StoreConfig extends HttpServlet {
 		initConfig(this);
 	}
 
-	public String getBaseURI(final HttpServletRequest pRequest) {
+	public String getBaseURI(final HttpServletRequest pReq) {
 		if (_props.containsKey("baseURI")) {
-			return _props.get("baseURI");
+			return _props.get("baseURI");// external hostname
 		} else {
-			StringBuffer tURL = new StringBuffer(pRequest.getScheme());
-			tURL.append("://");
-			tURL.append(pRequest.getServerName());
-			tURL.append(":");
-			tURL.append(pRequest.getServerPort());
-			tURL.append("/");
-			tURL.append(pRequest.getServletPath().split("/")[1]);
-			tURL.append("/");
-			return tURL.toString();
+			int tBase = 0;
+			String[] tURL = pReq.getRequestURL().toString().split("/");
+			String tServletName = "";
+			if (pReq.getServletPath().matches(".*/[a-zA-Z0-9.]*$")) {
+				tServletName = pReq.getServletPath().replaceAll("/[a-zA-Z0-9.]*$","").replaceAll("/","");
+			} else {
+				tServletName = pReq.getServletPath().replaceAll("/","");
+			}
+			for (int i = tURL.length - 1; i >=0 ; i--) {
+				if (tURL[i].equals(tServletName)) {
+					tBase = i;
+					break;
+				}
+			}
+			StringBuffer tBaseURL = new StringBuffer();
+			for (int i = 0; i < tBase; i++) {
+				tBaseURL.append(tURL[i] + "/");
+			}
+			String tBaseURLStr = tBaseURL.toString();
+			if (tBaseURLStr.endsWith("/")) {
+				 tBaseURLStr = tBaseURLStr.replaceAll("/$","");
+			}
+			return tBaseURLStr;
 		}
 	}
 
@@ -65,6 +80,9 @@ public class StoreConfig extends HttpServlet {
 		}	
 		if (_props.get("store").equals("sesame")) {
 			tAdapter = new SesameStore(_props.get("repo_url"));
+		}
+		if (_props.get("store").equals("solr")) {
+			tAdapter = new SolrStore(_props.get("solr_connection"), _props.get("solr_collection"));
 		}
 
 		return tAdapter;

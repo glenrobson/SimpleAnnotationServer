@@ -36,6 +36,7 @@ public class Populate extends HttpServlet {
 		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
+		_store.init(_annotationUtils);
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
@@ -44,9 +45,16 @@ public class Populate extends HttpServlet {
 			_logger.debug("Reading from " + pReq.getParameter("uri"));
 			tAnnotationList = new URL(pReq.getParameter("uri")).openStream();
 		} else {
+			/*java.io.BufferedReader tReader = new java.io.BufferedReader( new java.io.InputStreamReader( pReq.getInputStream())); 
+			String tLine = "";
+			System.out.println("Printing results");
+			while ((tLine = tReader.readLine()) != null) {
+				System.out.println("line:" + tLine);
+			}
+			System.out.println("done");*/
 			tAnnotationList = pReq.getInputStream();
 		}
-		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList, StoreConfig.getConfig().getBaseURI(pReq)); //annotaiton list
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(tAnnotationList, StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); //annotaiton list
 		_logger.debug("JSON in:");
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationListJSON));
 

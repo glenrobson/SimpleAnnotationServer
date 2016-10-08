@@ -35,7 +35,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import java.nio.charset.Charset;
 
-public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
+public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(JenaStore.class.getName()); 
 
 	protected Dataset _dataset = null;
@@ -55,27 +55,6 @@ public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 		_dataset.commit();
 
 		return tJsonLDModel;
-	}
-
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException {
-		List<Model> tStoredAnnotations = new ArrayList<Model>();
-
-		_dataset.begin(ReadWrite.WRITE) ;
-		for (Map<String, Object> tAnno : pJson) {
-			String tJson = JsonUtils.toString(tAnno);
-
-			Model tJsonLDModel = ModelFactory.createDefaultModel();
-			RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
-			//RDFDataMgr.write(System.out, tJsonLDModel, Lang.NTRIPLES);
-
-			_dataset.addNamedModel((String)tAnno.get("@id"), tJsonLDModel);
-
-			tStoredAnnotations.add(tJsonLDModel);
-
-		}
-		_dataset.commit();
-
-		return tStoredAnnotations;
 	}
 
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
@@ -109,53 +88,18 @@ public class JenaStore extends AbstractStoreAdapter implements StoreAdapter {
 	protected void end() {
 		_dataset.end();
 	}
-	/*public List<Model> getAnnotationsFromPage(final String pPageId) {
-		String tQueryString = "select ?annoId ?graph where {" 
-										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> <" + pPageId + "> ."
-										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
-									+ "}";
 
-		Query tQuery = QueryFactory.create(tQueryString);
-		QueryExecution tExec = QueryExecutionFactory.create(tQuery, _dataset);
+	protected String indexManifestOnly(final String pShortId, Map<String,Object> pManifest) throws IOException {
+		_dataset.begin(ReadWrite.WRITE) ;
+		Model tJsonLDModel = ModelFactory.createDefaultModel();
+		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(JsonUtils.toString(pManifest).getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
 
-		_dataset.begin(ReadWrite.READ);
-		ResultSet results = tExec.execSelect(); // Requires Java 1.7
-		int i = 0;
-		List<Model> tAnnotations = new ArrayList<Model>();
-		while (results.hasNext()) {
-			QuerySolution soln = results.nextSolution() ;
-			Resource tAnnoId = soln.getResource("annoId") ; // Get a result variable - must be a resource
+		
+		//RDFDataMgr.write(System.out, tJsonLDModel, Lang.NQUADS);
+		_dataset.addNamedModel((String)pManifest.get("@id"), tJsonLDModel);
 
-			tAnnotations.add(_dataset.getNamedModel(tAnnoId.getURI()));
-		} 
-		_dataset.end();
+		_dataset.commit();
 
-		return tAnnotations;
+		return pShortId;
 	}
-
-	public List<PageAnnoCount> listAnnoPages() {
-		String tQueryString = "select ?pageId (count(?annoId) as ?count) where {" 
-										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ."
-										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
-									+ "}group by ?pageId order by ?pageId";
-
-		Query tQuery = QueryFactory.create(tQueryString);
-		QueryExecution tExec = QueryExecutionFactory.create(tQuery, _dataset);
-
-		_dataset.begin(ReadWrite.READ);
-		ResultSet results = tExec.execSelect(); // Requires Java 1.7
-		int i = 0;
-		List<PageAnnoCount> tAnnotations = new ArrayList<PageAnnoCount>();
-		while (results.hasNext()) {
-			QuerySolution soln = results.nextSolution() ;
-			Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
-			int tCount = soln.getLiteral("count").getInt();
-			_logger.debug("Found " + tPageId + " count " + tCount);
-
-			tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
-		} 
-		_dataset.end();
-
-		return tAnnotations;
-	}*/
 }

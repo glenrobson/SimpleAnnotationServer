@@ -1,0 +1,19 @@
+{
+  "@context" : "http://iiif.io/api/presentation/2/context.json",
+  "@id":"http://example.com/manifest/annotation/1",
+  "@type" : "oa:Annotation",
+  "motivation" : [ "oa:commenting" ],
+  "resource" : {
+    "@type" : "dctypes:Text",
+    "format" : "text/html",
+    "chars" : "<p>anno1</p>"
+  },
+  "on" : {
+    "@type" : "oa:SpecificResource",
+    "full" : "http://example.com/manfiest/test/canvas/1.json",
+    "selector" : {
+      "@type" : "oa:FragmentSelector",
+      "value" : "xywh=5626,1853,298,355"
+    }
+  }
+}

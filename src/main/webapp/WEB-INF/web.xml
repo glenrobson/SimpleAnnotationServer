@@ -22,7 +22,7 @@
 	    </init-param>
 	    <init-param>
 	        <param-name>repo_url</param-name>
-	        <param-value>http://hostname:port/openrdf-sesame/repositories/annotations</param-value>
+	        <param-value>http://data.llgc.org.uk/openrdf-sesame/repositories/bor-annotations</param-value>
 	        <description>Set the http URL to use to the Sesame Repository</description>
 	    </init-param>-->
 		<init-param>
@@ -35,16 +35,31 @@
 		    <param-value>data</param-value>
 		    <description>Sets the directory containing TDB RDF database</description>
 		</init-param>
+	    <!--<init-param>
+	        <param-name>store</param-name>
+	        <param-value>solr</param-value>
+	        <description>Annotation Store to use</description>
+	    </init-param>
+	    <init-param>
+	        <param-name>solr_connection</param-name>
+	        <param-value>http://solr-host/solr/core</param-value>
+	        <description>set the solr connection details</description>
+	    </init-param>-->
+	    <!--<init-param>
+	        <param-name>solr_collection</param-name>
+	        <param-value>annotations</param-value>
+	        <description>The Solr collection to use as an index</description>
+	    </init-param>-->
 		<!--<init-param>
 			<param-name>encoder</param-name>
 		    <param-value>uk.org.llgc.annotation.store.encoders.BookOfPeaceEncoder</param-value>
 		    <description>Changes the Linked data that is stored in the RDF Store. Also decodes it back into a format mirador understands</description>
-		</init-param> -->
-		<init-param>
+		</init-param>-->
+		<!--<init-param>
 			<param-name>baseURI</param-name>
 		    <param-value>http://dev.llgc.org.uk/annotation/</param-value>
 		    <description>Sets the base uri for the annotation id, either change the above to the public URL to this annotation server or remove it so the server can work out the hostname and port and path from the request.</description>
-		</init-param>
+		</init-param>-->
 		<load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
 	</servlet>
     <servlet>
@@ -71,6 +86,34 @@
         <servlet-name>List</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.ListAnnoPages</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ListAllAnnos</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.ListAnnotations</servlet-class>
+    </servlet>
+	 <servlet>
+        <servlet-name>UploadManifest</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.ManifestUpload</servlet-class>
+		  <init-param>
+			  <param-name>manifest_dir</param-name>
+			  <param-value>/manifests</param-value>
+		  </init-param>
+    </servlet>
+	 <servlet>
+        <servlet-name>IIIFSearchAPI</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.IIIFSearchAPI</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>IIIFSearchAPI</servlet-name>
+        <url-pattern>/search-api/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UploadManifest</servlet-name>
+        <url-pattern>/manifests</url-pattern>
+    </servlet-mapping>
+	 <servlet-mapping>
+        <servlet-name>UploadManifest</servlet-name>
+        <url-pattern>/manifests/*</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Search</servlet-name>
         <url-pattern>/annotation/search</url-pattern>
@@ -94,5 +137,9 @@
 	 <servlet-mapping>
         <servlet-name>List</servlet-name>
         <url-pattern>/list.html</url-pattern>
+    </servlet-mapping>
+	 <servlet-mapping>
+        <servlet-name>ListAllAnnos</servlet-name>
+        <url-pattern>/annotation/</url-pattern>
     </servlet-mapping>
 </web-app>

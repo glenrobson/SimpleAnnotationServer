@@ -18,7 +18,9 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.AnnotationUtils;
 
 import java.util.Map;
 import java.util.List;
@@ -34,10 +36,21 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.nio.charset.Charset;
 
 public interface StoreAdapter {
+
+	public void init(final AnnotationUtils pAnnoUtils);
 	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException;
 	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException;
 
 	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException;
+
+	public String indexManifest(Map<String,Object> pManifest) throws IOException;
+	public List<String> getManifests() throws IOException;
+	public String getManifestId(final String pShortId) throws IOException;
+	public Map<String,Object> getManifest(final String pShortId) throws IOException;
+	public Map<String, Object> getAllAnnotations() throws IOException;
+	public List<String> getManifestForCanvas(final String pCanvasId) throws IOException;
+
+	public Map<String, Object> search(final SearchQuery pQuery) throws IOException;
 
 	/**
 	 * Return the annotaiton with the given id
