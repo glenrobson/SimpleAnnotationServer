@@ -3249,7 +3249,7 @@ window.Mirador = window.Mirador || function(config) {
     //true or false.  controls display of "Add new object from URL" on manifest listing page
     'showAddFromURLBox' : true,
 
-    'buildPath' : 'build/mirador/',
+    'buildPath' : 'mirador/',
 
     'i18nPath' : 'locales/',
 
