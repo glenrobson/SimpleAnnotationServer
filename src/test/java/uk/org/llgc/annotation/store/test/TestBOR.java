@@ -66,6 +66,7 @@ public class TestBOR extends TestUtils {
 		_logger.debug("Annotation Saved");
 		
 		String tAnnoId = super.getAnnoId(tModel);
+		_annoIds.add(tAnnoId);
 		_logger.debug("ID " + tAnnoId);
 		String tQuery = "PREFIX oa: <http://www.w3.org/ns/oa#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX cnt: <http://www.w3.org/2011/content#> PREFIX foaf: <http://xmlns.com/foaf/0.1/> select ?uri ?fragment ?unit ?ship ?rank ?hometown ?name ?medal where { <" + tAnnoId + "> oa:hasTarget ?target . ?target oa:hasSource ?uri . ?target oa:hasSelector ?fragmentCont . ?fragmentCont rdf:value ?fragment . <" + tAnnoId + "> oa:hasBody ?body . ?body foaf:primaryTopic ?person . OPTIONAL { ?person <http://data.llgc.org.uk/bor/def#servedInUnit> ?unit } OPTIONAL { ?person <http://data.llgc.org.uk/bor/def#servedOnShip> ?ship } OPTIONAL { ?person <http://rdf.muninn-project.org/ontologies/military#heldRank> ?rank } OPTIONAL { ?person foaf:based_near ?hometown } OPTIONAL { ?person foaf:name ?name } OPTIONAL { ?person <http://data.llgc.org.uk/waw/def#awarded> ?medal }}";
 
@@ -102,6 +103,7 @@ public class TestBOR extends TestUtils {
 
 		_logger.debug("Adding annotation");
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		_annoIds.add(super.getAnnoId(tModel));
 		_logger.debug("Annotation Saved");
 		Map<String,Object> tAnno =  _annotationUtils.createAnnotationList(tModel);
 
@@ -115,4 +117,28 @@ public class TestBOR extends TestUtils {
 		assertTrue("Missing unit", tContent.contains("<span property=\"ns:unit\" class=\"unit\">R.N.</span>"));
 		assertTrue("Missing ship", tContent.contains("<span property=\"ns:ship\" class=\"ship\">Bulwark</span>"));
 	}
+
+	@Test
+	public void testAberAnno() throws IOException, IDConflictException {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/aberAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+
+		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
+
+		assertNotNull("Missing Id ", tAnnotation.get("@id"));
+
+		List<Map<String,Object>> tResources = (List<Map<String,Object>>)tAnnotation.get("resource");
+		assertEquals("Not correct number of bodies", 2, tResources.size());
+		for (Map<String,Object> tResource : tResources) {
+			if (tResource.get("@type").equals("dctypes:Text")) {
+				assertEquals("Body text no correct", "<p>18</p>", tResource.get("chars"));
+			} else {
+				assertEquals("tag text no correct", "age", tResource.get("chars"));
+				// tag
+			}
+		}
+		assertTrue("motivation missing commenting", ((List<String>)tAnnotation.get("motivation")).contains("oa:commenting"));
+		assertTrue("motivation missing tagging ", ((List<String>)tAnnotation.get("motivation")).contains("oa:tagging"));
+	}	
+
 }	

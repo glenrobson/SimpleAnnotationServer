@@ -16,6 +16,12 @@
 		<Logger name="uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.AbstractRDFStore" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.SolrStore" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
 		<Logger name="uk.org.llgc.annotation.store.test.TestUtils" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>

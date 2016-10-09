@@ -3,6 +3,8 @@ package uk.org.llgc.annotation.store;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URL;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -67,11 +69,21 @@ public class AnnotationUtils {
 			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 			
+			Map<String, Object> tResource = null;
+			if (tAnno.get("resource") instanceof List) {
+				tResource = (Map<String, Object>)((List)tAnno.get("resource")).get(0);
+			} else {
+				tResource = (Map<String, Object>)tAnno.get("resource");
+			}
 			// do I need to change the format to html?
-			((Map<String, Object>)tAnno.get("resource")).put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
-			((Map<String, Object>)tAnno.get("resource")).put("format","text/html");
-			String tText = (String)((Map<String, Object>)tAnno.get("resource")).get("chars");
-			((Map<String, Object>)tAnno.get("resource")).put("chars", "<p>" + tText + "</p>");
+			tResource.put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
+			tResource.put("format","text/html");
+			String tText = (String)tResource.get("chars");
+			if (!tText.trim().startsWith("<p>")) {
+				tResource.put("chars", "<p>" + tText + "</p>");
+			} else {
+				tResource.put("chars", tText);
+			}
 
 			// Not sure if this is strictly necessary:
 			/*List<String> tMotivation = new ArrayList<String>();
@@ -79,18 +91,20 @@ public class AnnotationUtils {
 			tAnno.put("motivation", tMotivation); // replaces painting with commenting*/
 
 
-			String[] tOnStr = ((String)tAnno.get("on")).split("#");
+			if (tAnno.get("on") instanceof String) {
+				String[] tOnStr = ((String)tAnno.get("on")).split("#");
 
-			Map<String,Object> tOnObj = new HashMap<String,Object>();
-			tOnObj.put("@type", "oa:SpecificResource");
-			tOnObj.put("full", tOnStr[0]);
+				Map<String,Object> tOnObj = new HashMap<String,Object>();
+				tOnObj.put("@type", "oa:SpecificResource");
+				tOnObj.put("full", tOnStr[0]);
 
-			Map<String,Object> tSelector = new HashMap<String,Object>();
-			tOnObj.put("selector", tSelector);
-			tSelector.put("@type", "oa:FragmentSelector");
-			tSelector.put("value", tOnStr[1]);
+				Map<String,Object> tSelector = new HashMap<String,Object>();
+				tOnObj.put("selector", tSelector);
+				tSelector.put("@type", "oa:FragmentSelector");
+				tSelector.put("value", tOnStr[1]);
 
-			tAnno.put("on", tOnObj);
+				tAnno.put("on", tOnObj);
+			}	
 
 			if (_encoder != null) {
 				_encoder.encode(tAnno);
@@ -105,7 +119,7 @@ public class AnnotationUtils {
 		Map<String, Object> tRoot = (Map<String,Object>)tAnnotation;
 
 		if (tRoot.get("@id") == null) { 
-			String tID = pBaseURL + this.generateAnnoId();
+			String tID = pBaseURL + "/" + this.generateAnnoId();
 			tRoot.put("@id", tID);
 		}	
 		// Change context to local for quick processing
@@ -151,28 +165,10 @@ public class AnnotationUtils {
 
 		Map<String, Object> tRoot = this.buildAnnotationListHead();
 		List tResources = (List)tRoot.get("resources");
-		StringWriter tStringOut = null;
 		for (Model tAnnotation : pAnnotations) {
-			tStringOut = new StringWriter();
-			RDFDataMgr.write(tStringOut, tAnnotation, Lang.JSONLD);
 
 			try {
-				Object framed = JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), contextJson,  options);
-
-				Map tJsonLd = (Map)((List)((Map)framed).get("@graph")).get(0);
-				//tJsonLd.put("@context","http://iiif.io/api/presentation/2/context.json");
-				//this.colapseFragement(tJsonLd);
-				Map<String, Object> tOn = (Map<String, Object>)tJsonLd.get("on");
-				// Check if this is a valid annotation
-				// if it is valid it should have one source, one fragment selector
-				if (((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
-					_logger.error("Annotation is broken " + tJsonLd.get("@id"));
-				} else {
-					if (_encoder != null) {
- 						_encoder.decode(tJsonLd);
- 					}
-					tResources.add(tJsonLd);
-				}	
+				tResources.add(this.frameAnnotation(tAnnotation, false));
 			} catch (JsonLdError tExcpt) {
 				_logger.error("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
 				tExcpt.printStackTrace();
@@ -182,11 +178,68 @@ public class AnnotationUtils {
 		return tResources;//tRoot;
 	}
 
+	public Map<String,Object> frameAnnotation(final Model pAnno, final boolean pCollapse) throws JsonLdError, IOException  {
+		final Map<String,Object> contextJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(new File(_contextDir, "annotation_frame.json")));
+		Map<String,Object> tJsonLd = this.frame(pAnno, contextJson);
+		if (pCollapse) {
+			this.colapseFragement(tJsonLd);
+		}	
+		Map<String, Object> tOn = null;
+		if (tOn instanceof Map) {
+			tOn = (Map<String, Object>)tJsonLd.get("on");
+			if (tOn.get("selector") != null && ((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
+				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
+				return tJsonLd;
+			}	
+		}	
+		// Check if this is a valid annotation
+		// if it is valid it should have one source, one fragment selector
+		if (_encoder != null) {
+			_encoder.decode(tJsonLd);
+		}
+		return tJsonLd; 
+	}
+
+
+	public Map<String,Object> frameManifest(final Model pManifest) throws JsonLdError, IOException  {
+		final Map<String,Object> tContextJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL("http://iiif.io/api/presentation/2/manifest_frame.json").openStream());
+		return this.frame(pManifest, tContextJson);
+	}
+
+	public Map<String,Object> frame(final Model pModel, final Map<String,Object> pFrame) throws JsonLdError, IOException {
+		pFrame.put("@context", this.getContext());
+
+		final JsonLdOptions tOptions = new JsonLdOptions();
+		tOptions.format = "application/jsonld";
+
+		StringWriter tStringOut = new StringWriter();
+		RDFDataMgr.write(tStringOut, pModel, Lang.JSONLD);
+		Map<String,Object> tFramed = (Map<String,Object>)JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), pFrame,  tOptions);
+
+		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);
+		if (tJsonLd.get("@context") == null) {
+			tJsonLd.put("@context", this.getContext());
+		}
+		return tJsonLd;
+	}
+
 	// Need to move fragement into on
-	protected void colapseFragement(final Map pAnnotationJson) {
-		String tFragement = (String)((Map)((Map)pAnnotationJson.get("on")).get("selector")).get("value");
-		String tTarget = (String)((Map)pAnnotationJson.get("on")).get("full");
-		pAnnotationJson.put("on", tTarget + "#" + tFragement);
+	public void colapseFragement(final Map<String,Object> pAnnotationJson) {
+		if (((Map<String,Object>)pAnnotationJson.get("on")).get("selector") != null) {
+			try {
+				String tFragement = (String)((Map)((Map)pAnnotationJson.get("on")).get("selector")).get("value");
+				String tTarget = (String)((Map)pAnnotationJson.get("on")).get("full");
+				pAnnotationJson.put("on", tTarget + "#" + tFragement);
+			} catch (ClassCastException tExcpt) {
+				System.err.println("Failed to transform annotation");
+				try {
+					System.out.println(JsonUtils.toPrettyString(pAnnotationJson));
+				} catch (IOException	tIOExcpt) { 
+					System.out.println("Failed to print failing annotation " + tIOExcpt);
+				}
+				throw tExcpt;
+			}
+		}	
 	}
 
 	protected String generateAnnoId() {

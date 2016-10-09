@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,6 +42,12 @@ import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+
 import java.util.Properties;
 
 
@@ -51,6 +58,7 @@ public class TestUtils {
 	@Rule
 	public TemporaryFolder _testFolder = new TemporaryFolder();
 	protected Map<String,String> _props = null;
+	protected List<String> _annoIds = new ArrayList<String>();
 
 	public TestUtils() throws IOException {
 		this(null);
@@ -73,9 +81,10 @@ public class TestUtils {
 			tDataDir.mkdirs();
 			_props.put("data_dir",tDataDir.getPath());
 		}	
-
+		
 		StoreConfig tConfig = new StoreConfig(_props);
 		_store = StoreConfig.getConfig().getStore();
+		_store.init(_annotationUtils);
 	}
 
 	public String getAnnoId(final Model pModel) {
@@ -96,6 +105,17 @@ public class TestUtils {
 		if (_props.get("store").equals("jena")) {
 			File tDataDir = new File(_testFolder.getRoot(), "data");
 			this.delete(tDataDir);
+		} else if (_props.get("store").equals("solr")) {
+			String tSolrURL = _props.get("solr_connection");
+			String tCollection = _props.get("solr_collection");
+			SolrClient _solrClient = new HttpSolrClient(tSolrURL);//new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
+			try {
+				UpdateResponse tResponse = _solrClient.deleteByQuery(tCollection, "*:*");// deletes all documents
+				_solrClient.commit(tCollection);
+			} catch(SolrServerException tException) {
+				tException.printStackTrace();
+				throw new IOException("Failed to remove annotations due to " + tException);
+			}
 		}	else {
 			try {
 				HTTPRepository tRepo = new HTTPRepository(_props.get("repo_url"));

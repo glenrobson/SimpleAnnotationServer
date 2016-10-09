@@ -1,0 +1,21 @@
+{
+  "@context" : "http://iiif.io/api/presentation/2/context.json",
+  "@id":"http://example.com/manifest/annotation/within",
+  "@type" : "oa:Annotation",
+  "motivation" : [ "oa:commenting" ],
+  
+  "resource" : {
+    "@type" : "dctypes:Text",
+    "format" : "text/html",
+    "chars" : "<p>anno2</p>"
+  },
+  "on" : {
+    "@type" : "oa:SpecificResource",
+    "full" : "http://example.com/manfiest/test/canvas/1.json",
+    "selector" : {
+      "@type" : "oa:FragmentSelector",
+      "value" : "xywh=100,100,500,300"
+    },
+    "within":"http://example.com/manfiest/test/manifest.json"
+  }
+}

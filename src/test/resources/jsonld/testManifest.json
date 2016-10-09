@@ -1,0 +1,104 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "sc:Manifest",
+    "@id": "http://example.com/manfiest/test/manifest.json",
+    "label": "Test Manifest",
+    "metadata": [
+        {
+            "label": [
+                {
+                    "@value": "Title",
+                    "@language": "en"
+                },
+                {
+                    "@value": "Teitl",
+                    "@language": "cy-GB"
+                }
+            ],
+            "value": "Test Manifest"
+        }
+    ],
+    "sequences": [{
+        "@id": "http://example.com/manfiest/test/sequence/Physical.json",
+        "@type": "sc:Sequence",
+        "label": "Current Page Order",
+        "viewingDirection": "left-to-right",
+        "viewingHint": "paged",
+        "canvases": [
+            {
+                "@id": "http://example.com/manfiest/test/canvas/1.json",
+                "@type": "sc:Canvas",
+                "label": "Image 1",
+                "height": 3469,
+                "width": 2787,
+                "images": [{
+                    "@id": "http://example.com/manfiest/test/annotation/1.json",
+                    "@type": "oa:Annotation",
+                    "motivation": "sc:painting",
+                    "resource": {
+                        "@id": "http://example.com/manfiest/test/res/1.jpg",
+                        "@type": "dctypes:Image",
+                        "format": "image/jpeg",
+                        "service": {
+                            "@context": "http://iiif.io/api/image/2/context.json",
+                            "@id": "http://dams.llgc.org.uk/iiif/2.0/image/2",
+                            "profile": "http://iiif.io/api/image/2/level1.json",
+                            "height": 3469,
+                            "width": 2787,
+                            "tiles": [{
+                                "width": 256,
+                                "scaleFactors": [
+                                    1,
+                                    2,
+                                    4,
+                                    8,
+                                    16
+                                ]
+                            }]
+                        },
+                        "height": 3469,
+                        "width": 2787
+                    },
+                    "on": "http://example.com/manfiest/test/canvas/1.json"
+                }]
+            },
+            {
+                "@id": "http://example.com/manfiest/test/canvas/2.json",
+                "@type": "sc:Canvas",
+                "label": "Image 2",
+                "height": 3470,
+                "width": 2785,
+                "images": [{
+                    "@id": "http://example.com/manfiest/test/annotation/2.json",
+                    "@type": "oa:Annotation",
+                    "motivation": "sc:painting",
+                    "resource": {
+                        "@id": "http://example.com/manfiest/test/res/2.jpg",
+                        "@type": "dctypes:Image",
+                        "format": "image/jpeg",
+                        "service": {
+                            "@context": "http://iiif.io/api/image/2/context.json",
+                            "@id": "http://dams.llgc.org.uk/iiif/2.0/image/3",
+                            "profile": "http://iiif.io/api/image/2/level1.json",
+                            "height": 3470,
+                            "width": 2785,
+                            "tiles": [{
+                                "width": 256,
+                                "scaleFactors": [
+                                    1,
+                                    2,
+                                    4,
+                                    8,
+                                    16
+                                ]
+                            }]
+                        },
+                        "height": 3470,
+                        "width": 2785
+                    },
+                    "on": "http://example.com/manfiest/test/canvas/2.json"
+                }]
+            }
+        ]
+    }]
+}

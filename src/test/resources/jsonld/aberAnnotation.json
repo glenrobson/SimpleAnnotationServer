@@ -1,0 +1,27 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "resource": [
+        {
+            "@type": "dctypes:Text",
+            "format": "text/html",
+            "chars": "<p>18<\/p>"
+        },
+        {
+            "@type": "oa:Tag",
+            "chars": "age"
+        }
+    ],
+    "on": {
+        "@type": "oa:SpecificResource",
+        "selector": {
+            "@type": "oa:FragmentSelector",
+            "value": "xywh=1582,811,183,155"
+        },
+        "full": "http://dams.llgc.org.uk/iiif/2.0/4658089/canvas/4658122.json"
+    },
+    "motivation": [
+        "oa:commenting",
+        "oa:tagging"
+    ]
+}

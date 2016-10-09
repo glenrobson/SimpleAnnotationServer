@@ -33,7 +33,8 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.query.* ;
 
 import org.openrdf.repository.http.HTTPRepository;
@@ -68,10 +69,12 @@ public class TestPublish extends TestUtils {
 		Model tMasterModel = tAnnosAsModel.get(0);
 		String tOtherId = "";
 		String tKnownID = "http://example.com/annotation/1";
+		_annoIds.add(tKnownID);
 		for (int i = 1; i < tAnnosAsModel.size(); i++) {
 			StmtIterator tResults = tAnnosAsModel.get(i).listStatements(null,tMasterModel.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),tMasterModel.createResource("http://www.w3.org/ns/oa#Annotation"));
 			Statement tResult = tResults.nextStatement();
 			String tId = tResult.getSubject().toString();
+			_annoIds.add(tId);
 			if (!tId.equals(tKnownID)) {
 				tOtherId = tId;
 			}
@@ -90,6 +93,7 @@ public class TestPublish extends TestUtils {
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		
+		_annoIds.add(super.getAnnoId(tModel));
 		this.testAnnotation(tModel, "Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355"); 
 	}
 
@@ -100,6 +104,7 @@ public class TestPublish extends TestUtils {
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		String tAnnoID = super.getAnnoId(tModel);
+		_annoIds.add(tAnnoID);
 		_store.deleteAnnotation(tAnnoID);
 		//RDFDataMgr.write(System.out, tDelModel, Lang.NQUADS);
 		assertNull("Annotation should be deleted but it isn't.", _store.getAnnotation(tAnnoID));
@@ -109,12 +114,13 @@ public class TestPublish extends TestUtils {
 	public void testUpdate() throws IOException, IDConflictException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
-		_store.addAnnotation(tAnnotationJSON);
+		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		_annoIds.add(super.getAnnoId(tModel));
 
 		_logger.debug("ID : " + (String)tAnnotationJSON.get("@id"));
 		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
 
-		Model tModel = _store.updateAnnotation(tAnnotationJSON);
+		tModel = _store.updateAnnotation(tAnnotationJSON);
 
 		this.testAnnotation(tModel, "New String","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355"); 
 	}
@@ -124,7 +130,8 @@ public class TestPublish extends TestUtils {
 		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		for (Map<String,Object> tAnnotation : tAnnotationList) {
-			_store.addAnnotation(tAnnotation);
+			Model tModel = _store.addAnnotation(tAnnotation);
+			_annoIds.add(super.getAnnoId(tModel));
 		}
 
 		List<Model> tAnnotationsModel = _store.getAnnotationsFromPage("http://example.com/image2"); 
@@ -142,6 +149,7 @@ public class TestPublish extends TestUtils {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		_annoIds.add(super.getAnnoId(tModel));
 
 		this.testAnnotation(tModel, "http://example.com/annotation/utf-8", new String("UTF 8 test â".getBytes("UTF8"),"UTF8"),"http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891217.json#xywh=5626,1853,298,355"); 
 	}
@@ -153,8 +161,44 @@ public class TestPublish extends TestUtils {
 		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		_store.addAnnotation(tAnnotationJSON);
+		_annoIds.add((String)tAnnotationJSON.get("@id"));
 
 		 Model tSecondAnno = _store.addAnnotation(tAnnotationJSON2);
+		_annoIds.add(super.getAnnoId(tSecondAnno));
+
 		 this.testAnnotation(tSecondAnno,"http://example.com/annotation/clash1","Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
 	}
+
+	@Test
+	public void testDates() throws IOException, IDConflictException, InterruptedException {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		
+		String tAnnoId = (String)tAnnotationJSON.get("@id");
+		_logger.debug("ID " + tAnnoId);
+		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		_annoIds.add(super.getAnnoId(tModel));
+
+		Resource tAnnoRes = tModel.getResource(tAnnoId);
+		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
+		assertNotNull("Annotation missing created date", tCreatedSt);
+		String tCreatedDate = tCreatedSt.getString();
+
+		Statement tModifiedSt = tAnnoRes.getProperty(DCTerms.modified);
+		assertNull("Annotation has a modification date and it shouldn't",tModifiedSt);
+
+		_logger.debug("ID : " + (String)tAnnotationJSON.get("@id"));
+		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
+		Thread.sleep(1000);
+
+		tModel = _store.updateAnnotation(tAnnotationJSON);
+		tAnnoRes = tModel.getResource(tAnnoId);
+		
+		tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
+		assertNotNull("Annotation missing created date after update.", tCreatedSt);
+		assertEquals("Created date is different on update.", tCreatedDate, tCreatedSt.getString());
+
+		tModifiedSt = tAnnoRes.getProperty(DCTerms.modified);
+		assertNotNull("Annotation is missing modification date after update. ", tModifiedSt);
+	}
+
 }

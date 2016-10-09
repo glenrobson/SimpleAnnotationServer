@@ -10,10 +10,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
+import java.io.File;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.encoders.Encoder;
 
 public class Destroy extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Destroy.class.getName()); 
@@ -22,6 +24,9 @@ public class Destroy extends HttpServlet {
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
 		_store = StoreConfig.getConfig().getStore();
+		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
+		AnnotationUtils tAnnoUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
+		_store.init(tAnnoUtils);
 	}
 
 	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {

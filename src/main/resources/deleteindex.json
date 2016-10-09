@@ -1,0 +1,67 @@
+{
+   "delete-copy-field":
+  { 
+     "source":"body",
+      "dest":"text" 
+    },
+  
+  "delete-field":
+  { 
+     "name":"short_id"
+  },
+  "delete-field":
+  { 
+     "name":"created"
+  },
+  "delete-field":
+  { 
+     "name":"modified"
+  },
+  "delete-field":
+  { 
+     "name":"type"
+  },
+  "delete-field":
+  { 
+     "name":"motivation"
+  },
+  
+  "delete-field":
+  { 
+     "name":"body"
+  },
+  "delete-field":
+  { 
+     "name":"target"
+  },
+  
+  "delete-field":
+  { 
+     "name":"selector"
+  },
+  
+  "delete-field":
+  { 
+     "name":"text"
+  },
+  "delete-field":
+  { 
+     "name":"within"
+  },
+  "delete-field":
+  { 
+     "name":"canvas"
+  },
+   "delete-field":
+  { 
+     "name":"label"
+  },
+    "delete-field":
+  { 
+     "name":"data"
+  },
+ "delete-field-type":
+  {
+     "name":"stripHTML_en"
+  }
+}

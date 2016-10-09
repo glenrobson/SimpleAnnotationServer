@@ -6293,6 +6293,8 @@ window.Mirador = window.Mirador || function(config) {
 			  }
 		  }
 
+		  oaAnno.on.within=_this.parent.parent.manifest.uri;
+
         var bounds = _this.osdViewer.viewport.getBounds(true);
         // var scope = _this.osdViewer.viewport.viewportToImageRectangle(bounds);
         //bounds is giving negative values?
@@ -6690,6 +6692,7 @@ window.Mirador = window.Mirador || function(config) {
                   motivation.push("oa:commenting");
                   on = { "@type" : "oa:SpecificResource",
                   "full" : parent.parent.canvasID,
+						"within":_this.parent.parent.manifest.uri,
                   "selector" : {
                     "@type" : "oa:FragmentSelector",
                     "value" : "xywh="+canvasRect.x+","+canvasRect.y+","+canvasRect.width+","+canvasRect.height

@@ -32,6 +32,7 @@ public class Search extends HttpServlet {
 		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
+		_store.init(_annotationUtils);
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
