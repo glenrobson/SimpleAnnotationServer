@@ -39,20 +39,26 @@ public class Update extends HttpServlet {
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
-		_logger.debug("JSON in:");
-		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
-		String tAnnoId = (String)tAnnotationJSON.get("@id");
+		try {
+			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
+			_logger.debug("JSON in:");
+			_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
+			String tAnnoId = (String)tAnnotationJSON.get("@id");
 
-		Model tModel = _store.updateAnnotation(tAnnotationJSON);
+			Model tModel = _store.updateAnnotation(tAnnotationJSON);
 
-		Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
+			Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
 
-		pRes.setStatus(HttpServletResponse.SC_CREATED);
-		pRes.setContentType("application/ld+json; charset=UTF-8");
-		pRes.setCharacterEncoding("UTF-8");
-		_logger.debug("JSON out:");
-		_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
+			pRes.setStatus(HttpServletResponse.SC_CREATED);
+			pRes.setContentType("application/ld+json; charset=UTF-8");
+			pRes.setCharacterEncoding("UTF-8");
+			_logger.debug("JSON out:");
+			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
+		} catch (IOException tException) {	
+			System.err.println("Exception occured trying to add annotation:");
+			tException.printStackTrace();
+			throw tException;
+		}	
 	}
 }

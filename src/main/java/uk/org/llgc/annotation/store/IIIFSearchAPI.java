@@ -50,8 +50,14 @@ public class IIIFSearchAPI extends HttpServlet {
 
 		SearchQuery tQuery = null;
 		try { 
-			StringBuffer tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
-			tURI.append("/search-api/search");
+			StringBuffer tURI = null;
+			if (pReq.getParameter("base") != null) {
+				// a supplied base overides config
+				tURI= new StringBuffer(pReq.getParameter("base"));
+			} else {
+				tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
+				tURI.append("/search-api/" + tManifestShortId + "/search");
+			}	
 			if (pReq.getQueryString() != null) {
 				tURI.append("?");
 				tURI.append(pReq.getQueryString());

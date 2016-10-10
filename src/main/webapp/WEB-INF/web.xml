@@ -57,7 +57,7 @@
 		</init-param>-->
 		<!--<init-param>
 			<param-name>baseURI</param-name>
-		    <param-value>http://dev.llgc.org.uk/annotation/</param-value>
+		    <param-value>http://dev.llgc.org.uk</param-value>
 		    <description>Sets the base uri for the annotation id, either change the above to the public URL to this annotation server or remove it so the server can work out the hostname and port and path from the request.</description>
 		</init-param>-->
 		<load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
