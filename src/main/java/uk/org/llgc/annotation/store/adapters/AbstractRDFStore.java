@@ -114,7 +114,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 				tManifest = tManifestURI.getURI();
 			} else {
 				this.end();
-				_logger.error("Manifest with short id " + pShortId + " not found");
+				_logger.debug("Manifest with short id " + pShortId + " not found");
 				return null;
 			}
 		}	
