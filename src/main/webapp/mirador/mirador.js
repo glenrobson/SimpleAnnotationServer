@@ -5294,17 +5294,16 @@ window.Mirador = window.Mirador || function(config) {
       //return combination of all of them
     },
 
+// '<input id="tags-editor-{{windowId}}" class="tags-editor" placeholder="{{t "addTagsHere"}}…" {{#if tags}}value="{{tags}}"{{/if}}>',
+// '<div>', '</div>',
     //when this is being used to edit an existing annotation, insert them into the inputs
     editorTemplate: Handlebars.compile([
                                        '<form id="annotation-editor-{{windowId}}" class="annotation-editor annotation-tooltip" {{#if id}}data-anno-id="{{id}}"{{/if}}>',
                                        '<textarea class="text-editor" placeholder="{{t "comments"}}…">{{#if content}}{{content}}{{/if}}</textarea>',
-                                       '<input id="tags-editor-{{windowId}}" class="tags-editor" placeholder="{{t "addTagsHere"}}…" {{#if tags}}value="{{tags}}"{{/if}}>',
-                                       '<div>',
                                        // need to add a delete, if permissions allow
                                        '<div class="button-container">',
                                        '<a href="#cancel" class="cancel"><i class="fa fa-times-circle-o fa-fw"></i>{{t "cancel"}}</a>',
                                        '<a href="#save" class="save"><i class="fa fa-database fa-fw"></i>{{t "save"}}</a>',
-                                       '</div>',
                                        '</div>',
                                        '</form>'
     ].join('')),
@@ -5321,16 +5320,18 @@ window.Mirador = window.Mirador || function(config) {
                                        '{{#if username}}<p class="user">{{username}}:</p>{{/if}}',
                                        '<p>{{{annoText}}}</p>',
                                        '</div>',
-                                       '<div id="tags-viewer-{{windowId}}" class="tags-viewer">',
-                                       '{{#each tags}}',
-                                       '<span class="tag">{{this}}</span>',
-                                       '{{/each}}',
-                                       '</div>',
-                                       '</div>',
+                                                                              '</div>',
                                        '{{/each}}',
                                        '</div>'
     ].join(''))
   };
+  /*'<div id="tags-viewer-{{windowId}}" class="tags-viewer">',
+                                       '{{#each tags}}',
+                                       '<span class="tag">{{this}}</span>',
+                                       '{{/each}}',
+                                       '</div>',
+													*/
+
 
 }(Mirador));
 

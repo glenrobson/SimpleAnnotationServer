@@ -27,12 +27,15 @@ import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
+import java.text.ParseException;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.Base64;
+import java.util.Date;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -60,8 +63,29 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tDoc.addField("id", (String)pJson.get("@id"));
 		this.addMultiple(tDoc, "type",pJson.get("@type"));
 		this.addMultiple(tDoc, "motivation", pJson.get("motivation"));
-		this.addSingle(tDoc, "created", pJson.get("created"));
-		this.addSingle(tDoc, "modified", pJson.get("modified"));
+		Date tCreated = null;
+		try {
+			if (pJson.get("created") != null) {
+					tCreated = _dateFormatter.parse((String)pJson.get("created")); 
+			} else if (pJson.get("http://purl.org/dc/terms/created") != null) {
+				tCreated = _dateFormatter.parse((String)pJson.get("http://purl.org/dc/terms/created")); 
+			}
+		} catch (ParseException tException) {
+			_logger.error("Failed to parse Created date");
+		}
+		this.addSingle(tDoc, "created", tCreated);
+		Date tModified = null;
+		try {
+			if (pJson.get("modified") != null) {
+				tModified = _dateFormatter.parse((String)pJson.get("modified")); 
+			} else if (pJson.get("http://purl.org/dc/terms/modified") != null) {
+				tModified = _dateFormatter.parse((String)pJson.get("http://purl.org/dc/terms/modified")); 
+			}
+		} catch (ParseException tException) {
+			_logger.error("Failed to parse Modified date");
+		}
+
+		this.addSingle(tDoc, "modified", tModified);
 		if (pJson.get("resource") != null) {
 			if (pJson.get("resource") instanceof List) {
 				List<Map<String,Object>> tMultpleBodies = (List<Map<String,Object>>)pJson.get("resource");
@@ -442,7 +466,11 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	protected void addSingle(final SolrInputDocument pDoc, final String pKey, final Object pObject) {
 		if (pObject != null) {
-			pDoc.addField(pKey, (String)pObject);
+			if (pObject instanceof String) {
+				pDoc.addField(pKey, (String)pObject);
+			} else {
+				pDoc.addField(pKey, pObject);
+			}
 		}
 	}
 
@@ -506,6 +534,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 		if (pCollapseOn) {
 			_annoUtils.colapseFragement(tAnnotation);
+			tAnnotation.put("@context", _annoUtils.getExternalContext());
 		}
 		return tAnnotation;
 	}

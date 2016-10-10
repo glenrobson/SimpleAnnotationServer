@@ -259,15 +259,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	protected Model convertAnnoToModel(final Map<String,Object> pJson) throws IOException {
-		if (pJson.get("@context") == null) {
-			pJson.put("@context","http://iiif.io/api/presentation/2/context.json");
-		}
-		String tJson = JsonUtils.toString(pJson);
-
-		Model tJsonLDModel = ModelFactory.createDefaultModel();
-		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
-
-		return tJsonLDModel;
+		return _annoUtils.convertAnnoToModel(pJson);
 	}
 
 }

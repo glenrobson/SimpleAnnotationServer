@@ -20,11 +20,15 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.StringWriter;
 import java.io.File;
+import java.io.ByteArrayInputStream;
+
+import java.nio.charset.Charset;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import uk.org.llgc.annotation.store.encoders.Encoder;
 
@@ -135,11 +139,14 @@ public class AnnotationUtils {
 		return "file://" + new File(_contextDir, "iiif-2.0.json").getPath();
 	}
 
+	public String getExternalContext() {
+		return "http://iiif.io/api/presentation/2/context.json";
+	}
 
 	@SuppressWarnings("unchecked") 
 	protected Map<String, Object> buildAnnotationListHead() {
 		Map<String, Object> tRoot = (Map<String, Object>)new HashMap<String,Object>();
-		tRoot.put("@context", "http://iiif.io/api/presentation/2/context.json");
+		tRoot.put("@context", getExternalContext());
 		String tPageId = "tmp";
 		tRoot.put("@id", "http://dams.llgc.org.uk/iiif/annotation/list/" + tPageId);// current URL TODO make better id and resolvable
 		tRoot.put("@type", "sc:AnnotationList");
@@ -166,7 +173,6 @@ public class AnnotationUtils {
 		Map<String, Object> tRoot = this.buildAnnotationListHead();
 		List tResources = (List)tRoot.get("resources");
 		for (Model tAnnotation : pAnnotations) {
-
 			try {
 				tResources.add(this.frameAnnotation(tAnnotation, false));
 			} catch (JsonLdError tExcpt) {
@@ -176,6 +182,23 @@ public class AnnotationUtils {
 		}
 
 		return tResources;//tRoot;
+	}
+
+	public Model convertAnnoToModel(final Map<String,Object> pJson) throws IOException {
+		if (pJson.get("@context") == null) {
+			pJson.put("@context", this.getContext());
+		} else if (((String)pJson.get("@context")).trim().startsWith("file://")) {
+			File tContext = new File(((String)pJson.get("@context")).trim().substring("file://".length()));
+			if (!tContext.exists()) {
+				pJson.put("@context", this.getContext());
+			}
+		}
+		String tJson = JsonUtils.toString(pJson);
+
+		Model tJsonLDModel = ModelFactory.createDefaultModel();
+		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
+
+		return tJsonLDModel;
 	}
 
 	public Map<String,Object> frameAnnotation(final Model pAnno, final boolean pCollapse) throws JsonLdError, IOException  {
@@ -218,7 +241,7 @@ public class AnnotationUtils {
 
 		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);
 		if (tJsonLd.get("@context") == null) {
-			tJsonLd.put("@context", this.getContext());
+			tJsonLd.put("@context", this.getExternalContext());
 		}
 		return tJsonLd;
 	}

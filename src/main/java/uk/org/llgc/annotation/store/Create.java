@@ -56,6 +56,10 @@ public class Create extends HttpServlet {
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			pRes.setContentType("text/plain");
 			pRes.getOutputStream().println("Failed to load annotation due to conflict in ID: " + tException.toString());
+		} catch (IOException tException) {	
+			System.err.println("Exception occured trying to add annotation:");
+			tException.printStackTrace();
+			throw tException;
 		}
 	}
 }
