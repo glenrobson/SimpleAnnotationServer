@@ -25,7 +25,7 @@
 	        <param-value>http://data.llgc.org.uk/openrdf-sesame/repositories/bor-annotations</param-value>
 	        <description>Set the http URL to use to the Sesame Repository</description>
 	    </init-param>-->
-		<init-param>
+<!--		<init-param>
 			<param-name>store</param-name>
 		    <param-value>jena</param-value>
 		    <description>RDF Store to use</description>
@@ -34,17 +34,17 @@
 			<param-name>data_dir</param-name>
 		    <param-value>data</param-value>
 		    <description>Sets the directory containing TDB RDF database</description>
-		</init-param>
-	    <!--<init-param>
+		</init-param>-->
+	    <init-param>
 	        <param-name>store</param-name>
 	        <param-value>solr</param-value>
 	        <description>Annotation Store to use</description>
 	    </init-param>
 	    <init-param>
 	        <param-name>solr_connection</param-name>
-	        <param-value>http://solr-host/solr/core</param-value>
+	        <param-value>http://horseman.llgc.org.uk:8983/solr/annotations_dev_v1</param-value>
 	        <description>set the solr connection details</description>
-	    </init-param>-->
+	    </init-param>
 	    <!--<init-param>
 	        <param-name>solr_collection</param-name>
 	        <param-value>annotations</param-value>
@@ -55,11 +55,11 @@
 		    <param-value>uk.org.llgc.annotation.store.encoders.BookOfPeaceEncoder</param-value>
 		    <description>Changes the Linked data that is stored in the RDF Store. Also decodes it back into a format mirador understands</description>
 		</init-param>-->
-		<!--<init-param>
+		<init-param>
 			<param-name>baseURI</param-name>
-		    <param-value>http://dev.llgc.org.uk</param-value>
+		    <param-value>http://dev.llgc.org.uk/aber</param-value>
 		    <description>Sets the base uri for the annotation id, either change the above to the public URL to this annotation server or remove it so the server can work out the hostname and port and path from the request.</description>
-		</init-param>-->
+		</init-param>
 		<load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
 	</servlet>
     <servlet>
