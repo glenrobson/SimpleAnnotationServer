@@ -104,8 +104,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			if (tOn.get("full") instanceof String) {
 				this.addSingle(tDoc, "target", tOn.get("full"));
 			} else {
-				System.out.println("Probably have an invalid annotation ");
-				System.out.println(JsonUtils.toPrettyString(pJson));
+				_logger.info("Probably have an invalid annotation ");
+				_logger.info(JsonUtils.toPrettyString(pJson));
 			}
 			this.addSingle(tDoc, "target", tOn.get("source"));
 			if (tOn.get("selector") != null) { // index xywh in case in future you want to search within bounds
