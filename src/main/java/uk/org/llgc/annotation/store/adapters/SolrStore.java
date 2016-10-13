@@ -34,8 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.Base64;
+// import java.util.Base64;  - requires java8
 import java.util.Date;
+
+import javax.xml.bind.DatatypeConverter;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -131,7 +133,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			}
 		} 
 		String tJson = JsonUtils.toString(pJson);
-		this.addSingle(tDoc, "data", Base64.getEncoder().encodeToString(tJson.getBytes("UTF-8")));
+		this.addSingle(tDoc, "data", DatatypeConverter.printBase64Binary(tJson.getBytes("UTF-8")));
 
 		this.addDoc(tDoc, true);
 		
@@ -530,7 +532,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	}	
 
 	protected Map<String,Object> buildAnnotation(final SolrDocument pDoc, final boolean pCollapseOn) throws IOException {
-		Map<String,Object> tAnnotation = (Map<String,Object>)JsonUtils.fromString(new String(Base64.getDecoder().decode((String)pDoc.get("data"))));
+		Map<String,Object> tAnnotation = (Map<String,Object>)JsonUtils.fromString(new String(DatatypeConverter.parseBase64Binary((String)pDoc.get("data"))));
 
 		if (pCollapseOn) {
 			_annoUtils.colapseFragement(tAnnotation);
