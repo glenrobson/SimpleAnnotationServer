@@ -392,8 +392,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			}
 			
 		} catch (SolrServerException tException) {
+			tException.printStackTrace();
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		} catch (URISyntaxException tException) {	
+			tException.printStackTrace();
 			throw new IOException("Failed to work with base URI " + tException.toString());
 		}
 

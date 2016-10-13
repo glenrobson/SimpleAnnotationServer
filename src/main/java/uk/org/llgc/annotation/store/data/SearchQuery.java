@@ -7,8 +7,10 @@ import java.util.StringTokenizer;
 import java.util.Map;
 
 import java.text.ParseException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.NameValuePair;
@@ -73,11 +75,11 @@ public class SearchQuery {
 
 	public String toQueryString() {
 		StringBuffer tBuff = new StringBuffer("q=");
-		tBuff.append(_query);
+		tBuff.append(URLEncoder.encode(_query));
 
 		if (_motivations != null) {
 			tBuff.append("&");
-			tBuff.append(this.convertListToString("motivation", _motivations));
+			tBuff.append(URLEncoder.encode(this.convertListToString("motivation", _motivations)));
 		}
 		if (_dates != null) {
 			tBuff.append("&");
@@ -85,7 +87,7 @@ public class SearchQuery {
 		}	
 		if (_users != null) {
 			tBuff.append("&");
-			tBuff.append(this.convertListToString("user", _users));
+			tBuff.append(URLEncoder.encode(this.convertListToString("user", _users)));
 		}	
 		if (_page != 0) {
 			tBuff.append("&");
