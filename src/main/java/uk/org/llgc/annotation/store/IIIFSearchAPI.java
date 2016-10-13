@@ -47,13 +47,13 @@ public class IIIFSearchAPI extends HttpServlet {
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		String[] tRequestURI = pReq.getRequestURI().split("/");
 		String tManifestShortId = tRequestURI[tRequestURI.length - 2]; 
-
+		String tBaseURI = pReq.getParameter("base");
 		SearchQuery tQuery = null;
 		try { 
 			StringBuffer tURI = null;
-			if (pReq.getParameter("base") != null) {
+			if (tBaseURI != null) {
 				// a supplied base overides config
-				tURI= new StringBuffer(pReq.getParameter("base"));
+				tURI= new StringBuffer(tBaseURI);
 			} else {
 				tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
 				tURI.append("/search-api/" + tManifestShortId + "/search");
@@ -75,6 +75,13 @@ public class IIIFSearchAPI extends HttpServlet {
 		}
 
 		Map<String, Object> tResults = _store.search(tQuery);
+		if (tBaseURI != null && tBaseURI.startsWith("https://damsssl")) {
+			List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tResults.get("resources");
+			for (Map<String,Object> tAnno : tAnnotations) {
+				String tNewOn = ((String)tAnno.get("on")).replaceAll("http://dams","https://damsssl");
+				tAnno.put("on", tNewOn);
+			}
+		}
 
 		pRes.setContentType("application/ld+json; charset=UTF-8");
 		pRes.setCharacterEncoding("UTF-8");
