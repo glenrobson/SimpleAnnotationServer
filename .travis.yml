@@ -1,4 +1,5 @@
 before_script: travis/install_solr.sh
+after_script: travis/stop_solr.sh
 language: java
 jdk:
   - oraclejdk8
