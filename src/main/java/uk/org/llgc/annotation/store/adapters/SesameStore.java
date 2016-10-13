@@ -194,7 +194,6 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 		Resource tContext = _repo.getValueFactory().createURI((String)pManifest.get("@id"));
 
 		String tJson = JsonUtils.toString(pManifest);
-		System.out.println(tJson);
 		
 		RepositoryConnection tConn = null;
 		InputStream tInput = null;

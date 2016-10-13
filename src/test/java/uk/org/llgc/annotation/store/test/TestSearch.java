@@ -170,6 +170,17 @@ public class TestSearch extends TestUtils {
 
 		assertEquals("Expected 1 result for 'abold' but found different", 1, tResults.size());
 		assertEquals("Expected single result for 'abold'","http://example.com/annotation/2", tResults.get(0).get("@id"));
+
+		// Test multiple words:
+		tQuery = new SearchQuery("Test content simple");
+		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
+		tResultsJson = _store.search(tQuery); 
+
+		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		assertEquals("Expected 1 result for 'Test content simple' but found different", 1, tResults.size());
+		assertEquals("Expected different result for 'Test content simple'","http://example.com/annotation/1", tResults.get(0).get("@id"));
+
 	}
 
 	@Test

@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
-// import java.util.Base64;  - requires java8
+import java.util.Base64;
 import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
@@ -106,8 +106,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			if (tOn.get("full") instanceof String) {
 				this.addSingle(tDoc, "target", tOn.get("full"));
 			} else {
-				System.out.println("Probably have an invalid annotation ");
-				System.out.println(JsonUtils.toPrettyString(pJson));
+				_logger.info("Probably have an invalid annotation ");
+				_logger.info(JsonUtils.toPrettyString(pJson));
 			}
 			this.addSingle(tDoc, "target", tOn.get("source"));
 			if (tOn.get("selector") != null) { // index xywh in case in future you want to search within bounds
@@ -133,6 +133,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			}
 		} 
 		String tJson = JsonUtils.toString(pJson);
+		//this.addSingle(tDoc, "data", Base64.getEncoder().encodeToString(tJson.getBytes("UTF-8")));
 		this.addSingle(tDoc, "data", DatatypeConverter.printBase64Binary(tJson.getBytes("UTF-8")));
 
 		this.addDoc(tDoc, true);
@@ -391,8 +392,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			}
 			
 		} catch (SolrServerException tException) {
+			tException.printStackTrace();
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		} catch (URISyntaxException tException) {	
+			tException.printStackTrace();
 			throw new IOException("Failed to work with base URI " + tException.toString());
 		}
 
@@ -533,6 +536,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	protected Map<String,Object> buildAnnotation(final SolrDocument pDoc, final boolean pCollapseOn) throws IOException {
 		Map<String,Object> tAnnotation = (Map<String,Object>)JsonUtils.fromString(new String(DatatypeConverter.parseBase64Binary((String)pDoc.get("data"))));
+		//Map<String,Object> tAnnotation = (Map<String,Object>)JsonUtils.fromString(new String(Base64.getDecoder().decode((String)pDoc.get("data"))));
 
 		if (pCollapseOn) {
 			_annoUtils.colapseFragement(tAnnotation);

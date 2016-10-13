@@ -4,7 +4,7 @@ a copy of Mirador so you can get started creating annotations straight away. The
 
 ## Getting Started
 **Requires:**
- * Java 1.7
+ * Java 1.8
  * [maven](https://maven.apache.org/)
 
 To begin working with Mirador and the Simple Annotation Server do the following:
