@@ -16,7 +16,7 @@ download() {
 SOLR_VERSION="6.2.1"
 SOLR_DIR="solr-$SOLR_VERSION"
 SOLR_CORE="testannotations"
-download "http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION" "solr-SOLR_VERSION"
+download "http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz" "solr-$SOLR_VERSION"
 
 SOLR_CORE_HOME="$SOLR_DIR/server/solr/$SOLR_CORE"
 cp -r src/main/resources/solr $SOLR_CORE_HOME
