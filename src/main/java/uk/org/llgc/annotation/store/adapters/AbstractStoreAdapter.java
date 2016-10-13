@@ -67,6 +67,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 			}
 			return this.addAnnotation(pJson);
 		} else {
+			this.expandTarget(pJson);
 			_logger.debug("No conflicting id " + pJson.get("@id"));
 			if (this.isMissingWithin(pJson)) {
 				// missing within so check to see if the canvas maps to a manifest
@@ -86,6 +87,37 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 			this.addMetadata(pJson);
 			return addAnnotationSafe(pJson);
 		}
+	}
+
+	public void expandTarget(final Map<String,Object> pJson) {
+		String tURI = null;
+		Map<String,Object> tSpecificResource = null;
+		if (pJson.get("on") instanceof String) {
+			tURI = (String)pJson.get("on");
+			tSpecificResource = new HashMap<String,Object>();
+			pJson.put("on", tSpecificResource);
+		} else if (pJson.get("on") instanceof Map) {
+			tSpecificResource = (Map<String,Object>)pJson.get("on");
+
+			if (tSpecificResource.get("@id") == null || ((String)tSpecificResource.get("@id")).indexOf("#") == -1) {
+				return; // No id to split or no fragement
+			}
+			if (tSpecificResource.get("selector") != null) {
+				return; // already have a selector
+			}
+			tURI = (String)tSpecificResource.get("@id");
+			tSpecificResource.remove("@id");
+		} else {
+			return; // could be a list so not processing
+		}
+		int tIndexOfHash = tURI.indexOf("#");
+		tSpecificResource.put("@type","oa:SpecificResource");
+		Map<String,Object> tFragement = new HashMap<String,Object>();
+		tSpecificResource.put("selector", tFragement);
+		tSpecificResource.put("full", tURI.substring(0, tIndexOfHash));
+
+		tFragement.put("@type", "oa:FragmentSelector");
+		tFragement.put("value", tURI.substring(tIndexOfHash + 1));
 	}
 	
 	protected boolean isMissingWithin(final Map<String,Object> pAnno) {
