@@ -1,3 +1,4 @@
+before_script: curl -sSL https://raw.githubusercontent.com/moliware/travis-solr/master/travis-solr.sh | SOLR_VERSION=6.2.1 SOLR_CONFS="src/main/resources/solr/conf" SOLR_CORE="testannotations" bash
 language: java
 jdk:
   - oraclejdk8
