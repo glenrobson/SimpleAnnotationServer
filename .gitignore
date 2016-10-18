@@ -8,6 +8,7 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 src/main/webapp/demo.html
+src/main/webapp/stats
 *.swp
 .DS_Store
 /data
