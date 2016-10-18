@@ -68,3 +68,14 @@ change the solr_connection from 'http://solr-host/solr/core' to 'http://localhos
 ```
 mvn jetty:run
 ```
+
+
+Tips:
+
+If you need to manually change a record in SOLR you can do it with curl using the following commnad:
+
+```
+curl -X POST -d @/tmp/full_formmatted.xml -H "Content-Type: application/xml" http://localhost:8983/solr/testannotations/update?commit=true 
+```
+Note content type is very important
+

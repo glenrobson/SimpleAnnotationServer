@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import com.github.jsonldjava.utils.JsonUtils;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -73,7 +74,15 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 				// missing within so check to see if the canvas maps to a manifest
 				String tCanvasId = "";
 				if (pJson.get("on") instanceof Map) {
-					tCanvasId = (String)((Map<String,Object>)pJson.get("on")).get("full");
+					if (((Map<String,Object>)pJson.get("on")).get("full") instanceof String) {
+						tCanvasId = (String)((Map<String,Object>)pJson.get("on")).get("full");
+					} else {
+						System.out.println("Probable invalid id ");
+						System.out.println(JsonUtils.toPrettyString(pJson));
+					}
+				} else if (pJson.get("on") instanceof List) {
+					System.out.println("Probable invalid id ");
+					System.out.println(JsonUtils.toPrettyString(pJson));
 				} else {
 					String tURL = (String)pJson.get("on");
 					tCanvasId = tURL.split("#")[0];
@@ -275,7 +284,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	public abstract Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException;
 	public abstract Map<String, Object> search(final SearchQuery pQuery) throws IOException;
 	protected abstract String indexManifestNoCheck(final String pShortID, final Map<String,Object> pManifest) throws IOException;
-	public abstract List<String> getManifests() throws IOException;
+	public abstract List<Manifest> getManifests() throws IOException;
 	public abstract String getManifestId(final String pShortId) throws IOException;
 	public abstract Map<String,Object> getManifest(final String pShortId) throws IOException;
 
