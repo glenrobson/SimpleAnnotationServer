@@ -19,7 +19,8 @@ Copy the solr config from SAS to solr:
 
 ```
 cd solr_dir
-cp -r src/main/resources/solr server/solr/annotations
+mkdir -p server/solr/annotations/data
+cp -r $SAS_HOME/src/main/resources/solr/* server/solr/annotations/
 ```
 
 Then create the core in solr by navigating to the SOLR web interface: 
