@@ -11,9 +11,12 @@ import org.junit.After;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import com.github.jsonldjava.utils.JsonUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -201,4 +204,18 @@ public class TestPublish extends TestUtils {
 		assertNotNull("Annotation is missing modification date after update. ", tModifiedSt);
 	}
 
+	@Test 
+	public void testInvalidAnnotation() throws IOException {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/invalidAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		Model tAnnoModel = _annotationUtils.convertAnnoToModel(tAnnotationJSON);
+		List<Model> tAnnotations = new ArrayList<Model>();
+		tAnnotations.add(tAnnoModel);
+		List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
+
+		if (!tAnnotationList.isEmpty()) {
+			System.out.println("Annotations that made it through:");
+			System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+		}
+		assertEquals("Annotations are invalid so shouldn't have created any annotations in the list.", 0, tAnnotationList.size());  
+	}
 }
