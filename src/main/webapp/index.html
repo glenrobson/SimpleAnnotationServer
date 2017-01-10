@@ -22,25 +22,33 @@
 		  "mainMenuSettings" :
 		  {
 		  		"show": true,
-		  		"buttons" : {"bookmark" : true, "layout" : true},
-		  		"userLogo": {"label": "IIIF", "attributes": {"href": "http://iiif.io"}}
+		  		"buttons" : {"bookmark" : false, "layout" : false},
+		  		"userLogo": {"label": "Help", "attributes": {"href": "http://iiif.io"}}
 		  },
 		  'showAddFromURLBox' : false,
-		  "saveSession": true,
+		  "saveSession": false,
+		  "buildPath" : 'mirador/',
         "data": [
-          { "collectionUri": "http://dams.llgc.org.uk/iiif/collection/aberXIC.json", "location": "Aberystwyth University"}
-        ],
-        "windowObjects": [],
-		  /** Testing Annotations **/
-		  annotationEndpoint: {
-				name: 'Simple Annotation Store Endpoint',
-				module: 'SimpleASEndpoint',
-				options: {
-					url: 'annotation',
-				  storeId: 'comparison',
-				  APIKey: 'user_auth'
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4655942/manifest.json", "location":"Aberystwyth University","label": ", 1872"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4656327/manifest.json", "location":"Aberystwyth University","label": ", 1879"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4656708/manifest.json", "location":"Aberystwyth University","label": ", 1887"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4657163/manifest.json", "location":"Aberystwyth University","label": ", 1892"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4663090/manifest.json", "location":"Aberystwyth University","label": ", 1895"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4657633/manifest.json", "location":"Aberystwyth University","label": ", 1898"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4658089/manifest.json", "location":"Aberystwyth University","label": ", 1902"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4658548/manifest.json", "location":"Aberystwyth University","label": ", 1904"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4659170/manifest.json", "location":"Aberystwyth University","label": ", 1905"},
+			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4659626/manifest.json", "location":"Aberystwyth University","label": ", 1908"}
+    		],
+        "windowObjects": [
+		  ],
+		  "annotationEndpoint": {
+				"name": 'Simple Annotation Store Endpoint',
+				"module": 'SimpleASEndpoint',
+				"options": {
+					"url": 'annotation',
 				}
-		  }   
+		  },
       });
     });
   </script>

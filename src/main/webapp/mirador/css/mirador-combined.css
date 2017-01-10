@@ -4055,3 +4055,15 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
 .mce-edit-area iframe {
     height: 75px !important;
 }
+
+/* 
+ Aber Uni customisations
+*/
+
+.crosshair {
+	cursor: crosshair;
+}
+
+.mirador-osd-edit-mode.selected {
+  color: red;
+}
