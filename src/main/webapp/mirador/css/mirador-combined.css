@@ -4039,16 +4039,16 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
   margin-bottom: 12px;
 }
 .qtip-bootstrap .tags-viewer span.tag {
-  background: lightgray;
+  /*background: lightgray;
   color: #222;
-  border-radius: 6px;
-  padding: 0 5px;
-  margin-right:5px;
+  border-radius: 6px; 
   margin-bottom: 5px;
-  text-align: center;
+  border: 1px solid #aaa;
+  margin-right:5px;*/
+  padding: 0 0px;
+  text-align: left;
   font-size: 12;
   font-weight: bold;
-  border: 1px solid #aaa;
   display: inline-block;
 }
 
@@ -4066,4 +4066,47 @@ div.manifest-info a.mirador-btn.mirador-icon-toc {
 
 .mirador-osd-edit-mode.selected {
   color: red;
+}
+
+.flyover {
+  margin-top:-1000px;
+   overflow: hidden;
+   position: fixed;
+   width: 25%;
+   opacity: 10;
+   z-index: 10;
+   transition: all 1s ease;
+}
+ 
+.flyover.in {
+  margin-top: 240px;
+  margin-left: 15px;     
+
+}
+
+.hid {
+    display:none;
+}
+
+.alert-danger {
+	position: relative;
+	margin: 0px auto;
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+	 z-index: 100;
+	 width:50%;
+	 height: 33px;
+	 text-align: center;
+}
+.alert-warning {
+	position: relative;
+	margin: 0px auto;
+	color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+	 z-index: 100;
+	 width:50%;
+	 height: 33px;
+	 text-align: center;
 }
