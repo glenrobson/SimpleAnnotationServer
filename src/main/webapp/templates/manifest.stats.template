@@ -20,12 +20,6 @@
 					<li>
 						<a href="index.html">Stats</a>
 					</li>
-					<li>
-						<a href="../populate.html">Load Annotation List</a>
-					</li>
-					<li>
-						<a href="../uploadManifest.html">Index Manifest</a>
-					</li>
 				</ul>
 			</div>
 		</div>
