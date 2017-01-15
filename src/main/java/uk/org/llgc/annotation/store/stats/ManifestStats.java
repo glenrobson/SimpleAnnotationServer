@@ -89,6 +89,7 @@ public class ManifestStats extends HttpServlet {
 			tQuery.setFacet(true);
 			tQuery.addFacetField("target");
 			tQuery.setFacetLimit(-1);
+			tQuery.setFacetMinCount(1);
 			tQuery.setFacetSort("index");
 			tQuery.set("q", "type:oa\\:Annotation AND within:" + tManifestURI.replaceAll(":","\\\\:"));
 
@@ -123,7 +124,7 @@ public class ManifestStats extends HttpServlet {
 		List tPageCountResult = new ArrayList();
 		tPageCountResult = new ArrayList();
 		tAnnoPageCountData.add(tPageCountResult);
-		tPageCountResult.add("Camvas type");
+		tPageCountResult.add("Canvas type");
 		tPageCountResult.add("count");
 
 		
