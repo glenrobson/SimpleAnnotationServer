@@ -44,7 +44,7 @@ public class ListManifests extends HttpServlet {
 
 		StringBuffer tContent = new StringBuffer();
 		for (Manifest tManifest: tManifests) {
-			tContent.append("<li><a href=\"/stats/");
+			tContent.append("<li><a href=\"");
 			tContent.append(tManifest.getShortId());
 			tContent.append(".html\">");
 			tContent.append(tManifest.getLabel());
