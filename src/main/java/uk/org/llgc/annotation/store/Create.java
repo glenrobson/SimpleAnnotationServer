@@ -39,9 +39,9 @@ public class Create extends HttpServlet {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
 		_logger.debug("JSON in:");
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
-		/*
-		 Testing various error conditions
-		 String tJson = JsonUtils.toPrettyString(tAnnotationJSON);
+		
+		 //Testing various error conditions
+		 /*String tJson = JsonUtils.toPrettyString(tAnnotationJSON);
 		if (tJson.contains("hang")) {
 			try {
 				Thread.sleep(50000);
