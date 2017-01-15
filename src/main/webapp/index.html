@@ -7,11 +7,19 @@
   <style type="text/css">
     body { padding: 0; margin: 0; overflow: hidden;}
     #viewer {width: 100%; height: 100%; position: fixed; }
+    /*#error_console {width: 100%; height: 5%;  position: fixed; bottom: 0; background-color:black}
+	 #status {width:100%; height=100%; background-color:black;color: white}*/
   </style>
 </head>
 <body>
   <div id="viewer"></div>
-
+  <div id="error_console" class="alert-danger hid">
+		Communication problem with the Annotation Server...
+		<!--<textarea id="status" readonly="true">this is where status messages will go
+		this is where status messages will go line 2
+		this is where status messages will go line 3
+		</textarea>-->
+	</div>
   <script src="mirador/mirador.js"></script>
   <script type="text/javascript">
 
@@ -40,8 +48,7 @@
 			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4659170/manifest.json", "location":"Aberystwyth University","label": ", 1905"},
 			  { "manifestUri":"http://dams.llgc.org.uk/iiif/2.0/4659626/manifest.json", "location":"Aberystwyth University","label": ", 1908"}
     		],
-        "windowObjects": [
-		  ],
+        "windowObjects": [],
 		  "annotationEndpoint": {
 				"name": 'Simple Annotation Store Endpoint',
 				"module": 'SimpleASEndpoint',
