@@ -39,6 +39,7 @@ import org.openrdf.rio.Rio;
 
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 

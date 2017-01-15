@@ -28,6 +28,7 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.Manifest;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -116,7 +117,7 @@ public class TestSearch extends TestUtils {
 		List<String> tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
 		assertNull("Annotation contains a within even though I haven't loaded the manifest", tWithin);
 
-		List<String> tLoadedManifests = _store.getManifests();
+		List<Manifest> tLoadedManifests = _store.getManifests();
 		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests.isEmpty());
 
 		Map<String, Object> tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
@@ -125,7 +126,7 @@ public class TestSearch extends TestUtils {
 
 		tLoadedManifests = _store.getManifests();
 		assertEquals("Store should have 1 manifests registered but answered " + tLoadedManifests, 1, tLoadedManifests.size());
-		assertEquals("Store should have single manifests registered but answered " + tLoadedManifests, "http://example.com/manfiest/test/manifest.json",tLoadedManifests.get(0));
+		assertEquals("Store should have single manifests registered but answered " + tLoadedManifests, "http://example.com/manfiest/test/manifest.json",tLoadedManifests.get(0).getURI());
 		assertEquals("Short id returned incorrect manifest", "http://example.com/manfiest/test/manifest.json", _store.getManifestId(tShortId));
 
 		tModel = _store.getAnnotation("http://example.com/manifest/annotation/1");
@@ -170,6 +171,17 @@ public class TestSearch extends TestUtils {
 
 		assertEquals("Expected 1 result for 'abold' but found different", 1, tResults.size());
 		assertEquals("Expected single result for 'abold'","http://example.com/annotation/2", tResults.get(0).get("@id"));
+
+		// Test multiple words:
+		tQuery = new SearchQuery("Test content simple");
+		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
+		tResultsJson = _store.search(tQuery); 
+
+		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		assertEquals("Expected 1 result for 'Test content simple' but found different", 1, tResults.size());
+		assertEquals("Expected different result for 'Test content simple'","http://example.com/annotation/1", tResults.get(0).get("@id"));
+
 	}
 
 	@Test

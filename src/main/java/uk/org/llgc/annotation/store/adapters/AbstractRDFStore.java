@@ -16,6 +16,7 @@ import java.net.URISyntaxException;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.Manifest;
 
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -63,10 +64,10 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	}
 
 
-	public List<String> getManifests() throws IOException {
+	public List<Manifest> getManifests() throws IOException {
 		String tQueryString = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
 										"select ?manifest where {"  + 
-										" GRAPH ?graph {?manifest <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Manifest> }}";
+										" GRAPH ?graph {?manifest <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Manifest> }}"; // need to bring back short_id and label
 		
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
@@ -88,8 +89,8 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		}
 		this.end();
 
-		return tManifests;
-
+		//return tManifests; TODO
+		return null;
 	}
 
 	public String getManifestId(final String pShortId) throws IOException {

@@ -174,7 +174,10 @@ public class AnnotationUtils {
 		List tResources = (List)tRoot.get("resources");
 		for (Model tAnnotation : pAnnotations) {
 			try {
-				tResources.add(this.frameAnnotation(tAnnotation, false));
+				Map<String,Object> tAnnoJson = this.frameAnnotation(tAnnotation, false);
+				if (tAnnoJson != null) { // Only add if its a valid annotation
+					tResources.add(tAnnoJson);
+				}	
 			} catch (JsonLdError tExcpt) {
 				_logger.error("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
 				tExcpt.printStackTrace();
@@ -207,12 +210,11 @@ public class AnnotationUtils {
 		if (pCollapse) {
 			this.colapseFragement(tJsonLd);
 		}	
-		Map<String, Object> tOn = null;
-		if (tOn instanceof Map) {
-			tOn = (Map<String, Object>)tJsonLd.get("on");
+		if (tJsonLd.get("on") instanceof Map) {
+			Map<String, Object> tOn = (Map<String, Object>)tJsonLd.get("on");
 			if (tOn.get("selector") != null && ((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
-				return tJsonLd;
+				return null;
 			}	
 		}	
 		// Check if this is a valid annotation

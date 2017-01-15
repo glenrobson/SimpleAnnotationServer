@@ -19,6 +19,7 @@ import org.apache.jena.riot.Lang;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
@@ -44,7 +45,7 @@ public interface StoreAdapter {
 	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException;
 
 	public String indexManifest(Map<String,Object> pManifest) throws IOException;
-	public List<String> getManifests() throws IOException;
+	public List<Manifest> getManifests() throws IOException;
 	public String getManifestId(final String pShortId) throws IOException;
 	public Map<String,Object> getManifest(final String pShortId) throws IOException;
 	public Map<String, Object> getAllAnnotations() throws IOException;

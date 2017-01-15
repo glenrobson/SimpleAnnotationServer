@@ -1,0 +1,43 @@
+html,body {
+    height:100%;
+}
+.container, .jumbotron {
+    height:110%;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+}
+.mainform {
+    height:100%;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top:auto;
+    margin-bottom:auto;
+    width:60%;
+}
+.mainformrow {
+    height:20%;
+}
+.mainimage {
+    background: url('../images/Untitled3.jpg')  no-repeat center center;
+    background-size: 100%;
+    height:110%;
+    width:100%;
+}
+h2.white {
+   color:#EBEBEB !important;
+}
+.wellcomePlayer {
+    height: 500px;
+    width: 100%;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    background-color: white;
+}
+a.anchor {
+ padding-top: 55px;
+ margin-top: -55px;
+}
+ul.nav a.vote {
+ background: red;
+ color: black;
+}

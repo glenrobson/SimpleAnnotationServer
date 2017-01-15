@@ -24,6 +24,7 @@ import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
@@ -33,8 +34,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
-// import java.util.Base64;  - requires java8
 import java.util.Set;
+import java.util.Base64;
 import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
@@ -55,6 +56,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		_solrClient = new HttpSolrClient(pConnectionURL); 
 	//	_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
 	// ((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);	
+	}
+
+	public SolrClient getClient() {
+		return _solrClient;
 	}
 
 // id, motivation, body, target, selector, within, data, short_id, label
@@ -203,11 +208,11 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	}
 
-	public List<String> getManifests() throws IOException {
-		SolrQuery tQuery = this.getQuery();
+	public List<Manifest> getManifests() throws IOException {
+		SolrQuery tQuery = this.getManifestQuery();
 		tQuery.set("q", "type:sc\\:Manifest");
 
-		List<String> tManifestIds = new ArrayList<String>();
+		List<Manifest> tManifests = new ArrayList<Manifest>();
 		try {
 			QueryResponse tResponse = _solrClient.query(tQuery);
 			long tResultNo = tResponse.getResults().getNumFound();
@@ -215,7 +220,11 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			int tStart = 0;
 			do { 
 				for (SolrDocument tResult : tResponse.getResults()) {
-					tManifestIds.add((String)tResult.get("id"));
+					Manifest tManifest = new Manifest();
+					tManifest.setURI((String)tResult.get("id"));
+					tManifest.setShortId((String)tResult.get("short_id"));
+					tManifest.setLabel(((List<String>)tResult.get("label")).get(0));
+					tManifests.add(tManifest);
 				}
 
 				tStart += tPageSize;
@@ -226,7 +235,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			tExcpt.printStackTrace();
 			throw new IOException("Failed to remove annotations due to " + tExcpt);
 		}
-		return tManifestIds;
+		return tManifests;
 	}
 
 
@@ -235,6 +244,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		SolrInputDocument tDoc = new SolrInputDocument();
 		tDoc.addField("short_id", pShortId);
 		tDoc.addField("id", tManifestId);
+		this.addSingle(tDoc, "label", pManifest.get("label"));
 		this.addMultiple(tDoc, "type", pManifest.get("@type"));
 		List<String> tCanvases = new ArrayList<String>();
 		for (Map<String,Object> tSequence : (List<Map<String,Object>>)pManifest.get("sequences")) {
@@ -392,8 +402,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			}
 			
 		} catch (SolrServerException tException) {
+			tException.printStackTrace();
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		} catch (URISyntaxException tException) {	
+			tException.printStackTrace();
 			throw new IOException("Failed to work with base URI " + tException.toString());
 		}
 
@@ -489,6 +501,13 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		}
 	}
 
+	protected SolrQuery getManifestQuery() {
+		SolrQuery tQuery = new SolrQuery();
+		tQuery.setFields("id", "type", "short_id", "label", "canvas");
+		tQuery.setRows(1000);
+
+		return tQuery;
+	}
 
 	protected SolrQuery getQuery() {
 		SolrQuery tQuery = new SolrQuery();

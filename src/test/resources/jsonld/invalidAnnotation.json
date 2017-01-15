@@ -1,0 +1,32 @@
+{
+    "@id": "http://dev.llgc.org.uk/annotation/1467636737279",
+    "@type": "oa:Annotation",
+    "dcterms:created": "2016-10-08T23:33:38",
+    "dcterms:modified": "2016-10-10T01:19:19",
+    "resource": [{
+        "@id": "_:b2",
+        "@type": "dctypes:Text",
+        "http://dev.llgc.org.uk/sas/full_text": "<span property=\"ns:rank\" class=\"rank\">Pte. <span property=\"ns:name\" class=\"name\">Thomas John Roberts Frederick Lewis Pocock John Roberts  <span property=\"ns:unit\" class=\"unit\">Tynybedw Dvn Blaenavon Dvn. Blaenau Ffestiniog Dvn. Blaenau Festiniog Dvn.  ",
+        "format": "text/html",
+        "chars": "<p><span property=\"ns:rank\" class=\"rank\">Pte.<\/span> <span property=\"ns:name\" class=\"name\">Thomas John Roberts Frederick Lewis Pocock John Roberts <\/span> <span property=\"ns:unit\" class=\"unit\">Tynybedw Dvn Blaenavon Dvn. Blaenau Ffestiniog Dvn. Blaenau Festiniog Dvn. <\/span> <\/p>"
+    }],
+    "on": {
+        "@id": "_:b1",
+        "@type": "oa:SpecificResource",
+        "within": "http://dams.llgc.org.uk/iiif/2.0/4642022/manifest.json",
+        "selector": {
+            "@id": "_:b0",
+            "@type": "oa:FragmentSelector",
+            "value": [
+                "xywh=2630,3561,1531,211",
+                "xywh=2630,3795,1548,228",
+                "xywh=2647,3819,1501,205",
+                "xywh=2647,4059,1701,199",
+                "xywh=2635,3548,1572,205"
+            ]
+        },
+        "full": "http://dams.llgc.org.uk/iiif/2.0/4642022/canvas/4643036.json"
+    },
+    "motivation": ["oa:commenting"],
+    "@context": "http://iiif.io/api/presentation/2/context.json"
+}

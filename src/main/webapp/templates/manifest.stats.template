@@ -1,0 +1,82 @@
+<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+	 	<meta charset="utf-8">
+		<meta content="IE=edge" http-equiv="X-UA-Compatible">
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+	 	<title>Statistics for Manifest</title>
+		<link rel="stylesheet" href="../css/bootstrap-local.min.css">
+		<link rel="stylesheet" href="../css/dashboard.css">
+		<link rel="stylesheet" href="../css/local.css">
+	</head>
+	<body>
+	<div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li>
+						<a href="../index.html">Home</a>
+					</li>
+					<li>
+						<a href="index.html">Stats</a>
+					</li>
+					<li>
+						<a href="../populate.html">Load Annotation List</a>
+					</li>
+					<li>
+						<a href="../uploadManifest.html">Index Manifest</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+		<div class="container">
+        <h1>##LABEL##</h1>
+		  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		  <script type="text/javascript">
+		    google.charts.load("current", {packages:['corechart']});
+			 google.charts.setOnLoadCallback(drawChart);
+			 function drawChart() {
+			  var data = google.visualization.arrayToDataTable(
+					##ANNO_PAGE_DATA##
+			  	);
+				var options = {
+					title: "Annotations per Page",
+					width: ##ANNO_PAGE_WIDTH##,
+					chartArea: {top: 20, left:20 },
+					height: 400,
+					fontSize: 10,
+					hAxis: { slantedText: true, slantedTextAngle: 90, showTextEvery: 10 },
+				   bar: { groupWidth: '95%'},
+				   legend: { position: 'none' },
+				  };
+				var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+				chart.draw(data, options);
+
+				var data = google.visualization.arrayToDataTable(
+					##PAGE_ANNO_COUNT##
+				 );
+
+				 var options = {
+					 title: 'Annotations per Page'
+				  };
+
+				  var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+				  chart.draw(data, options);
+				
+			 }	
+		  </script>
+		  <p><b>Total number of annotations:</b> ##total_anno##</p>
+		  <br/>
+		  <p>Percentage pages with annotations</p>
+		  <div id="piechart" align="left" border="2px solid black"></div>
+
+        <p>Below is a graph showing the number of annotations per page.</p>
+		  <div id="chart_div" align="left" border="2px solid black"></div>
+		  </div>
+		</main>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"/>
+	</body>
+</html>
