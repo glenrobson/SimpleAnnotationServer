@@ -39,6 +39,26 @@ public class Create extends HttpServlet {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
 		_logger.debug("JSON in:");
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
+		/*
+		 Testing various error conditions
+		 String tJson = JsonUtils.toPrettyString(tAnnotationJSON);
+		if (tJson.contains("hang")) {
+			try {
+				Thread.sleep(50000);
+			} catch (Exception tExcpt) {
+			}
+		} else if (tJson.contains("null")) {
+			Object tNullObj = null;
+			tNullObj.toString();
+		} else if (tJson.contains("ioexception")) {
+			System.out.println("throwing IO");
+			throw new IOException("testing excpt");
+		} else if (tJson.contains("badrequest")) {
+			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			pRes.setContentType("text/plain");
+			pRes.getOutputStream().println("Failed to load annotation due to conflict in ID: ");
+			return;
+		}*/
 
 		try {
 			Model tModel = _store.addAnnotation(tAnnotationJSON);
