@@ -41,6 +41,10 @@ public class Update extends HttpServlet {
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		try {
 			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
+			if (tAnnotationJSON.get("@context") instanceof String) {
+				Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(super.getServletContext().getResourceAsStream("/contexts/iiif-2.0.json"));
+				tAnnotationJSON.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
+			}
 			_logger.debug("JSON in:");
 			_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 			String tAnnoId = (String)tAnnotationJSON.get("@id");
