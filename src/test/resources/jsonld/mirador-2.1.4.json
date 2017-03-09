@@ -1,0 +1,39 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "motivation": [
+        "oa:tagging",
+        "oa:commenting"
+    ],
+    "resource": [
+        {
+            "@type": "oa:Tag",
+            "chars": "tag"
+        },
+        {
+            "@type": "dctypes:Text",
+            "format": "text/html",
+            "chars": "<p>content<\/p>"
+        }
+    ],
+    "on": [{
+        "@type": "oa:SpecificResource",
+        "full": "http://dms-data.stanford.edu/data/manifests/BnF/jr903ng8662/canvas/canvas-13",
+        "selector": {
+            "@type": "oa:Choice",
+            "default": {
+                "@type": "oa:FragmentSelector",
+                "value": "xywh=3002,587,371,332"
+            },
+            "item": {
+                "@type": "oa:SvgSelector",
+                "value": "<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M3002.02122,586.53692l185.50155,0l0,0l185.50155,0l0,166.0886l0,166.0886l-185.50155,0l-185.50155,0l0,-166.0886z\" data-paper-data=\"{&quot;defaultStrokeValue&quot;:1,&quot;editStrokeValue&quot;:5,&quot;currentStrokeValue&quot;:1,&quot;rotation&quot;:0,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null,&quot;editable&quot;:true,&quot;annotation&quot;:null}\" id=\"rectangle_e17b2bc5-c17b-4cfb-a4cf-6bac5a37a6e0\" fill-opacity=\"0.00001\" fill=\"#00bfff\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"4.31399\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/><\/svg>"
+            }
+        },
+        "within": {
+            "@id": "http://dms-data.stanford.edu/data/manifests/BnF/jr903ng8662/manifest.json",
+            "@type": "sc:Manifest"
+        }
+    }],
+    "@id": "http://localhost:8888/annotation/1488244504042"
+}

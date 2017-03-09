@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.After;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.jsonldjava.utils.JsonUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -201,4 +203,17 @@ public class TestPublish extends TestUtils {
 		assertNotNull("Annotation is missing modification date after update. ", tModifiedSt);
 	}
 
+	@Test
+	public void testMirador214() throws IOException, IDConflictException, InterruptedException {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/mirador-2.1.4.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		
+		String tAnnoId = (String)tAnnotationJSON.get("@id");
+		_logger.debug("ID " + tAnnoId);
+		Model tModel = _store.addAnnotation(tAnnotationJSON);
+
+		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
+
+		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
+		assertNotNull("Default rect present ", ((Map<String,Map<String,String>>)((Map<String,Object>)tAnnotation.get("on")).get("selector")).get("default").get("value"));
+	}
 }

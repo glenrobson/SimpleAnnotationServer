@@ -74,6 +74,8 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 				String tCanvasId = "";
 				if (pJson.get("on") instanceof Map) {
 					tCanvasId = (String)((Map<String,Object>)pJson.get("on")).get("full");
+				} else if (pJson.get("on") instanceof List) {	
+					tCanvasId = (String)((List<Map<String,Object>>)pJson.get("on")).get(0).get("full");
 				} else {
 					String tURL = (String)pJson.get("on");
 					tCanvasId = tURL.split("#")[0];
