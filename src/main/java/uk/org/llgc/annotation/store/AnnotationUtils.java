@@ -208,8 +208,12 @@ public class AnnotationUtils {
 			this.colapseFragement(tJsonLd);
 		}	
 		Map<String, Object> tOn = null;
-		if (tOn instanceof Map) {
+		if (tJsonLd.get("on") instanceof Map) {
 			tOn = (Map<String, Object>)tJsonLd.get("on");
+			// Set on to always be a list see Github issue SAS#21
+			List tOnList = new ArrayList();
+			tOnList.add(tOn);
+			tJsonLd.put("on",tOnList);
 			if (tOn.get("selector") != null && ((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
 				return tJsonLd;
