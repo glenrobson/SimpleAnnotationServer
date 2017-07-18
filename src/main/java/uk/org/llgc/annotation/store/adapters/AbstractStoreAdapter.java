@@ -160,7 +160,13 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		} else {
 			tWithin = pManifestURI;
 		}
-		((Map<String, Object>)pAnno.get("on")).put("within", tWithin);
+		if (pAnno.get("on") instanceof Map) {
+			((Map<String, Object>)pAnno.get("on")).put("within", tWithin);
+		} else {
+			for (Map<String,Object> tSingleOn : (List<Map<String,Object>>)pAnno.get("on")) {
+				tSingleOn.put("within", tWithin);
+			}
+		}
 	}
 
 	public void addMetadata(final Map<String,Object> pJson) {
@@ -209,13 +215,8 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 		if (this.isMissingWithin(pJson)) {
 			// missing within so check to see if the canvas maps to a manifest
-			String tCanvasId = "";
-			if (pJson.get("on") instanceof Map) {
-				tCanvasId = (String)((Map<String,Object>)pJson.get("on")).get("full");
-			} else {
-				String tURL = (String)pJson.get("on");
-				tCanvasId = tURL.split("#")[0];
-			}
+			String tCanvasId = getFirstCanvasId(pJson.get("on"));
+			
 			List<String> tManifestURI = getManifestForCanvas(tCanvasId);
 			if (tManifestURI != null && !tManifestURI.isEmpty()) {
 				this.addWithin(pJson, tManifestURI);
@@ -224,6 +225,19 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		this.addMetadata(pJson);
 
 		return addAnnotationSafe(pJson);
+	}
+
+	protected String getFirstCanvasId(final Object pOn) {
+		if (pOn instanceof Map) {
+			return (String)((Map<String,Object>)pOn).get("full");
+		} else if (pOn instanceof String) {
+			String tURL = (String)pOn;
+			return tURL.split("#")[0];
+		} else if (pOn instanceof List) {
+			return getFirstCanvasId(((List)pOn).get(0));
+		}
+		_logger.error("On in annotation is a format I don't regocnise its a format type " + pOn.getClass().getName());
+		return null;
 	}
 
 	public String indexManifest(Map<String,Object> pManifest) throws IOException {

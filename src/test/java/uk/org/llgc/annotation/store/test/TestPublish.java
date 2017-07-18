@@ -213,7 +213,10 @@ public class TestPublish extends TestUtils {
 
 		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
 
+		// Require on to be an array
+		assertTrue("On needs to be an array and it isn't.", tAnnotation.get("on") instanceof List);
+
 		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
-		assertNotNull("Default rect present ", ((Map<String,Map<String,String>>)((Map<String,Object>)tAnnotation.get("on")).get("selector")).get("default").get("value"));
+		assertNotNull("Default rect present ", ((Map<String,Map<String,String>>)((List<Map<String,Object>>)tAnnotation.get("on")).get(0).get("selector")).get("default").get("value"));
 	}
 }
