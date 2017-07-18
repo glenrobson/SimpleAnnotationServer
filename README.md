@@ -2,9 +2,10 @@
 This is an Annotation Server which is compatible with [IIIF](http://iiif.io) and [Mirador](https://github.com/IIIF/mirador). This Annotation Server includes
 a copy of Mirador so you can get started creating annotations straight away. The annotations are stored as linked data in an [Apache Jena](https://jena.apache.org/) triple store by default. It is also possible to store the annotations in [Sesame](doc/Sesame.md) or [SOLR](doc/Solr.md). 
 
-**Now supports IIIF Search API**
 
-**NOTE: the current master doesn't support mirador versions after 2.1.1 due to a change in the way Mirador stores annotations. See branch [mirador-2.1.4](../../tree/mirador-2.1.4) for code that works with the latest mirador versions.** See issue [#21](../issues/21) for the more details.
+**NOTE: the current master doesn't support mirador versions after 2.1.1 due to a change in the way Mirador stores annotations. See branch [mirador-2.1.4](../../tree/mirador-2.1.4) for code that works with the latest mirador versions.** See issue [#21](../../issues/21) for the more details.
+
+**Now supports IIIF Search API**
 
 For details see [IIIF Search](doc/IIIFSearch.md)
 
