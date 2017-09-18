@@ -33,7 +33,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 
 public class AnnotationUtils {
-	protected static Logger _logger = LogManager.getLogger(AnnotationUtils.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(AnnotationUtils.class.getName());
 
 	protected File _contextDir = null;
 	protected Encoder _encoder = null;
@@ -44,7 +44,7 @@ public class AnnotationUtils {
 	}
 
 	/**
-	 * Convert a IIIF annotation list into a list of annotations that have fragement 
+	 * Convert a IIIF annotation list into a list of annotations that have fragement
 	 * identifiers
 	 * @param InputStream the input stream to read to get the IIIF annotation list
 	 */
@@ -72,7 +72,7 @@ public class AnnotationUtils {
 
 			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
-			
+
 			Map<String, Object> tResource = null;
 			if (tAnno.get("resource") instanceof List) {
 				tResource = (Map<String, Object>)((List)tAnno.get("resource")).get(0);
@@ -108,7 +108,7 @@ public class AnnotationUtils {
 				tSelector.put("value", tOnStr[1]);
 
 				tAnno.put("on", tOnObj);
-			}	
+			}
 
 			if (_encoder != null) {
 				_encoder.encode(tAnno);
@@ -117,15 +117,15 @@ public class AnnotationUtils {
 		return tAnnotations;
 	}
 
-	@SuppressWarnings("unchecked") 
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> readAnnotaion(final InputStream pStream, final String pBaseURL) throws IOException {
 		Object tAnnotation = JsonUtils.fromInputStream(pStream);
 		Map<String, Object> tRoot = (Map<String,Object>)tAnnotation;
 
-		if (tRoot.get("@id") == null) { 
+		if (tRoot.get("@id") == null) {
 			String tID = pBaseURL + "/" + this.generateAnnoId();
 			tRoot.put("@id", tID);
-		}	
+		}
 		// Change context to local for quick processing
 		tRoot.put("@context", this.getContext());
 
@@ -143,7 +143,7 @@ public class AnnotationUtils {
 		return "http://iiif.io/api/presentation/2/context.json";
 	}
 
-	@SuppressWarnings("unchecked") 
+	@SuppressWarnings("unchecked")
 	protected Map<String, Object> buildAnnotationListHead() {
 		Map<String, Object> tRoot = (Map<String, Object>)new HashMap<String,Object>();
 		tRoot.put("@context", getExternalContext());
@@ -206,7 +206,7 @@ public class AnnotationUtils {
 		Map<String,Object> tJsonLd = this.frame(pAnno, contextJson);
 		if (pCollapse) {
 			this.colapseFragement(tJsonLd);
-		}	
+		}
 		Map<String, Object> tOn = null;
 		if (tJsonLd.get("on") instanceof Map) {
 			tOn = (Map<String, Object>)tJsonLd.get("on");
@@ -217,14 +217,14 @@ public class AnnotationUtils {
 			if (tOn.get("selector") != null && ((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
 				return tJsonLd;
-			}	
-		}	
+			}
+		}
 		// Check if this is a valid annotation
 		// if it is valid it should have one source, one fragment selector
 		if (_encoder != null) {
 			_encoder.decode(tJsonLd);
 		}
-		return tJsonLd; 
+		return tJsonLd;
 	}
 
 
@@ -252,21 +252,30 @@ public class AnnotationUtils {
 
 	// Need to move fragement into on
 	public void colapseFragement(final Map<String,Object> pAnnotationJson) {
-		if (((Map<String,Object>)pAnnotationJson.get("on")).get("selector") != null) {
+		if (pAnnotationJson.get("on") instanceof Map) {
+				collapseFragmentOn(pAnnotationJson, (Map<String,Object>)pAnnotationJson.get("on"));
+		} else if (pAnnotationJson.get("on") instanceof List) {
+				for (Map<String,Object> tOn : (List<Map<String,Object>>)pAnnotationJson.get("on")) {
+					collapseFragmentOn(pAnnotationJson, tOn);
+				}
+		}	// otherwise its already collapsed as its a string
+	}
+	public void collapseFragmentOn(final Map<String,Object> pAnnotationJson, final Map<String,Object> pOn) {
+		if (pOn.get("selector") != null) {
 			try {
-				String tFragement = (String)((Map)((Map)pAnnotationJson.get("on")).get("selector")).get("value");
-				String tTarget = (String)((Map)pAnnotationJson.get("on")).get("full");
+				String tFragement = (String)((Map)pOn.get("selector")).get("value");
+				String tTarget = (String)pOn.get("full");
 				pAnnotationJson.put("on", tTarget + "#" + tFragement);
 			} catch (ClassCastException tExcpt) {
 				System.err.println("Failed to transform annotation");
 				try {
 					System.out.println(JsonUtils.toPrettyString(pAnnotationJson));
-				} catch (IOException	tIOExcpt) { 
+				} catch (IOException	tIOExcpt) {
 					System.out.println("Failed to print failing annotation " + tIOExcpt);
 				}
 				throw tExcpt;
 			}
-		}	
+		}
 	}
 
 	protected String generateAnnoId() {
