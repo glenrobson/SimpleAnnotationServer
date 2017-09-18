@@ -1,10 +1,12 @@
-Setting up SOLR as an annoation store
+Setting up SOLR as an annotation store
 
 Download SOLR from:
 
 https://lucene.apache.org/solr/
 
-(Note tested with 6.2.1). The current version of SAS uses SOLR cores rather than Cloud although cloud can be supported if required (please create an issue if this is of interest).
+(Note tested with 6.2.1). The SAS supports both Cloud and Cores but the instructions differ slightly between these two options.
+
+## SOLR Cores
 
 Start solr:
 
@@ -23,15 +25,15 @@ mkdir -p server/solr/annotations/data
 cp -r $SAS_HOME/src/main/resources/solr/* server/solr/annotations/
 ```
 
-Then create the core in solr by navigating to the SOLR web interface: 
+Then create the core in solr by navigating to the SOLR web interface:
 
 http://localhost:8983/solr/#/
 
-and clicking create core. Make sure the instanceDir matches the name of the directory you used above (in this case it would be annotations). 
+and clicking create core. Make sure the instanceDir matches the name of the directory you used above (in this case it would be annotations).
 
 Now configure SAS to use this core, open up the following file in the SAS folder:
 
-src/main/webapp/WEB-INF/web.xml 
+src/main/webapp/WEB-INF/web.xml
 
 Now comment out the jena configuration:
 
@@ -69,3 +71,19 @@ change the solr_connection from 'http://solr-host/solr/core' to 'http://localhos
 ```
 mvn jetty:run
 ```
+## SOLR Collections
+
+Start SOLR:
+
+```
+ ./bin/solr -e cloud -noprompt
+ ```
+
+ Load annotations:
+
+ ```
+ # cp config from SAS:
+ cp -r $SAS_HOME/src/main/resources/solr $SOLR_HOME/server/solr/configsets/annos
+ ./bin/solr create_collection -c test -d server/solr/configsets/annos -shards 2
+ ```
+ 

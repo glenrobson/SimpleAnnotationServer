@@ -52,9 +52,12 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	protected SolrClient _solrClient = null;
 
 	public SolrStore(final String pConnectionURL, final String pCollection) {
-		_solrClient = new HttpSolrClient(pConnectionURL); 
-	//	_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
-	// ((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);	
+		if (pCollection == null || pCollection.trim().length() == 0) {
+			_solrClient = new HttpSolrClient(pConnectionURL); 
+		} else {	
+			_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
+			((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);	
+		}	
 	}
 
 // id, motivation, body, target, selector, within, data, short_id, label
