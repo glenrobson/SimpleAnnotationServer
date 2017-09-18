@@ -73,16 +73,24 @@ public class StoreConfig extends HttpServlet {
 	}
 
 	public StoreAdapter getStore() {
-		
+
 		StoreAdapter tAdapter = null;
-		if (_props.get("store").equals("jena")) {
+		String tStore = _props.get("store");
+		if (tStore.equals("jena")) {
 			tAdapter = new JenaStore(_props.get("data_dir"));
-		}	
-		if (_props.get("store").equals("sesame")) {
+		}
+		if (tStore.equals("sesame")) {
 			tAdapter = new SesameStore(_props.get("repo_url"));
 		}
-		if (_props.get("store").equals("solr")) {
-			tAdapter = new SolrStore(_props.get("solr_connection"), _props.get("solr_collection"));
+		if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
+			String tCollection = null;
+			if (tStore.equals("solr-cloud")) {
+					tCollection = _props.get("solr_collection");
+					if (tCollection == null || tCollection.trim().length() == 0) {
+						throw new IllegalArgumentException("If you are using solr-cloud you must specify the solr_collection field.");
+					}
+			}
+			tAdapter = new SolrStore(_props.get("solr_connection"), tCollection);
 		}
 
 		return tAdapter;

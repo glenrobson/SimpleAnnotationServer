@@ -47,12 +47,13 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 
 import java.util.Properties;
 
 
 public class TestUtils {
-	protected static Logger _logger = LogManager.getLogger(TestUtils.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(TestUtils.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 	@Rule
@@ -80,8 +81,8 @@ public class TestUtils {
 			File tDataDir = new File(_testFolder.getRoot(), "data");
 			tDataDir.mkdirs();
 			_props.put("data_dir",tDataDir.getPath());
-		}	
-		
+		}
+
 		StoreConfig tConfig = new StoreConfig(_props);
 		_store = StoreConfig.getConfig().getStore();
 		_store.init(_annotationUtils);
@@ -102,13 +103,20 @@ public class TestUtils {
 	}
 
    public void tearDown() throws IOException {
-		if (_props.get("store").equals("jena")) {
+		String tStore = _props.get("store");
+		if (tStore.equals("jena")) {
 			File tDataDir = new File(_testFolder.getRoot(), "data");
 			this.delete(tDataDir);
-		} else if (_props.get("store").equals("solr")) {
+		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
 			String tSolrURL = _props.get("solr_connection");
 			String tCollection = _props.get("solr_collection");
-			SolrClient _solrClient = new HttpSolrClient(tSolrURL);//new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
+			SolrClient _solrClient = null;
+			if (tStore.equals("solr")) {
+					_solrClient = new HttpSolrClient(tSolrURL);//new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
+			} else {
+					_solrClient = new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
+					((CloudSolrClient)_solrClient).setDefaultCollection(tCollection);
+			}
 			try {
 				UpdateResponse tResponse = _solrClient.deleteByQuery(tCollection, "*:*");// deletes all documents
 				_solrClient.commit(tCollection);
@@ -132,11 +140,11 @@ public class TestUtils {
 		if (f.isDirectory()) {
 			for (File c : f.listFiles()) {
 				this.delete(c);
-			}	
+			}
 		}
 		if (!f.delete()) {
 			throw new IOException("Failed to delete file: " + f);
-		}	
+		}
 	}
 
 	protected void testAnnotation(final Model pModel, final String pValue, final String pTarget) {
@@ -147,14 +155,14 @@ public class TestUtils {
 	protected void testAnnotation(final Model pModel, final String pId, final String pValue, final String pTarget) {
 		String tQuery = "PREFIX oa: <http://www.w3.org/ns/oa#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX cnt: <http://www.w3.org/2011/content#> select ?content ?uri ?fragement where { <$id> oa:hasTarget ?target . ?target oa:hasSource ?uri . ?target oa:hasSelector ?fragmentCont . ?fragmentCont rdf:value ?fragement . <$id> oa:hasBody ?body . ?body cnt:chars ?content }".replaceAll("\\$id",pId);
 		this.queryAnnotation(pModel, tQuery, pValue, pTarget);
-	}	
+	}
 
 	protected ResultSet queryAnnotation(final Model pModel, final String pQuery, final String pValue, final String pTarget) {
 		Query query = QueryFactory.create(pQuery) ;
 		ResultSetRewindable results = null;
 		boolean tFound = false;
 		try (QueryExecution qexec = QueryExecutionFactory.create(query,pModel)) {
-		
+
 			results = ResultSetFactory.copyResults(qexec.execSelect());
 			for ( ; results.hasNext() ; ) {
 				tFound = true;
