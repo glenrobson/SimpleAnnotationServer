@@ -124,8 +124,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 					if (tSelector.get("value") instanceof String) {
 						this.addSingle(tDoc, "selector", tSelector.get("value"));
 					} else {
-						System.out.println("Probably have an invalid annotation ");
-						System.out.println(JsonUtils.toPrettyString(pJson));
+						_logger.info("Probably have an invalid annotation ");
+						_logger.info(JsonUtils.toPrettyString(pJson));
 					}
 				}
 				// by the time it gets here the annotation should have a within if there is a manifest avilable.
