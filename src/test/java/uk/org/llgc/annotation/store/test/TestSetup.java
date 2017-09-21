@@ -54,6 +54,13 @@ public class TestSetup extends TestUtils {
     @After
     public void tearDown() throws IOException {
         //super.tearDown();
+        removeEnv("SAS.baseURI");
+        removeEnv("SAS.encoder");
+        removeEnv("SAS.store");
+        removeEnv("SAS.data_dir");
+        removeEnv("SAS.repo_url");
+        removeEnv("SAS.solr_connection");
+        removeEnv("SAS.solr_collection");
     }
 
     @Test
@@ -94,6 +101,18 @@ public class TestSetup extends TestUtils {
             field.setAccessible(true);
             Map<String, String> writableEnv = (Map<String, String>) field.get(env);
             writableEnv.put(key, value);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to set environment variable", e);
+        }
+    }
+    private void removeEnv(String key) {
+        try {
+            Map<String, String> env = System.getenv();
+            Class<?> cl = env.getClass();
+            java.lang.reflect.Field field = cl.getDeclaredField("m");
+            field.setAccessible(true);
+            Map<String, String> writableEnv = (Map<String, String>) field.get(env);
+            writableEnv.remove(key);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to set environment variable", e);
         }
