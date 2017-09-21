@@ -68,6 +68,7 @@ public class TestUtils {
 	public TestUtils(final Encoder pEncoder) throws IOException {
 		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), pEncoder);
 
+        _logger.debug("Calling load props");
 		_props = new Properties();
 		_props.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
 	}
@@ -81,6 +82,7 @@ public class TestUtils {
 
 		StoreConfig tConfig = new StoreConfig(_props);
 		_store = StoreConfig.getConfig().getStore();
+        _logger.debug("Store is " + _store);
 		_store.init(_annotationUtils);
 	}
 
