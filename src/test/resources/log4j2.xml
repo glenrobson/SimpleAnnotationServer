@@ -10,7 +10,7 @@
 		<Logger name="uk.org.llgc.annotation.store.test.TestBOR" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
-        <Logger name="uk.org.llgc.annotation.store.test.TestSearch" level="debug" additivity="false">
+        <Logger name="uk.org.llgc.annotation.store.test.TestSearch" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>		<Logger name="uk.org.llgc.annotation.store.adapters.SesameStore" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
@@ -24,7 +24,7 @@
 		<Logger name="uk.org.llgc.annotation.store.adapters.SolrStore" level="ERROR" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
-		<Logger name="uk.org.llgc.annotation.store.test.TestUtils" level="debug" additivity="false">
+		<Logger name="uk.org.llgc.annotation.store.test.TestUtils" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
         <Logger name="uk.org.llgc.annotation.store.StoreConfig" level="INFO" additivity="false">

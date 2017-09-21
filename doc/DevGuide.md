@@ -6,4 +6,10 @@ If you make any changes to the HTML, Javascript, css (anything apart from the Ja
 
 Mirador is included in the SimpleAnnotationServer to aid quick deployment. If you would like to update Mirador follow the instructions on the [Mirador Site](https://github.com/IIIF/mirador) and copy everything from mirador/build/mirador/* to [src/main/webapp/mirador](../src/main/webapp/mirador).
 
+## Overloading config using Enviroment variables
 
+It is possible to overload any of the configuration specified in [src/main/webapp/WEB-INF/sas.properties](../src/main/webapp/WEB-INF/sas.properties) by prepending `SAS.` to any of the properties in sas.properties e.g:
+
+```
+export SAS.store="solr"
+```
