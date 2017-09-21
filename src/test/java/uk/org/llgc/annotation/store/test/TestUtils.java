@@ -67,8 +67,9 @@ public class TestUtils {
 
 	public TestUtils(final Encoder pEncoder) throws IOException {
 		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), pEncoder);
-
+        _logger.debug("Reading in " + getClass().getResource("/contexts").getFile());
         _logger.debug("Calling load props");
+        _logger.debug("Reading props " + getClass().getResource("/test.properties").getFile());
 		_props = new Properties();
 		_props.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
 	}

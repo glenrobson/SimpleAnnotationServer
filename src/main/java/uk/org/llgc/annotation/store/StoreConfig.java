@@ -120,11 +120,9 @@ public class StoreConfig extends HttpServlet {
 		String tStore = _props.get("store");
 		if (tStore.equals("jena")) {
 			tAdapter = new JenaStore(_props.get("data_dir"));
-		}
-		if (tStore.equals("sesame")) {
+		} else if (tStore.equals("sesame")) {
 			tAdapter = new SesameStore(_props.get("repo_url"));
-		}
-		if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
+		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
 			String tCollection = null;
 			if (tStore.equals("solr-cloud")) {
 					tCollection = _props.get("solr_collection");
@@ -133,7 +131,9 @@ public class StoreConfig extends HttpServlet {
 					}
 			}
 			tAdapter = new SolrStore(_props.get("solr_connection"), tCollection);
-		}
+		} else {
+            _logger.error("Couldn't find a store for '" + tStore + "'.");
+        }
 
 		return tAdapter;
 	}
