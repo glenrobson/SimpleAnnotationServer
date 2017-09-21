@@ -58,7 +58,7 @@ public class TestUtils {
 	protected StoreAdapter _store = null;
 	@Rule
 	public TemporaryFolder _testFolder = new TemporaryFolder();
-	protected Map<String,String> _props = null;
+	protected Properties _props = null;
 	protected List<String> _annoIds = new ArrayList<String>();
 
 	public TestUtils() throws IOException {
@@ -67,17 +67,15 @@ public class TestUtils {
 
 	public TestUtils(final Encoder pEncoder) throws IOException {
 		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), pEncoder);
-
-		Properties tProps = new Properties();
-		tProps.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
-		_props = new HashMap<String,String>();
-		for (String tKey : tProps.stringPropertyNames()) {
-			_props.put(tKey, tProps.getProperty(tKey));
-		}
+        _logger.debug("Reading in " + getClass().getResource("/contexts").getFile());
+        _logger.debug("Calling load props");
+        _logger.debug("Reading props " + getClass().getResource("/test.properties").getFile());
+		_props = new Properties();
+		_props.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
 	}
 
    public void setup() throws IOException {
-		if (_props.get("store").equals("jena")) {
+		if (_props.getProperty("store").equals("jena")) {
 			File tDataDir = new File(_testFolder.getRoot(), "data");
 			tDataDir.mkdirs();
 			_props.put("data_dir",tDataDir.getPath());
@@ -85,6 +83,7 @@ public class TestUtils {
 
 		StoreConfig tConfig = new StoreConfig(_props);
 		_store = StoreConfig.getConfig().getStore();
+        _logger.debug("Store is " + _store);
 		_store.init(_annotationUtils);
 	}
 
@@ -103,13 +102,13 @@ public class TestUtils {
 	}
 
    public void tearDown() throws IOException {
-		String tStore = _props.get("store");
+		String tStore = _props.getProperty("store");
 		if (tStore.equals("jena")) {
 			File tDataDir = new File(_testFolder.getRoot(), "data");
 			this.delete(tDataDir);
 		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
-			String tSolrURL = _props.get("solr_connection");
-			String tCollection = _props.get("solr_collection");
+			String tSolrURL = _props.getProperty("solr_connection");
+			String tCollection = _props.getProperty("solr_collection");
 			SolrClient _solrClient = null;
 			if (tStore.equals("solr")) {
 					_solrClient = new HttpSolrClient(tSolrURL);//new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
@@ -126,7 +125,7 @@ public class TestUtils {
 			}
 		}	else {
 			try {
-				HTTPRepository tRepo = new HTTPRepository(_props.get("repo_url"));
+				HTTPRepository tRepo = new HTTPRepository(_props.getProperty("repo_url"));
 				RepositoryConnection tConn = tRepo.getConnection();
 				tConn.clear();
 			} catch (RepositoryException tExcpt) {

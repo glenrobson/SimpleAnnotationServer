@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.JenaStore;
@@ -17,19 +18,69 @@ import uk.org.llgc.annotation.store.encoders.Encoder;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.File;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class StoreConfig extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
 
 	public StoreConfig() {
 		_props = null;
 	}
 
-	public StoreConfig(final Map<String, String> pProps) {
-		_props = pProps;
+	// Called from test scripts
+	public StoreConfig(final Properties pProps) {
+		this.overloadConfigFromEnviroment(pProps);
 		initConfig(this);
 	}
+
+  // Called by servlet
+	public void init(final ServletConfig pConfig) throws ServletException {
+		super.init(pConfig);
+		String tConfigFile = pConfig.getInitParameter("config_file");
+        boolean isRelative = true;
+        if (pConfig.getInitParameter("relative") != null || pConfig.getInitParameter("relative").trim().length() != 0) {
+            isRelative = pConfig.getInitParameter("relative").equals("true");
+        }
+		Properties tProps = new Properties();
+		try {
+            InputStream tPropsStream = null;
+            if (isRelative) {
+                tPropsStream = this.getServletContext().getResourceAsStream("/WEB-INF/" + tConfigFile);
+            } else {
+                tPropsStream = new FileInputStream(new File(tConfigFile));
+            }
+
+            tProps.load(tPropsStream);
+		} catch (IOException tExcpt) {
+			tExcpt.printStackTrace();
+			throw new ServletException("Failed to load config file due to: " + tExcpt.getMessage());
+		}
+		this.overloadConfigFromEnviroment(tProps);
+		initConfig(this);
+	}
+
+	protected void overloadConfigFromEnviroment(final Properties pProps) {
+		_props = new HashMap<String,String>();
+		Map<String, String> env = System.getenv();
+		for (String tKey : pProps.stringPropertyNames()) {
+			if (env.get("SAS." + tKey) != null) {
+				_logger.debug("Overloading " + tKey + " with value " + env.get("SAS." + tKey) + " from ENV");
+				_props.put(tKey, env.get("SAS." + tKey));
+			} else {
+				_props.put(tKey, pProps.getProperty(tKey));
+			}
+		}
+	}
+
 
 	public String getBaseURI(final HttpServletRequest pReq) {
 		if (_props.containsKey("baseURI")) {
@@ -61,16 +112,7 @@ public class StoreConfig extends HttpServlet {
 		}
 	}
 
-	public void init(final ServletConfig pConfig) throws ServletException {
-		super.init(pConfig);
-		_props = new HashMap<String,String>();
-		Enumeration<String> tParams = (Enumeration<String>)pConfig.getInitParameterNames();
-		while(tParams.hasMoreElements()) {
-			String tKey = tParams.nextElement();
-			_props.put(tKey, pConfig.getInitParameter(tKey));
-		}
-		initConfig(this);
-	}
+
 
 	public StoreAdapter getStore() {
 
@@ -78,11 +120,9 @@ public class StoreConfig extends HttpServlet {
 		String tStore = _props.get("store");
 		if (tStore.equals("jena")) {
 			tAdapter = new JenaStore(_props.get("data_dir"));
-		}
-		if (tStore.equals("sesame")) {
+		} else if (tStore.equals("sesame")) {
 			tAdapter = new SesameStore(_props.get("repo_url"));
-		}
-		if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
+		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
 			String tCollection = null;
 			if (tStore.equals("solr-cloud")) {
 					tCollection = _props.get("solr_collection");
@@ -91,7 +131,9 @@ public class StoreConfig extends HttpServlet {
 					}
 			}
 			tAdapter = new SolrStore(_props.get("solr_connection"), tCollection);
-		}
+		} else {
+            _logger.error("Couldn't find a store for '" + tStore + "'.");
+        }
 
 		return tAdapter;
 	}
