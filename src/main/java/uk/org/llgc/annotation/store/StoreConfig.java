@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","solr_collection"};
 
 	public StoreConfig() {
 		_props = null;
@@ -70,13 +71,22 @@ public class StoreConfig extends HttpServlet {
 
 	protected void overloadConfigFromEnviroment(final Properties pProps) {
 		_props = new HashMap<String,String>();
+        final String EMPTY="EMPTY";
+        // Ensure all options are present to be overriden
+        for (int i = 0; i < ALLOWED_PROPS.length; i++) {
+            if (pProps.getProperty(ALLOWED_PROPS[i]) == null) {
+                pProps.setProperty(ALLOWED_PROPS[i], EMPTY);
+            }
+        }
 		Map<String, String> env = System.getenv();
 		for (String tKey : pProps.stringPropertyNames()) {
 			if (env.get("SAS." + tKey) != null) {
 				_logger.debug("Overloading " + tKey + " with value " + env.get("SAS." + tKey) + " from ENV");
 				_props.put(tKey, env.get("SAS." + tKey));
 			} else {
-				_props.put(tKey, pProps.getProperty(tKey));
+                if (!pProps.getProperty(tKey).equals(EMPTY)) {
+    				_props.put(tKey, pProps.getProperty(tKey));
+                }
 			}
 		}
 	}
