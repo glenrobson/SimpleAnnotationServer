@@ -78,11 +78,10 @@ public class StoreConfig extends HttpServlet {
                 pProps.setProperty(ALLOWED_PROPS[i], EMPTY);
             }
         }
-		Map<String, String> env = System.getenv();
 		for (String tKey : pProps.stringPropertyNames()) {
-			if (env.get("SAS." + tKey) != null) {
-				_logger.debug("Overloading " + tKey + " with value " + env.get("SAS." + tKey) + " from ENV");
-				_props.put(tKey, env.get("SAS." + tKey));
+			if (System.getProperty("SAS." + tKey) != null) {
+				_logger.debug("Overloading " + tKey + " with value " + System.getProperty("SAS." + tKey) + " from System.getProperty");
+				_props.put(tKey, System.getProperty("SAS." + tKey));
 			} else {
                 if (!pProps.getProperty(tKey).equals(EMPTY)) {
     				_props.put(tKey, pProps.getProperty(tKey));

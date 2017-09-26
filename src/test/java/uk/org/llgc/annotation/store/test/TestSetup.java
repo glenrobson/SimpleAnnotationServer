@@ -74,7 +74,6 @@ public class TestSetup extends TestUtils {
         tProps.setProperty("solr_connection", "properties_solr_connection");
         tProps.setProperty("solr_collection", "properties_solr_collection");
 
-        Map<String, String> env = System.getenv();
         setEnv("SAS.baseURI","env_baseuri");
         setEnv("SAS.encoder","env_encoder");
         setEnv("SAS.store","env_store");
@@ -94,27 +93,9 @@ public class TestSetup extends TestUtils {
         assertEquals("solr_collection hasn't been picked up from the Enviroment.","env_solr_collection", tNewProps.get("solr_collection"));
     }
     private void setEnv(String key, String value) {
-        try {
-            Map<String, String> env = System.getenv();
-            Class<?> cl = env.getClass();
-            java.lang.reflect.Field field = cl.getDeclaredField("m");
-            field.setAccessible(true);
-            Map<String, String> writableEnv = (Map<String, String>) field.get(env);
-            writableEnv.put(key, value);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to set environment variable", e);
-        }
+        System.setProperty(key, value);
     }
     private void removeEnv(String key) {
-        try {
-            Map<String, String> env = System.getenv();
-            Class<?> cl = env.getClass();
-            java.lang.reflect.Field field = cl.getDeclaredField("m");
-            field.setAccessible(true);
-            Map<String, String> writableEnv = (Map<String, String>) field.get(env);
-            writableEnv.remove(key);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to set environment variable", e);
-        }
+        System.clearProperty(key);
     }
 }
