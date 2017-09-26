@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.adapters.SolrStore;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -107,18 +108,10 @@ public class TestUtils {
 			File tDataDir = new File(_testFolder.getRoot(), "data");
 			this.delete(tDataDir);
 		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
-			String tSolrURL = _props.getProperty("solr_connection");
-			String tCollection = _props.getProperty("solr_collection");
-			SolrClient _solrClient = null;
-			if (tStore.equals("solr")) {
-					_solrClient = new HttpSolrClient(tSolrURL);//new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
-			} else {
-					_solrClient = new CloudSolrClient.Builder().withZkHost(tSolrURL).build();
-					((CloudSolrClient)_solrClient).setDefaultCollection(tCollection);
-			}
+			SolrClient _solrClient = ((SolrStore)_store).getClient();
 			try {
-				UpdateResponse tResponse = _solrClient.deleteByQuery(tCollection, "*:*");// deletes all documents
-				_solrClient.commit(tCollection);
+				UpdateResponse tResponse = _solrClient.deleteByQuery("*:*");// deletes all documents
+				_solrClient.commit();
 			} catch(SolrServerException tException) {
 				tException.printStackTrace();
 				throw new IOException("Failed to remove annotations due to " + tException);

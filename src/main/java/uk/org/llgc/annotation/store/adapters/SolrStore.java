@@ -55,7 +55,17 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		if (pCollection == null || pCollection.trim().length() == 0) {
 			_solrClient = new HttpSolrClient(pConnectionURL);
 		} else {
-			_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
+			//_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
+            List<String> tHosts = new ArrayList<String>();
+            if (pConnectionURL.contains(",")) {
+                String[] tHostUrls = pConnectionURL.split(",");
+                for (int i = 0;i < tHostUrls.length; i++) {
+                    tHosts.add(tHostUrls[i]);
+                }
+            } else {
+                tHosts.add(pConnectionURL);
+            }
+			_solrClient = new CloudSolrClient.Builder().withSolrUrl(tHosts).build();
 			((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);
 		}
 	}
@@ -599,4 +609,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		return tResults;
 	}
 
+    public SolrClient getClient() {
+            return _solrClient;
+    }
 }
