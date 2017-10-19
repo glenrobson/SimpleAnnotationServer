@@ -16,7 +16,7 @@
             "chars": "<p>content<\/p>"
         }
     ],
-    "on": [{
+    "on": {
         "@type": "oa:SpecificResource",
         "full": "http://dms-data.stanford.edu/data/manifests/BnF/jr903ng8662/canvas/canvas-13",
         "selector": {
@@ -34,6 +34,6 @@
             "@id": "http://dms-data.stanford.edu/data/manifests/BnF/jr903ng8662/manifest.json",
             "@type": "sc:Manifest"
         }
-    }],
+    },
     "@id": "http://localhost:8888/annotation/1488244504042"
 }
