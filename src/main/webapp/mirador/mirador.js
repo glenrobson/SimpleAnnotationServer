@@ -34301,6 +34301,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
               value["@id"] = $.genUUID();
               _this.idMapper[value["@id"]] = value.fullId;
               value.endpoint = _this;
+              _this.fixOn(value);
             });
             _this.dfd.resolve(false);
           }
@@ -34314,6 +34315,13 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         }
 
       });
+    },
+
+    fixOn: function(annotation) {
+        if (annotation.on && !jQuery.isArray(annotation.on) && annotation.on.selector && annotation.on.selector.default) {
+            oldOn = annotation.on;
+            annotation.on = [ oldOn ];
+        }
     },
 
     deleteAnnotation: function(annotationID, returnSuccess, returnError) {
@@ -34359,6 +34367,9 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         data: JSON.stringify(annotation),
         contentType: "application/json; charset=utf-8",
         success: function(data) {
+
+            _this.fixOn(data);
+
           /* this returned data doesn't seem to be used anywhere */
           returnSuccess();
         },
@@ -34391,6 +34402,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
           data.endpoint = _this;
           _this.idMapper[data["@id"]] = data.fullId;
 
+          _this.fixOn(data);
           returnSuccess(data);
         },
         error: function() {
