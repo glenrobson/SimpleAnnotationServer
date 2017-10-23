@@ -80,7 +80,7 @@ public class AnnotationUtils {
 				tResource = (Map<String, Object>)tAnno.get("resource");
 			}
 			// do I need to change the format to html?
-        /*    if (!tResource.get("@type").equals("oa:Tag")) {
+            if (tResource.get("@type") != null && tResource.get("@type").equals("cnt:ContentAsText") || tResource.get("format") != null && tResource.get("format").equals("text/plain")) {
     			tResource.put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
     			tResource.put("format","text/html");
                 String tText = (String)tResource.get("chars");
@@ -89,8 +89,7 @@ public class AnnotationUtils {
     			} else {
     				tResource.put("chars", tText);
     			}
-            }*/
-
+            }
 			// Not sure if this is strictly necessary:
 			/*List<String> tMotivation = new ArrayList<String>();
 			tMotivation.add("oa:commenting");
