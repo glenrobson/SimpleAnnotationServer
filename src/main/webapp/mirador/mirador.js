@@ -1310,8 +1310,8 @@ var __module2__ = (function(__dependency1__, __dependency2__) {
         } else {
           for(var key in context) {
             if(context.hasOwnProperty(key)) {
-              if(data) { 
-                data.key = key; 
+              if(data) {
+                data.key = key;
                 data.index = i;
                 data.first = (i === 0);
               }
@@ -1820,9 +1820,9 @@ var __module9__ = (function() {
 
   var $0 = $$.length - 1;
   switch (yystate) {
-  case 1: return new yy.ProgramNode($$[$0-1], this._$); 
+  case 1: return new yy.ProgramNode($$[$0-1], this._$);
   break;
-  case 2: return new yy.ProgramNode([], this._$); 
+  case 2: return new yy.ProgramNode([], this._$);
   break;
   case 3:this.$ = new yy.ProgramNode([], $$[$0-1], $$[$0], this._$);
   break;
@@ -1838,7 +1838,7 @@ var __module9__ = (function() {
   break;
   case 9:this.$ = [$$[$0]];
   break;
-  case 10: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
+  case 10: $$[$0-1].push($$[$0]); this.$ = $$[$0-1];
   break;
   case 11:this.$ = new yy.BlockNode($$[$0-2], $$[$0-1].inverse, $$[$0-1], $$[$0], this._$);
   break;
@@ -1896,7 +1896,7 @@ var __module9__ = (function() {
   break;
   case 38:this.$ = new yy.IdNode($$[$0], this._$);
   break;
-  case 39: $$[$0-2].push({part: $$[$0], separator: $$[$0-1]}); this.$ = $$[$0-2]; 
+  case 39: $$[$0-2].push({part: $$[$0], separator: $$[$0-1]}); this.$ = $$[$0-2];
   break;
   case 40:this.$ = [{part: $$[$0]}];
   break;
@@ -2218,14 +2218,14 @@ var __module9__ = (function() {
                                        this.begin("mu");
                                      }
                                      if(yy_.yytext) return 14;
-                                   
+
   break;
   case 1:return 14;
   break;
   case 2:
                                      this.popState();
                                      return 14;
-                                   
+
   break;
   case 3:strip(0,4); this.popState(); return 15;
   break;
@@ -8943,7 +8943,7 @@ $.EventSource.prototype = {
             touchCount = event.changedTouches.length,
             gPoints = [],
             pointsList = tracker.getActivePointersListByType( 'touch' );
-        
+
         abortTouchContacts( tracker, event, pointsList );
     }
 
@@ -9999,7 +9999,7 @@ $.EventSource.prototype = {
             } );
         }
     }
-    
+
     // True if inside an iframe, otherwise false.
     // @member {Boolean} isInIframe
     // @private
@@ -10011,7 +10011,7 @@ $.EventSource.prototype = {
             return true;
         }
     })();
- 
+
     // @function
     // @private
     // @inner
@@ -15818,11 +15818,11 @@ $.IIIFTileSource = function( options ){
             options.tileSize = shortDim;
         }
     } else if (this.sizes && this.sizes.length > 0) {
-        // This info.json can't be tiled, but we can still construct a legacy pyramid from the sizes array. 
-        // In this mode, IIIFTileSource will call functions from the abstract baseTileSource or the 
-        // LegacyTileSource instead of performing IIIF tiling.      
+        // This info.json can't be tiled, but we can still construct a legacy pyramid from the sizes array.
+        // In this mode, IIIFTileSource will call functions from the abstract baseTileSource or the
+        // LegacyTileSource instead of performing IIIF tiling.
         this.emulateLegacyImagePyramid = true;
-        
+
         options.levels = constructLevels( this );
         // use the largest available size to define tiles
         $.extend( true, options, {
@@ -15857,7 +15857,7 @@ $.extend( $.IIIFTileSource.prototype, $.TileSource.prototype, /** @lends OpenSea
      * @param {Object|Array} data
      * @param {String} optional - url
      */
-     
+
     supports: function( data, url ) {
         // Version 2.0 and forwards
         if (data.protocol && data.protocol == 'http://iiif.io/api/image') {
@@ -24845,7 +24845,7 @@ var Isfahan = function(configObject) {
     divisor;
     // if not already set, divide equally.
     group.forEach(function(item) {
-      if (!item[dimension] === undefined) { 
+      if (!item[dimension] === undefined) {
         old = true;
       }
     });
@@ -24857,7 +24857,7 @@ var Isfahan = function(configObject) {
         return previousValue[dimension] + currentValue[dimension];
       });
       console.log('sum: ' + sum);
-      
+
       divisor = (node[dimension]/sum)*total;
       console.log("divisor: "+divisor);
       return divisor;
@@ -24889,7 +24889,7 @@ var Isfahan = function(configObject) {
     });
 
     return nodes;
-  } 
+  }
 
   isfahan.size = function(x) {
     if (!arguments.length) return containerSize;
@@ -24946,7 +24946,7 @@ var Isfahan = function(configObject) {
     if (dy < 0) { y += dy / 2; dy = 0; }
     return {x: x, y: y, dx: dx, dy: dy};
   }
-  
+
   function merge(target, source) {
 
     /* Merges two (or more) objects,
@@ -27370,11 +27370,11 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
     if (this instanceof Mirador) {
         // initialize the event emitter for this mirador instance
         this.eventEmitter = new Mirador.EventEmitter();
-  
+
         // pass the config through the save and restore process,
         // returning the config that will, in fact, populate the application
         this.saveController = new Mirador.SaveController(jQuery.extend(true, {}, config, {'eventEmitter': this.eventEmitter}));
-  
+
         // initialize the application
         this.viewer = new Mirador.Viewer({
             'state': this.saveController,
@@ -28602,7 +28602,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         bindEvents: function() {
             var _this = this;
             //change 'change-layout' to mouseover events rather than click?
-            this.element.find('.change-layout').on('click', function() { 
+            this.element.find('.change-layout').on('click', function() {
               _this.eventEmitter.publish('TOGGLE_WORKSPACE_PANEL');
               //remove active class from other buttons
               _this.element.find('.bookmark-workspace').removeClass('active');
@@ -28613,7 +28613,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
               }
             });
 
-            this.element.find('.bookmark-workspace').on('click', function() { 
+            this.element.find('.bookmark-workspace').on('click', function() {
               _this.eventEmitter.publish('TOGGLE_BOOKMARK_PANEL');
               //remove active class from other buttons
               _this.element.find('.change-layout').removeClass('active');
@@ -29081,7 +29081,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
         var _this = this;
         _this.init();
-        
+
     };
 
     $.ManifestsPanel.prototype = {
@@ -29091,7 +29091,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
                 showURLBox : this.state.getStateProperty('showAddFromURLBox')
             })).appendTo(this.appendTo);
             this.manifestListElement = this.element.find('ul');
-            
+
             //this code gives us the max width of the results area, used to determine how many preview images to show
             //cloning the element and adjusting the display and visibility means it won't break the normal flow
             var clone = this.element.clone().css("visibility","hidden").css("display", "block").appendTo(this.appendTo);
@@ -29100,7 +29100,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
             this.paddingListElement = this.controlsHeight;
             this.manifestListElement.css("padding-bottom", this.paddingListElement);
             clone.remove();
-            
+
             // this.manifestLoadStatusIndicator = new $.ManifestLoadStatusIndicator({
             //   manifests: this.parent.manifests,
             //   appendTo: this.element.find('.select-results')
@@ -29148,7 +29148,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
               _this.resizePanel();
             }, 50, true));
         },
-        
+
         hide: function() {
             var _this = this;
             jQuery(this.element).hide({effect: "fade", duration: 160, easing: "easeOutCubic"});
@@ -29158,17 +29158,17 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
             var _this = this;
             jQuery(this.element).show({effect: "fade", duration: 160, easing: "easeInCubic"});
         },
-        
+
         addManifestUrl: function(url) {
           var _this = this;
           _this.eventEmitter.publish('ADD_MANIFEST_FROM_URL', [url, "(Added from URL)"]);
         },
-        
+
         togglePanel: function(event) {
           var _this = this;
           _this.eventEmitter.publish('TOGGLE_LOAD_WINDOW');
         },
-        
+
         filterManifests: function(value) {
           var _this = this;
           if (value.length > 0) {
@@ -29187,7 +29187,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
           clone.remove();
           _this.eventEmitter.publish("manifestPanelWidthChanged", _this.resultsWidth);
         },
-        
+
         onPanelVisible: function(_, stateValue) {
           var _this = this;
           if (stateValue) { _this.show(); return; }
@@ -29196,9 +29196,9 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
         onManifestReceived: function(event, newManifest) {
           var _this = this;
-          _this.manifestListItems.push(new $.ManifestListItem({ 
-            manifest: newManifest, 
-            resultsWidth: _this.resultsWidth, 
+          _this.manifestListItems.push(new $.ManifestListItem({
+            manifest: newManifest,
+            resultsWidth: _this.resultsWidth,
             state: _this.state,
             eventEmitter: _this.eventEmitter,
             appendTo: _this.manifestListElement }));
@@ -29268,7 +29268,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       this.element = jQuery(this.template(templateData)).appendTo(this.appendTo);
       var backgroundImage = _this.state.getStateProperty('buildPath') + _this.state.getStateProperty('imagesPath') + 'debut_dark.png';
       this.element.css('background-image','url('+backgroundImage+')').css('background-repeat','repeat');
-      
+
       this.bindEvents();
       this.listenForActions();
     },
@@ -29292,7 +29292,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         var gridString = jQuery(this).data('gridstring');
         _this.hover(gridString);
       });
-      
+
       _this.element.find('.select-grid').on('mouseout', function() {
         _this.reset();
       });
@@ -29319,7 +29319,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       _this.element.find('.grid-instructions').hide();
       _this.element.find('.grid-text').text(gridString).show();
     },
-    
+
     reset: function() {
       var _this = this;
       _this.element.find('.grid-item').removeClass('hovered');
@@ -29472,10 +29472,10 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         } else if (canvas.thumbnail.hasOwnProperty('service')) {
             service = canvas.thumbnail.service;
             if(service.hasOwnProperty('profile')) {
-               compliance = $.Iiif.getComplianceLevelFromProfile(service.profile);    
+               compliance = $.Iiif.getComplianceLevelFromProfile(service.profile);
             }
             if(compliance === 0){
-                // don't change existing behaviour unless compliance is explicitly 0            
+                // don't change existing behaviour unless compliance is explicitly 0
                 thumbnailUrl = canvas.thumbnail['@id'];
             } else {
                 // Get the IIIF Image API via the @context
@@ -30674,7 +30674,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
   $.Endpoint.prototype = {
     init: function() {
-      //whatever initialization your endpoint needs       
+      //whatever initialization your endpoint needs
     },
 
     //Search endpoint for all annotations with a given URI in options
@@ -30707,10 +30707,10 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         }
       });
     },
-    
+
     //Delete an annotation by endpoint identifier
     deleteAnnotation: function(annotationID, successCallback, errorCallback) {
-      var _this = this;        
+      var _this = this;
       jQuery.ajax({
         url: '',
         type: 'DELETE',
@@ -30729,12 +30729,12 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         }
       });
     },
-    
+
     //Update an annotation given the OA version
     update: function(oaAnnotation, successCallback, errorCallback) {
       var annotation = this.getAnnotationInEndpoint(oaAnnotation),
       _this = this;
-      
+
       jQuery.ajax({
         url: '',
         type: 'POST',
@@ -30759,7 +30759,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
     //if successful, MUST return the OA rendering of the annotation
     create: function(oaAnnotation, successCallback, errorCallback) {
       var _this = this;
-      
+
       jQuery.ajax({
         url: '',
         type: 'POST',
@@ -30803,16 +30803,16 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
   $.LegacyOpenAnnotationStrategy = function(options) {
     jQuery.extend(this, {
-      
+
     }, options);
     this.init();
   };
-  
+
   $.LegacyOpenAnnotationStrategy.prototype = {
     init: function() {
-      
+
     },
-    
+
     // Check whether an annotation is supported under this formatting strategy
     isThisType: function(annotation) {
       if (annotation.on && typeof annotation.on === 'string') {
@@ -30820,7 +30820,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       }
       return false;
     },
-    
+
     // Build the selector into a bare annotation, given a Window and an OsdSvgOverlay
     buildAnnotation: function(options) {
       var oaAnno = options.annotation,
@@ -30830,7 +30830,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       oaAnno.on = win.canvasID + "#xywh=" + Math.round(bounds.x) + "," + Math.round(bounds.y) + "," + Math.round(bounds.width) + "," + Math.round(bounds.height);
       return oaAnno;
     },
-    
+
     // Parse the annotation into the OsdRegionDrawTool instance (only if its format is supported by this strategy)
     parseRegion: function(annotation, osdRegionDrawTool) {
       if (this.isThisType(annotation)) {
@@ -30838,7 +30838,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       }
     },
   };
-  
+
 }(Mirador));
 /*
  * All Endpoints need to have at least the following:
@@ -31071,16 +31071,16 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
   $.Mirador21Strategy = function(options) {
     jQuery.extend(this, {
-      
+
     }, options);
     this.init();
   };
-  
+
   $.Mirador21Strategy.prototype = {
     init: function() {
-      
+
     },
-    
+
     // Check whether an annotation is supported under this formatting strategy
     isThisType: function(annotation) {
       if (annotation.on && typeof annotation.on === 'object' &&
@@ -31091,7 +31091,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       }
       return false;
     },
-    
+
     // Build the selector into a bare annotation, given a Window and an OsdSvgOverlay
     buildAnnotation: function(options) {
       var oaAnno = options.annotation,
@@ -31112,7 +31112,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         };
       return oaAnno;
     },
-    
+
     // Parse the annotation into the OsdRegionDrawTool instance (only if its format is supported by this strategy)
     parseRegion: function(annotation, osdRegionDrawTool) {
       if (this.isThisType(annotation)) {
@@ -31120,7 +31120,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       }
     },
   };
-  
+
 }(Mirador));
 (function($) {
 
@@ -31202,16 +31202,16 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
   $.MiradorLegacyStrategy = function(options) {
     jQuery.extend(this, {
-      
+
     }, options);
     this.init();
   };
-  
+
   $.MiradorLegacyStrategy.prototype = {
     init: function() {
-      
+
     },
-    
+
     // Check whether an annotation is supported under this formatting strategy
     isThisType: function(annotation) {
       if (annotation.on && typeof annotation.on === 'object' &&
@@ -31222,7 +31222,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       }
       return false;
     },
-    
+
     // Build the selector into a bare annotation, given a Window and an OsdSvgOverlay
     buildAnnotation: function(options) {
       var oaAnno = options.annotation,
@@ -31239,7 +31239,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       };
       return oaAnno;
     },
-    
+
     // Parse the annotation into the OsdRegionDrawTool instance (only if its format is supported by this strategy)
     parseRegion: function(annotation, osdRegionDrawTool) {
       if (this.isThisType(annotation)) {
@@ -31247,7 +31247,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       }
     },
   };
-  
+
 }(Mirador));
 (function($) {
   $.OsdRegionDrawTool = function(options) {
@@ -31277,7 +31277,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
     enterDisplayAnnotations: function() {
       this.svgOverlay.setMouseTool();
-      
+
       // if a user selected the pointer mode but is still actively
       // working on an annotation, don't re-render
       if (!this.svgOverlay.inEditOrCreateMode) {
@@ -31363,9 +31363,12 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
               break;
             }
           }
-          if (j === strategies.length) continue;
+          if (j === strategies.length) {
+              console.log("Failed to find strategy for anno " + annotation["@id"]);
+              continue;
+          }
         }
-        
+
         _this.svgOverlay.restoreLastView(shapeArray);
         _this.annotationsToShapesMap[annotation['@id']] = shapeArray;
       }
@@ -33440,7 +33443,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         }
       }
     },
-    
+
     onHover:function(activate,shape,hoverColor){
       // shape needs to have hovered styles
       if(activate && !shape.data.hovered){
@@ -34212,14 +34215,14 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 }(Mirador));
 
 /*
- * Edited version of https://github.com/IIIF/mirador/blob/9e3c6bbb894e044d01ad51aae1b70309939de5a9/js/src/annotations/catchEndpoint.js 
+ * Edited version of https://github.com/IIIF/mirador/blob/9e3c6bbb894e044d01ad51aae1b70309939de5a9/js/src/annotations/catchEndpoint.js
  * This module tries to store the annotation as is in a RDF store but some fiddeling is required. Fidles are:
- * 
+ *
  * - delete annotation fails if id has a / in it so have to send sanatised ids to mirador
  * - mirador requires an endpoint variable in the annotation pointing to this class.
- * 
+ *
  * Note: this endpoint doesn't currently support authentication, just returns allow all
- * 
+ *
  * All Endpoints need to have at least the following:
  * annotationsList - current list of OA Annotations
  * dfd - Deferred Object
@@ -34229,7 +34232,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
  * update(oaAnnotation, returnSuccess, returnError)
  * deleteAnnotation(annotationID, returnSuccess, returnError) (delete is a reserved word)
  * TODO:
- * There is a bug in that if you create an annotation and then delete it (without moving pages) then click either the write annotation button 
+ * There is a bug in that if you create an annotation and then delete it (without moving pages) then click either the write annotation button
  * or try to create a new annotation the deleted annotation re-appears. Changing pages fixes the issue as the annoation is delete from the annotation store
  *
  */
@@ -34255,7 +34258,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
     init: function() {
       this.catchOptions = {
         user: {
-          id: this.userid, 
+          id: this.userid,
           name: this.username
         },
         permissions: {
@@ -34298,6 +34301,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
               value["@id"] = $.genUUID();
               _this.idMapper[value["@id"]] = value.fullId;
               value.endpoint = _this;
+              _this.fixOn(value);
             });
             _this.dfd.resolve(false);
           }
@@ -34311,6 +34315,13 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         }
 
       });
+    },
+
+    fixOn: function(annotation) {
+        if (annotation.on && !jQuery.isArray(annotation.on) && annotation.on.selector && annotation.on.selector.default) {
+            oldOn = annotation.on;
+            annotation.on = [ oldOn ];
+        }
     },
 
     deleteAnnotation: function(annotationID, returnSuccess, returnError) {
@@ -34356,6 +34367,9 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
         data: JSON.stringify(annotation),
         contentType: "application/json; charset=utf-8",
         success: function(data) {
+
+            _this.fixOn(data);
+
           /* this returned data doesn't seem to be used anywhere */
           returnSuccess();
         },
@@ -34388,6 +34402,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
           data.endpoint = _this;
           _this.idMapper[data["@id"]] = data.fullId;
 
+          _this.fixOn(data);
           returnSuccess(data);
         },
         error: function() {
@@ -34723,13 +34738,13 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
 
           _this.eventEmitter.publish('ADD_WINDOW', windowConfig);
 
-        } 
-        
+        }
+
         else if (typeof imageInfoUrl !== 'undefined') {
           if (!_this.state.getStateProperty('manifests')[imageInfoUrl]) {
             _this.eventEmitter.publish('ADD_MANIFEST_FROM_URL', [imageInfoUrl, "(Added from URL)"]);
           }
-        } 
+        }
         else if (typeof collectionUrl !== 'undefined'){
           jQuery.getJSON(collectionUrl).done(function (data, status, jqXHR) {
             if (data.hasOwnProperty('manifests')){
@@ -34747,11 +34762,11 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
             }
           });
 
-          //TODO: 
+          //TODO:
           //this works;
           //but you might want to check if some "publish" action would be better
           _this.addItem();
-          
+
         }
         else {
           if (!_this.state.getStateProperty('manifests')[imageInfoUrl]) {
@@ -38077,7 +38092,7 @@ bindEvents: function() {
         _this.appendTo.find(".layersPanel").remove();
       }
       this.element = jQuery(_this.template(templateData)).appendTo(_this.appendTo);
-      
+
       _this.bindEvents();
 
 
@@ -38392,11 +38407,11 @@ bindEvents: function() {
       panel:                false,
       lazyLoadingFactor:    1.5  //should be >= 1
     }, options);
-    
+
     jQuery.extend($.ScrollView.prototype, $.ThumbnailsView.prototype);
     this.init();
   };
-  
+
 }(Mirador));
 
 (function($) {
@@ -38429,7 +38444,7 @@ bindEvents: function() {
             name : 'toc',
             options : {
               available: _this.tocTabAvailable,
-              id:'tocTab', 
+              id:'tocTab',
               label:'Index'
             }
           },
@@ -38437,7 +38452,7 @@ bindEvents: function() {
            name : 'annotations',
            options : {
            available: _this.annotationsTabAvailable,
-           id:'annotationsTab', 
+           id:'annotationsTab',
            label:'Annotations'
            }
            },*/
@@ -38445,7 +38460,7 @@ bindEvents: function() {
             name : 'layers',
             options : {
               available: _this.layersTabAvailable,
-              id:'layersTab', 
+              id:'layersTab',
               label:'Layers'
             }
           },
@@ -38453,7 +38468,7 @@ bindEvents: function() {
            name : 'tools',
            options : {
            available: _this.toolsTabAvailable,
-           id:'toolsTab', 
+           id:'toolsTab',
            label:'Tools'
            }
            }*/
@@ -38607,11 +38622,11 @@ bindEvents: function() {
       if (!enableSidePanel) {
         jQuery(this.appendTo).hide();
         _this.eventEmitter.publish('ADD_CLASS.'+this.windowId, 'focus-max-width');
-        _this.eventEmitter.publish('HIDE_ICON_TOC.'+this.windowId);                
+        _this.eventEmitter.publish('HIDE_ICON_TOC.'+this.windowId);
       } else {
         jQuery(this.appendTo).show({effect: "fade", duration: 300, easing: "easeInCubic"});
         _this.eventEmitter.publish('REMOVE_CLASS.'+this.windowId, 'focus-max-width');
-        _this.eventEmitter.publish('SHOW_ICON_TOC.'+this.windowId);                
+        _this.eventEmitter.publish('SHOW_ICON_TOC.'+this.windowId);
       }
     }
   };
@@ -38716,15 +38731,15 @@ bindEvents: function() {
                     return value.options.available;
                 });
                 renderingData.tabs = tabs;
-                if(renderingData.tabs.length === 1){                    
+                if(renderingData.tabs.length === 1){
                     // TODO: temporary logic to minimize side panel if only tab is toc and toc is empty
                     if (renderingData.tabs[0].name === 'toc' && !_this.hasStructures) {
                         _this.eventEmitter.publish("sidePanelVisibilityByTab." + _this.windowId, false);
                     }
 
                     // don't show button if only one tab
-                    renderingData.tabs = []; 
-                } 
+                    renderingData.tabs = [];
+                }
                 //TODO: add text if there is one label or no content within this tab
                 this.element = jQuery(_this.template(renderingData)).prependTo(_this.appendTo);
                 return;
@@ -38879,8 +38894,8 @@ bindEvents: function() {
     },
 
     toggle: function(stateValue) {
-      if (stateValue) { 
-        this.show(); 
+      if (stateValue) {
+        this.show();
       } else {
         this.hide();
       }
@@ -39465,14 +39480,14 @@ bindEvents: function() {
     }, config);
     this.emitterId = $.EventEmitter.nextId();
   };
-  
+
   $.EventEmitter.debug = false;
   $.EventEmitter.id = 0;
   $.EventEmitter.nextId = function() {
     $.EventEmitter.id++;
     return $.EventEmitter.id;
   };
-  
+
   ['subscribe', 'unsubscribe', 'publish'].forEach(function(action) {
     $.EventEmitter.prototype[action] = function() {
       var args = Array.prototype.slice.call(arguments);
@@ -39524,15 +39539,15 @@ bindEvents: function() {
 
     getComplianceLevelFromProfile: function(profile) {
         // what to return if we can't determine profile? 0 is not a good idea
-        // would be better to have $.Iiif.supports(profile, feature) but that needs a lot more! 
+        // would be better to have $.Iiif.supports(profile, feature) but that needs a lot more!
         var compliance = -1;
         var complianceString = null;
         if(profile) {
             if(typeof(profile) === 'string'){
-                complianceString = profile;    
+                complianceString = profile;
             } else if (typeof(profile) === 'object'){
                complianceString = profile[0];
-            }   
+            }
             switch(complianceString){
                 case "http://iiif.io/api/image/2/level0.json":
                     compliance = 0;
@@ -39547,7 +39562,7 @@ bindEvents: function() {
         }
         return compliance;
     },
-    
+
     makeUriWithWidth: function(uri, width, version) {
       uri = uri.replace(/\/$/, '');
       if (version[0] == '1') {
@@ -39606,8 +39621,8 @@ bindEvents: function() {
 
 	var path = JSONBLOB_API_ENDPOINT;
 
-        // If the body is a string, this is a blob GET operation, 
-	// otherwise it's a POST	
+        // If the body is a string, this is a blob GET operation,
+	// otherwise it's a POST
         if ( typeof body === 'string' || body instanceof String ){
 		path += '/' + body;
 	}
@@ -39743,7 +39758,7 @@ bindEvents: function() {
       }
     }
   };
-  
+
 }(Mirador));
 
 /* Local fake JsonBlob endpoint */
@@ -39760,7 +39775,7 @@ bindEvents: function() {
         });
         return uuid;
     }
-    
+
     $.LocalJSONBlobAPI = function(opts) {
           this.options = {
               storage: window.localStorage
@@ -39801,7 +39816,7 @@ bindEvents: function() {
       }, options)
 
     );
-    
+
     return osd;
 
   };
@@ -40235,10 +40250,10 @@ bindEvents: function() {
       } else if (canvas.thumbnail.hasOwnProperty('service')) {
         service = canvas.thumbnail.service;
         if(service.hasOwnProperty('profile')) {
-            compliance = $.Iiif.getComplianceLevelFromProfile(service.profile);    
+            compliance = $.Iiif.getComplianceLevelFromProfile(service.profile);
         }
         if(compliance === 0){
-            // don't change existing behaviour unless compliance is explicitly 0            
+            // don't change existing behaviour unless compliance is explicitly 0
             thumbnailUrl = canvas.thumbnail['@id'];
         } else {
             // Get the IIIF Image API via the @context
@@ -40262,7 +40277,7 @@ bindEvents: function() {
     return thumbnailUrl;
   };
 
-  /* 
+  /*
      miscellaneous utilities
      */
 
@@ -40397,17 +40412,17 @@ bindEvents: function() {
     // Javascript does not have range expansions quite yet,
     // long live the humble for loop.
     // Use a closure to contain the column and row variables.
-    for (var i = 0, c = columns; i < c; i++) { 
+    for (var i = 0, c = columns; i < c; i++) {
       var column = { type: 'column'};
 
       if (rowsPerColumn > 1) {
         column.children = [];
-        for (var j = 0, r = rowsPerColumn; j < r; j++) { 
+        for (var j = 0, r = rowsPerColumn; j < r; j++) {
           column.children.push({
             type: 'row'
           });
         }
-      } 
+      }
 
       layoutDescription.children.push(column);
     }

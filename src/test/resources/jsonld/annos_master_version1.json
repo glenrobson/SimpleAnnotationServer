@@ -1,0 +1,67 @@
+{
+
+    "@type": "sc:AnnotationList",
+    "resources": [
+        {
+            "@context": "file:///Users/gmr/development/SimpleAnnotationServer/src/main/webapp/contexts/iiif-2.0.json",
+            "@type": "oa:Annotation",
+            "motivation": [
+                "oa:commenting"
+            ],
+            "resource": [
+                {
+                    "@type": "dctypes:Text",
+                    "format": "text/html",
+                    "chars": "<p>Annotation1</p>",
+                    "http://dev.llgc.org.uk/sas/full_text": "Annotation1"
+                }
+            ],
+            "on": {
+                "@type": "oa:SpecificResource",
+                "full": "https://oculus-dev.harvardx.harvard.edu/manifests/huam:165773/canvas/canvas-17810920.json",
+                "within": "http://oculus-dev.harvardx.harvard.edu/manifests/huam:165773",
+                "selector": {
+                    "@type": "oa:FragmentSelector",
+                    "value": "xywh=275,637,681,290"
+                }
+            },
+            "@id": "http://localhost:8888/annotation/1508066127071",
+            "http://purl.org/dc/terms/created": "2017-10-15T07:15:27"
+        },
+        {
+            "@context": "file:///Users/gmr/development/SimpleAnnotationServer/src/main/webapp/contexts/iiif-2.0.json",
+            "@type": "oa:Annotation",
+            "motivation": [
+                "oa:tagging",
+                "oa:commenting"
+            ],
+            "resource": [
+                {
+                    "@type": "oa:Tag",
+                    "chars": "tag",
+                    "http://dev.llgc.org.uk/sas/full_text": "tag"
+                },
+                {
+                    "@type": "dctypes:Text",
+                    "format": "text/html",
+                    "chars": "<p>House1</p>",
+                    "http://dev.llgc.org.uk/sas/full_text": "House1"
+                }
+            ],
+            "on": {
+                "@type": "oa:SpecificResource",
+                "full": "https://oculus-dev.harvardx.harvard.edu/manifests/huam:165773/canvas/canvas-17810920.json",
+                "within": "http://oculus-dev.harvardx.harvard.edu/manifests/huam:165773",
+                "selector": {
+                    "@type": "oa:FragmentSelector",
+                    "value": "xywh=92,1219,362,314"
+                }
+            },
+            "@id": "http://localhost:8888/annotation/1508066141328",
+            "http://purl.org/dc/terms/created": "2017-10-15T07:15:41"
+        }
+    ],
+    "@id": "http://localhost:8888/annotation/",
+    "@context": "http://iiif.io/api/presentation/2/context.json"
+
+}

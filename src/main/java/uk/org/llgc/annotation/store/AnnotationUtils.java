@@ -80,15 +80,16 @@ public class AnnotationUtils {
 				tResource = (Map<String, Object>)tAnno.get("resource");
 			}
 			// do I need to change the format to html?
-			tResource.put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
-			tResource.put("format","text/html");
-			String tText = (String)tResource.get("chars");
-			if (!tText.trim().startsWith("<p>")) {
-				tResource.put("chars", "<p>" + tText + "</p>");
-			} else {
-				tResource.put("chars", tText);
-			}
-
+            if (tResource.get("@type") != null && tResource.get("@type").equals("cnt:ContentAsText") || tResource.get("format") != null && tResource.get("format").equals("text/plain")) {
+    			tResource.put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
+    			tResource.put("format","text/html");
+                String tText = (String)tResource.get("chars");
+    			if (!tText.trim().startsWith("<p>")) {
+    				tResource.put("chars", "<p>" + tText + "</p>");
+    			} else {
+    				tResource.put("chars", tText);
+    			}
+            }
 			// Not sure if this is strictly necessary:
 			/*List<String> tMotivation = new ArrayList<String>();
 			tMotivation.add("oa:commenting");
@@ -210,10 +211,6 @@ public class AnnotationUtils {
 		Map<String, Object> tOn = null;
 		if (tJsonLd.get("on") instanceof Map) {
 			tOn = (Map<String, Object>)tJsonLd.get("on");
-			// Set on to always be a list see Github issue SAS#21
-			List tOnList = new ArrayList();
-			tOnList.add(tOn);
-			tJsonLd.put("on",tOnList);
 			if (tOn.get("selector") != null && ((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
 				return tJsonLd;
@@ -253,11 +250,11 @@ public class AnnotationUtils {
 	// Need to move fragement into on
 	public void colapseFragement(final Map<String,Object> pAnnotationJson) {
 		if (pAnnotationJson.get("on") instanceof Map) {
-				collapseFragmentOn(pAnnotationJson, (Map<String,Object>)pAnnotationJson.get("on"));
+            collapseFragmentOn(pAnnotationJson, (Map<String,Object>)pAnnotationJson.get("on"));
 		} else if (pAnnotationJson.get("on") instanceof List) {
-				for (Map<String,Object> tOn : (List<Map<String,Object>>)pAnnotationJson.get("on")) {
-					collapseFragmentOn(pAnnotationJson, tOn);
-				}
+            for (Map<String,Object> tOn : (List<Map<String,Object>>)pAnnotationJson.get("on")) {
+                collapseFragmentOn(pAnnotationJson, tOn);
+            }
 		}	// otherwise its already collapsed as its a string
 	}
 	public void collapseFragmentOn(final Map<String,Object> pAnnotationJson, final Map<String,Object> pOn) {
