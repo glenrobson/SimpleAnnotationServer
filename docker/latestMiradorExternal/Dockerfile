@@ -47,6 +47,7 @@ RUN curl -OL https://github.com/ProjectMirador/mirador/releases/download/v2.6.0/
 RUN unzip build.zip
 RUN mv build/mirador /var/www/html/
 ADD index.html /var/www/html/
+ADD sas.conf /etc/httpd/conf.d/
 
 WORKDIR /var/www/html/mirador
 RUN curl -OL https://raw.githubusercontent.com/ProjectMirador/mirador/develop/js/src/annotations/simpleASEndpoint.js
