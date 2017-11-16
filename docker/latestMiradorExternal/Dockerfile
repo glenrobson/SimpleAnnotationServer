@@ -1,0 +1,56 @@
+FROM centos:7
+
+# Setup centos:
+ENV container docker
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+VOLUME [ "/sys/fs/cgroup" ]
+
+RUN yum install -y tomcat unzip maven lsof httpd
+
+# Setup SAS
+RUN echo 'JAVA_OPTS="-DSAS.store=solr-cloud -DSAS.solr_connection=http://localhost:8983/solr,http://localhost:7574/solr -DSAS.solr_collection=test"' >> /etc/tomcat/tomcat.conf
+
+WORKDIR /usr/local/src
+RUN curl -LO "https://github.com/glenrobson/SimpleAnnotationServer/archive/mirador-2.1.4.zip"
+RUN unzip mirador-2.1.4.zip
+WORKDIR /usr/local/src/SimpleAnnotationServer-mirador-2.1.4
+RUN mvn package
+RUN cp target/simpleAnnotationStore.war /usr/share/tomcat/webapps/sas.war
+
+
+# Setup SOLR
+RUN useradd -ms /bin/bash solr
+RUN mkdir /opt/solr
+WORKDIR /opt/solr
+RUN chown -R solr /opt/solr
+RUN curl -OL http://archive.apache.org/dist/lucene/solr/6.6.1/solr-6.6.1.tgz
+RUN su solr -c "/usr/local/src/SimpleAnnotationServer-mirador-2.1.4/travis/install_solrcloud.sh /usr/local/src/SimpleAnnotationServer-mirador-2.1.4"
+#RUN su solr -c "/opt/solr/solr-6.6.1/bin/solr -all stop"
+ADD solr.service /etc/systemd/system
+ADD startCloud.sh /opt/solr/solr-6.6.1/bin/
+RUN systemctl enable solr.service
+
+RUN systemctl enable tomcat.service
+EXPOSE 8080
+
+# Setup httpd
+WORKDIR /usr/local/src
+RUN curl -OL https://github.com/ProjectMirador/mirador/releases/download/v2.6.0/build.zip
+RUN unzip build.zip
+RUN mv build/mirador /var/www/html/
+ADD index.html /var/www/html/
+
+WORKDIR /var/www/html/mirador
+RUN curl -OL https://raw.githubusercontent.com/ProjectMirador/mirador/develop/js/src/annotations/simpleASEndpoint.js
+
+RUN systemctl enable httpd.service
+EXPOSE 80
+CMD ["/usr/sbin/init"]
