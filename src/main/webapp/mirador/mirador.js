@@ -34358,7 +34358,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
       delete annotation.fullId;
       delete annotation.endpoint;
       jQuery.ajax({
-        url: _this.url + "/update/"+encodeURIComponent(annotationID) + "?APIKey=" + _this.APIKey, //this.prefix+
+        url: _this.url + "/update?APIKey=" + _this.APIKey, //this.prefix+
         type: 'POST',
         dataType: 'json',
         headers: {
@@ -34371,7 +34371,7 @@ this._cbs.ontext(data)}};Tokenizer.prototype.reset=function(){Tokenizer.call(thi
             _this.fixOn(data);
 
           /* this returned data doesn't seem to be used anywhere */
-          returnSuccess();
+          returnSuccess(data);
         },
         error: function() {
           returnError();
