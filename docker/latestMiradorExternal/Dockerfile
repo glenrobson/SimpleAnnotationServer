@@ -33,7 +33,7 @@ WORKDIR /opt/solr
 RUN chown -R solr /opt/solr
 RUN curl -OL http://archive.apache.org/dist/lucene/solr/6.6.1/solr-6.6.1.tgz
 RUN su solr -c "/usr/local/src/SimpleAnnotationServer-mirador-2.1.4/travis/install_solrcloud.sh /usr/local/src/SimpleAnnotationServer-mirador-2.1.4"
-#RUN su solr -c "/opt/solr/solr-6.6.1/bin/solr -all stop"
+RUN su solr -c "/opt/solr/solr-6.6.1/bin/solr stop -all "
 ADD solr.service /etc/systemd/system
 ADD startCloud.sh /opt/solr/solr-6.6.1/bin/
 RUN systemctl enable solr.service
@@ -47,11 +47,14 @@ RUN curl -OL https://github.com/ProjectMirador/mirador/releases/download/v2.6.0/
 RUN unzip build.zip
 RUN mv build/mirador /var/www/html/
 ADD index.html /var/www/html/
+ADD 3320651.json /var/www/html/3320651.json
 ADD sas.conf /etc/httpd/conf.d/
 
 WORKDIR /var/www/html/mirador
 RUN curl -OL https://raw.githubusercontent.com/ProjectMirador/mirador/develop/js/src/annotations/simpleASEndpoint.js
 
 RUN systemctl enable httpd.service
+STOPSIGNAL SIGRTMIN+3
 EXPOSE 80
-CMD ["/usr/sbin/init"]
+
+CMD ["/sbin/init"]
