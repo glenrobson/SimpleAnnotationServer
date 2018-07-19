@@ -12,3 +12,5 @@ src/main/webapp/demo.html
 .DS_Store
 /data
 /mirador_full
+dockerlogin.sh
+cache
