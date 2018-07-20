@@ -1,11 +1,13 @@
 ## Running SAS on Windows
 
+## Prerequisite
+
 Download and install java: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-Use the default install location `C:\Program Files\Java\jre1.8.0_181`
+For the purposes of this guide use the default install location `C:\Program Files\Java\jre1.8.0_181` when installing.
 
 Download maven https://maven.apache.org/download.cgi
-Select the latest .zip file
-Open zip file and copy apache-maven-x.x.x directory to somewhere useful. I'm using  `C:\Users\user\Documents\apache-maven-3.5.4`.
+ * Select the latest .zip file
+ * Open zip file and copy apache-maven-x.x.x directory to somewhere useful. I'm using  `C:\Users\user\Documents\apache-maven-3.5.4`.
 
 Open up the command prompt and check java and mvn are installed:
 ```
@@ -44,16 +46,17 @@ Default locale: en_US, platform encoding: Cp1252
 OS name: "windows server 2016", version: "10.0", arch: "amd64", family: "windows"
 ```
 
-Download zip version of SAS.
-Extract to a folder.
-open cmd
-cd into that folder
+## Building SAS
+Download zip version of SAS from github.
 
-run the following so maven knows where to find java:
+ * Extract to a folder.
+ * Open cmd prompt
+ * cd into the extracted SimpleAnnoationServer folder
+ * run the following so maven knows where to find java:
 
 ```
 set JAVA_HOME=c:\Progra~1\Java\jdk1.8.0_181
-``
+```
 
 then run:
 
