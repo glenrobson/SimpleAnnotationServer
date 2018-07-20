@@ -136,7 +136,7 @@ public class AnnotationUtils {
 	}
 
 	protected String getContext() {
-		return new File(_contextDir, "iiif-2.0.json").toURI().toURL();
+		return new File(_contextDir, "iiif-2.0.json").toURI().toURL().toString();
 	}
 
 	public String getExternalContext() {
