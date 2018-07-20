@@ -49,20 +49,29 @@ public class AnnotationUtils {
 	 * @param InputStream the input stream to read to get the IIIF annotation list
 	 */
 	public List<Map<String,Object>> readAnnotationList(final InputStream pStream, final String pBaseURL) throws IOException {
-		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
-		_logger.debug("Original untouched annotation:");
-		_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
+		Object inputList = JsonUtils.fromInputStream(pStream);
+        _logger.debug("Original untouched annotation:");
+        _logger.debug(JsonUtils.toPrettyString(inputList));
+        List<Map<String,Object>> tAnnotations = null;
+        if (inputList instanceof Map) {
+            Map<String,Object> tAnnotationList = (Map<String,Object>)inputList;
+            tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
+        } else if (inputList instanceof List) {
+            tAnnotations = (List<Map<String,Object>>)inputList;
+        } else {
+            throw new IOException("Don't recognise annotation list " + inputList.getClass().getName());
+        }
 
-		if (tAnnotationList.get("@id") == null) {
-			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-			throw new IOException("Annotation list must have a @id at root");
-		}
-		String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
-		String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
+
+		//if (tAnnotationList.get("@id") == null) {
+		//	_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
+		//	throw new IOException("Annotation list must have a @id at root");
+		//}
+		//String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
+		//String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
-			if (tAnno.get("@id") == null) {
+			/*if (tAnno.get("@id") == null) {
 				StringBuffer tBuff = new StringBuffer(pBaseURL);
 				tBuff.append("/");
 				tBuff.append(tBucketId);
@@ -70,7 +79,7 @@ public class AnnotationUtils {
 				tBuff.append(tAnnoCount++);
 				tAnno.put("@id", tBuff.toString());
 
-			}
+			}*/
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 
 			Map<String, Object> tResource = null;
