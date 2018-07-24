@@ -22,6 +22,8 @@ import java.io.StringWriter;
 import java.io.File;
 import java.io.ByteArrayInputStream;
 
+import java.security.MessageDigest;
+
 import java.nio.charset.Charset;
 
 import org.apache.jena.riot.RDFDataMgr;
@@ -71,15 +73,16 @@ public class AnnotationUtils {
 		//String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
-			/*if (tAnno.get("@id") == null) {
+			if (tAnno.get("@id") == null) {
+
 				StringBuffer tBuff = new StringBuffer(pBaseURL);
 				tBuff.append("/");
-				tBuff.append(tBucketId);
+				tBuff.append(getHash("md5", getTarget(tAnno)));
 				tBuff.append("/");
 				tBuff.append(tAnnoCount++);
 				tAnno.put("@id", tBuff.toString());
 
-			}*/
+			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 
 			Map<String, Object> tResource = null;
@@ -126,6 +129,32 @@ public class AnnotationUtils {
 		}
 		return tAnnotations;
 	}
+    protected String getTarget(final Map<String, Object> pAnno) {
+        if (pAnno.get("on") instanceof String) {
+            String tTarget = (String)pAnno.get("on");
+            if (tTarget.contains("#")) {
+                return tTarget.substring(0,tTarget.indexOf("#"));
+            } else {
+                return tTarget;
+            }
+        } else {
+            return (String)((Map<String,Object>)pAnno.get("on")).get("full");
+        }
+    }
+    public static String getHash(String txt, String hashType) {
+        try {
+                    java.security.MessageDigest md = java.security.MessageDigest.getInstance(hashType);
+                    byte[] array = md.digest(txt.getBytes());
+                    StringBuffer sb = new StringBuffer();
+                    for (int i = 0; i < array.length; ++i) {
+                        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+                 }
+                    return sb.toString();
+            } catch (java.security.NoSuchAlgorithmException e) {
+                //error action
+            }
+            return null;
+    }
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> readAnnotaion(final InputStream pStream, final String pBaseURL) throws IOException {
