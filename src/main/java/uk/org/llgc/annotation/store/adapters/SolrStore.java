@@ -382,6 +382,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tQuery.set("q", tSolrQuery.toString());
 		tQuery.setStart(pQuery.getPage() * pQuery.getResultsPerPage());
 		tQuery.setRows(pQuery.getResultsPerPage());
+        tQuery.setHighlight(true);
+        tQuery.addHighlightField("text");
 
 		Map<String,Object> tAnnoList = new HashMap<String,Object>();
 		tAnnoList.put("@type","sc:AnnotationList");
@@ -394,12 +396,15 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tNumberOfPages = (int)(tResultNo / pQuery.getResultsPerPage());
 			tAnnotations.addAll(this.buildAnnotationList(tResponse, true));
+
+            // Adding page count even if results are smaller than one page.
+            Map<String,String> tWithin = new HashMap<String,String>();
+            tAnnoList.put("within",tWithin);
+            tWithin.put("@type","sc:Layer");
+            tWithin.put("total","" + tResultNo);
 			if (tResultNo > pQuery.getResultsPerPage()) { // if paginating
-				Map<String,String> tWithin = new HashMap<String,String>();
-				tAnnoList.put("within",tWithin);
-				tWithin.put("@type","sc:Layer");
-				tWithin.put("total","" + tResultNo);
 				int tPageNo = pQuery.getPage();
+                tAnnoList.put("startIndex", tPageNo);
 				if (tNumberOfPages != pQuery.getPage()) { // not on last page
 					int tPage = tPageNo + 1;
 					pQuery.setPage(tPage);
@@ -409,7 +414,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 				tWithin.put("first", pQuery.toURI().toString());
 				pQuery.setPage(tNumberOfPages);
 				tWithin.put("last", pQuery.toURI().toString());
-			}
+			} else {
+                tAnnoList.put("startIndex", 0);
+            }
 
 		} catch (SolrServerException tException) {
 			tException.printStackTrace();
@@ -603,7 +610,18 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	protected List<Map<String,Object>> buildAnnotationList(final QueryResponse pResponse, final boolean pCollapseOn) throws IOException {
 		List<Map<String,Object>> tResults = new ArrayList<Map<String,Object>>();
 		for (SolrDocument tResult : pResponse.getResults()) {
-			tResults.add(this.buildAnnotation(tResult, pCollapseOn));
+            Map<String, Object> tAnno = this.buildAnnotation(tResult, pCollapseOn);
+			tResults.add(tAnno);
+            if (pResponse.getHighlighting() != null && pResponse.getHighlighting().get(tAnno.get("@id")) != null) {
+                // Add snippet as label to annotation
+                if ( pResponse.getHighlighting().get(tAnno.get("@id")).get("text") != null) {
+                    List<String> snippets = pResponse.getHighlighting().get(tAnno.get("@id")).get("text");
+
+                    tAnno.put("label", snippets.get(0).replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", ""));
+                } else {
+                    tAnno.put("label", ((List<String>)tResult.get("body")).get(0).replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", ""));
+                }
+            }
 		}
 
 		return tResults;

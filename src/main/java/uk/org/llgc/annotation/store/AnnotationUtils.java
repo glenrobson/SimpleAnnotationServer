@@ -298,7 +298,12 @@ public class AnnotationUtils {
 	public void collapseFragmentOn(final Map<String,Object> pAnnotationJson, final Map<String,Object> pOn) {
 		if (pOn.get("selector") != null) {
 			try {
-				String tFragement = (String)((Map)pOn.get("selector")).get("value");
+                String tFragement = "";
+                if (((Map)pOn.get("selector")).get("value") != null) {
+    				tFragement = (String)((Map)pOn.get("selector")).get("value");
+                } else {
+    				tFragement = (String)((Map)((Map)pOn.get("selector")).get("default")).get("value");
+                }
 				String tTarget = (String)pOn.get("full");
 				pAnnotationJson.put("on", tTarget + "#" + tFragement);
 			} catch (ClassCastException tExcpt) {

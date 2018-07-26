@@ -183,6 +183,51 @@ public class TestSearch extends TestUtils {
 
 	}
 
+    @Test
+	public void testMirador() throws IOException, IDConflictException {
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+
+		_store.addAnnotationList(tAnnotationListJSON);
+
+
+		SearchQuery tQuery = new SearchQuery("simple");
+		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
+		Map<String, Object> tResultsJson = _store.search(tQuery);
+
+        // Mirador requires the number of results:
+		assertNotNull("Missing within in result set", tResultsJson.get("within"));
+        Map<String, Object> tWithin = (Map<String,Object>)tResultsJson.get("within");
+		assertNotNull("Missing result count in result set", tWithin.get("total"));
+		assertEquals("Start index should be 0", 0, tResultsJson.get("startIndex"));
+        System.out.println(JsonUtils.toPrettyString(tResultsJson));
+        Map<String, Object> tAnno = ((List<Map<String,Object>>)tResultsJson.get("resources")).get(0);
+        assertTrue("Mirador requires resource to be an object. Found class " + tAnno.get("resource").getClass().getName(), tAnno.get("resource") instanceof Map);
+		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
+
+        // annotation.resource should be string not array (for mirador)
+        // Can't find canvas label... include in result? looks like it on.label (should be canvas label)...
+        /*
+            Get a label describing a search match. This label is set to the
+           * associated annotation label, if available, or to the label of the
+           * parent canvas.
+        if (resource && typeof resource === 'object') {
+            if (resource.label) {
+                return resource.label;
+            } else if (resource.resource.label){
+                return resource.resource.label;
+            } else if (resource.on && typeof resource.on === 'string') {
+                label = this.manifest.getCanvasLabel(resource.on);
+                return label ? 'Canvas ' + label : undefined;
+            } else if (resource.on && typeof resource.on === 'object') {
+                label = resource.on.label ? resource.on.label : this.manifest.getCanvasLabel(resource.on['@id']);
+                return label ? 'Canvas ' + label : undefined;
+            }
+        } else {
+            return undefined;
+        }
+        */
+    }
+
 	@Test
 	public void testPagination() throws IOException, IDConflictException, URISyntaxException, ParseException {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
