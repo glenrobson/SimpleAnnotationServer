@@ -33,6 +33,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.encoders.Mirador214;
 
 public class AnnotationUtils {
 	protected static Logger _logger = LogManager.getLogger(AnnotationUtils.class.getName());
@@ -253,6 +254,13 @@ public class AnnotationUtils {
 				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
 				return tJsonLd;
 			}
+            // Autmoatically fix mirador-2.1.4 annos as if its done in javascript then exports won't include fix so won't work in Mirador
+            // Do it automatically for mirador2.1.4 annos rather than using an encoder as we only want to fix this kind
+            // of annos rather than all of them.
+            if (((Map<String,Object>)tJsonLd.get("on")).get("selector") != null && ((Map<String,Object>)tJsonLd.get("on")).get("selector") != null && ((Map<String,Object>)((Map<String,Object>)tJsonLd.get("on")).get("selector")).get("item") != null) {
+                Encoder tEncoder = new Mirador214();
+                tEncoder.encode(tJsonLd);
+            }
 		}
 		// Check if this is a valid annotation
 		// if it is valid it should have one source, one fragment selector
