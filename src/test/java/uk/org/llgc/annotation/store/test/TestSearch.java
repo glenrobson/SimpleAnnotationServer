@@ -199,7 +199,6 @@ public class TestSearch extends TestUtils {
         Map<String, Object> tWithin = (Map<String,Object>)tResultsJson.get("within");
 		assertNotNull("Missing result count in result set", tWithin.get("total"));
 		assertEquals("Start index should be 0", 0, tResultsJson.get("startIndex"));
-        System.out.println(JsonUtils.toPrettyString(tResultsJson));
         Map<String, Object> tAnno = ((List<Map<String,Object>>)tResultsJson.get("resources")).get(0);
         assertTrue("Mirador requires resource to be an object. Found class " + tAnno.get("resource").getClass().getName(), tAnno.get("resource") instanceof Map);
 		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
