@@ -79,26 +79,4 @@ public class TestMirador214 extends TestUtils {
 		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
 		assertNotNull("Default rect present ", ((Map<String,Map<String,String>>)((List<Map<String,Object>>)tAnnotation.get("on")).get(0).get("selector")).get("default").get("value"));
 	}
-
-    @Test
-    public void testPopulate() throws IOException, IDConflictException, InterruptedException {
-        List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/annos_master_version1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
-
-        List<Model> tModel = _store.addAnnotationList(tAnnotationListJSON);
-
-		List<Map<String, Object>> tAnnotations = _annotationUtils.createAnnotationList(tModel);
-
-        assertEquals("Exported list was a different size to the one supplied.", tAnnotationListJSON.size(), tAnnotations.size());
-
-        Map<String,Object> tAnno1 = tAnnotations.get(0);
-		/*assertTrue("On needs to be an array and it isn't.", tAnno1.get("on") instanceof List);
-
-        List<Map<String,Object>> tOn = (List<Map<String,Object>>)tAnno1.get("on");
-        Map<String,Object> tSelector = (Map<String,Object>)tOn.get(0).get("selector");
-        assertEquals("Mirador requires select is a choice but it was:", "oa:Choice",tSelector.get("@type"));
-        assertNotNull("Missing default choice in selector",tSelector.get("default"));
-        assertEquals("Default should be fragment selector.","oa:FragmentSelector",((Map<String,Object>)tSelector.get("default")).get("@type"));
-        assertEquals("Backup needs to be svg","oa:SvgSelector",((Map<String,Object>)tSelector.get("item")).get("@type"));
-        */
-    }
 }
