@@ -61,7 +61,7 @@ ADD sas.conf /etc/httpd/conf.d/
 
 
 WORKDIR /var/www/html/mirador
-RUN curl -OL https://raw.githubusercontent.com/ProjectMirador/mirador/develop/js/src/annotations/simpleASEndpoint.js
+#RUN curl -OL https://raw.githubusercontent.com/ProjectMirador/mirador/develop/js/src/annotations/simpleASEndpoint.js
 
 RUN systemctl enable httpd.service
 
