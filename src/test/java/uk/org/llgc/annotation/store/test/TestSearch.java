@@ -147,8 +147,11 @@ public class TestSearch extends TestUtils {
 
 	@Test
 	public void testSearching() throws IOException, IDConflictException {
-		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
-
+        // Add two copies of the same annotation list but pointing to different Manifests
+        // this checks if the scoping to manifest search is working.
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch-distraction.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+		_store.addAnnotationList(tAnnotationListJSON);
+		 tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 		_store.addAnnotationList(tAnnotationListJSON);
 
 
@@ -280,11 +283,11 @@ public class TestSearch extends TestUtils {
 
         tQuery = new SearchQuery("");
 		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");
-        tQuery.setResultsPerPage(200);
+        tQuery.setResultsPerPage(1000);
 		tResultsJson = _store.search(tQuery);
 		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
-		System.out.println(JsonUtils.toPrettyString(tResultsJson));
-		assertEquals("Expected 175 result for any empty search but found something different.", 175, tResults.size());
+		//System.out.println(JsonUtils.toPrettyString(tResultsJson));
+		assertEquals("Expected 175 result for any empty search but found something different.", 735, tResults.size());
     }
 }

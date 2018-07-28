@@ -146,9 +146,11 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	public Map<String, Object> search(final SearchQuery pQuery) throws IOException {
 		String tQueryString = "PREFIX oa: <http://www.w3.org/ns/oa#> "
 									 + "PREFIX cnt: <http://www.w3.org/2011/content#> "
+                                     + "PREFIX dcterms: <http://purl.org/dc/terms/> "
 									 + "select ?anno ?content ?graph where { "
 									 + "  GRAPH ?graph { ?anno oa:hasTarget ?target . "
 									 + "  ?anno oa:hasBody ?body . "
+                                     + "  ?target dcterms:isPartOf <" + pQuery.getScope() + "> ."
 									 + "  ?body <" + super.FULL_TEXT_PROPERTY + "> ?content ."
 									 + "  FILTER regex(str(?content), \".*" + pQuery.getQuery() + ".*\")"
 									 + "  }"
@@ -227,10 +229,10 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                                 start = 0;
                             }
                             int end = tFoundIndex + 2;
-                            if (tEnd > tChars.length) {
-                                tEnd = tChars.length;
+                            if (end > tChars.length) {
+                                end = tChars.length;
                             }
-                            for (int j = start; j < tEnd; j++) {
+                            for (int j = start; j < end; j++) {
                                 tSnippet += tChars[j] + " ";
                             }
                         }
