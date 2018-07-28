@@ -1,10 +1,12 @@
-Setting up SOLR as an annoation store
+Setting up SOLR as an annotation store
 
 Download SOLR from:
 
 https://lucene.apache.org/solr/
 
-(Note tested with 6.2.1). The current version of SAS uses SOLR cores rather than Cloud although cloud can be supported if required (please create an issue if this is of interest).
+(Note tested with 6.2.1). The SAS supports both Cloud and Cores but the instructions differ slightly between these two options.
+
+## SOLR Cores
 
 Start solr:
 
@@ -23,49 +25,50 @@ mkdir -p server/solr/annotations/data
 cp -r $SAS_HOME/src/main/resources/solr/* server/solr/annotations/
 ```
 
-Then create the core in solr by navigating to the SOLR web interface: 
+Then create the core in solr by navigating to the SOLR web interface:
 
 http://localhost:8983/solr/#/
 
-and clicking create core. Make sure the instanceDir matches the name of the directory you used above (in this case it would be annotations). 
+and clicking create core. Make sure the instanceDir matches the name of the directory you used above (in this case it would be annotations).
 
-Now configure SAS to use this core, open up the following file in the SAS folder:
+Now configure SAS to use this core, open up the [sas.properties](../src/main/webapp/WEB-INF/sas.properties) file in the SAS folder:
 
-src/main/webapp/WEB-INF/web.xml 
+src/main/webapp/WEB-INF/sas.properties
 
 Now comment out the jena configuration:
 
 ```
-<!--
-	<init-param>
-			<param-name>store</param-name>
-		    <param-value>jena</param-value>
-		    <description>RDF Store to use</description>
-		</init-param>
-		<init-param>
-			<param-name>data_dir</param-name>
-		    <param-value>data</param-value>
-		    <description>Sets the directory containing TDB RDF database</description>
-		</init-param>
--->
+# Uncomment this if you would like to use Jena as a backend
+# store=jena
+# data_dir=data
 ```
 
 and uncomment the SOLR config:
 
 ```
-		<init-param>
-	        <param-name>store</param-name>
-	        <param-value>solr</param-value>
-	        <description>Annotation Store to use</description>
-	    </init-param>
-	    <init-param>
-	        <param-name>solr_connection</param-name>
-	        <param-value>http://solr-host/solr/core</param-value>
-	        <description>set the solr connection details</description>
-	    </init-param>
+# Uncomment the following if you want to use SOLR cores
+# store=solr
+# solr_connection=http://solr-host/solr/core
 ```
+
 change the solr_connection from 'http://solr-host/solr/core' to 'http://localhost:8983/solr/annotations'. You should now be able to start SAS using:
 
 ```
 mvn jetty:run
 ```
+
+## SOLR Collections
+
+Start SOLR:
+
+```
+ ./bin/solr -e cloud -noprompt
+ ```
+
+ Load annotations:
+
+ ```
+ # cp config from SAS:
+ cp -r $SAS_HOME/src/main/resources/solr $SOLR_HOME/server/solr/configsets/annos
+ ./bin/solr create_collection -c test -d server/solr/configsets/annos -shards 2
+ ```

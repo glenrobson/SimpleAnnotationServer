@@ -22,6 +22,8 @@ import java.io.StringWriter;
 import java.io.File;
 import java.io.ByteArrayInputStream;
 
+import java.security.MessageDigest;
+
 import java.nio.charset.Charset;
 
 import org.apache.jena.riot.RDFDataMgr;
@@ -31,6 +33,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.encoders.Mirador214;
 
 public class AnnotationUtils {
 	protected static Logger _logger = LogManager.getLogger(AnnotationUtils.class.getName());
@@ -49,27 +52,35 @@ public class AnnotationUtils {
 	 * @param InputStream the input stream to read to get the IIIF annotation list
 	 */
 	public List<Map<String,Object>> readAnnotationList(final InputStream pStream, final String pBaseURL) throws IOException {
-		Map<String,Object> tAnnotationList = (Map<String,Object>)JsonUtils.fromInputStream(pStream);
-		_logger.debug("Original untouched annotation:");
-		_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-		List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
+		Object inputList = JsonUtils.fromInputStream(pStream);
+        _logger.debug("Original untouched annotation:");
+        _logger.debug(JsonUtils.toPrettyString(inputList));
+        List<Map<String,Object>> tAnnotations = null;
+        if (inputList instanceof Map) {
+            Map<String,Object> tAnnotationList = (Map<String,Object>)inputList;
+            tAnnotations = (List<Map<String,Object>>)tAnnotationList.get("resources");
+        } else if (inputList instanceof List) {
+            tAnnotations = (List<Map<String,Object>>)inputList;
+        } else {
+            throw new IOException("Don't recognise annotation list " + inputList.getClass().getName());
+        }
 
-		if (tAnnotationList.get("@id") == null) {
-			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-			throw new IOException("Annotation list must have a @id at root");
-		}
-		String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
-		String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
+
+		//if (tAnnotationList.get("@id") == null) {
+		//	_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
+		//	throw new IOException("Annotation list must have a @id at root");
+		//}
+		//String[] tListURI = ((String)tAnnotationList.get("@id")).split("/");
+		//String tBucketId = tListURI[tListURI.length - 1].replaceAll(".json","");
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
 			if (tAnno.get("@id") == null) {
+
 				StringBuffer tBuff = new StringBuffer(pBaseURL);
-				tBuff.append("/");
-				tBuff.append(tBucketId);
+				tBuff.append(getHash(getTarget(tAnno), "md5"));
 				tBuff.append("/");
 				tBuff.append(tAnnoCount++);
 				tAnno.put("@id", tBuff.toString());
-
 			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 
@@ -80,15 +91,16 @@ public class AnnotationUtils {
 				tResource = (Map<String, Object>)tAnno.get("resource");
 			}
 			// do I need to change the format to html?
-			tResource.put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
-			tResource.put("format","text/html");
-			String tText = (String)tResource.get("chars");
-			if (!tText.trim().startsWith("<p>")) {
-				tResource.put("chars", "<p>" + tText + "</p>");
-			} else {
-				tResource.put("chars", tText);
-			}
-
+            if (tResource.get("@type") != null && tResource.get("@type").equals("cnt:ContentAsText") || tResource.get("format") != null && tResource.get("format").equals("text/plain")) {
+    			tResource.put("@type","dctypes:Text"); //requried for Mirador: js/src/annotations/osd-canvas-renderer.js:421:if (value["@type"] === "dctypes:Text") {
+    			tResource.put("format","text/html");
+                String tText = (String)tResource.get("chars");
+    			if (!tText.trim().startsWith("<p>")) {
+    				tResource.put("chars", "<p>" + tText + "</p>");
+    			} else {
+    				tResource.put("chars", tText);
+    			}
+            }
 			// Not sure if this is strictly necessary:
 			/*List<String> tMotivation = new ArrayList<String>();
 			tMotivation.add("oa:commenting");
@@ -116,6 +128,40 @@ public class AnnotationUtils {
 		}
 		return tAnnotations;
 	}
+    protected String getTarget(final Map<String, Object> pAnno) {
+        if (pAnno.get("on") instanceof String) {
+            String tTarget = (String)pAnno.get("on");
+            if (tTarget.contains("#")) {
+                return tTarget.substring(0,tTarget.indexOf("#"));
+            } else {
+                return tTarget;
+            }
+        } else {
+            return (String)((Map<String,Object>)pAnno.get("on")).get("full");
+        }
+    }
+
+    public static String getHash(String txt, String hashType) throws IOException {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance(hashType);
+            byte[] array = md.digest(txt.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+
+            for (int i = 0; i < array.length; i++) {
+                String hex = Integer.toHexString(0xFF & array[i]);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IOException("Failed to find algorithum " + hashType + " due to: " + e.toString());
+        } catch (java.io.UnsupportedEncodingException tExcpt) {
+            throw new IOException("Failed to convert string to md5 " + txt + " due to: " + tExcpt.toString());
+        }
+    }
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> readAnnotaion(final InputStream pStream, final String pBaseURL) throws IOException {
@@ -214,12 +260,19 @@ public class AnnotationUtils {
 			this.colapseFragement(tJsonLd);
 		}
 		Map<String, Object> tOn = null;
-		if (tOn instanceof Map) {
+		if (tJsonLd.get("on") instanceof Map) {
 			tOn = (Map<String, Object>)tJsonLd.get("on");
 			if (tOn.get("selector") != null && ((Map<String,Object>)tOn.get("selector")).get("value") instanceof List || tOn.get("source") instanceof List) {
 				_logger.error("Annotation is broken " + tJsonLd.get("@id"));
 				return tJsonLd;
 			}
+            // Autmoatically fix mirador-2.1.4 annos as if its done in javascript then exports won't include fix so won't work in Mirador
+            // Do it automatically for mirador2.1.4 annos rather than using an encoder as we only want to fix this kind
+            // of annos rather than all of them.
+            if (((Map<String,Object>)tJsonLd.get("on")).get("selector") != null && ((Map<String,Object>)tJsonLd.get("on")).get("selector") != null && ((Map<String,Object>)((Map<String,Object>)tJsonLd.get("on")).get("selector")).get("item") != null) {
+                Encoder tEncoder = new Mirador214();
+                tEncoder.encode(tJsonLd);
+            }
 		}
 		// Check if this is a valid annotation
 		// if it is valid it should have one source, one fragment selector
@@ -254,10 +307,24 @@ public class AnnotationUtils {
 
 	// Need to move fragement into on
 	public void colapseFragement(final Map<String,Object> pAnnotationJson) {
-		if (((Map<String,Object>)pAnnotationJson.get("on")).get("selector") != null) {
+		if (pAnnotationJson.get("on") instanceof Map) {
+            collapseFragmentOn(pAnnotationJson, (Map<String,Object>)pAnnotationJson.get("on"));
+		} else if (pAnnotationJson.get("on") instanceof List) {
+            for (Map<String,Object> tOn : (List<Map<String,Object>>)pAnnotationJson.get("on")) {
+                collapseFragmentOn(pAnnotationJson, tOn);
+            }
+		}	// otherwise its already collapsed as its a string
+	}
+	public void collapseFragmentOn(final Map<String,Object> pAnnotationJson, final Map<String,Object> pOn) {
+		if (pOn.get("selector") != null) {
 			try {
-				String tFragement = (String)((Map)((Map)pAnnotationJson.get("on")).get("selector")).get("value");
-				String tTarget = (String)((Map)pAnnotationJson.get("on")).get("full");
+                String tFragement = "";
+                if (((Map)pOn.get("selector")).get("value") != null) {
+    				tFragement = (String)((Map)pOn.get("selector")).get("value");
+                } else {
+    				tFragement = (String)((Map)((Map)pOn.get("selector")).get("default")).get("value");
+                }
+				String tTarget = (String)pOn.get("full");
 				pAnnotationJson.put("on", tTarget + "#" + tFragement);
 			} catch (ClassCastException tExcpt) {
 				System.err.println("Failed to transform annotation");

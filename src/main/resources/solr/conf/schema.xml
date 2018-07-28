@@ -141,7 +141,7 @@
     <fieldType name="tlong" class="solr.TrieLongField" positionIncrementGap="0" docValues="true" precisionStep="8"/>
     <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
     <field name="_version_" type="long" indexed="true" stored="false"/>
-    <field name="body" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="body" type="text_general" multiValued="true" indexed="true" stored="true"/>
     <field name="canvas" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="created" type="date" multiValued="false" indexed="true" stored="true"/>
     <field name="creator" type="date" multiValued="false" indexed="true" stored="true"/>
@@ -186,5 +186,3 @@
     <dynamicField name="*_c" type="currency" indexed="true" stored="true"/>
     <copyField source="body" dest="text"/>
 </schema>
-
-

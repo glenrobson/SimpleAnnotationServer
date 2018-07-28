@@ -2,7 +2,7 @@
 
 You can add your own Manifests by creating a HTML page in the [webapp](../src/main/webapp) directory. For example if you wanted to add the following NLW Newspaper Manifest:
 
-[http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json](http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json)
+[http://localhost:8888/examples/Cambrian_1804-01-28.json](../src/main/webapp/examples/Cambrian_1804-01-28.json)
 
 you would create the following file:
 
@@ -39,7 +39,7 @@ you would create the following file:
 				"saveSession": true,
 				"data": [
 					/** Put your manifest below **/
-					{ "manifestUri": "http://dev.llgc.org.uk/iiif/examples/newspapers/1861-01-02.json", "location": "National Library of Wales"}
+					{ "manifestUri": "http://localhost:8888/examples/Cambrian_1804-01-28.json", "location": "National Library of Wales"}
 				],
 				"windowObjects": [],
 				/** Annotations Config **/
@@ -58,4 +58,3 @@ you would create the following file:
 ```
 
 and if you saved it as demo.html in the [webapp](../src/main/webapp) directory you could access it at [http://localhost:8888/demo.html](http://localhost:8888/demo.html).
-

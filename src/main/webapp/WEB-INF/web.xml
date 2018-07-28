@@ -12,56 +12,21 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <servlet>
-        <servlet-name>InitServer</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.StoreConfig</servlet-class>
-        <!--<init-param>
-            <param-name>store</param-name>
-            <param-value>sesame</param-value>
-            <description>RDF Store to use</description>
-        </init-param>
+	<servlet>
+		<servlet-name>InitServer</servlet-name>
+		<servlet-class>uk.org.llgc.annotation.store.StoreConfig</servlet-class>
+	    <init-param>
+	        <param-name>config_file</param-name>
+	        <param-value>sas.properties</param-value>
+	        <description>Name of the config file to use.</description>
+	    </init-param>
         <init-param>
-            <param-name>repo_url</param-name>
-            <param-value>http://data.llgc.org.uk/openrdf-sesame/repositories/bor-annotations</param-value>
-            <description>Set the http URL to use to the Sesame Repository</description>
-        </init-param>-->
-        <init-param>
-            <param-name>store</param-name>
-            <param-value>jena</param-value>
-            <description>RDF Store to use</description>
-        </init-param>
-        <init-param>
-            <param-name>data_dir</param-name>
-            <param-value>data</param-value>
-            <description>Sets the directory containing TDB RDF database</description>
-        </init-param>
-        <!--<init-param>
-            <param-name>store</param-name>
-            <param-value>solr</param-value>
-            <description>Annotation Store to use</description>
-        </init-param>
-        <init-param>
-            <param-name>solr_connection</param-name>
-            <param-value>http://solr-host/solr/core</param-value>
-            <description>set the solr connection details</description>
-        </init-param>-->
-        <!--<init-param>
-            <param-name>solr_collection</param-name>
-            <param-value>annotations</param-value>
-            <description>The Solr collection to use as an index</description>
-        </init-param>-->
-        <!--<init-param>
-            <param-name>encoder</param-name>
-            <param-value>uk.org.llgc.annotation.store.encoders.BookOfPeaceEncoder</param-value>
-            <description>Changes the Linked data that is stored in the RDF Store. Also decodes it back into a format mirador understands</description>
-        </init-param>-->
-        <!--<init-param>
-            <param-name>baseURI</param-name>
-            <param-value>http://dev.llgc.org.uk</param-value>
-            <description>Sets the base uri for the annotation id, either change the above to the public URL to this annotation server or remove it so the server can work out the hostname and port and path from the request.</description>
-        </init-param>-->
-        <load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
-    </servlet>
+	        <param-name>relative</param-name>
+	        <param-value>true</param-value>
+	        <description>If above file is relative to /WEB-INF/ or is absolute.</description>
+	    </init-param>
+	    <load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
+	</servlet>
     <servlet>
         <servlet-name>Search</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.Search</servlet-class>
@@ -142,4 +107,8 @@
         <servlet-name>ListAllAnnos</servlet-name>
         <url-pattern>/annotation/</url-pattern>
     </servlet-mapping>
+    <mime-mapping>
+        <extension>json</extension>
+        <mime-type>application/json</mime-type>
+    </mime-mapping>
 </web-app>

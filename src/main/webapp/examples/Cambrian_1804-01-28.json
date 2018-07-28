@@ -1,0 +1,266 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json",
+    "@type": "sc:Manifest",
+    "label": "Cambrian (1804-01-28)",
+    "navDate": "1804-01-28T00:00:00Z",
+    "metadata": [
+        {
+            "label": [
+                {
+                    "@value": "Publisher",
+                    "@language": "en"
+                },
+                {
+                    "@value": "Cyhoeddwr",
+                    "@language": "cy-GB"
+                }
+            ],
+            "value": "T. Jenkins"
+        },
+        {
+            "label": "Place of Publication",
+            "value": "Swansea"
+        },
+        {
+            "label": [
+                {
+                    "@value": "Frequency",
+                    "@language": "en"
+                },
+                {
+                    "@value": "Amlder",
+                    "@language": "cy-GB"
+                }
+            ],
+            "value": "Weekly"
+        },
+        {
+            "label": "Language",
+            "value": "eng"
+        },
+        {
+            "label": "Subject",
+            "value": [
+                "Swansea (Wales) Newspapers"
+            ]
+        },
+        {
+            "label": [
+                {
+                    "@value": "Repository",
+                    "@language": "en"
+                },
+                {
+                    "@value": "Ystorfa",
+                    "@language": "cy-GB"
+                }
+            ],
+            "value": [
+                {
+                    "@value": "This content has been digitised by The National Library of Wales",
+                    "@language": "en"
+                },
+                {
+                    "@value": "Digidwyd y cynnwys hwn gan Lyfrgell Gendlaethol Cymru",
+                    "@language": "cy-GB"
+                }
+            ]
+        }
+    ],
+    "within": "http://dams.llgc.org.uk/iiif/newspapers/3320639.json",
+    "logo": {
+        "@id": "http://dams.llgc.org.uk/iiif/2.0/image/logo/full/400,/0/default.jpg",
+        "service": {
+            "@context": "http://iiif.io/api/image/2/context.json",
+            "@id": "http://dams.llgc.org.uk/iiif/2.0/image/logo",
+            "profile": "http://iiif.io/api/image/2/level1.json"
+        }
+    },
+    "service": {
+        "@context": "http://iiif.io/api/search/0/context.json",
+        "@id": "http://localhost:8888/search-api/3320640/search",
+        "profile": "http://iiif.io/api/search/0/search",
+        "label": "Search inside this Newspaper."
+    },
+    "seeAlso": {
+        "@id": "http://hdl.handle.net/10107/3320640",
+        "format": "application/rdf+xml",
+        "profile": "http://www.europeana.eu/schemas/edm/"
+    },
+    "sequences": [
+        {
+            "@type": "sc:Sequence",
+            "canvases": [
+                {
+                    "@id": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320641",
+                    "@type": "sc:Canvas",
+                    "label": "[1]",
+                    "height": 7905,
+                    "width": 5826,
+                    "images": [
+                        {
+                            "@id": "http://dams.llgc.org.uk/iiif/3320640/annotation/3320641.json",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "resource": {
+                                "@id": "http://dams.llgc.org.uk/iiif/2.0/3320641/image/full/512,/0/default.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "http://dams.llgc.org.uk/iiif/2.0/image/3320641",
+                                    "profile": "http://iiif.io/api/image/2/level1.json",
+                                    "height": 7905,
+                                    "width": 5826,
+                                    "tiles": [
+                                        {
+                                            "width": 256,
+                                            "scaleFactors": [
+                                                1,
+                                                2,
+                                                4,
+                                                8,
+                                                16,
+                                                32
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "height": 7905,
+                                "width": 5826
+                            },
+                            "on": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320641"
+                        }
+                    ]
+                },
+                {
+                    "@id": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320642",
+                    "@type": "sc:Canvas",
+                    "label": "[2]",
+                    "height": 7905,
+                    "width": 5826,
+                    "images": [
+                        {
+                            "@id": "http://dams.llgc.org.uk/iiif/3320640/annotation/3320642.json",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "resource": {
+                                "@id": "http://dams.llgc.org.uk/iiif/2.0/3320642/image/full/512,/0/default.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "http://dams.llgc.org.uk/iiif/2.0/image/3320642",
+                                    "profile": "http://iiif.io/api/image/2/level1.json",
+                                    "height": 7905,
+                                    "width": 5826,
+                                    "tiles": [
+                                        {
+                                            "width": 256,
+                                            "scaleFactors": [
+                                                1,
+                                                2,
+                                                4,
+                                                8,
+                                                16,
+                                                32
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "height": 7905,
+                                "width": 5826
+                            },
+                            "on": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320642"
+                        }
+                    ]
+                },
+                {
+                    "@id": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320643",
+                    "@type": "sc:Canvas",
+                    "label": "[3]",
+                    "height": 7905,
+                    "width": 5826,
+                    "images": [
+                        {
+                            "@id": "http://dams.llgc.org.uk/iiif/3320640/annotation/3320643.json",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "resource": {
+                                "@id": "http://dams.llgc.org.uk/iiif/2.0/3320643/image/full/512,/0/default.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "http://dams.llgc.org.uk/iiif/2.0/image/3320643",
+                                    "profile": "http://iiif.io/api/image/2/level1.json",
+                                    "height": 7905,
+                                    "width": 5826,
+                                    "tiles": [
+                                        {
+                                            "width": 256,
+                                            "scaleFactors": [
+                                                1,
+                                                2,
+                                                4,
+                                                8,
+                                                16,
+                                                32
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "height": 7905,
+                                "width": 5826
+                            },
+                            "on": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320643"
+                        }
+                    ]
+                },
+                {
+                    "@id": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320644",
+                    "@type": "sc:Canvas",
+                    "label": "[4]",
+                    "height": 7905,
+                    "width": 5826,
+                    "images": [
+                        {
+                            "@id": "http://dams.llgc.org.uk/iiif/3320640/annotation/3320644.json",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "resource": {
+                                "@id": "http://dams.llgc.org.uk/iiif/2.0/3320644/image/full/512,/0/default.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "http://dams.llgc.org.uk/iiif/2.0/image/3320644",
+                                    "profile": "http://iiif.io/api/image/2/level1.json",
+                                    "height": 7905,
+                                    "width": 5826,
+                                    "tiles": [
+                                        {
+                                            "width": 256,
+                                            "scaleFactors": [
+                                                1,
+                                                2,
+                                                4,
+                                                8,
+                                                16,
+                                                32
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "height": 7905,
+                                "width": 5826
+                            },
+                            "on": "http://dams.llgc.org.uk/iiif/3320640/canvas/3320644"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
