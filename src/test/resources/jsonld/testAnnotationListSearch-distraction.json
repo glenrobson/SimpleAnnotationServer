@@ -1,0 +1,204 @@
+{
+    "@id" : "http://example.com/anno/1",
+    "@type" : "oa:AnnotationList",
+    "resources": [
+        {
+            "@id": "http://example.com/annotation/12",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content simple"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/13",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type" : "dctypes:Text",
+                "format" : "text/html",
+                "chars" : "<p>Test content a<b>bold</b> <i>italic</i></p>"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/14",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/15",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/16",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/17",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/18",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/19",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/20",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/21",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        },
+        {
+            "@id": "http://example.com/annotation/22",
+            "@type": "oa:Annotation",
+            "motivation": "sc:painting",
+            "within":"http://example.com/manfiest/test/manifest2.json",
+            "on": {
+                "@id":"http://example.com/image1#xywh=0,132,102,10",
+
+                "within": {
+                    "@id":"http://example.com/manfiest/test/manifest2.json",
+                    "@type":"sc:Manifest"
+                 }
+            },
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Test content 1"
+            }
+        }
+    ]
+}

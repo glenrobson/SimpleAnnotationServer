@@ -79,8 +79,12 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 			Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(tContextURL.openStream());
 			pJson.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
 		}	
-		Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
-		tOn.remove("scope");
+		if (pJson.get("on") instanceof Map) {
+			Map<String,Object> tOn = (Map<String,Object>)pJson.get("on");
+			if (tOn.get("scope") != null) {
+				tOn.remove("scope");
+			}	
+		}	
 		String tJson = JsonUtils.toString(pJson);
 
 		RepositoryConnection tConn = null;

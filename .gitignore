@@ -13,3 +13,9 @@ src/main/webapp/stats
 .DS_Store
 /data
 /mirador_full
+dockerlogin.sh
+cache
+mirador-2.6.1
+sas.tar.gz
+index-2.6.0.html
+index-2.6.1.html

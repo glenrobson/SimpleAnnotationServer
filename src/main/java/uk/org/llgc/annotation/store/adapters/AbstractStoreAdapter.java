@@ -42,7 +42,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
-	protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName());
 	protected SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	protected AnnotationUtils _annoUtils = null;
 	public static final String FULL_TEXT_PROPERTY = "http://dev.llgc.org.uk/sas/full_text";
@@ -74,15 +74,12 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 				// missing within so check to see if the canvas maps to a manifest
 				String tCanvasId = "";
 				if (pJson.get("on") instanceof Map) {
-					if (((Map<String,Object>)pJson.get("on")).get("full") instanceof String) {
+				/*	if (((Map<String,Object>)pJson.get("on")).get("full") instanceof String) {
 						tCanvasId = (String)((Map<String,Object>)pJson.get("on")).get("full");
 					} else {
 						System.out.println("Probable invalid id ");
 						System.out.println(JsonUtils.toPrettyString(pJson));
-					}
-				} else if (pJson.get("on") instanceof List) {
-					System.out.println("Probable invalid id ");
-					System.out.println(JsonUtils.toPrettyString(pJson));
+					}*/
 				} else {
 					String tURL = (String)pJson.get("on");
 					tCanvasId = tURL.split("#")[0];
@@ -128,7 +125,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		tFragement.put("@type", "oa:FragmentSelector");
 		tFragement.put("value", tURI.substring(tIndexOfHash + 1));
 	}
-	
+
 	protected boolean isMissingWithin(final Map<String,Object> pAnno) {
 		if (pAnno.get("on") != null) {
 			if (pAnno.get("on") instanceof String) {
@@ -167,7 +164,13 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		} else {
 			tWithin = pManifestURI;
 		}
-		((Map<String, Object>)pAnno.get("on")).put("within", tWithin);
+		if (pAnno.get("on") instanceof Map) {
+			((Map<String, Object>)pAnno.get("on")).put("within", tWithin);
+		} else {
+			for (Map<String,Object> tSingleOn : (List<Map<String,Object>>)pAnno.get("on")) {
+				tSingleOn.put("within", tWithin);
+			}
+		}
 	}
 
 	public void addMetadata(final Map<String,Object> pJson) {
@@ -183,7 +186,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 						// add a field which contains the text with all of the html markup removed
 						String tCleaned = ((String)tResource.get("chars")).replaceAll(tRepalceStr,"");
 						tResource.put(FULL_TEXT_PROPERTY,tCleaned);
-					}	
+					}
 				}
 			} else {
 				if (((Map<String,Object>)pJson.get("resource")).get("chars") != null) {
@@ -204,25 +207,23 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		String tAnnoId = (String)pJson.get("@id");
 		_logger.debug("ID " + tAnnoId);
 		Model tStoredAnno = this.getNamedModel(tAnnoId);
-		Resource tAnnoRes = tStoredAnno.getResource(tAnnoId); 
+        if (tStoredAnno == null) {
+            throw new IOException("Failed to find annotation with id " + pJson.get("@id").toString() + " so couldn't update.");
+        }
+		Resource tAnnoRes = tStoredAnno.getResource(tAnnoId);
 		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
 		if (tCreatedSt != null) {
 			String tCreatedDate = tCreatedSt.getString();
 			pJson.put(DCTerms.created.getURI(), tCreatedDate);
-		}	
+		}
 		pJson.put(DCTerms.modified.getURI(), _dateFormatter.format(new Date()));
 		_logger.debug("Modified annotation " + JsonUtils.toPrettyString(pJson));
 		deleteAnnotation(tAnnoId);
 
 		if (this.isMissingWithin(pJson)) {
 			// missing within so check to see if the canvas maps to a manifest
-			String tCanvasId = "";
-			if (pJson.get("on") instanceof Map) {
-				tCanvasId = (String)((Map<String,Object>)pJson.get("on")).get("full");
-			} else {
-				String tURL = (String)pJson.get("on");
-				tCanvasId = tURL.split("#")[0];
-			}
+			String tCanvasId = getFirstCanvasId(pJson.get("on"));
+
 			List<String> tManifestURI = getManifestForCanvas(tCanvasId);
 			if (tManifestURI != null && !tManifestURI.isEmpty()) {
 				this.addWithin(pJson, tManifestURI);
@@ -233,22 +234,35 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		return addAnnotationSafe(pJson);
 	}
 
+	protected String getFirstCanvasId(final Object pOn) {
+		if (pOn instanceof Map) {
+			return (String)((Map<String,Object>)pOn).get("full");
+		} else if (pOn instanceof String) {
+			String tURL = (String)pOn;
+			return tURL.split("#")[0];
+		} else if (pOn instanceof List) {
+			return getFirstCanvasId(((List)pOn).get(0));
+		}
+		_logger.error("On in annotation is a format I don't regocnise its a format type " + pOn.getClass().getName());
+		return null;
+	}
+
 	public String indexManifest(Map<String,Object> pManifest) throws IOException {
 		String tShortId = this.createShortId((String)pManifest.get("@id"));
 		return this.indexManifest(tShortId, pManifest);
 	}
 
-	protected String indexManifest(final String pShortId, Map<String,Object> pManifest) throws IOException {	
+	protected String indexManifest(final String pShortId, Map<String,Object> pManifest) throws IOException {
 		String tManifestId = (String)pManifest.get("@id");
 
 		Map<String,Object> tExisting = this.getManifest(pShortId);
 		if (tExisting != null) {
 			if (((String)tExisting.get("@id")).equals((String)pManifest.get("@id"))) {
 				return (String)tExisting.get("short_id"); // manifest already indexed
-			} else {	
+			} else {
 				// there already exists a document with this id but its a different manifest so try and make id unique
 				return indexManifest(pShortId + "1", pManifest);
-			}	
+			}
 		}
 		pManifest.put("short_id",pShortId);//may need to make this a uri...
 
@@ -267,7 +281,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 			pManifest.put("@context", tListContext);
 		}
-		
+
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
 

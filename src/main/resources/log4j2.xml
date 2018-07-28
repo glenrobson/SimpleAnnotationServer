@@ -10,6 +10,9 @@
 		<Logger name="uk.org.llgc.annotation.store" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.Create" level="DEBUG" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
 	    <Logger name="org.apache.jena.info" level="INFO" additivity="false">
 	        <AppenderRef ref="Console"/>
 	    </Logger>

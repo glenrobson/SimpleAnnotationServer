@@ -6,6 +6,9 @@
     <version>1.1</version>
     <name>simpleAnnotationStore Maven Webapp</name>
     <url>http://maven.apache.org</url>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -96,7 +99,7 @@
 		  <dependency>
 			  <groupId>org.apache.solr</groupId>
 			  <artifactId>solr-solrj</artifactId>
-			  <version>6.1.0</version>
+			  <version>6.6.0</version>
 		  </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -111,6 +114,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
                 <configuration>
                     <excludes>
                         <!--<exclude>**/TestPublish.java</exclude>

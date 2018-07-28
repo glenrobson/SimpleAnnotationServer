@@ -35,7 +35,7 @@ import uk.org.llgc.annotation.store.data.ManifestProcessor;
 import uk.org.llgc.annotation.store.data.Manifest;
 
 public class ManifestUpload extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(ManifestUpload.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(ManifestUpload.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 	protected File _manifestDir = null;
@@ -68,7 +68,7 @@ public class ManifestUpload extends HttpServlet {
 
 		String tShortId = _store.indexManifest(tManifest);
 
-		pRes.sendRedirect(StoreConfig.getConfig().getBaseURI(pReq) + "/search-api/" + tShortId + "search");
+		pRes.sendRedirect(StoreConfig.getConfig().getBaseURI(pReq) + "/search-api/" + tShortId + "/search");
 	}
 
 	// if asked for without path then return collection of manifests that are loaded
@@ -76,7 +76,7 @@ public class ManifestUpload extends HttpServlet {
 		String tRequestURI = pReq.getRequestURI();
 		String[] tSplitURI = tRequestURI.split("/");
 
-		// Return collection 
+		// Return collection
 		List<Manifest> tManifests = _store.getManifests();
 
 		Map<String,Object> tCollection = new HashMap<String,Object>();
