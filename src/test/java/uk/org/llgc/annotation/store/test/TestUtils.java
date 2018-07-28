@@ -9,6 +9,7 @@ import org.junit.Rule;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestWatcher;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class TestUtils {
 	public TemporaryFolder _testFolder = new TemporaryFolder();
 	protected Properties _props = null;
 	protected List<String> _annoIds = new ArrayList<String>();
+    protected boolean _retainFailedData = false;
 
 	public TestUtils() throws IOException {
 		this(null);
@@ -73,11 +75,18 @@ public class TestUtils {
         _logger.debug("Reading props " + getClass().getResource("/test.properties").getFile());
 		_props = new Properties();
 		_props.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
+        _retainFailedData = _props.getProperty("retain_failed_data") != null ? _props.getProperty("retain_failed_data").equals("true") : false;
 	}
 
    public void setup() throws IOException {
 		if (_props.getProperty("store").equals("jena")) {
-			File tDataDir = new File(_testFolder.getRoot(), "data");
+            File tDataDir = null;
+            if (_retainFailedData) {
+                File tTmpDir = new File(System.getProperty("java.io.tmpdir"));
+                tDataDir = new File(new File(tTmpDir, new java.text.SimpleDateFormat("dd-mm-yyyy_HH-mm-ss-SS").format(new java.util.Date())), "data");
+            } else {
+                tDataDir = new File(_testFolder.getRoot(), "data");
+            }
 			tDataDir.mkdirs();
 			_props.put("data_dir",tDataDir.getPath());
 		}
@@ -102,12 +111,40 @@ public class TestUtils {
 		return tAnnoId.getURI();
 	}
 
+    @Rule
+    public TestWatcher watchman = new TestWatcher() {
+        @Override
+        protected void failed(Throwable e, org.junit.runner.Description description) {
+            if (_retainFailedData) {
+                System.out.println("Test " + description + " failed. Jena data is aviliable in: " + _props.get("data_dir"));
+            } else {
+                this.deleteData();
+            }
+        }
+        @Override
+        protected void succeeded(org.junit.runner.Description description) {
+            this.deleteData();
+        }
+
+        protected void deleteData() {
+            String tStore = _props.getProperty("store");
+    		if (tStore.equals("jena")) {
+                // Only delete the data_dir if its been used. TestSetup only tests the enviroment variables
+                if (_props.get("data_dir") != null) {
+                    File tDataDir = new File((String)_props.get("data_dir")).getParentFile();
+                    try {
+            			delete(tDataDir);
+                    } catch (IOException tExcpt) {
+                        System.err.println("Failed to delete test dir " + tDataDir.getPath() + " due to " + tExcpt);
+                    }
+                }
+            }
+        }
+    };
+
    public void tearDown() throws IOException {
 		String tStore = _props.getProperty("store");
-		if (tStore.equals("jena")) {
-			File tDataDir = new File(_testFolder.getRoot(), "data");
-			this.delete(tDataDir);
-		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
+		if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
 			SolrClient _solrClient = ((SolrStore)_store).getClient();
 			try {
 				UpdateResponse tResponse = _solrClient.deleteByQuery("*:*");// deletes all documents
@@ -116,7 +153,7 @@ public class TestUtils {
 				tException.printStackTrace();
 				throw new IOException("Failed to remove annotations due to " + tException);
 			}
-		}	else {
+		} else if (tStore.equals("sesame")) {
 			try {
 				HTTPRepository tRepo = new HTTPRepository(_props.getProperty("repo_url"));
 				RepositoryConnection tConn = tRepo.getConnection();
@@ -134,7 +171,7 @@ public class TestUtils {
 				this.delete(c);
 			}
 		}
-		if (!f.delete()) {
+		if (f.exists() && !f.delete()) {
 			throw new IOException("Failed to delete file: " + f);
 		}
 	}

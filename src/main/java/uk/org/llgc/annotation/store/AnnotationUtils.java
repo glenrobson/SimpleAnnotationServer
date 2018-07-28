@@ -77,12 +77,10 @@ public class AnnotationUtils {
 			if (tAnno.get("@id") == null) {
 
 				StringBuffer tBuff = new StringBuffer(pBaseURL);
-				tBuff.append("/");
-				tBuff.append(getHash("md5", getTarget(tAnno)));
+				tBuff.append(getHash(getTarget(tAnno), "md5"));
 				tBuff.append("/");
 				tBuff.append(tAnnoCount++);
 				tAnno.put("@id", tBuff.toString());
-
 			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 
@@ -142,19 +140,27 @@ public class AnnotationUtils {
             return (String)((Map<String,Object>)pAnno.get("on")).get("full");
         }
     }
-    public static String getHash(String txt, String hashType) {
+
+    public static String getHash(String txt, String hashType) throws IOException {
         try {
-                    java.security.MessageDigest md = java.security.MessageDigest.getInstance(hashType);
-                    byte[] array = md.digest(txt.getBytes());
-                    StringBuffer sb = new StringBuffer();
-                    for (int i = 0; i < array.length; ++i) {
-                        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
-                 }
-                    return sb.toString();
-            } catch (java.security.NoSuchAlgorithmException e) {
-                //error action
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance(hashType);
+            byte[] array = md.digest(txt.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+
+            for (int i = 0; i < array.length; i++) {
+                String hex = Integer.toHexString(0xFF & array[i]);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
             }
-            return null;
+
+            return hexString.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IOException("Failed to find algorithum " + hashType + " due to: " + e.toString());
+        } catch (java.io.UnsupportedEncodingException tExcpt) {
+            throw new IOException("Failed to convert string to md5 " + txt + " due to: " + tExcpt.toString());
+        }
     }
 
 	@SuppressWarnings("unchecked")

@@ -202,29 +202,6 @@ public class TestSearch extends TestUtils {
         Map<String, Object> tAnno = ((List<Map<String,Object>>)tResultsJson.get("resources")).get(0);
         assertTrue("Mirador requires resource to be an object. Found class " + tAnno.get("resource").getClass().getName(), tAnno.get("resource") instanceof Map);
 		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
-
-        // annotation.resource should be string not array (for mirador)
-        // Can't find canvas label... include in result? looks like it on.label (should be canvas label)...
-        /*
-            Get a label describing a search match. This label is set to the
-           * associated annotation label, if available, or to the label of the
-           * parent canvas.
-        if (resource && typeof resource === 'object') {
-            if (resource.label) {
-                return resource.label;
-            } else if (resource.resource.label){
-                return resource.resource.label;
-            } else if (resource.on && typeof resource.on === 'string') {
-                label = this.manifest.getCanvasLabel(resource.on);
-                return label ? 'Canvas ' + label : undefined;
-            } else if (resource.on && typeof resource.on === 'object') {
-                label = resource.on.label ? resource.on.label : this.manifest.getCanvasLabel(resource.on['@id']);
-                return label ? 'Canvas ' + label : undefined;
-            }
-        } else {
-            return undefined;
-        }
-        */
     }
 
 	@Test
@@ -238,7 +215,7 @@ public class TestSearch extends TestUtils {
 		tQuery.setResultsPerPage(10);
 		Map<String, Object> tResultsJson = _store.search(tQuery);
 
-		//System.out.println(JsonUtils.toString(tResultsJson));
+		//System.out.println(JsonUtils.toPrettyString(tResultsJson));
 		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
 		assertEquals("Expected a limit of 10 results per page.", 10, tResults.size());
@@ -279,4 +256,35 @@ public class TestSearch extends TestUtils {
 
 		assertEquals("Unexpected ids " + tIds.keySet(), 0, tIds.keySet().size());
 	}
+
+    @Test
+    public void testEndToEnd() throws IOException, IDConflictException, URISyntaxException {
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/examples/anno_list.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+
+        // Upload Newspaper annotation list
+        _store.addAnnotationList(tAnnotationListJSON);
+
+        // Upload Manifest
+		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/examples/Cambrian_1804-01-28.json").getFile())); //annotaiton list
+        String tShortId = _store.indexManifest(tManifest);
+
+        SearchQuery tQuery = new SearchQuery("PUBLIC");
+		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");
+		Map<String, Object> tResultsJson = _store.search(tQuery);
+
+		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		assertEquals("Expected 3 result for 'PUBLIC' but found different", 3, tResults.size());
+
+        // Now test a default search
+
+        tQuery = new SearchQuery("");
+		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");
+        tQuery.setResultsPerPage(200);
+		tResultsJson = _store.search(tQuery);
+		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		System.out.println(JsonUtils.toPrettyString(tResultsJson));
+		assertEquals("Expected 175 result for any empty search but found something different.", 175, tResults.size());
+    }
 }

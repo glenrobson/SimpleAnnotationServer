@@ -26,6 +26,8 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
+import com.github.jsonldjava.utils.JsonUtils;
+
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.ReadWrite;
@@ -202,8 +204,9 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                     if (tJsonAnno.get("resource") != null && tJsonAnno.get("resource") instanceof List && ((List)tJsonAnno.get("resource")).size() == 1) {
                         tJsonAnno.put("resource", ((List)tJsonAnno.get("resource")).get(0));
                     }
+
                     // Create snipet
-                    String tCharsString = (String)((Map<String,Object>)tJsonAnno.get("resource")).get("http://dev.llgc.org.uk/sas/full_text");
+                    String tCharsString = ((String)((Map<String,Object>)tJsonAnno.get("resource")).get("chars")).replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", "");
                     String[] tChars = tCharsString.split(" ");
                     String tSnippet = "";
                     if (tChars.length < 5) {
@@ -366,7 +369,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 										"PREFIX sc: <http://iiif.io/api/presentation/2#> " +
 										"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 										"PREFIX dcterms: <http://purl.org/dc/terms/>" +
-										"select ?anno where {" +
+										"select distinct ?graph {" +
 										"   GRAPH ?graph2 { " +
 										"	 <" + tManifestURI + "> sc:hasSequences ?seqence ." +
 										"	 ?seqence ?sequenceCount ?seqenceId ." +
@@ -382,26 +385,33 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 										"}";
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
-
 		this.begin(ReadWrite.READ);
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
 		this.end();
 		if (results != null) {
+            List<String> tUris = new ArrayList<String>();
 			while (results.hasNext()) {
 				QuerySolution soln = results.nextSolution() ;
-				Resource tAnno = soln.getResource("anno") ; // Get a result variable - must be a resource
-				Model tAnnoModel = this.getNamedModel(tAnno.toString());
+				tUris.add(soln.getResource("graph").toString()); // Get a result variable - must be a resource
+            }
+            for (String tURI : tUris) {
+				Model tAnnoModel = this.getNamedModel(tURI);
+                // should add within without turning it back and forth into json
 
-				// add within
-				Map<String,Object> tJsonAnno = null;
-				try {
-					tJsonAnno = _annoUtils.frameAnnotation(tAnnoModel, false);
-				} catch (JsonLdError tException) {
-					throw new IOException("Failed to convert annotation to json for " + tAnno.toString() + " due to " + tException.toString());
-				}
-				super.addWithin(tJsonAnno, tManifestURI);
+                if (tAnnoModel != null) {
+    				// add within
+    				Map<String,Object> tJsonAnno = null;
+    				try {
+    					tJsonAnno = _annoUtils.frameAnnotation(tAnnoModel, false);
+    				} catch (JsonLdError tException) {
+    					throw new IOException("Failed to convert annotation to json for " + tURI + " due to " + tException.toString());
+    				}
+    				super.addWithin(tJsonAnno, tManifestURI);
 
-				super.updateAnnotation(tJsonAnno);
+    				super.updateAnnotation(tJsonAnno);
+                } else {
+                    _logger.error("Failed to find annotation with id " + tURI);
+                }
 			}
 
 		} else {
