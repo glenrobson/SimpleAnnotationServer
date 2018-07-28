@@ -1,0 +1,67 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "http://localhost:8888/annotation/1532737161338",
+    "@type": "oa:Annotation",
+    "motivation": [ "oa:commenting" ],
+    "resource": [
+        {
+            "@id": "_:b9",
+            "@type": "dctypes:Text",
+            "format": "text/html",
+            "chars": "<p>three targets</p>"
+        }
+    ],
+    "on": [
+        {
+            "@type": "oa:SpecificResource",
+            "within": {
+                "@id": "https://data.ucd.ie/api/img/manifests/ucdlib:40851",
+                "@type": "sc:Manifest"
+            },
+            "selector": {
+                "@type": "oa:Choice",
+                "default": {
+                    "@type": "oa:FragmentSelector",
+                    "value": "xywh=7949,1839,1130,2026"
+                },
+                "item": {
+                    "@type": "oa:SvgSelector",
+                    "value": "<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M7948.55201,1839.24146h565.18276v0h565.18276v1013.21025v1013.21025h-565.18276h-565.18276v-1013.21025z\" data-paper-data=\"{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null,&quot;editable&quot;:true,&quot;annotation&quot;:null}\" id=\"rectangle_97559762-919d-4074-8550-91524b403b51\" fill-opacity=\"0\" fill=\"#00bfff\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"1\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"
+                }
+            },
+            "full": "https://data.ucd.ie/api/img/ucdlib:40851/canvas/ucdlib:42220"
+        },
+        {
+            "@type": "oa:SpecificResource",
+            "within": "https://data.ucd.ie/api/img/manifests/ucdlib:40851",
+            "selector": {
+                "@type": "oa:Choice",
+                "default": {
+                    "@type": "oa:FragmentSelector",
+                    "value": "xywh=3269,1629,2469,964"
+                },
+                "item": {
+                    "@type": "oa:SvgSelector",
+                    "value": "<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M3269.15379,1629.05572h1234.4584v0h1234.4584v482.21471v482.21471h-1234.4584h-1234.4584v-482.21471z\" data-paper-data=\"{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null,&quot;editable&quot;:true,&quot;annotation&quot;:null}\" id=\"rectangle_e1751254-fc86-4a9a-8f33-722cdaba4911\" fill-opacity=\"0\" fill=\"#00bfff\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"1\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"
+                }
+            },
+            "full": "https://data.ucd.ie/api/img/ucdlib:40851/canvas/ucdlib:42220"
+        },
+        {
+            "@type": "oa:SpecificResource",
+            "within": "https://data.ucd.ie/api/img/manifests/ucdlib:40851",
+            "selector": {
+                "@type": "oa:Choice",
+                "default": {
+                    "@type": "oa:FragmentSelector",
+                    "value": "xywh=1709,4173,2546,1761"
+                },
+                "item": {
+                    "@type": "oa:SvgSelector",
+                    "value": "<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M1709.35438,4173.40936h1273.17682v0h1273.17682v880.46137v880.46137h-1273.17682h-1273.17682v-880.46137z\" data-paper-data=\"{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null,&quot;editable&quot;:true,&quot;annotation&quot;:null}\" id=\"rectangle_5ebbf9db-424c-4ad5-af27-4ca509ab7c94\" fill-opacity=\"0\" fill=\"#00bfff\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"1\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"
+                }
+            },
+            "full": "https://data.ucd.ie/api/img/ucdlib:40851/canvas/ucdlib:42220"
+        }
+    ]
+}
