@@ -33,7 +33,7 @@ For the UnivesralViewer or Mirador to find your search service you need to add i
 ```
 "service": {
     "@context": "http://iiif.io/api/search/0/context.json",
-    "@id": "http://localhost:8888/sas/search-api/4389767/search",
+    "@id": "http://localhost:8888/search-api/3320640/search",
     "profile": "http://iiif.io/api/search/0/search"
 },
 ```
