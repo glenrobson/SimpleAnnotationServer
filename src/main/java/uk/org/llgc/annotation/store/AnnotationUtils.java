@@ -182,7 +182,13 @@ public class AnnotationUtils {
 	}
 
 	protected String getContext() {
-		return "file://" + new File(_contextDir, "iiif-2.0.json").getPath();
+        try {
+    		return new File(_contextDir, "iiif-2.0.json").toURI().toURL().toString();
+        } catch (IOException tExcpt) {
+            _logger.error("Failed to find local context using external");
+            return getExternalContext();
+
+        }
 	}
 
 	public String getExternalContext() {
