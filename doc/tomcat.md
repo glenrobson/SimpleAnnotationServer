@@ -1,4 +1,4 @@
-##Deploying to Tomcat
+# Deploying to Tomcat
 
 Edit the location of the Jena data dir as by default it will create it in $TOMCAT_HOME/data. Edit [sas.properties](../src/main/webapp/WEB-INF/sas.properties) and change the following:
 
