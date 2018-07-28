@@ -107,4 +107,8 @@
         <servlet-name>ListAllAnnos</servlet-name>
         <url-pattern>/annotation/</url-pattern>
     </servlet-mapping>
+    <mime-mapping>
+        <extension>json</extension>
+        <mime-type>application/json</mime-type> 
+    </mime-mapping>
 </web-app>
