@@ -37,10 +37,11 @@ SimpleAnnotationServer or SAS aims to fulfil two main use cases; a easy to insta
 
 ### User guides
 
+ * [Installing SAS on Windows](Windows.md)
  * [Adding your own Manifests](doc/NewManifests.md)
  * [Populating the Annotation Store with IIIF Annotation List](doc/PopulatingAnnotations.md)
  * [Using the IIIF Search API with SAS](IIIFSearch.md)
- * [Installing SAS on Windows](Windows.md)
+ * [Downloading annotations and linking to static Manifests](DownloadAnnotations.md)
 
 ### Developer guides
 
