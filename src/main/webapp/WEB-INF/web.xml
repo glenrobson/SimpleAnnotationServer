@@ -55,15 +55,15 @@
         <servlet-name>ListAllAnnos</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.ListAnnotations</servlet-class>
     </servlet>
-	 <servlet>
+    <servlet>
         <servlet-name>UploadManifest</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.ManifestUpload</servlet-class>
-		  <init-param>
-			  <param-name>manifest_dir</param-name>
-			  <param-value>/manifests</param-value>
-		  </init-param>
+        <init-param>
+            <param-name>manifest_dir</param-name>
+            <param-value>/manifests</param-value>
+        </init-param>
     </servlet>
-	 <servlet>
+    <servlet>
         <servlet-name>IIIFSearchAPI</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.IIIFSearchAPI</servlet-class>
     </servlet>
@@ -75,7 +75,7 @@
         <servlet-name>UploadManifest</servlet-name>
         <url-pattern>/manifests</url-pattern>
     </servlet-mapping>
-	 <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>UploadManifest</servlet-name>
         <url-pattern>/manifests/*</url-pattern>
     </servlet-mapping>
@@ -95,20 +95,20 @@
         <servlet-name>Destroy</servlet-name>
         <url-pattern>/annotation/destroy/*</url-pattern>
     </servlet-mapping>
-	 <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>Populate</servlet-name>
         <url-pattern>/annotation/populate</url-pattern>
     </servlet-mapping>
-	 <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>List</servlet-name>
         <url-pattern>/list.html</url-pattern>
     </servlet-mapping>
-	 <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>ListAllAnnos</servlet-name>
         <url-pattern>/annotation/</url-pattern>
     </servlet-mapping>
     <mime-mapping>
         <extension>json</extension>
-        <mime-type>application/json</mime-type> 
+        <mime-type>application/json</mime-type>
     </mime-mapping>
 </web-app>
