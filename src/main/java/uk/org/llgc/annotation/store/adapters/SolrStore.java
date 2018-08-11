@@ -643,8 +643,4 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 		return tResults;
 	}
-
-    public SolrClient getClient() {
-            return _solrClient;
-    }
 }

@@ -118,7 +118,7 @@ public class TestSearch extends TestUtils {
 		assertNull("Annotation contains a within even though I haven't loaded the manifest", tWithin);
 
 		List<Manifest> tLoadedManifests = _store.getManifests();
-		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests.isEmpty());
+		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests != null && tLoadedManifests.isEmpty());
 
 		Map<String, Object> tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
 		String tShortId = _store.indexManifest(tManifest);

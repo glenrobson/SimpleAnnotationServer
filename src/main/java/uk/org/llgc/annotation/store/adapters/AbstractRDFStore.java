@@ -61,7 +61,6 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 			tAnnotations.add(this.getNamedModel(tAnnoId.getURI()));
 		}
 		this.end();
-
 		return tAnnotations;
 	}
 
@@ -77,22 +76,25 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		this.begin(ReadWrite.READ);
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
 		int i = 0;
-		List<String> tManifests = new ArrayList<String>();
+		List<Manifest> tManifests = new ArrayList<Manifest>();
 		if (results != null) {
 			while (results.hasNext()) {
 				QuerySolution soln = results.nextSolution() ;
 				Resource tManifestURI = soln.getResource("manifest") ; // Get a result variable - must be a resource
 
 				_logger.debug("Found manifest " + tManifestURI.getURI());
-				tManifests.add(tManifestURI.getURI());
+                Manifest tManifest = new Manifest();
+                tManifest.setURI(tManifestURI.getURI());
+                // TODO add label and short id
+
+				tManifests.add(tManifest);
 			}
 		} else {
 			_logger.debug("no Manifests loaded");
 		}
 		this.end();
 
-		//return tManifests; TODO
-		return null;
+		return tManifests;
 	}
 
 	public String getManifestId(final String pShortId) throws IOException {
