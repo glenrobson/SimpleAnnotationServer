@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -289,5 +290,13 @@ public class TestSearch extends TestUtils {
 
 		//System.out.println(JsonUtils.toPrettyString(tResultsJson));
 		assertEquals("Expected 175 result for any empty search but found something different.", 735, tResults.size());
+    }
+
+    @Test
+    public void testShortId() throws IOException {
+        String tShortId = ((AbstractStoreAdapter)_store).createShortId("https://api-pre.library.tamu.edu/fcrepo/rest/mwbManifests/CofeEarHis/Full_Manifest");
+        assertNotNull("Short id shouldn't be null",tShortId);
+        assertNotEquals("Short id shouldn't be empty",tShortId, "");
+        System.out.println("short: " + tShortId);
     }
 }
