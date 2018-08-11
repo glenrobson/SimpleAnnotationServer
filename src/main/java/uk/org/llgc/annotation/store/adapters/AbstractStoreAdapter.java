@@ -281,12 +281,12 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
 
-	protected String createShortId(final String pLongId) {
+	public String createShortId(final String pLongId) throws IOException {
 		if (pLongId.endsWith("manifest.json")) {
 			String[] tURI = pLongId.split("/");
 			return tURI[tURI.length - 2];
 		} else {
-			return pLongId.replaceAll("\\D+","");
+			return _annoUtils.getHash(pLongId, "md5");
 		}
 	}
 
