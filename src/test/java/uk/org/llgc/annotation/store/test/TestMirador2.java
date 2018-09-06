@@ -27,6 +27,7 @@ import uk.org.llgc.annotation.store.encoders.Mirador214;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -64,7 +65,7 @@ public class TestMirador2 extends TestUtils {
 	}
 
 	@Test
-	public void TestMirador2() throws IOException, IDConflictException, InterruptedException {
+	public void TestMirador2() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
@@ -81,7 +82,7 @@ public class TestMirador2 extends TestUtils {
 	}
 
     @Test
-    public void testPopulate() throws IOException, IDConflictException, InterruptedException {
+    public void testPopulate() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/annos_master_version1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
         List<Model> tModel = _store.addAnnotationList(tAnnotationListJSON);

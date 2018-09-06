@@ -34,6 +34,8 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.encoders.Mirador214;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 public class AnnotationUtils {
 	protected static Logger _logger = LogManager.getLogger(AnnotationUtils.class.getName());
@@ -208,14 +210,14 @@ public class AnnotationUtils {
 		return tRoot;
 	}
 
-	public Map<String,Object> createAnnotationList(final Model pAnnotation) throws IOException {
+	public Map<String,Object> createAnnotationList(final Model pAnnotation) throws IOException, MalformedAnnotation {
 		List<Model> tTmpList = new ArrayList<Model>();
 		tTmpList.add(pAnnotation);
 
 		return createAnnotationList(tTmpList).get(0);
 	}
 
-	public List<Map<String,Object>> createAnnotationList(final List<Model> pAnnotations) throws IOException {
+	public List<Map<String,Object>> createAnnotationList(final List<Model> pAnnotations) throws IOException, MalformedAnnotation {
 		final Object contextJson = JsonUtils.fromInputStream(new FileInputStream(new File(_contextDir, "annotation_frame.json")));
 		((Map)contextJson).put("@context", this.getContext());
 
@@ -225,13 +227,14 @@ public class AnnotationUtils {
 		Map<String, Object> tRoot = this.buildAnnotationListHead();
 		List tResources = (List)tRoot.get("resources");
 		for (Model tAnnotation : pAnnotations) {
+            Annotation tAnno = null;
 			try {
-				Map<String,Object> tAnnoJson = this.frameAnnotation(tAnnotation, false);
-				if (tAnnoJson != null) { // Only add if its a valid annotation
-					tResources.add(tAnnoJson);
+				tAnno = new Annotation(this.frameAnnotation(tAnnotation, false));
+				if (tAnno != null && tAnno.checkValid() != "") { // Only add if its a valid annotation
+					tResources.add(tAnno.toJson());
 				}
 			} catch (JsonLdError tExcpt) {
-				_logger.error("Failed to generate Model " + tAnnotation.toString() + "  due to " + tExcpt);
+				_logger.error("Failed to generate Model " + tAnno.getId() + "  due to " + tExcpt);
 				tExcpt.printStackTrace();
 			}
 		}

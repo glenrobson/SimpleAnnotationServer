@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -379,7 +380,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 										"PREFIX sc: <http://iiif.io/api/presentation/2#> " +
 										"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 										"PREFIX dcterms: <http://purl.org/dc/terms/>" +
-										"select distinct ?graph {" +
+										"select distinct ?graph ?canvas {" +
 										"   GRAPH ?graph2 { " +
 										"	 <" + tManifestURI + "> sc:hasSequences ?seqence ." +
 										"	 ?seqence ?sequenceCount ?seqenceId ." +
@@ -399,12 +400,17 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
 		this.end();
 		if (results != null) {
-            List<String> tUris = new ArrayList<String>();
+            List<Map<String,String>> tUris = new ArrayList<Map<String, String>>();
 			while (results.hasNext()) {
 				QuerySolution soln = results.nextSolution() ;
-				tUris.add(soln.getResource("graph").toString()); // Get a result variable - must be a resource
+                Map<String,String> tResult = new HashMap<String,String>();
+                tResult.put("anno_id", soln.getResource("graph").toString());// Get a result variable - must be a resource
+                tResult.put("canvas_id", soln.getResource("canvas").toString());
+				tUris.add(tResult);
             }
-            for (String tURI : tUris) {
+            for (Map<String, String> tResult: tUris) {
+                String tURI = tResult.get("anno_id");
+                String tCanvasId = tResult.get("canvas_id");
 				Model tAnnoModel = this.getNamedModel(tURI);
                 // should add within without turning it back and forth into json
 
@@ -416,9 +422,13 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
     				} catch (JsonLdError tException) {
     					throw new IOException("Failed to convert annotation to json for " + tURI + " due to " + tException.toString());
     				}
-    				super.addWithin(tJsonAnno, tManifestURI);
+    				super.addWithin(tJsonAnno, tManifestURI, tCanvasId);
 
-    				super.updateAnnotation(tJsonAnno);
+                    try {
+        				super.updateAnnotation(tJsonAnno);
+                    } catch (MalformedAnnotation tExcpt) {
+                        throw new IOException("Failed to reload annotation after updating the within: " + tExcpt);
+                    }
                 } else {
                     _logger.error("Failed to find annotation with id " + tURI);
                 }

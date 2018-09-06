@@ -21,6 +21,7 @@ import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
 import java.util.Map;
@@ -39,10 +40,10 @@ import java.nio.charset.Charset;
 public interface StoreAdapter {
 
 	public void init(final AnnotationUtils pAnnoUtils);
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException;
-	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException;
+	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException, MalformedAnnotation;
+	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException, MalformedAnnotation;
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException;
+	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException, MalformedAnnotation;
 
 	public String indexManifest(Map<String,Object> pManifest) throws IOException;
 	public List<Manifest> getManifests() throws IOException;

@@ -29,6 +29,7 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -66,7 +67,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testPublish() throws IOException, IDConflictException {
+	public void testPublish() throws IOException, IDConflictException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		List<Model> tAnnosAsModel = _store.addAnnotationList(tAnnotationListJSON);
@@ -93,7 +94,7 @@ public class TestPublish extends TestUtils {
 
 
 	@Test
-	public void testCreate() throws IOException, IDConflictException {
+	public void testCreate() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -104,7 +105,7 @@ public class TestPublish extends TestUtils {
 
 	// test reuse of id
 	@Test
-	public void testDelete() throws IOException, IDConflictException {
+	public void testDelete() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -116,7 +117,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testUpdate() throws IOException, IDConflictException {
+	public void testUpdate() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -131,7 +132,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testPage() throws IOException, IDConflictException {
+	public void testPage() throws IOException, IDConflictException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		for (Map<String,Object> tAnnotation : tAnnotationList) {
@@ -150,7 +151,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testUTF8() throws IOException, IDConflictException {
+	public void testUTF8() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -161,7 +162,7 @@ public class TestPublish extends TestUtils {
 
 	//@Test(expected=IDConflictException.class)
 	@Test
-	public void testDuplicate() throws IOException, IDConflictException, InterruptedException {
+	public void testDuplicate() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
@@ -175,7 +176,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testDates() throws IOException, IDConflictException, InterruptedException {
+	public void testDates() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
@@ -212,12 +213,16 @@ public class TestPublish extends TestUtils {
 		Model tAnnoModel = _annotationUtils.convertAnnoToModel(tAnnotationJSON);
 		List<Model> tAnnotations = new ArrayList<Model>();
 		tAnnotations.add(tAnnoModel);
-		List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
+        try {
+    		List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
 
-		if (!tAnnotationList.isEmpty()) {
-			System.out.println("Annotations that made it through:");
-			System.out.println(JsonUtils.toPrettyString(tAnnotationList));
-		}
-		assertEquals("Annotations are invalid so shouldn't have created any annotations in the list.", 0, tAnnotationList.size());
+    		if (!tAnnotationList.isEmpty()) {
+    			System.out.println("Annotations that made it through:");
+    			System.out.println(JsonUtils.toPrettyString(tAnnotationList));
+    		}
+    		assertEquals("Annotations are invalid so shouldn't have created any annotations in the list.", 0, tAnnotationList.size());
+        } catch (MalformedAnnotation tExcpt) {
+            assertTrue("",tExcpt.getMessage().contains("n array in the on/selector/value "));
+        }
 	}
 }

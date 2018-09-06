@@ -22,8 +22,11 @@ import javax.servlet.ServletException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+
+
 public class Search extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Search.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(Search.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -43,11 +46,18 @@ public class Search extends HttpServlet {
 			return; // for some reason Mirador is sending blank uri requests
 		}
 		List<Model> tAnnotations = _store.getAnnotationsFromPage(pReq.getParameter("uri"));
-		List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
+        try {
+            List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
 
-		pRes.setContentType("application/ld+json; charset=UTF-8");
-		pRes.setCharacterEncoding("UTF-8");
-		/**/_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
-	}
+            pRes.setContentType("application/ld+json; charset=UTF-8");
+            pRes.setCharacterEncoding("UTF-8");
+            /**/_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
+            pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
+        } catch (MalformedAnnotation tExcpt) {
+            tExcpt.printStackTrace();
+            pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            pRes.setContentType("text/plain");
+            pRes.getOutputStream().println("Falied to load annotation as it was badly informed: " + tExcpt.toString());
+        }
+    }
 }

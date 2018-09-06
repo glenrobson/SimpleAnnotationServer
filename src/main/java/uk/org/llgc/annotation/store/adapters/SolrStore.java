@@ -25,8 +25,10 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import java.text.ParseException;
 
@@ -285,11 +287,16 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 							_logger.debug("Found " + tResponse.getResults().size() + " annotations to update with within");
 							do {
 								for (SolrDocument tResult : tResponse.getResults()) {
-									Map<String,Object> tAnno =  this.buildAnnotation(tResult, false);
+									Map<String,Object> tAnnoJson =  this.buildAnnotation(tResult, false);
 
-									super.addWithin(tAnno, tManifestId);
+                                    String tCanvasId = (String)tCanvas.get("@id");
+                    				super.addWithin(tAnnoJson, tManifestId, tCanvasId);
 
-									super.updateAnnotation(tAnno);
+                                    try {
+    									super.updateAnnotation(tAnnoJson);
+                                    } catch (MalformedAnnotation tExcpt) {
+                                        throw new IOException("Failed to reload annotation after updating the within: " + tExcpt);
+                                    }
 								}
 
 								tStart += tPageSize;

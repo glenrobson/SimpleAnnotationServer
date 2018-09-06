@@ -27,6 +27,7 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.encoders.BookOfPeaceEncoder;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -40,13 +41,13 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.query.* ;
 
 public class TestBOR extends TestUtils {
-	protected static Logger _logger = LogManager.getLogger(TestBOR.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(TestBOR.class.getName());
 
 	public TestBOR() throws IOException {
 		super(new BookOfPeaceEncoder());
 	}
 
-	@Before 
+	@Before
    public void setup() throws IOException {
 		super.setup();
 	}
@@ -57,14 +58,14 @@ public class TestBOR extends TestUtils {
 	}
 
 	@Test
-	public void testAnnotation() throws IOException, IDConflictException {
+	public void testAnnotation() throws IOException, IDConflictException, MalformedAnnotation {
 		_logger.debug("Reading annotation");
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/borAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/borAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		_logger.debug("Adding annotation");
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		_logger.debug("Annotation Saved");
-		
+
 		String tAnnoId = super.getAnnoId(tModel);
 		_annoIds.add(tAnnoId);
 		_logger.debug("ID " + tAnnoId);
@@ -74,7 +75,7 @@ public class TestBOR extends TestUtils {
 		ResultSetRewindable results = null;
 		boolean tHasResults = false;
 		try (QueryExecution qexec = QueryExecutionFactory.create(query,tModel)) {
-		
+
 			results = ResultSetFactory.copyResults(qexec.execSelect());
 			for ( ; results.hasNext() ; ) {
 				tHasResults = true;
@@ -97,9 +98,9 @@ public class TestBOR extends TestUtils {
 	}
 
 	@Test
-	public void testRetrieveAnnotation() throws IOException, IDConflictException {
+	public void testRetrieveAnnotation() throws IOException, IDConflictException, MalformedAnnotation {
 		_logger.debug("Reading annotation");
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/borAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/borAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		_logger.debug("Adding annotation");
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -119,8 +120,8 @@ public class TestBOR extends TestUtils {
 	}
 
 	@Test
-	public void testAberAnno() throws IOException, IDConflictException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/aberAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+	public void testAberAnno() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/aberAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
@@ -139,6 +140,6 @@ public class TestBOR extends TestUtils {
 		}
 		assertTrue("motivation missing commenting", ((List<String>)tAnnotation.get("motivation")).contains("oa:commenting"));
 		assertTrue("motivation missing tagging ", ((List<String>)tAnnotation.get("motivation")).contains("oa:tagging"));
-	}	
+	}
 
-}	
+}

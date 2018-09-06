@@ -27,6 +27,7 @@ import uk.org.llgc.annotation.store.encoders.Mirador214;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -64,7 +65,7 @@ public class TestMirador214 extends TestUtils {
 	}
 
 	@Test
-	public void testMirador214() throws IOException, IDConflictException, InterruptedException {
+	public void testMirador214() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/mirador-2.1.4.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
