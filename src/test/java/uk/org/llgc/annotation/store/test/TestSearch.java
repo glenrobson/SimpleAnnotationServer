@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -53,17 +54,17 @@ import java.net.URISyntaxException;
 import java.net.URI;
 
 public class TestSearch extends TestUtils {
-	protected static Logger _logger = LogManager.getLogger(TestSearch.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(TestSearch.class.getName());
 
 	public TestSearch() throws IOException {
 		super();
+        _logger.debug("Called super()");
 	}
 
-	@Before 
+	@Before
    public void setup() throws IOException {
 		super.setup();
-
-
+        _logger.debug("Called setup()");
 	}
 
    @After
@@ -78,14 +79,14 @@ public class TestSearch extends TestUtils {
 		ResultSetRewindable results = null;
 		List<String> tWithin = new ArrayList<String>();
 		try (QueryExecution qexec = QueryExecutionFactory.create(query,pModel)) {
-		
+
 			results = ResultSetFactory.copyResults(qexec.execSelect());
 			for ( ; results.hasNext() ; ) {
 				QuerySolution soln = results.nextSolution() ;
 
 				tWithin.add(soln.getResource("within").toString());
 			}
-		}	
+		}
 		if (tWithin.isEmpty()) {
 			return null;
 		} else {
@@ -95,7 +96,7 @@ public class TestSearch extends TestUtils {
 
 	@Test
 	public void testPassedWithin() throws IOException, IDConflictException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		List<String> tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
 		assertNotNull("Missing within for second annotation ", tWithin);
@@ -105,14 +106,14 @@ public class TestSearch extends TestUtils {
 		tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
 		assertNotNull("Missing within for second annotation ", tWithin);
 		assertEquals("Second Annotation should have a within but its missing or not correct", "http://example.com/manfiest/test/manifest.json", tWithin.get(0));
-	}	
+	}
 
 	@Test
 	public void loadManifest() throws IOException, IDConflictException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestAnno1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestAnno1.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		// check no within
-	
+
 		List<String> tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
 		assertNull("Annotation contains a within even though I haven't loaded the manifest", tWithin);
 
@@ -136,7 +137,7 @@ public class TestSearch extends TestUtils {
 		assertEquals("Annotation should have a within but its missing or not correct", "http://example.com/manfiest/test/manifest.json", tWithin.get(0));
 
 		// now get annotation and see if it has a within
-		tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestAnno2.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
+		tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestAnno2.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		tModel = _store.addAnnotation(tAnnotationJSON);
 		//RDFDataMgr.write(System.out, tModel, Lang.NQUADS);
 		// this annotation should already have a within.
@@ -147,24 +148,27 @@ public class TestSearch extends TestUtils {
 
 	@Test
 	public void testSearching() throws IOException, IDConflictException {
-		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
-
+        // Add two copies of the same annotation list but pointing to different Manifests
+        // this checks if the scoping to manifest search is working.
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch-distraction.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+		_store.addAnnotationList(tAnnotationListJSON);
+		 tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 		_store.addAnnotationList(tAnnotationListJSON);
 
 
 		SearchQuery tQuery = new SearchQuery("simple");
 		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
-		Map<String, Object> tResultsJson = _store.search(tQuery); 
+		Map<String, Object> tResultsJson = _store.search(tQuery);
 
 		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
 		assertEquals("Expected 1 result for 'simple' but found different", 1, tResults.size());
 		assertEquals("Expected single result for 'simple'","http://example.com/annotation/1", tResults.get(0).get("@id"));
 
-		// test html 
+		// test html
 		tQuery = new SearchQuery("abold");
 		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
-		tResultsJson = _store.search(tQuery); 
+		tResultsJson = _store.search(tQuery);
 
 		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
@@ -174,7 +178,7 @@ public class TestSearch extends TestUtils {
 		// Test multiple words:
 		tQuery = new SearchQuery("Test content simple");
 		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
-		tResultsJson = _store.search(tQuery); 
+		tResultsJson = _store.search(tQuery);
 
 		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
@@ -183,18 +187,39 @@ public class TestSearch extends TestUtils {
 
 	}
 
+    @Test
+	public void testMirador() throws IOException, IDConflictException {
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+
+		_store.addAnnotationList(tAnnotationListJSON);
+
+
+		SearchQuery tQuery = new SearchQuery("simple");
+		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
+		Map<String, Object> tResultsJson = _store.search(tQuery);
+
+        // Mirador requires the number of results:
+		assertNotNull("Missing within in result set", tResultsJson.get("within"));
+        Map<String, Object> tWithin = (Map<String,Object>)tResultsJson.get("within");
+		assertNotNull("Missing result count in result set", tWithin.get("total"));
+		assertEquals("Start index should be 0", 0, tResultsJson.get("startIndex"));
+        Map<String, Object> tAnno = ((List<Map<String,Object>>)tResultsJson.get("resources")).get(0);
+        assertTrue("Mirador requires resource to be an object. Found class " + tAnno.get("resource").getClass().getName(), tAnno.get("resource") instanceof Map);
+		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
+    }
+
 	@Test
 	public void testPagination() throws IOException, IDConflictException, URISyntaxException, ParseException {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		_store.addAnnotationList(tAnnotationListJSON);
-		
+
 		SearchQuery tQuery = new SearchQuery(new URI("http://example.com/1/search?q=Test"));
 		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
 		tQuery.setResultsPerPage(10);
-		Map<String, Object> tResultsJson = _store.search(tQuery); 
+		Map<String, Object> tResultsJson = _store.search(tQuery);
 
-		//System.out.println(JsonUtils.toString(tResultsJson));
+		//System.out.println(JsonUtils.toPrettyString(tResultsJson));
 		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
 		assertEquals("Expected a limit of 10 results per page.", 10, tResults.size());
@@ -205,7 +230,7 @@ public class TestSearch extends TestUtils {
 		tQuery.setResultsPerPage(10);
 		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
 
-		tResultsJson = _store.search(tQuery); 
+		tResultsJson = _store.search(tQuery);
 		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
 		assertEquals("Last page to have 1 result", 1, tResults.size());
@@ -220,7 +245,7 @@ public class TestSearch extends TestUtils {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		_store.addAnnotationList(tAnnotationListJSON);
-		
+
 		Map<String, Object> tAllAnnos =  _store.getAllAnnotations();
 		assertEquals("Expected 11 results but got " + ((List)tAllAnnos.get("resources")).size(), 11, ((List)tAllAnnos.get("resources")).size());
 		Map<String,String> tIds = new HashMap<String,String>();
@@ -235,4 +260,43 @@ public class TestSearch extends TestUtils {
 
 		assertEquals("Unexpected ids " + tIds.keySet(), 0, tIds.keySet().size());
 	}
+
+    @Test
+    public void testEndToEnd() throws IOException, IDConflictException, URISyntaxException {
+		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/examples/anno_list.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+
+        // Upload Newspaper annotation list
+        _store.addAnnotationList(tAnnotationListJSON);
+
+        // Upload Manifest
+		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/examples/Cambrian_1804-01-28.json").getFile())); //annotaiton list
+        String tShortId = _store.indexManifest(tManifest);
+
+        SearchQuery tQuery = new SearchQuery("PUBLIC");
+		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");
+		Map<String, Object> tResultsJson = _store.search(tQuery);
+
+		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		assertEquals("Expected 3 result for 'PUBLIC' but found different", 3, tResults.size());
+
+        // Now test a default search
+
+        tQuery = new SearchQuery("");
+		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");
+        tQuery.setResultsPerPage(1000);
+		tResultsJson = _store.search(tQuery);
+		tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		//System.out.println(JsonUtils.toPrettyString(tResultsJson));
+		assertEquals("Expected 175 result for any empty search but found something different.", 735, tResults.size());
+    }
+
+    @Test
+    public void testShortId() throws IOException {
+        String tShortId = ((AbstractStoreAdapter)_store).createShortId("https://api-pre.library.tamu.edu/fcrepo/rest/mwbManifests/CofeEarHis/Full_Manifest");
+        assertNotNull("Short id shouldn't be null",tShortId);
+        assertNotEquals("Short id shouldn't be empty",tShortId, "");
+        System.out.println("short: " + tShortId);
+    }
 }

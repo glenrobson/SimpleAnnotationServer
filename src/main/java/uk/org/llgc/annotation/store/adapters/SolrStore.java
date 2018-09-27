@@ -47,14 +47,27 @@ import java.io.File;
 import com.github.jsonldjava.utils.JsonUtils;
 
 public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
-	protected static Logger _logger = LogManager.getLogger(SolrStore.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(SolrStore.class.getName());
 
 	protected SolrClient _solrClient = null;
 
 	public SolrStore(final String pConnectionURL, final String pCollection) {
-		_solrClient = new HttpSolrClient(pConnectionURL); 
-	//	_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
-	// ((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);	
+		if (pCollection == null || pCollection.trim().length() == 0) {
+			_solrClient = new HttpSolrClient(pConnectionURL);
+		} else {
+			//_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
+            List<String> tHosts = new ArrayList<String>();
+            if (pConnectionURL.contains(",")) {
+                String[] tHostUrls = pConnectionURL.split(",");
+                for (int i = 0;i < tHostUrls.length; i++) {
+                    tHosts.add(tHostUrls[i]);
+                }
+            } else {
+                tHosts.add(pConnectionURL);
+            }
+			_solrClient = new CloudSolrClient.Builder().withSolrUrl(tHosts).build();
+			((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);
+		}
 	}
 
 // id, motivation, body, target, selector, within, data, short_id, label
@@ -68,9 +81,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		Date tCreated = null;
 		try {
 			if (pJson.get("created") != null) {
-					tCreated = _dateFormatter.parse((String)pJson.get("created")); 
+					tCreated = _dateFormatter.parse((String)pJson.get("created"));
 			} else if (pJson.get("http://purl.org/dc/terms/created") != null) {
-				tCreated = _dateFormatter.parse((String)pJson.get("http://purl.org/dc/terms/created")); 
+				tCreated = _dateFormatter.parse((String)pJson.get("http://purl.org/dc/terms/created"));
 			}
 		} catch (ParseException tException) {
 			_logger.error("Failed to parse Created date");
@@ -79,9 +92,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		Date tModified = null;
 		try {
 			if (pJson.get("modified") != null) {
-				tModified = _dateFormatter.parse((String)pJson.get("modified")); 
+				tModified = _dateFormatter.parse((String)pJson.get("modified"));
 			} else if (pJson.get("http://purl.org/dc/terms/modified") != null) {
-				tModified = _dateFormatter.parse((String)pJson.get("http://purl.org/dc/terms/modified")); 
+				tModified = _dateFormatter.parse((String)pJson.get("http://purl.org/dc/terms/modified"));
 			}
 		} catch (ParseException tException) {
 			_logger.error("Failed to parse Modified date");
@@ -101,49 +114,56 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		}
 		String tCanvasId = null;
 		if (pJson.get("on") != null) {
-			Map<String, Object> tOn = (Map<String,Object>)pJson.get("on");
-
-			if (tOn.get("full") instanceof String) {
-				this.addSingle(tDoc, "target", tOn.get("full"));
-			} else {
-				_logger.info("Probably have an invalid annotation ");
-				_logger.info(JsonUtils.toPrettyString(pJson));
+			if (pJson.get("on") instanceof Map) {
+				Map<String, Object> tOn = (Map<String,Object>)pJson.get("on");
+				List<Map<String,Object>> tListOn = new ArrayList<Map<String,Object>>();
+				tListOn.add(tOn);
+				pJson.put("on",tListOn);
 			}
-			this.addSingle(tDoc, "target", tOn.get("source"));
-			if (tOn.get("selector") != null) { // index xywh in case in future you want to search within bounds
-				Map<String,Object> tSelector = (Map<String, Object>)tOn.get("selector");
-				if (tSelector.get("value") instanceof String) {
-					this.addSingle(tDoc, "selector", tSelector.get("value"));
+			for (Map<String, Object> tOn : (List<Map<String,Object>>)pJson.get("on"))	{
+				// for each linked canvas add link to canvas and manifest
+				if (tOn.get("full") instanceof String) {
+					this.addSingle(tDoc, "target", tOn.get("full"));
 				} else {
-					System.out.println("Probably have an invalid annotation ");
-					System.out.println(JsonUtils.toPrettyString(pJson));
+					_logger.info("Probably have an invalid annotation ");
+					_logger.info(JsonUtils.toPrettyString(pJson));
+				}
+				this.addSingle(tDoc, "target", tOn.get("source"));
+				if (tOn.get("selector") != null) { // index xywh in case in future you want to search within bounds
+					Map<String,Object> tSelector = (Map<String, Object>)tOn.get("selector");
+					if (tSelector.get("value") instanceof String) {
+						this.addSingle(tDoc, "selector", tSelector.get("value"));
+					} else {
+						_logger.info("Probably have an invalid annotation ");
+						_logger.info(JsonUtils.toPrettyString(pJson));
+					}
+				}
+				// by the time it gets here the annotation should have a within if there is a manifest avilable.
+				if (tOn.get("within") != null) {
+					String tWithinURi = "";
+					if (tOn.get("within") instanceof Map) {
+						tWithinURi = (String)((Map<String,Object>)tOn.get("within")).get("@id");
+					} else {
+						tWithinURi = (String)tOn.get("within");
+					}
+					this.addSingle(tDoc, "within", tWithinURi);
+				} else {
+					_logger.debug("Missing canvas Id so couldn't find registered manifest");
 				}
 			}
-			// by the time it gets here the annotation should have a within if there is a manifest avilable. 
-			if (tOn.get("within") != null) {
-				String tWithinURi = "";
-				if (tOn.get("within") instanceof Map) {
-					tWithinURi = (String)((Map<String,Object>)tOn.get("within")).get("@id");
-				} else {
-					tWithinURi = (String)tOn.get("within");
-				}	
-				this.addSingle(tDoc, "within", tWithinURi);
-			} else {
-				_logger.debug("Missing canvas Id so couldn't find registered manifest");
-			}
-		} 
+		}
 		String tJson = JsonUtils.toString(pJson);
 		//this.addSingle(tDoc, "data", Base64.getEncoder().encodeToString(tJson.getBytes("UTF-8")));
 		this.addSingle(tDoc, "data", DatatypeConverter.printBase64Binary(tJson.getBytes("UTF-8")));
 
 		this.addDoc(tDoc, true);
-		
+
 		return super.convertAnnoToModel(pJson);
 	}
 
 
 	public List<String> getManifestForCanvas(final String pCanvasId) throws IOException {
-		try { 
+		try {
 			SolrQuery tQuery = this.getQuery();
 			tQuery.set("q", "canvas:\"" + this.escapeChars(pCanvasId) + "\"");
 			QueryResponse tResponse = _solrClient.query(tQuery);
@@ -151,7 +171,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			int tPageSize = tResponse.getResults().size();
 			int tStart = 0;
 			List<String> tWithin = new ArrayList<String>();
-			do { 
+			do {
 				for (SolrDocument tResult : tResponse.getResults()) {
 					tWithin.add((String)tResult.get("id"));
 				}
@@ -188,7 +208,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tPageSize = tResponse.getResults().size();
 			int tStart = 0;
-			do { 
+			do {
 				tResources.addAll(this.buildAnnotationList(tResponse, false));
 
 				tStart += tPageSize;
@@ -213,7 +233,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tPageSize = tResponse.getResults().size();
 			int tStart = 0;
-			do { 
+			do {
 				for (SolrDocument tResult : tResponse.getResults()) {
 					tManifestIds.add((String)tResult.get("id"));
 				}
@@ -253,20 +273,20 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 							_logger.debug("no annotations to update");
 						} else {
 							_logger.debug("Found " + tResponse.getResults().size() + " annotations to update with within");
-							do { 
+							do {
 								for (SolrDocument tResult : tResponse.getResults()) {
 									Map<String,Object> tAnno =  this.buildAnnotation(tResult, false);
 
 									super.addWithin(tAnno, tManifestId);
 
-									super.updateAnnotation(tAnno);	
+									super.updateAnnotation(tAnno);
 								}
 
 								tStart += tPageSize;
 								tQuery.setStart(tStart);
 								tResponse = _solrClient.query(tQuery);
 							} while (tStart < tResultNo);
-						}	
+						}
 					} catch (SolrServerException tExcpt) {
 						String tMessage = "Failed to update canvases with link to manifest due to " + tExcpt.toString();
 						_logger.debug(tMessage);
@@ -296,7 +316,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 				return null; // no annotation found with supplied id
 			} else {
 				throw new IOException("Found " + tResponse.getResults().size() + " manifests with ID " + pShortId);
-			}	
+			}
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		}
@@ -316,12 +336,12 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 				return null; // no annotation found with supplied id
 			} else {
 				throw new IOException("Found " + tResponse.getResults().size() + " manifests with ID " + pShortId);
-			}	
+			}
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		}
 	}
-	
+
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
 		List<String> tOldIds = new ArrayList<String>();
 		tOldIds.add(pAnnoId);
@@ -357,29 +377,34 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tSolrQuery.append(" AND within:\"");
 		tSolrQuery.append(pQuery.getScope());
 		tSolrQuery.append("\"");
-		
+
 		SolrQuery tQuery = this.getQuery();
 		tQuery.set("q", tSolrQuery.toString());
 		tQuery.setStart(pQuery.getPage() * pQuery.getResultsPerPage());
 		tQuery.setRows(pQuery.getResultsPerPage());
+        tQuery.setHighlight(true);
+        tQuery.addHighlightField("text");
 
 		Map<String,Object> tAnnoList = new HashMap<String,Object>();
 		tAnnoList.put("@type","sc:AnnotationList");
 		List<Map<String, Object>> tAnnotations = new ArrayList<Map<String,Object>>();
 		tAnnoList.put("resources", tAnnotations);
-		
+
 		try {
 			tAnnoList.put("@id",pQuery.toURI().toString());
 			QueryResponse tResponse = _solrClient.query(tQuery);
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tNumberOfPages = (int)(tResultNo / pQuery.getResultsPerPage());
 			tAnnotations.addAll(this.buildAnnotationList(tResponse, true));
+
+            // Adding page count even if results are smaller than one page.
+            Map<String,String> tWithin = new HashMap<String,String>();
+            tAnnoList.put("within",tWithin);
+            tWithin.put("@type","sc:Layer");
+            tWithin.put("total","" + tResultNo);
 			if (tResultNo > pQuery.getResultsPerPage()) { // if paginating
-				Map<String,String> tWithin = new HashMap<String,String>();
-				tAnnoList.put("within",tWithin);
-				tWithin.put("@type","sc:Layer");
-				tWithin.put("total","" + tResultNo);
 				int tPageNo = pQuery.getPage();
+                tAnnoList.put("startIndex", tPageNo);
 				if (tNumberOfPages != pQuery.getPage()) { // not on last page
 					int tPage = tPageNo + 1;
 					pQuery.setPage(tPage);
@@ -389,12 +414,14 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 				tWithin.put("first", pQuery.toURI().toString());
 				pQuery.setPage(tNumberOfPages);
 				tWithin.put("last", pQuery.toURI().toString());
-			}
-			
+			} else {
+                tAnnoList.put("startIndex", 0);
+            }
+
 		} catch (SolrServerException tException) {
 			tException.printStackTrace();
 			throw new IOException("Failed to run solr query due to " + tException.toString());
-		} catch (URISyntaxException tException) {	
+		} catch (URISyntaxException tException) {
 			tException.printStackTrace();
 			throw new IOException("Failed to work with base URI " + tException.toString());
 		}
@@ -413,7 +440,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			int tStart = 0;
 			List<Map<String,Object>> tAnnotations = new ArrayList<Map<String,Object>>();
 			do { // this gets all of the pages of results and creates one list of annotations which isn't going to scale
-				// would need to fix this by implementing paging. 
+				// would need to fix this by implementing paging.
 				tAnnotations.addAll(this.buildAnnotationList(tResponse, false));
 
 				tStart += tPageSize;
@@ -444,11 +471,11 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 				return null; // no annotation found with supplied id
 			} else {
 				throw new IOException("Found " + tResponse.getResults().size() + " annotations with ID " + pContext);
-			}	
+			}
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		}
-	}	
+	}
 
 	public List<PageAnnoCount> listAnnoPages() {
 		return null;
@@ -461,7 +488,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 			if (pCommit) {
 				_solrClient.commit();
-			}	
+			}
 		} catch (SolrServerException tExcpt) {
 			tExcpt.printStackTrace();
 			throw new IOException("Failed to remove annotations due to " + tExcpt);
@@ -484,10 +511,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			if (pObject instanceof List) {
 				for (String tValue: (List<String>)pObject) {
 					pDoc.addField(pKey, tValue);
-				}	
+				}
 			} else {
-				pDoc.addField(pKey, (String)pObject);	
-			}	
+				pDoc.addField(pKey, (String)pObject);
+			}
 		}
 	}
 
@@ -498,7 +525,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tQuery.setRows(1000);
 
 		return tQuery;
-	}	
+	}
 
 	protected String escapeChars(final String pParam) {
 		return pParam.replaceAll(":","\\\\:");
@@ -532,7 +559,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		this.createItemList(tFirstSequence, "canvases", pDoc.get("canvases"));
 
 		return tManifest;
-	}	
+	}
 
 	protected Map<String,Object> buildAnnotation(final SolrDocument pDoc, final boolean pCollapseOn) throws IOException {
 		Map<String,Object> tAnnotation = (Map<String,Object>)JsonUtils.fromString(new String(DatatypeConverter.parseBase64Binary((String)pDoc.get("data"))));
@@ -572,21 +599,35 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			if (pValue instanceof List) {
 				for (String tValueInst : (List<String>)pValue) {
 					tList.add(tValueInst);
-				}	
+				}
 			} else {
 				tList.add((String)pValue);
 			}
 			pParent.put(pKey, tList);
-		} 	
+		}
 	}
 
 	protected List<Map<String,Object>> buildAnnotationList(final QueryResponse pResponse, final boolean pCollapseOn) throws IOException {
 		List<Map<String,Object>> tResults = new ArrayList<Map<String,Object>>();
 		for (SolrDocument tResult : pResponse.getResults()) {
-			tResults.add(this.buildAnnotation(tResult, pCollapseOn));
+            Map<String, Object> tAnno = this.buildAnnotation(tResult, pCollapseOn);
+			tResults.add(tAnno);
+            if (pResponse.getHighlighting() != null && pResponse.getHighlighting().get(tAnno.get("@id")) != null) {
+                // Add snippet as label to annotation
+                if ( pResponse.getHighlighting().get(tAnno.get("@id")).get("text") != null) {
+                    List<String> snippets = pResponse.getHighlighting().get(tAnno.get("@id")).get("text");
+
+                    tAnno.put("label", snippets.get(0).replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", ""));
+                } else {
+                    tAnno.put("label", ((List<String>)tResult.get("body")).get(0).replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", ""));
+                }
+            }
 		}
 
 		return tResults;
 	}
 
+    public SolrClient getClient() {
+            return _solrClient;
+    }
 }

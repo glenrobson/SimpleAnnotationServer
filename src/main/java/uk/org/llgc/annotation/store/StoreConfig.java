@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.JenaStore;
@@ -17,19 +18,78 @@ import uk.org.llgc.annotation.store.encoders.Encoder;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.File;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class StoreConfig extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","solr_collection"};
 
 	public StoreConfig() {
 		_props = null;
 	}
 
-	public StoreConfig(final Map<String, String> pProps) {
-		_props = pProps;
+	// Called from test scripts
+	public StoreConfig(final Properties pProps) {
+		this.overloadConfigFromEnviroment(pProps);
 		initConfig(this);
 	}
+
+  // Called by servlet
+	public void init(final ServletConfig pConfig) throws ServletException {
+		super.init(pConfig);
+		String tConfigFile = pConfig.getInitParameter("config_file");
+        boolean isRelative = true;
+        if (pConfig.getInitParameter("relative") != null || pConfig.getInitParameter("relative").trim().length() != 0) {
+            isRelative = pConfig.getInitParameter("relative").equals("true");
+        }
+		Properties tProps = new Properties();
+		try {
+            InputStream tPropsStream = null;
+            if (isRelative) {
+                tPropsStream = this.getServletContext().getResourceAsStream("/WEB-INF/" + tConfigFile);
+            } else {
+                tPropsStream = new FileInputStream(new File(tConfigFile));
+            }
+
+            tProps.load(tPropsStream);
+		} catch (IOException tExcpt) {
+			tExcpt.printStackTrace();
+			throw new ServletException("Failed to load config file due to: " + tExcpt.getMessage());
+		}
+		this.overloadConfigFromEnviroment(tProps);
+		initConfig(this);
+	}
+
+	protected void overloadConfigFromEnviroment(final Properties pProps) {
+		_props = new HashMap<String,String>();
+        final String EMPTY="EMPTY";
+        // Ensure all options are present to be overriden
+        for (int i = 0; i < ALLOWED_PROPS.length; i++) {
+            if (pProps.getProperty(ALLOWED_PROPS[i]) == null) {
+                pProps.setProperty(ALLOWED_PROPS[i], EMPTY);
+            }
+        }
+		for (String tKey : pProps.stringPropertyNames()) {
+			if (System.getProperty("SAS." + tKey) != null) {
+				_logger.debug("Overloading " + tKey + " with value " + System.getProperty("SAS." + tKey) + " from System.getProperty");
+				_props.put(tKey, System.getProperty("SAS." + tKey));
+			} else {
+                if (!pProps.getProperty(tKey).equals(EMPTY)) {
+    				_props.put(tKey, pProps.getProperty(tKey));
+                }
+			}
+		}
+	}
+
 
 	public String getBaseURI(final HttpServletRequest pReq) {
 		if (_props.containsKey("baseURI")) {
@@ -61,29 +121,28 @@ public class StoreConfig extends HttpServlet {
 		}
 	}
 
-	public void init(final ServletConfig pConfig) throws ServletException {
-		super.init(pConfig);
-		_props = new HashMap<String,String>();
-		Enumeration<String> tParams = (Enumeration<String>)pConfig.getInitParameterNames();
-		while(tParams.hasMoreElements()) {
-			String tKey = tParams.nextElement();
-			_props.put(tKey, pConfig.getInitParameter(tKey));
-		}
-		initConfig(this);
-	}
+
 
 	public StoreAdapter getStore() {
-		
+
 		StoreAdapter tAdapter = null;
-		if (_props.get("store").equals("jena")) {
+		String tStore = _props.get("store");
+		if (tStore.equals("jena")) {
 			tAdapter = new JenaStore(_props.get("data_dir"));
-		}	
-		if (_props.get("store").equals("sesame")) {
+		} else if (tStore.equals("sesame")) {
 			tAdapter = new SesameStore(_props.get("repo_url"));
-		}
-		if (_props.get("store").equals("solr")) {
-			tAdapter = new SolrStore(_props.get("solr_connection"), _props.get("solr_collection"));
-		}
+		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
+			String tCollection = null;
+			if (tStore.equals("solr-cloud")) {
+					tCollection = _props.get("solr_collection");
+					if (tCollection == null || tCollection.trim().length() == 0) {
+						throw new IllegalArgumentException("If you are using solr-cloud you must specify the solr_collection field.");
+					}
+			}
+			tAdapter = new SolrStore(_props.get("solr_connection"), tCollection);
+		} else {
+            _logger.error("Couldn't find a store for '" + tStore + "'.");
+        }
 
 		return tAdapter;
 	}

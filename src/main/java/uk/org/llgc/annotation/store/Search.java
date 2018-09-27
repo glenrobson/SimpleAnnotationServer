@@ -47,7 +47,7 @@ public class Search extends HttpServlet {
 
 		pRes.setContentType("application/ld+json; charset=UTF-8");
 		pRes.setCharacterEncoding("UTF-8");
-		//**/_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
+		/**/_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
 		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
 	}
 }

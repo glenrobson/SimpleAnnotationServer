@@ -1,13 +1,11 @@
-##Deploying to Tomcat
+# Deploying to Tomcat
 
-Edit the location of the Jena data dir as by default it will create it in $TOMCAT_HOME/data. Edit [web.xml](../src/main/webapp/WEB-INF/web.xml) and change the following:
+Edit the location of the Jena data dir as by default it will create it in $TOMCAT_HOME/data. Edit [sas.properties](../src/main/webapp/WEB-INF/sas.properties) and change the following:
 
 ```
-<context-param>
-	<description>Sets the directory containing TDB RDF database</description>
-	<param-name>data_dir</param-name>
-	<param-value>data</param-value>
-</context-param>
+# Uncomment this if you would like to use Jena as a backend
+store=jena
+data_dir=data
 ```
 change the param-value to something like /usr/local/annotation-data.
 
