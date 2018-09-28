@@ -76,17 +76,25 @@ public class TestSearch extends TestUtils {
 		String tQuery = "PREFIX oa: <http://www.w3.org/ns/oa#> PREFIX dcterms: <http://purl.org/dc/terms/>  select ?within where { <" + pAnnoId + "> oa:hasTarget ?target . ?target dcterms:isPartOf ?within }";
 
 		Query query = QueryFactory.create(tQuery) ;
-		ResultSetRewindable results = null;
+		ResultSet results = null;
 		List<String> tWithin = new ArrayList<String>();
 		try (QueryExecution qexec = QueryExecutionFactory.create(query,pModel)) {
 
-			results = ResultSetFactory.copyResults(qexec.execSelect());
+            try {
+                //pModel.begin();
+                qexec.getDataset().begin(ReadWrite.READ);
+			results = qexec.execSelect();
+                qexec.getDataset().end();
+        }catch (Exception tExcpt) {
+            tExcpt.printStackTrace();
+        }
+
 			for ( ; results.hasNext() ; ) {
 				QuerySolution soln = results.nextSolution() ;
 
 				tWithin.add(soln.getResource("within").toString());
 			}
-		}
+        }
 		if (tWithin.isEmpty()) {
 			return null;
 		} else {
@@ -297,6 +305,5 @@ public class TestSearch extends TestUtils {
         String tShortId = ((AbstractStoreAdapter)_store).createShortId("https://api-pre.library.tamu.edu/fcrepo/rest/mwbManifests/CofeEarHis/Full_Manifest");
         assertNotNull("Short id shouldn't be null",tShortId);
         assertNotEquals("Short id shouldn't be empty",tShortId, "");
-        System.out.println("short: " + tShortId);
     }
 }
