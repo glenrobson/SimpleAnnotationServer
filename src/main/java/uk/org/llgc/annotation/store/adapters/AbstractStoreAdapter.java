@@ -206,12 +206,14 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
         if (tStoredAnno == null) {
             throw new IOException("Failed to find annotation with id " + pJson.get("@id").toString() + " so couldn't update.");
         }
+		this.begin(ReadWrite.READ);
 		Resource tAnnoRes = tStoredAnno.getResource(tAnnoId);
 		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
 		if (tCreatedSt != null) {
 			String tCreatedDate = tCreatedSt.getString();
 			pJson.put(DCTerms.created.getURI(), tCreatedDate);
 		}
+		this.end();
 		pJson.put(DCTerms.modified.getURI(), _dateFormatter.format(new Date()));
 		_logger.debug("Modified annotation " + JsonUtils.toPrettyString(pJson));
 		deleteAnnotation(tAnnoId);
