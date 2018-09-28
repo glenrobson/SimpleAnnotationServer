@@ -264,6 +264,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		this.begin(ReadWrite.READ);
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+        this.end();
 		int i = 0;
 		Map<String,Object> tAnnotationList = new HashMap<String,Object>();
 		tAnnotationList.put("@context", "http://iiif.io/api/presentation/2/context.json");
@@ -287,8 +288,6 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 			}
 		} catch (JsonLdError tException) {
 			throw new IOException("Failed to generate annotation list due to " + tException.toString());
-		} finally {
-			this.end();
 		}
 
 		return tAnnotationList;
