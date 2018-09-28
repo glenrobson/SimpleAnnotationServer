@@ -34,17 +34,24 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 
 	public JenaStore(final String pDataDir) {
 		_dataset = TDBFactory.createDataset(pDataDir);
+		_logger.debug("Dataset is {}", _dataset);
 	}
 
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
-		String tJson = JsonUtils.toString(pJson);
-
-		Model tJsonLDModel = ModelFactory.createDefaultModel();
-		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
+		_logger.debug("Now starting write transaction…");
 		_dataset.begin(TxnType.WRITE);
 //		_dataset.begin(ReadWrite.WRITE) ;
-		_dataset.addNamedModel((String)pJson.get("@id"), tJsonLDModel);
-		_dataset.commit();
+		Model tJsonLDModel;
+		try {
+			String tJson = JsonUtils.toString(pJson);
+
+			tJsonLDModel = ModelFactory.createDefaultModel();
+			RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
+			_dataset.addNamedModel((String) pJson.get("@id"), tJsonLDModel);
+			_dataset.commit();
+		} finally {
+			_dataset.end();
+		}
 
 		return tJsonLDModel;
 	}
@@ -60,15 +67,16 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		return QueryExecutionFactory.create(pQuery, _dataset);
 	}
 	protected Model getNamedModel(final String pContext) throws IOException {
-		boolean tLocaltransaction = !_dataset.isInTransaction();
-		if (tLocaltransaction) {
+		//boolean tLocaltransaction = !_dataset.isInTransaction();
+		//if (tLocaltransaction) {
 			_dataset.begin(ReadWrite.READ);
-		}	
+		//}
 		Model tAnnotation = _dataset.getNamedModel(pContext);
-		if (tLocaltransaction) {
+		boolean isEmpty = tAnnotation.isEmpty();
+		//if (tLocaltransaction) {
 			_dataset.end();
-		}	
-		if (tAnnotation.isEmpty()) {
+		//}
+		if (isEmpty) {
 			return null; // annotation wasn't found
 		} else {
 			return tAnnotation;
