@@ -139,9 +139,10 @@ public class TestPublish extends TestUtils {
 		List<Model> tAnnotationsModel = _store.getAnnotationsFromPage("http://example.com/image2");
 		Model tModel = ModelFactory.createDefaultModel();
 		for (Model tModelAnno : tAnnotationsModel) {
-			tModel.add(tModelAnno);
+            tModelAnno.begin();
+            tModel.add(tModelAnno);
+            tModelAnno.commit();
 		}
-
 		this.testAnnotation(tModel, "http://example.com/annotation/2", "Test content 1a","http://example.com/image2#xywh=0,132,102,10");
 		this.testAnnotation(tModel, "http://example.com/annotation/3", "Test Content 2a","http://example.com/image2#xywh=1873,132,102,10");
 	}
