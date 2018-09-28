@@ -7,40 +7,36 @@
 	</Appenders>
 
 	<Loggers>
-		<!--<Logger name="uk.org.llgc.annotation.store.test.TestBOR" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-        <!--<Logger name="uk.org.llgc.annotation.store.test.TestSearch" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>		-->
-		<!--<Logger name="uk.org.llgc.annotation.store.adapters.SesameStore" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-		<!--<Logger name="uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-		<!--<Logger name="uk.org.llgc.annotation.store.adapters.AbstractRDFStore" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-		<!--<Logger name="uk.org.llgc.annotation.store.adapters.SolrStore" level="ERROR" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-		<!--<Logger name="uk.org.llgc.annotation.store.test.TestUtils" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-		<!--<Logger name="uk.org.llgc.annotation" level="DEBUG" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
-        <!--<Logger name="uk.org.llgc.annotation.store.StoreConfig" level="INFO" additivity="false">-->
-			<!--<AppenderRef ref="Console"/>-->
-		<!--</Logger>-->
+		<Logger name="uk.org.llgc.annotation.store.test.TestBOR" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+        <Logger name="uk.org.llgc.annotation.store.test.TestSearch" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>		<Logger name="uk.org.llgc.annotation.store.adapters.SesameStore" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.AbstractRDFStore" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.adapters.SolrStore" level="ERROR" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation.store.test.TestUtils" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+		<Logger name="uk.org.llgc.annotation" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
+        <Logger name="uk.org.llgc.annotation.store.StoreConfig" level="INFO" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
         <Logger name="org.apache.jena.info" level="INFO" additivity="false">
 	        <AppenderRef ref="Console"/>
 	    </Logger>
-		<Logger name="org.apache.jena.tdb" level="INFO" additivity="false">
-			<AppenderRef ref="Console"/>
-		</Logger>
-		<Root level="DEBUG">
+		<Root level="error">
 			<AppenderRef ref="Console"/>
 		</Root>
 	</Loggers>
