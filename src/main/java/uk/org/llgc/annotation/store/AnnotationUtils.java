@@ -29,8 +29,8 @@ import java.nio.charset.Charset;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.encoders.Mirador214;
@@ -295,7 +295,13 @@ public class AnnotationUtils {
 		tOptions.format = "application/jsonld";
 
 		StringWriter tStringOut = new StringWriter();
+        if (pModel.supportsTransactions()) {
+            pModel.begin();
+        }
 		RDFDataMgr.write(tStringOut, pModel, Lang.JSONLD);
+        if (pModel.supportsTransactions()) {
+            pModel.commit();
+        }    
 		Map<String,Object> tFramed = (Map<String,Object>)JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), pFrame,  tOptions);
 
 		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);

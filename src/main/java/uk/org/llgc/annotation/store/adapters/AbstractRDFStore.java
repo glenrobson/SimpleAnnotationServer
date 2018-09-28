@@ -17,26 +17,26 @@ import java.net.URISyntaxException;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.DCTerms;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 
 public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractRDFStore.class.getName());
@@ -264,6 +264,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		this.begin(ReadWrite.READ);
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+        this.end();
 		int i = 0;
 		Map<String,Object> tAnnotationList = new HashMap<String,Object>();
 		tAnnotationList.put("@context", "http://iiif.io/api/presentation/2/context.json");
@@ -287,8 +288,6 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 			}
 		} catch (JsonLdError tException) {
 			throw new IOException("Failed to generate annotation list due to " + tException.toString());
-		} finally {
-			this.end();
 		}
 
 		return tAnnotationList;

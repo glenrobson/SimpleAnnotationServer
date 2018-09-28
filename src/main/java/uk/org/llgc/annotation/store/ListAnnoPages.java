@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 
 import java.util.Map;
 import java.util.List;

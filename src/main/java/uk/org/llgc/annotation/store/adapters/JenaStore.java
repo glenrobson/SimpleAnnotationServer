@@ -1,21 +1,13 @@
 package uk.org.llgc.annotation.store.adapters;
 
+import org.apache.jena.query.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -36,7 +28,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.nio.charset.Charset;
 
 public class JenaStore extends AbstractRDFStore implements StoreAdapter {
-	protected static Logger _logger = LogManager.getLogger(JenaStore.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(JenaStore.class.getName());
 
 	protected Dataset _dataset = null;
 
@@ -49,7 +41,6 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 
 		Model tJsonLDModel = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
-
 		_dataset.begin(ReadWrite.WRITE) ;
 		_dataset.addNamedModel((String)pJson.get("@id"), tJsonLDModel);
 		_dataset.commit();
@@ -58,7 +49,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
-		_dataset.begin(ReadWrite.WRITE); // should probably move this to deleted state
+		_dataset.begin(ReadWrite.WRITE) ; // should probably move this to deleted state
 		_dataset.removeNamedModel(pAnnoId);
 		_dataset.commit();
 	}
@@ -70,16 +61,15 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		boolean tLocaltransaction = !_dataset.isInTransaction();
 		if (tLocaltransaction) {
 			_dataset.begin(ReadWrite.READ);
-		}	
+		}
 		Model tAnnotation = _dataset.getNamedModel(pContext);
+		if (tAnnotation.isEmpty()) {
+			tAnnotation = null; // annotation wasn't found
+		}
 		if (tLocaltransaction) {
 			_dataset.end();
-		}	
-		if (tAnnotation.isEmpty()) {
-			return null; // annotation wasn't found
-		} else {
-			return tAnnotation;
-		}	
+		}
+        return tAnnotation;
 	}
 
 	protected void begin(final ReadWrite pWrite) {
@@ -94,7 +84,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		Model tJsonLDModel = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(JsonUtils.toString(pManifest).getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
 
-		
+
 		//RDFDataMgr.write(System.out, tJsonLDModel, Lang.NQUADS);
 		_dataset.addNamedModel((String)pManifest.get("@id"), tJsonLDModel);
 

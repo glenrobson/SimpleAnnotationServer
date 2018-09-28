@@ -29,15 +29,15 @@ import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.query.* ;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.query.* ;
 
 import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.repository.RepositoryConnection;
@@ -139,9 +139,10 @@ public class TestPublish extends TestUtils {
 		List<Model> tAnnotationsModel = _store.getAnnotationsFromPage("http://example.com/image2");
 		Model tModel = ModelFactory.createDefaultModel();
 		for (Model tModelAnno : tAnnotationsModel) {
-			tModel.add(tModelAnno);
+            tModelAnno.begin();
+            tModel.add(tModelAnno);
+            tModelAnno.commit();
 		}
-
 		this.testAnnotation(tModel, "http://example.com/annotation/2", "Test content 1a","http://example.com/image2#xywh=0,132,102,10");
 		this.testAnnotation(tModel, "http://example.com/annotation/3", "Test Content 2a","http://example.com/image2#xywh=1873,132,102,10");
 	}

@@ -3,23 +3,23 @@ package uk.org.llgc.annotation.store.adapters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.DCTerms;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 
 import java.nio.charset.Charset;
 
@@ -206,12 +206,14 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
         if (tStoredAnno == null) {
             throw new IOException("Failed to find annotation with id " + pJson.get("@id").toString() + " so couldn't update.");
         }
+		this.begin(ReadWrite.READ);
 		Resource tAnnoRes = tStoredAnno.getResource(tAnnoId);
 		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
 		if (tCreatedSt != null) {
 			String tCreatedDate = tCreatedSt.getString();
 			pJson.put(DCTerms.created.getURI(), tCreatedDate);
 		}
+		this.end();
 		pJson.put(DCTerms.modified.getURI(), _dateFormatter.format(new Date()));
 		_logger.debug("Modified annotation " + JsonUtils.toPrettyString(pJson));
 		deleteAnnotation(tAnnoId);

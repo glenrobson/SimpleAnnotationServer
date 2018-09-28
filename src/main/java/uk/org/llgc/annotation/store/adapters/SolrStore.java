@@ -3,7 +3,7 @@ package uk.org.llgc.annotation.store.adapters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 
 import java.net.URISyntaxException;
 
@@ -53,7 +53,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	public SolrStore(final String pConnectionURL, final String pCollection) {
 		if (pCollection == null || pCollection.trim().length() == 0) {
-			_solrClient = new HttpSolrClient(pConnectionURL);
+			_solrClient = (new  HttpSolrClient.Builder(pConnectionURL)).build();
 		} else {
 			//_solrClient = new CloudSolrClient.Builder().withZkHost(pConnectionURL).build();
             List<String> tHosts = new ArrayList<String>();
