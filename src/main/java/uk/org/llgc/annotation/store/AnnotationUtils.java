@@ -295,7 +295,13 @@ public class AnnotationUtils {
 		tOptions.format = "application/jsonld";
 
 		StringWriter tStringOut = new StringWriter();
+        if (pModel.supportsTransactions()) {
+            pModel.begin();
+        }
 		RDFDataMgr.write(tStringOut, pModel, Lang.JSONLD);
+        if (pModel.supportsTransactions()) {
+            pModel.commit();
+        }    
 		Map<String,Object> tFramed = (Map<String,Object>)JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), pFrame,  tOptions);
 
 		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);
