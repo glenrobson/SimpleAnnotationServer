@@ -31,7 +31,7 @@ def fetch(url, retry=0):
                 base64string = base64.b64encode(result.group(1))
                 request.add_header("Authorization", "Basic %s" % base64string)
 
-        try: 
+        try:
             fh = urllib2.urlopen(request)
             data = fh.read()
             fh.close()
@@ -44,7 +44,7 @@ def fetch(url, retry=0):
                 return fetch(url, retry+1)
 
     return data
-if __name__ == "__main__":    
+if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         print("Usage:\n\tdownloadAnnotationListsByCanvas.py [manifest] [sas_endpoint] [output_dir] [optional outputfilename proc]")
@@ -59,16 +59,18 @@ if __name__ == "__main__":
         count += 1
         print ("Downloading %s " % canvas["@id"])
         annoListData = fetch("%s/annotation/search?uri=%s" % (sys.argv[2], canvas["@id"]))
-        #try: 
-        annoList = json.loads(annoListData)
+        # add list to resource
+        annoList = {
+                            "@type" : "sc:AnnotationList",
+                            "context": "http://iiif.io/api/presentation/2/context.json",
+                            "resources": json.loads(annoListData)
+                        }
         if len(sys.argv) > 4 and sys.argv[4] == 'nlw':
             filename = canvas["@id"].split('/')[-1]
         else:
            filename = "page%s.json" % count
         with open("%s/%s" % (sys.argv[3],filename), 'wb') as outfile:
             json.dump(annoList, outfile, sort_keys=False,indent=4, separators=(',', ': '))
-        outfile.close()    
+        outfile.close()
         #except:
         #    print (annoListData)
-
-
