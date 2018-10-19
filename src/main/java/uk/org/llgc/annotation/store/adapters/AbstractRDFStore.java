@@ -40,6 +40,7 @@ import org.apache.jena.query.ResultSet;
 
 public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractRDFStore.class.getName());
+
 	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException {
 		String tQueryString = "select ?annoId ?graph where {"
 										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> <" + pPageId + "> ."
@@ -259,7 +260,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 									 "GRAPH ?graph {?anno rdf:type <http://www.w3.org/ns/oa#Annotation> . " +
 								    "FILTER NOT EXISTS {?canvas rdf:first ?anno} " +
 							 	    "}}";
-
+        _logger.debug("Running SPARQL: " + tQueryString);
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
 		this.begin(ReadWrite.READ);
@@ -275,10 +276,11 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		try {
 			if (results != null) {
+                _logger.debug("Searching for results");
 				while (results.hasNext()) {
 					QuerySolution soln = results.nextSolution() ;
 					Resource tAnnoURI = soln.getResource("anno") ; // Get a result variable - must be a resource
-
+                    _logger.debug("Found + " + tAnnoURI.getURI());
 					Model tAnno = this.getNamedModel(tAnnoURI.getURI());
 
 					Map<String,Object> tJsonAnno = _annoUtils.frameAnnotation(tAnno, false);

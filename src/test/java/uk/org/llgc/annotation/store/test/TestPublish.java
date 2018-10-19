@@ -45,6 +45,8 @@ import org.openrdf.repository.RepositoryException;
 
 import java.util.Properties;
 
+import java.net.URISyntaxException;
+
 public class TestPublish extends TestUtils {
 	protected static Logger _logger = LogManager.getLogger(TestPublish.class.getName());
 
@@ -63,7 +65,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testPublish() throws IOException, IDConflictException {
+	public void testPublish() throws IOException, IDConflictException, URISyntaxException {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		List<Model> tAnnosAsModel = _store.addAnnotationList(tAnnotationListJSON);
@@ -90,7 +92,7 @@ public class TestPublish extends TestUtils {
 
 
 	@Test
-	public void testCreate() throws IOException, IDConflictException {
+	public void testCreate() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -101,7 +103,7 @@ public class TestPublish extends TestUtils {
 
 	// test reuse of id
 	@Test
-	public void testDelete() throws IOException, IDConflictException {
+	public void testDelete() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -113,7 +115,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testUpdate() throws IOException, IDConflictException {
+	public void testUpdate() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -128,7 +130,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testPage() throws IOException, IDConflictException {
+	public void testPage() throws IOException, IDConflictException, URISyntaxException {
 		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		for (Map<String,Object> tAnnotation : tAnnotationList) {
@@ -148,7 +150,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testUTF8() throws IOException, IDConflictException {
+	public void testUTF8() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -159,7 +161,7 @@ public class TestPublish extends TestUtils {
 
 	//@Test(expected=IDConflictException.class)
 	@Test
-	public void testDuplicate() throws IOException, IDConflictException, InterruptedException {
+	public void testDuplicate() throws IOException, IDConflictException, InterruptedException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
@@ -173,7 +175,7 @@ public class TestPublish extends TestUtils {
 	}
 
 	@Test
-	public void testDates() throws IOException, IDConflictException, InterruptedException {
+	public void testDates() throws IOException, IDConflictException, InterruptedException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");

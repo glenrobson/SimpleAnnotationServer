@@ -46,6 +46,8 @@ import org.openrdf.repository.RepositoryException;
 
 import java.util.Properties;
 
+import java.net.URISyntaxException;
+
 public class TestMirador2 extends TestUtils {
 	protected static Logger _logger = LogManager.getLogger(TestMirador2.class.getName());
 
@@ -64,7 +66,7 @@ public class TestMirador2 extends TestUtils {
 	}
 
 	@Test
-	public void TestMirador2() throws IOException, IDConflictException, InterruptedException {
+	public void TestMirador2() throws IOException, IDConflictException, InterruptedException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
@@ -81,7 +83,7 @@ public class TestMirador2 extends TestUtils {
 	}
 
     @Test
-    public void testPopulate() throws IOException, IDConflictException, InterruptedException {
+    public void testPopulate() throws IOException, IDConflictException, InterruptedException, URISyntaxException {
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/annos_master_version1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
         List<Model> tModel = _store.addAnnotationList(tAnnotationListJSON);

@@ -39,6 +39,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.query.* ;
 
+import java.net.URISyntaxException;
+
 public class TestBOR extends TestUtils {
 	protected static Logger _logger = LogManager.getLogger(TestBOR.class.getName()); 
 
@@ -57,7 +59,7 @@ public class TestBOR extends TestUtils {
 	}
 
 	@Test
-	public void testAnnotation() throws IOException, IDConflictException {
+	public void testAnnotation() throws IOException, IDConflictException, URISyntaxException {
 		_logger.debug("Reading annotation");
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/borAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
@@ -97,7 +99,7 @@ public class TestBOR extends TestUtils {
 	}
 
 	@Test
-	public void testRetrieveAnnotation() throws IOException, IDConflictException {
+	public void testRetrieveAnnotation() throws IOException, IDConflictException, URISyntaxException {
 		_logger.debug("Reading annotation");
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/borAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
@@ -119,7 +121,7 @@ public class TestBOR extends TestUtils {
 	}
 
 	@Test
-	public void testAberAnno() throws IOException, IDConflictException {
+	public void testAberAnno() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/aberAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); 
 
 		Model tModel = _store.addAnnotation(tAnnotationJSON);

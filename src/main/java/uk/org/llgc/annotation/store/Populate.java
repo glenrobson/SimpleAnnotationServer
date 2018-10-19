@@ -25,6 +25,7 @@ import org.apache.jena.rdf.model.Model;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import java.net.URISyntaxException;
 
 public class Populate extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Populate.class.getName()); 
@@ -69,6 +70,12 @@ public class Populate extends HttpServlet {
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			pRes.setContentType("text/plain");
 			pRes.getOutputStream().println("Failed to load annotation list as there was a conflict in ids " + tException.toString());
+        } catch (URISyntaxException tException) {
+			tException.printStackTrace();
+			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			pRes.setContentType("text/plain");
+			pRes.getOutputStream().println("Annotation was malformed: " + tException.toString());
+
 		}
 	}
 }

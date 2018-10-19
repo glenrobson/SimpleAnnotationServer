@@ -33,15 +33,17 @@ import java.io.File;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
+import java.net.URISyntaxException;
+
 import java.nio.charset.Charset;
 
 public interface StoreAdapter {
 
 	public void init(final AnnotationUtils pAnnoUtils);
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException;
+	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException, URISyntaxException;
 	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException;
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException;
+	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException, URISyntaxException;
 
 	public String indexManifest(Map<String,Object> pManifest) throws IOException;
 	public List<String> getManifests() throws IOException;

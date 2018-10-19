@@ -22,6 +22,8 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 
+import java.net.URISyntaxException;
+
 public class Create extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Create.class.getName()); 
 	protected AnnotationUtils _annotationUtils = null;
@@ -60,6 +62,11 @@ public class Create extends HttpServlet {
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			pRes.setContentType("text/plain");
 			pRes.getOutputStream().println("Failed to load annotation due to conflict in ID: " + tException.toString());
+        } catch (URISyntaxException tException) {    
+			tException.printStackTrace();
+			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			pRes.setContentType("text/plain");
+			pRes.getOutputStream().println("Failed to load annotation due to invalid annotation ID:" + tException.toString());
 		} catch (IOException tException) {	
 			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();
