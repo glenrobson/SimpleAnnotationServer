@@ -40,6 +40,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
+import java.net.URISyntaxException;
+import java.net.URI;
+
 public abstract class AbstractStoreAdapter implements StoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName());
 	protected SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -50,7 +53,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		_annoUtils = pAnnoUtils;
 	}
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException {
+	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException, URISyntaxException {
 		List<Model> tModel = new ArrayList<Model>();
 		for (Map<String,Object> tAnno : pJson) {
 			tModel.add(this.addAnnotation(tAnno));
@@ -58,7 +61,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		return tModel;
 	}
 
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException {
+	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException, URISyntaxException {
 		if (this.getNamedModel((String)pJson.get("@id")) != null) {
 			_logger.debug("Found existing annotation with id " + pJson.get("@id").toString());
 			pJson.put("@id",(String)pJson.get("@id") + "1");
@@ -67,8 +70,13 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 			}
 			return this.addAnnotation(pJson);
 		} else {
+            URI tURI = new URI((String)pJson.get("@id")); // Check if this is a valid URI otherwise it will fail to load correctly.
+            if (!tURI.isAbsolute()) {
+                // No scheme so invalid
+                throw new URISyntaxException(tURI.toString(), "URI: '" + tURI + "' doesn't contain a scheme");
+            }
 			this.expandTarget(pJson);
-			_logger.debug("No conflicting id " + pJson.get("@id"));
+			_logger.debug("No conflicting id " + tURI);
 			if (this.isMissingWithin(pJson)) {
 				// missing within so check to see if the canvas maps to a manifest
 				String tCanvasId = "";

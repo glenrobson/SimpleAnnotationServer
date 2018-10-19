@@ -103,7 +103,7 @@ public class TestSearch extends TestUtils {
 	}
 
 	@Test
-	public void testPassedWithin() throws IOException, IDConflictException {
+	public void testPassedWithin() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		List<String> tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
@@ -117,7 +117,7 @@ public class TestSearch extends TestUtils {
 	}
 
 	@Test
-	public void loadManifest() throws IOException, IDConflictException {
+	public void loadManifest() throws IOException, IDConflictException, URISyntaxException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestAnno1.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		// check no within
@@ -155,7 +155,7 @@ public class TestSearch extends TestUtils {
 	}
 
 	@Test
-	public void testSearching() throws IOException, IDConflictException {
+	public void testSearching() throws IOException, IDConflictException, URISyntaxException {
         // Add two copies of the same annotation list but pointing to different Manifests
         // this checks if the scoping to manifest search is working.
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch-distraction.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
@@ -196,7 +196,7 @@ public class TestSearch extends TestUtils {
 	}
 
     @Test
-	public void testMirador() throws IOException, IDConflictException {
+	public void testMirador() throws IOException, IDConflictException, URISyntaxException {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		_store.addAnnotationList(tAnnotationListJSON);
@@ -215,6 +215,26 @@ public class TestSearch extends TestUtils {
         assertTrue("Mirador requires resource to be an object. Found class " + tAnno.get("resource").getClass().getName(), tAnno.get("resource") instanceof Map);
 		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
     }
+
+    @Test(expected = URISyntaxException.class)
+    public void testInvalidAnnoId() throws IOException, IDConflictException, URISyntaxException {
+        // Add two copies of the same annotation list but pointing to different Manifests
+        // this checks if the scoping to manifest search is working.
+        Map<String,Object> tAnnoListRaw = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/populateAnno.json").getFile()));
+        String tOriginalAnnoId = (String)((List<Map<String,Object>>)tAnnoListRaw.get("resources")).get(0).get("@id");
+
+        List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/populateAnno.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+        try {
+            List<Model> tModels = _store.addAnnotationList(tAnnotationListJSON); // this should throw Exception as Anno ID isn't a valid URI
+
+            String tId = (String)tAnnotationListJSON.get(0).get("@id");
+            assertEquals("Annotation ID changed on loading... ", tOriginalAnnoId, tId);
+        } catch (Exception tExcpt) {
+            tExcpt.printStackTrace();
+            throw tExcpt;
+        }
+    }
+
 
 	@Test
 	public void testPagination() throws IOException, IDConflictException, URISyntaxException, ParseException {
