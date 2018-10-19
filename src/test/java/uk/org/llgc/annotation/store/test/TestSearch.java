@@ -230,7 +230,7 @@ public class TestSearch extends TestUtils {
             String tId = (String)tAnnotationListJSON.get(0).get("@id");
             assertEquals("Annotation ID changed on loading... ", tOriginalAnnoId, tId);
         } catch (Exception tExcpt) {
-            tExcpt.printStackTrace();
+        //    tExcpt.printStackTrace();
             throw tExcpt;
         }
     }
