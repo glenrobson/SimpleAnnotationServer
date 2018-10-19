@@ -1,0 +1,19 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "http://invalid_anno_id",
+    "@type": "sc:AnnotationList",
+    "resources": [
+        {
+            "@id": "84fd0328-5041-488e-9efc-4e49c954b93e",
+            "@type": "oa:Annotation",
+            "created": "2018-01-23 09:54:08+00:00",
+            "motivation": "sc:painting",
+            "on": "https://damsssl.llgc.org.uk/iiif/2.0/4078677/canvas/4078678.json#xywh=0,0,3596,5641",
+            "resource": {
+                "@type": "cnt:ContentAsText",
+                "chars": "Annotation text",
+                "format": "text/plain"
+            }
+        }
+    ]
+}
