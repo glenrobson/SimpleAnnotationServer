@@ -225,4 +225,18 @@ public class TestPublish extends TestUtils {
             assertTrue("",tExcpt.getMessage().contains("n array in the on/selector/value "));
         }
 	}
+
+    @Test
+	public void testBrokenAnnotation() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/brokenAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
+        try {
+    		Model tAnnoModel = _store.addAnnotation(tAnnotationJSON);
+        } catch (MalformedAnnotation tExcpt) {
+            //tExcpt.printStackTrace();
+        }
+
+        tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
+		Model tAnnoModel = _store.addAnnotation(tAnnotationJSON);
+        assertNotNull("Failed to load good annotation after bad.",tAnnoModel);
+	}
 }

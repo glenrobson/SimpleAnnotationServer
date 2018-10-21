@@ -55,6 +55,9 @@ public class Annotation {
      */
     public String checkValid() throws MalformedAnnotation {
         List<Map<String, Object>> tOnList = this.getOn();
+        if (tOnList == null) {
+            throw new MalformedAnnotation("Missing on");
+        }
         StringBuffer tOutput = new StringBuffer();
         boolean tMalformed = false;
         for (Map<String, Object> tOn : tOnList) {

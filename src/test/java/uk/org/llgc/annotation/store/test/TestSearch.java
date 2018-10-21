@@ -294,4 +294,26 @@ public class TestSearch extends TestUtils {
 		//System.out.println(JsonUtils.toPrettyString(tResultsJson));
 		assertEquals("Expected 175 result for any empty search but found something different.", 735, tResults.size());
     }
+
+    @Test
+    public void testUploadOfInvalidManifest() throws IOException, IDConflictException, URISyntaxException, MalformedAnnotation {
+		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/invalidManifest.json").getFile())); //annotaiton list
+
+        String tShortId = "";
+        try {
+            _store.indexManifest(tManifest);
+        } catch (org.apache.jena.riot.RiotException tException) {
+            _logger.debug("Caught broken manifest");
+            //tException.printStackTrace();
+        }
+        List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+        // Load annotation after failed
+		List<Model> tLoaded = null;
+        try {
+            tLoaded = _store.addAnnotationList(tAnnotationListJSON);
+        } catch (com.hp.hpl.jena.sparql.JenaTransactionException tException) {
+             tException.printStackTrace();
+        }
+        assertNotNull("Failed to load annotation list after failed upload of manifest.", tLoaded);
+    }
 }

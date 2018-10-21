@@ -36,7 +36,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.nio.charset.Charset;
 
 public class JenaStore extends AbstractRDFStore implements StoreAdapter {
-	protected static Logger _logger = LogManager.getLogger(JenaStore.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(JenaStore.class.getName());
 
 	protected Dataset _dataset = null;
 
@@ -70,16 +70,16 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		boolean tLocaltransaction = !_dataset.isInTransaction();
 		if (tLocaltransaction) {
 			_dataset.begin(ReadWrite.READ);
-		}	
+		}
 		Model tAnnotation = _dataset.getNamedModel(pContext);
 		if (tLocaltransaction) {
 			_dataset.end();
-		}	
+		}
 		if (tAnnotation.isEmpty()) {
 			return null; // annotation wasn't found
 		} else {
 			return tAnnotation;
-		}	
+		}
 	}
 
 	protected void begin(final ReadWrite pWrite) {
@@ -90,12 +90,11 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	protected String indexManifestOnly(final String pShortId, Map<String,Object> pManifest) throws IOException {
-		_dataset.begin(ReadWrite.WRITE) ;
 		Model tJsonLDModel = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(JsonUtils.toString(pManifest).getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
 
-		
 		//RDFDataMgr.write(System.out, tJsonLDModel, Lang.NQUADS);
+		_dataset.begin(ReadWrite.WRITE) ;
 		_dataset.addNamedModel((String)pManifest.get("@id"), tJsonLDModel);
 
 		_dataset.commit();
