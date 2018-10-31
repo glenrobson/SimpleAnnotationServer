@@ -1,4 +1,4 @@
-Setting up SOLR as an annotation store
+# Setting up SOLR as an annotation store
 
 Download SOLR from:
 
@@ -62,13 +62,13 @@ mvn jetty:run
 Start SOLR:
 
 ```
- ./bin/solr -e cloud -noprompt
- ```
+./bin/solr -e cloud -noprompt
+```
 
- Load annotations:
+Load annotations:
 
- ```
- # cp config from SAS:
- cp -r $SAS_HOME/src/main/resources/solr $SOLR_HOME/server/solr/configsets/annos
- ./bin/solr create_collection -c test -d server/solr/configsets/annos -shards 2
- ```
+```
+# cp config from SAS:
+cp -r $SAS_HOME/src/main/resources/solr $SOLR_HOME/server/solr/configsets/annos
+./bin/solr create_collection -c test -d server/solr/configsets/annos -shards 2
+```
