@@ -14,7 +14,7 @@ after_success:
   - docker --version
   - pip install --user awscli
   - export PATH=$PATH:$HOME/.local/bin
-  - eval $(aws ecr get-login --region eu-west-2)
+  - eval $(aws ecr get-login --region eu-west-2 --no-include-email)
   - docker build --rm -t sas .
   - docker tag sas:latest 082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas:latest
   - docker push 082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas:latest
