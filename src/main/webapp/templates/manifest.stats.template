@@ -41,9 +41,9 @@
 			  var data = google.visualization.arrayToDataTable(
 					##ANNO_PAGE_DATA##
 			  	);
+
 				var options = {
 					title: "Annotations per Page",
-					width: ##ANNO_PAGE_WIDTH##,
 					chartArea: {top: 20, left:20 },
 					height: 400,
 					fontSize: 10,
