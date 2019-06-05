@@ -12,7 +12,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.File;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;

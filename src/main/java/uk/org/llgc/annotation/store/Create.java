@@ -16,12 +16,14 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+
+import java.net.URISyntaxException;
 
 public class Create extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Create.class.getName());
@@ -67,6 +69,7 @@ public class Create extends HttpServlet {
             pRes.setContentType("text/plain");
             pRes.getOutputStream().println("Falied to load annotation as it was badly informed: " + tExcpt.toString());
 		} catch (IOException tException) {
+
 			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();
 			throw tException;

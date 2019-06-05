@@ -12,11 +12,14 @@ import java.text.SimpleDateFormat;
 
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
-import com.hp.hpl.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.DCTerms;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
 import java.io.IOException;
+
+import java.net.URISyntaxException;
+import java.net.URI;
 
 public class Annotation {
     public static final String FULL_TEXT_PROPERTY = "http://dev.llgc.org.uk/sas/full_text";
@@ -54,6 +57,16 @@ public class Annotation {
      * Check if the load annotaiton is valid
      */
     public String checkValid() throws MalformedAnnotation {
+        try {
+            URI tURI = new URI(this.getId()); // Check if this is a valid URI otherwise it will fail to load correctly.
+            if (!tURI.isAbsolute()) {
+                // No scheme so invalid
+                throw new MalformedAnnotation("URI: '" + tURI + "' doesn't contain a scheme");
+            }
+        } catch (URISyntaxException tExcpt) {
+            throw new MalformedAnnotation("URI: " + this.getId() + " is invalid due to " + tExcpt.getMessage());
+        }
+
         List<Map<String, Object>> tOnList = this.getOn();
         if (tOnList == null) {
             throw new MalformedAnnotation("Missing on");
@@ -87,7 +100,7 @@ public class Annotation {
 			}
 		}
 		return tMissingOnList;
-	}
+    }
 
     public List<Map<String,Object>> getOn() {
         if (_annotation.get("on") instanceof List) {

@@ -1,4 +1,4 @@
-Setting up SOLR as an annotation store
+# Setting up SOLR as an annotation store
 
 Download SOLR from:
 
@@ -62,10 +62,10 @@ mvn jetty:run
 Start SOLR:
 
 ```
- ./bin/solr -e cloud -noprompt
- ```
+./bin/solr -e cloud -noprompt
+```
 
- Load annotations:
+Load annotations:
 
  ```
  # cp config from SAS:
@@ -82,3 +82,4 @@ curl -X POST -d @/tmp/full_formmatted.xml -H "Content-Type: application/xml" htt
 ```
 
 Note content type is very important.
+

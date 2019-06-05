@@ -29,8 +29,8 @@ import java.nio.charset.Charset;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.encoders.Mirador214;
@@ -55,7 +55,7 @@ public class AnnotationUtils {
 	 */
 	public List<Map<String,Object>> readAnnotationList(final InputStream pStream, final String pBaseURL) throws IOException {
 		Object inputList = JsonUtils.fromInputStream(pStream);
-        _logger.debug("Original untouched annotation:");
+        _logger.debug("Original untouched annotation list:");
         _logger.debug(JsonUtils.toPrettyString(inputList));
         List<Map<String,Object>> tAnnotations = null;
         if (inputList instanceof Map) {
@@ -128,6 +128,9 @@ public class AnnotationUtils {
 				_encoder.encode(tAnno);
 			}
 		}
+
+        _logger.debug("Normalised annotation list:");
+        _logger.debug(JsonUtils.toPrettyString(tAnnotations));
 		return tAnnotations;
 	}
     protected String getTarget(final Map<String, Object> pAnno) {
@@ -301,7 +304,13 @@ public class AnnotationUtils {
 		tOptions.format = "application/jsonld";
 
 		StringWriter tStringOut = new StringWriter();
+        if (pModel.supportsTransactions()) {
+            pModel.begin();
+        }
 		RDFDataMgr.write(tStringOut, pModel, Lang.JSONLD);
+        if (pModel.supportsTransactions()) {
+            pModel.commit();
+        }
 		Map<String,Object> tFramed = (Map<String,Object>)JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), pFrame,  tOptions);
 
 		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);

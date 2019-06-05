@@ -3,23 +3,25 @@ package uk.org.llgc.annotation.store.adapters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.DCTerms;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+
+import java.nio.charset.Charset;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -38,8 +40,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
     public static final String FULL_TEXT_PROPERTY = Annotation.FULL_TEXT_PROPERTY;
@@ -75,10 +77,10 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 			}
 			return this.addAnnotation(tAnno.toJson());
 		} else {
-			_logger.debug("No conflicting id " + tAnno.getId());
-
-            addWithins(tAnno);
-			return addAnnotationSafe(tAnno.toJson());
+			this.expandTarget(pJson);
+            this.addWithins(tAnno);
+			
+			return addAnnotationSafe(pJson);
 		}
 	}
 
@@ -92,11 +94,13 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
         if (tStoredAnno == null) {
             throw new IOException("Failed to find annotation with id " + tAnno.getId() + " so couldn't update.");
         }
+        this.begin(ReadWrite.READ);
 		Resource tAnnoRes = tStoredAnno.getResource(tAnno.getId());
 		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
 		if (tCreatedSt != null) {
             tAnno.setCreated(tCreatedSt.getString());
 		}
+        this.end();
         tAnno.updateModified();
 		_logger.debug("Modified annotation " + tAnno.toString());
 		deleteAnnotation(tAnno.getId());
@@ -125,6 +129,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
             }
         }
     }
+
     protected Map<String,String> createWithin(final String pManifestURI) {
         Map<String,String> tWithin = new HashMap<String,String>();
         tWithin.put("@id", pManifestURI);
@@ -161,6 +166,48 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
         }
     }
 
+    public void expandTarget(final Map<String,Object> pJson) {
+		String tURI = null;
+		Map<String,Object> tSpecificResource = null;
+		if (pJson.get("on") instanceof String) {
+			tURI = (String)pJson.get("on");
+			tSpecificResource = new HashMap<String,Object>();
+			pJson.put("on", tSpecificResource);
+		} else if (pJson.get("on") instanceof Map) {
+			tSpecificResource = (Map<String,Object>)pJson.get("on");
+
+			if (tSpecificResource.get("@id") == null || ((String)tSpecificResource.get("@id")).indexOf("#") == -1) {
+				return; // No id to split or no fragement
+			}
+			if (tSpecificResource.get("selector") != null) {
+				return; // already have a selector
+			}
+			tURI = (String)tSpecificResource.get("@id");
+			tSpecificResource.remove("@id");
+		} else {
+			return; // could be a list so not processing
+		}
+		int tIndexOfHash = tURI.indexOf("#");
+		tSpecificResource.put("@type","oa:SpecificResource");
+		Map<String,Object> tFragement = new HashMap<String,Object>();
+		tSpecificResource.put("selector", tFragement);
+		tSpecificResource.put("full", tURI.substring(0, tIndexOfHash));
+
+		tFragement.put("@type", "oa:FragmentSelector");
+		tFragement.put("value", tURI.substring(tIndexOfHash + 1));
+	}
+
+	protected boolean isMissingWithin(final Map<String,Object> pAnno) {
+		if (pAnno.get("on") != null) {
+			if (pAnno.get("on") instanceof String) {
+				return true;
+			}
+			if (pAnno.get("on") instanceof Map) {
+				return ((Map<String,Object>)pAnno.get("on")).get("within") == null;
+			}
+		}
+		return true;
+	}
 	protected String getFirstCanvasId(final Object pOn) {
 		if (pOn instanceof Map) {
 			return (String)((Map<String,Object>)pOn).get("full");
@@ -212,7 +259,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
 
-	protected String createShortId(final String pLongId) throws IOException {
+	public String createShortId(final String pLongId) throws IOException {
 		if (pLongId.endsWith("manifest.json")) {
 			String[] tURI = pLongId.split("/");
 			return tURI[tURI.length - 2];
@@ -245,3 +292,4 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	}
 
 }
+

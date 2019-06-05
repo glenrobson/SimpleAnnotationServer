@@ -33,6 +33,9 @@
         <Logger name="uk.org.llgc.annotation.store.StoreConfig" level="INFO" additivity="false">
 			<AppenderRef ref="Console"/>
 		</Logger>
+        <Logger name="uk.org.llgc.annotation" level="info" additivity="false">
+			<AppenderRef ref="Console"/>
+		</Logger>
         <Logger name="org.apache.jena.info" level="INFO" additivity="false">
 	        <AppenderRef ref="Console"/>
 	    </Logger>

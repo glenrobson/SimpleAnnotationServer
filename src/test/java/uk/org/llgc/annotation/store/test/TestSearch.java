@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -33,15 +34,15 @@ import uk.org.llgc.annotation.store.data.Manifest;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.query.* ;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.query.* ;
 
 import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.repository.RepositoryConnection;
@@ -77,17 +78,25 @@ public class TestSearch extends TestUtils {
 		String tQuery = "PREFIX oa: <http://www.w3.org/ns/oa#> PREFIX dcterms: <http://purl.org/dc/terms/>  select ?within where { <" + pAnnoId + "> oa:hasTarget ?target . ?target dcterms:isPartOf ?within }";
 
 		Query query = QueryFactory.create(tQuery) ;
-		ResultSetRewindable results = null;
+		ResultSet results = null;
 		List<String> tWithin = new ArrayList<String>();
 		try (QueryExecution qexec = QueryExecutionFactory.create(query,pModel)) {
 
-			results = ResultSetFactory.copyResults(qexec.execSelect());
+            try {
+                //pModel.begin();
+                qexec.getDataset().begin(ReadWrite.READ);
+			results = qexec.execSelect();
+                qexec.getDataset().end();
+        }catch (Exception tExcpt) {
+            tExcpt.printStackTrace();
+        }
+
 			for ( ; results.hasNext() ; ) {
 				QuerySolution soln = results.nextSolution() ;
 
 				tWithin.add(soln.getResource("within").toString());
 			}
-		}
+        }
 		if (tWithin.isEmpty()) {
 			return null;
 		} else {
@@ -211,6 +220,26 @@ public class TestSearch extends TestUtils {
 		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
     }
 
+    @Test(expected = MalformedAnnotation.class)
+    public void testInvalidAnnoId() throws IOException, IDConflictException, MalformedAnnotation {
+        // Add two copies of the same annotation list but pointing to different Manifests
+        // this checks if the scoping to manifest search is working.
+        Map<String,Object> tAnnoListRaw = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/populateAnno.json").getFile()));
+        String tOriginalAnnoId = (String)((List<Map<String,Object>>)tAnnoListRaw.get("resources")).get(0).get("@id");
+
+        List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/populateAnno.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+        try {
+            List<Model> tModels = _store.addAnnotationList(tAnnotationListJSON); // this should throw Exception as Anno ID isn't a valid URI
+
+            String tId = (String)tAnnotationListJSON.get(0).get("@id");
+            assertEquals("Annotation ID changed on loading... ", tOriginalAnnoId, tId);
+        } catch (Exception tExcpt) {
+        //    tExcpt.printStackTrace();
+            throw tExcpt;
+        }
+    }
+
+
 	@Test
 	public void testPagination() throws IOException, IDConflictException, URISyntaxException, ParseException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
@@ -304,6 +333,7 @@ public class TestSearch extends TestUtils {
             _store.indexManifest(tManifest);
         } catch (org.apache.jena.riot.RiotException tException) {
             _logger.debug("Caught broken manifest");
+
             //tException.printStackTrace();
         }
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
@@ -311,9 +341,15 @@ public class TestSearch extends TestUtils {
 		List<Model> tLoaded = null;
         try {
             tLoaded = _store.addAnnotationList(tAnnotationListJSON);
-        } catch (com.hp.hpl.jena.sparql.JenaTransactionException tException) {
+        } catch (org.apache.jena.sparql.JenaTransactionException tException) {
              tException.printStackTrace();
         }
         assertNotNull("Failed to load annotation list after failed upload of manifest.", tLoaded);
+    }
+
+    public void testShortId() throws IOException {
+        String tShortId = ((AbstractStoreAdapter)_store).createShortId("https://api-pre.library.tamu.edu/fcrepo/rest/mwbManifests/CofeEarHis/Full_Manifest");
+        assertNotNull("Short id shouldn't be null",tShortId);
+        assertNotEquals("Short id shouldn't be empty",tShortId, "");
     }
 }
