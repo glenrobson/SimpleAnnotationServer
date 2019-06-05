@@ -3,4 +3,17 @@ after_script: travis/stop_solr.sh
 language: java
 jdk:
   - openjdk8
+
+services:
+  - docker # required, but travis uses older version of docker :(  
+
 script: mvn clean test
+
+deploy:
+  - docker --version  # document the version travis is using
+  - pip install --user awscli # install aws cli w/o sudo
+  - export PATH=$PATH:$HOME/.local/bin # put aws in the path
+  - eval $(aws ecr get-login --region us-east-1) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+  - docker build --rm -t sas . 
+  - docker tag sas:latest 082101253860.dkr.ecr.eu-west-2.amazonaws.com/simple_annotation_server:latest
+  - docker push 082101253860.dkr.ecr.eu-west-2.amazonaws.com/simple_annotation_server:latest
