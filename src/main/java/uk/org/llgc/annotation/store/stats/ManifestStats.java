@@ -76,7 +76,7 @@ public class ManifestStats extends HttpServlet {
 			tManifest = new Manifest((Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(tCache)), tShortId);
 		} else {
 			tManifest = new Manifest((Map<String,Object>)JsonUtils.fromInputStream(new URL(tManifestURI).openStream()), tShortId);
-			JsonUtils.write(new FileWriter(tCache), tManifest);
+			JsonUtils.write(new FileWriter(tCache), tManifest.getJson());
 		}	
 
         List<List> tAnnoPageData = this.getStatsForManifest(tManifest);
