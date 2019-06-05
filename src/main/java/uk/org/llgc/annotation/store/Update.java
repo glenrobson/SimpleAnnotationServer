@@ -20,9 +20,10 @@ import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 public class Update extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Update.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(Update.class.getName());
 
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
@@ -40,7 +41,7 @@ public class Update extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		try {
-			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation"); 
+			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation");
 			if (tAnnotationJSON.get("@context") instanceof String) {
 				Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(super.getServletContext().getResourceAsStream("/contexts/iiif-2.0.json"));
 				tAnnotationJSON.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
@@ -59,10 +60,15 @@ public class Update extends HttpServlet {
 			_logger.debug("JSON out:");
 			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
 			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
-		} catch (IOException tException) {	
+		} catch (IOException tException) {
 			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();
 			throw tException;
-		}	
+        } catch (MalformedAnnotation tExcpt) {
+            tExcpt.printStackTrace();
+            pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            pRes.setContentType("text/plain");
+            pRes.getOutputStream().println("Falied to load annotation as it was badly informed: " + tExcpt.toString());
+		}
 	}
 }

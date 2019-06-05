@@ -32,6 +32,7 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.data.ManifestProcessor;
+import uk.org.llgc.annotation.store.data.Manifest;
 
 public class ManifestUpload extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(ManifestUpload.class.getName());
@@ -76,7 +77,7 @@ public class ManifestUpload extends HttpServlet {
 		String[] tSplitURI = tRequestURI.split("/");
 
 		// Return collection
-		List<String> tManifests = _store.getManifests();
+		List<Manifest> tManifests = _store.getManifests();
 
 		Map<String,Object> tCollection = new HashMap<String,Object>();
 
@@ -86,12 +87,12 @@ public class ManifestUpload extends HttpServlet {
 		tCollection.put("label","Collection of all manifests known by this annotation server");
 
 		List<Map<String,Object>> tMembers = new ArrayList<Map<String,Object>>();
-		for (String tManifestURI : tManifests) {
-			Map<String, Object> tManifest = new HashMap<String,Object>();
-			tManifest.put("@id", tManifestURI);
-			tManifest.put("@type", "sc:Manifest");
+		for (Manifest tManifest : tManifests) {
+			Map<String, Object> tManifestJson = new HashMap<String,Object>();
+			tManifestJson.put("@id", tManifest.getURI());
+			tManifestJson.put("@type", "sc:Manifest");
 
-			tMembers.add(tManifest);
+			tMembers.add(tManifestJson);
 		}
 
 		tCollection.put("members", tMembers);

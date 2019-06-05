@@ -67,6 +67,24 @@
         <servlet-name>IIIFSearchAPI</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.IIIFSearchAPI</servlet-class>
     </servlet>
+	 <servlet>
+        <servlet-name>ListManifests</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.stats.ListManifests</servlet-class>
+    </servlet>
+	 <servlet>
+        <servlet-name>ManifestStats</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.stats.ManifestStats</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ListManifests</servlet-name>
+        <url-pattern>/stats/</url-pattern>
+        <url-pattern>/stats/index.html</url-pattern>
+    </servlet-mapping>
+	 <servlet-mapping>
+        <servlet-name>ManifestStats</servlet-name>
+        <url-pattern>/stats/*</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>IIIFSearchAPI</servlet-name>
         <url-pattern>/search-api/*</url-pattern>

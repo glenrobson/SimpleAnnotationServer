@@ -2,5 +2,5 @@ before_script: travis/install_solrcloud.sh
 after_script: travis/stop_solr.sh
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
 script: mvn clean test

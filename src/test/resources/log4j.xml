@@ -20,6 +20,9 @@
   <logger name="org.apache.zookeeper">
     <level value="ERROR"/>
   </logger>
+  <logger name="org.apache.jena">
+    <level value="INFO"/>
+  </logger>
   <logger name="org.apache.solr">
     <level value="ERROR"/>
   </logger>

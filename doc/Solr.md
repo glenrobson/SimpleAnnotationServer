@@ -67,8 +67,19 @@ Start SOLR:
 
 Load annotations:
 
+ ```
+ # cp config from SAS:
+ cp -r $SAS_HOME/src/main/resources/solr $SOLR_HOME/server/solr/configsets/annos
+ ./bin/solr create_collection -c test -d server/solr/configsets/annos -shards 2
+ ```
+
+## Tips
+
+If you need to manually change a record in SOLR you can do it with curl using the following commnad:
+
 ```
-# cp config from SAS:
-cp -r $SAS_HOME/src/main/resources/solr $SOLR_HOME/server/solr/configsets/annos
-./bin/solr create_collection -c test -d server/solr/configsets/annos -shards 2
+curl -X POST -d @/tmp/full_formmatted.xml -H "Content-Type: application/xml" http://localhost:8983/solr/testannotations/update?commit=true
 ```
+
+Note content type is very important.
+

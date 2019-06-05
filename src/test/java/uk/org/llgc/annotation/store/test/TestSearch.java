@@ -28,7 +28,9 @@ import uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.Manifest;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -103,7 +105,7 @@ public class TestSearch extends TestUtils {
 	}
 
 	@Test
-	public void testPassedWithin() throws IOException, IDConflictException, URISyntaxException {
+	public void testPassedWithin() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		List<String> tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
@@ -114,10 +116,12 @@ public class TestSearch extends TestUtils {
 		tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
 		assertNotNull("Missing within for second annotation ", tWithin);
 		assertEquals("Second Annotation should have a within but its missing or not correct", "http://example.com/manfiest/test/manifest.json", tWithin.get(0));
+
+		//RDFDataMgr.write(System.out, tModel, Lang.NQUADS);
 	}
 
 	@Test
-	public void loadManifest() throws IOException, IDConflictException, URISyntaxException {
+	public void loadManifest() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testManifestAnno1.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Model tModel = _store.addAnnotation(tAnnotationJSON);
 		// check no within
@@ -125,8 +129,8 @@ public class TestSearch extends TestUtils {
 		List<String> tWithin = this.getWithin(tModel, "http://example.com/manifest/annotation/within");
 		assertNull("Annotation contains a within even though I haven't loaded the manifest", tWithin);
 
-		List<String> tLoadedManifests = _store.getManifests();
-		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests.isEmpty());
+		List<Manifest> tLoadedManifests = _store.getManifests();
+		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests != null && tLoadedManifests.isEmpty());
 
 		Map<String, Object> tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
 		String tShortId = _store.indexManifest(tManifest);
@@ -134,7 +138,7 @@ public class TestSearch extends TestUtils {
 
 		tLoadedManifests = _store.getManifests();
 		assertEquals("Store should have 1 manifests registered but answered " + tLoadedManifests, 1, tLoadedManifests.size());
-		assertEquals("Store should have single manifests registered but answered " + tLoadedManifests, "http://example.com/manfiest/test/manifest.json",tLoadedManifests.get(0));
+		assertEquals("Store should have single manifests registered but answered " + tLoadedManifests, "http://example.com/manfiest/test/manifest.json",tLoadedManifests.get(0).getURI());
 		assertEquals("Short id returned incorrect manifest", "http://example.com/manfiest/test/manifest.json", _store.getManifestId(tShortId));
 
 		tModel = _store.getAnnotation("http://example.com/manifest/annotation/1");
@@ -155,7 +159,7 @@ public class TestSearch extends TestUtils {
 	}
 
 	@Test
-	public void testSearching() throws IOException, IDConflictException, URISyntaxException {
+	public void testSearching() throws IOException, IDConflictException, MalformedAnnotation {
         // Add two copies of the same annotation list but pointing to different Manifests
         // this checks if the scoping to manifest search is working.
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch-distraction.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
@@ -196,11 +200,10 @@ public class TestSearch extends TestUtils {
 	}
 
     @Test
-	public void testMirador() throws IOException, IDConflictException, URISyntaxException {
+	public void testMirador() throws IOException, IDConflictException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		_store.addAnnotationList(tAnnotationListJSON);
-
 
 		SearchQuery tQuery = new SearchQuery("simple");
 		tQuery.setScope("http://example.com/manfiest/test/manifest.json");
@@ -211,13 +214,14 @@ public class TestSearch extends TestUtils {
         Map<String, Object> tWithin = (Map<String,Object>)tResultsJson.get("within");
 		assertNotNull("Missing result count in result set", tWithin.get("total"));
 		assertEquals("Start index should be 0", 0, tResultsJson.get("startIndex"));
+		assertEquals("Number of results should be 1", 1, ((List<Map<String,Object>>)tResultsJson.get("resources")).size());
         Map<String, Object> tAnno = ((List<Map<String,Object>>)tResultsJson.get("resources")).get(0);
         assertTrue("Mirador requires resource to be an object. Found class " + tAnno.get("resource").getClass().getName(), tAnno.get("resource") instanceof Map);
 		assertNotNull("Mirador requires a label describing a search match, using annotation.label", tAnno.get("label"));
     }
 
-    @Test(expected = URISyntaxException.class)
-    public void testInvalidAnnoId() throws IOException, IDConflictException, URISyntaxException {
+    @Test(expected = MalformedAnnotation.class)
+    public void testInvalidAnnoId() throws IOException, IDConflictException, MalformedAnnotation {
         // Add two copies of the same annotation list but pointing to different Manifests
         // this checks if the scoping to manifest search is working.
         Map<String,Object> tAnnoListRaw = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/populateAnno.json").getFile()));
@@ -237,7 +241,7 @@ public class TestSearch extends TestUtils {
 
 
 	@Test
-	public void testPagination() throws IOException, IDConflictException, URISyntaxException, ParseException {
+	public void testPagination() throws IOException, IDConflictException, URISyntaxException, ParseException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		_store.addAnnotationList(tAnnotationListJSON);
@@ -269,7 +273,7 @@ public class TestSearch extends TestUtils {
 	}
 
 	@Test
-	public void getAllAnnotations() throws IOException, IDConflictException, URISyntaxException {
+	public void getAllAnnotations() throws IOException, IDConflictException, URISyntaxException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
 		_store.addAnnotationList(tAnnotationListJSON);
@@ -290,7 +294,7 @@ public class TestSearch extends TestUtils {
 	}
 
     @Test
-    public void testEndToEnd() throws IOException, IDConflictException, URISyntaxException {
+    public void testEndToEnd() throws IOException, IDConflictException, URISyntaxException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/examples/anno_list.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
         // Upload Newspaper annotation list
@@ -321,6 +325,28 @@ public class TestSearch extends TestUtils {
     }
 
     @Test
+    public void testUploadOfInvalidManifest() throws IOException, IDConflictException, URISyntaxException, MalformedAnnotation {
+		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/invalidManifest.json").getFile())); //annotaiton list
+
+        String tShortId = "";
+        try {
+            _store.indexManifest(tManifest);
+        } catch (org.apache.jena.riot.RiotException tException) {
+            _logger.debug("Caught broken manifest");
+
+            //tException.printStackTrace();
+        }
+        List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+        // Load annotation after failed
+		List<Model> tLoaded = null;
+        try {
+            tLoaded = _store.addAnnotationList(tAnnotationListJSON);
+        } catch (org.apache.jena.sparql.JenaTransactionException tException) {
+             tException.printStackTrace();
+        }
+        assertNotNull("Failed to load annotation list after failed upload of manifest.", tLoaded);
+    }
+
     public void testShortId() throws IOException {
         String tShortId = ((AbstractStoreAdapter)_store).createShortId("https://api-pre.library.tamu.edu/fcrepo/rest/mwbManifests/CofeEarHis/Full_Manifest");
         assertNotNull("Short id shouldn't be null",tShortId);

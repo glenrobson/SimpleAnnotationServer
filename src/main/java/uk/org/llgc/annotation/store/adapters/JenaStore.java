@@ -44,6 +44,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
 
+
 		_dataset.begin(ReadWrite.WRITE) ;
 		_dataset.addNamedModel((String)pJson.get("@id"), tJsonLDModel);
 		_dataset.commit();
@@ -83,12 +84,11 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	protected String indexManifestOnly(final String pShortId, Map<String,Object> pManifest) throws IOException {
-		_dataset.begin(ReadWrite.WRITE) ;
 		Model tJsonLDModel = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(JsonUtils.toString(pManifest).getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
 
-
 		//RDFDataMgr.write(System.out, tJsonLDModel, Lang.NQUADS);
+		_dataset.begin(ReadWrite.WRITE) ;
 		_dataset.addNamedModel((String)pManifest.get("@id"), tJsonLDModel);
 
 		_dataset.commit();

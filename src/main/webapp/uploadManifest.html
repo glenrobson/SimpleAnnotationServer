@@ -1,7 +1,37 @@
 <!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-    <head><title>Register manifest with annotation store</title></head>
-    <body>
+    <head>
+	 	<meta charset="utf-8">
+		<meta content="IE=edge" http-equiv="X-UA-Compatible">
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+		<title>Register manifest with annotation store</title>
+		<link rel="stylesheet" href="../css/bootstrap-local.min.css">
+		<link rel="stylesheet" href="../css/dashboard.css">
+		<link rel="stylesheet" href="../css/local.css">
+	</head>
+	<body>
+	<div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li>
+						<a href="index.html">Home</a>
+					</li>
+					<li>
+						<a href="stats/index.html">Stats</a>
+					</li>
+					<li>
+						<a href="populate.html">Load Annotation List</a>
+					</li>
+					<li>
+						<a href="uploadManifest.html">Index Manifest</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+		<div class="container">
         <h1>Register manifest with annotation store</h1>
         <p>This page allows you to upload a link to a manifest so that it is registered with the repository. Annotations which are associated with this canvas are then linked to this manifest and also a IIIF Search API endpoint is created.</p>
         
@@ -10,5 +40,7 @@
             <br/>
             <input type="submit" value="Submit"/>
         </form>    
+		  </div>
+		  </main>
     </body>
 </html>

@@ -25,10 +25,10 @@ import org.apache.jena.rdf.model.Model;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
-import java.net.URISyntaxException;
+import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 public class Populate extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Populate.class.getName()); 
+	protected static Logger _logger = LogManager.getLogger(Populate.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -46,7 +46,7 @@ public class Populate extends HttpServlet {
 			_logger.debug("Reading from " + pReq.getParameter("uri"));
 			tAnnotationList = new URL(pReq.getParameter("uri")).openStream();
 		} else {
-			/*java.io.BufferedReader tReader = new java.io.BufferedReader( new java.io.InputStreamReader( pReq.getInputStream())); 
+			/*java.io.BufferedReader tReader = new java.io.BufferedReader( new java.io.InputStreamReader( pReq.getInputStream()));
 			String tLine = "";
 			System.out.println("Printing results");
 			while ((tLine = tReader.readLine()) != null) {
@@ -70,12 +70,11 @@ public class Populate extends HttpServlet {
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			pRes.setContentType("text/plain");
 			pRes.getOutputStream().println("Failed to load annotation list as there was a conflict in ids " + tException.toString());
-        } catch (URISyntaxException tException) {
-			tException.printStackTrace();
+		} catch (MalformedAnnotation tExcpt) {
+            tExcpt.printStackTrace();
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			pRes.setContentType("text/plain");
-			pRes.getOutputStream().println("Annotation was malformed: " + tException.toString());
-
-		}
+			pRes.getOutputStream().println("Falied to load annotation as it was badly informed: " + tExcpt.toString());
+        }
 	}
 }
