@@ -34,8 +34,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
-import uk.org.llgc.annotation.store.adapters.SolrStore;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 
@@ -44,6 +44,13 @@ public class ManifestStats extends HttpServlet {
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 	protected File _cacheDir = null;
+
+    public ManifestStats() {
+    }
+
+    public ManifestStats(final StoreAdapter pStore) {
+        _store = pStore;
+    }
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
@@ -63,79 +70,16 @@ public class ManifestStats extends HttpServlet {
 		String tManifestURI = _store.getManifestId(tShortId);
 
 		File tCache = new File(_cacheDir,tShortId + ".json");
-		System.out.println(tCache.getPath());
-		Map<String, Object> tManifest = null;
+		Manifest tManifest = null;
 		final long tCacheTimeout = 86400000; // 24 hours
 		if (tCache.exists() && tCache.length() != 0 && (tCache.lastModified() + tCacheTimeout) > new Date().getTime()) {
-			System.out.println("reading from cache");
-			tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(tCache));
+			tManifest = new Manifest((Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(tCache)), tShortId);
 		} else {
-			System.out.println("Getting remote manifest");
-			tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tManifestURI).openStream());
+			tManifest = new Manifest((Map<String,Object>)JsonUtils.fromInputStream(new URL(tManifestURI).openStream()), tShortId);
 			JsonUtils.write(new FileWriter(tCache), tManifest);
 		}	
 
-		List<List> tAnnoPageData = new ArrayList<List>();
-		List tTitle = new ArrayList();
-		tTitle.add("Page");
-		tTitle.add("Count");
-		tAnnoPageData.add(tTitle);
-		int tPageCount = 0;
-		int tAnnoPageCount = 0;
-		long tTotalAnnos= 0;
-		try {
-			SolrQuery tQuery = new SolrQuery();
-			tQuery.setRows(0);
-			tQuery.setFacet(true);
-			tQuery.addFacetField("target");
-			tQuery.setFacetLimit(-1);
-			tQuery.setFacetSort("index");
-			tQuery.set("q", "type:oa\\:Annotation AND within:" + tManifestURI.replaceAll(":","\\\\:"));
-
-			QueryResponse tResponse  = ((SolrStore)_store).getClient().query(tQuery);
-			tTotalAnnos = tResponse.getResults().getNumFound();
-			FacetField tFacetCounts = tResponse.getFacetField("target");
-			Map<String,Long> tFacetMap = new HashMap<String,Long>();
-			for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-				tFacetMap.put(tFacetValue.getName(), tFacetValue.getCount());
-			}
-			tAnnoPageCount = tFacetCounts.getValues().size();
-
-			List<Map<String,Object>> tSequence = (List<Map<String,Object>>)tManifest.get("sequences");
-			
-			for (Map<String,Object> tCanvas : (List<Map<String,Object>>)(tSequence).get(0).get("canvases")) {
-				long tCount = 0;
-				if (tFacetMap.get(tCanvas.get("@id")) != null) {
-					tCount = tFacetMap.get(tCanvas.get("@id"));
-				}
-				List tRow = new ArrayList();
-				tRow.add((String)tCanvas.get("label"));
-				tRow.add(tCount);
-				tAnnoPageData.add(tRow);
-			}
-			tPageCount = ((List<Map<String,Object>>)tSequence.get(0).get("canvases")).size();
-		} catch (SolrServerException tException) {
-			_logger.error("Failed to retrieve Manifest stats " + tException.toString());
-			throw new IOException("Failed to retrieve Manifest stats due to " + tException.toString());
-		}	
-
-		List<List> tAnnoPageCountData = new ArrayList<List>();
-		List tPageCountResult = new ArrayList();
-		tPageCountResult = new ArrayList();
-		tAnnoPageCountData.add(tPageCountResult);
-		tPageCountResult.add("Camvas type");
-		tPageCountResult.add("count");
-
-		
-		tPageCountResult = new ArrayList();
-		tAnnoPageCountData.add(tPageCountResult);
-		tPageCountResult.add("Transcribed");
-		tPageCountResult.add(tAnnoPageCount);
-
-		tPageCountResult = new ArrayList();
-		tAnnoPageCountData.add(tPageCountResult);
-		tPageCountResult.add("Still to do");
-		tPageCountResult.add(tPageCount - tAnnoPageCount);
+        List<List> tAnnoPageData = this.getStatsForManifest(tManifest);
 
 		File tTemplate = new File(new File(super.getServletContext().getRealPath("/templates")), "manifest.stats.template");
 		BufferedReader tReader = null;
@@ -148,11 +92,11 @@ public class ManifestStats extends HttpServlet {
 			}
 
 			String tResult = tHTML.toString().replaceAll("##ANNO_PAGE_DATA##", JsonUtils.toPrettyString(tAnnoPageData));
-			tResult = tResult.replaceAll("##LABEL##", (String)tManifest.get("label"));
-			tResult = tResult.replaceAll("##ANNO_PAGE_WIDTH##", "" + (tPageCount * 2));
-			tResult = tResult.replaceAll("##PAGE_ANNO_COUNT##", JsonUtils.toPrettyString(tAnnoPageCountData));
+			tResult = tResult.replaceAll("##LABEL##", tManifest.getLabel());
+			tResult = tResult.replaceAll("##ANNO_PAGE_WIDTH##", "" + (tAnnoPageData.size() * 2));
+			tResult = tResult.replaceAll("##PAGE_ANNO_COUNT##", JsonUtils.toPrettyString(getTranscribedTotals(tAnnoPageData)));
 			DecimalFormat tFormatter= new DecimalFormat("#,###");
-			tResult = tResult.replaceAll("##total_anno##", "" + tFormatter.format(tTotalAnnos));
+			tResult = tResult.replaceAll("##total_anno##", "" + tFormatter.format(getTotalAnnotations(tAnnoPageData)));
 
 			pRes.setContentType("text/html");
 			pRes.getOutputStream().println(tResult);
@@ -163,4 +107,86 @@ public class ManifestStats extends HttpServlet {
 		}
 
 	}
+
+    public List<List> getStatsForManifest(final Manifest pManifest) throws IOException {
+        List<List> tAnnoPageData = new ArrayList<List>();
+		List tTitle = new ArrayList();
+		tTitle.add("Page");
+		tTitle.add("Count");
+		tAnnoPageData.add(tTitle);
+
+        List<PageAnnoCount> tPageCounts = _store.listAnnoPages(pManifest);
+        // turn list to map
+        Map<String, Integer> tFacetMap = new HashMap<String, Integer>();
+        for (PageAnnoCount tCount : tPageCounts) {
+            tFacetMap.put(tCount.getPageId(), tCount.getCount());
+        }
+
+        Map<String, Object> tManifest = pManifest.getJson();
+        List<Map<String,Object>> tSequence = (List<Map<String,Object>>)tManifest.get("sequences");
+        
+        for (Map<String,Object> tCanvas : (List<Map<String,Object>>)(tSequence).get(0).get("canvases")) {
+            int tCount = 0;
+            if (tFacetMap.get(tCanvas.get("@id")) != null) {
+                tCount = tFacetMap.get(tCanvas.get("@id"));
+            }
+            List tRow = new ArrayList();
+            tRow.add((String)tCanvas.get("label"));
+            tRow.add(tCount);
+            tAnnoPageData.add(tRow);
+        }
+
+        
+        return tAnnoPageData;
+    }
+
+    public List<List> getTranscribedTotals(final List<List> pPages) {
+        int tTranscribed = 0;
+        int tTotal = 0;
+        for (List row : pPages) {
+            // Skip title row
+            if (row.get(1) instanceof Integer) {
+                if (((int)row.get(1)) != 0) {
+                    tTranscribed++;
+                }
+                tTotal++;
+            }
+        }    
+
+        // For pie chart data format:
+        // label, count
+        // transcribed, count
+        // still to do, count
+		List<List> tAnnoPageCountData = new ArrayList<List>();
+		List tPageCountResult = new ArrayList();
+		tPageCountResult = new ArrayList();
+		tAnnoPageCountData.add(tPageCountResult);
+		tPageCountResult.add("Canvas type");
+		tPageCountResult.add("count");
+
+		
+		tPageCountResult = new ArrayList();
+		tAnnoPageCountData.add(tPageCountResult);
+		tPageCountResult.add("Transcribed");
+		tPageCountResult.add(tTranscribed);
+
+		tPageCountResult = new ArrayList();
+		tAnnoPageCountData.add(tPageCountResult);
+		tPageCountResult.add("Still to do");
+		tPageCountResult.add(tTotal - tTranscribed);
+        
+        return tAnnoPageCountData;
+    }     
+        
+    public int getTotalAnnotations(final List<List> pPages) {
+        int tTotal = 0;
+        for (List row : pPages) {
+            // Skip title row
+            if (row.get(1) instanceof Integer) {
+                tTotal += (int)row.get(1);
+            }    
+        }
+        return tTotal;
+    }
+
 }

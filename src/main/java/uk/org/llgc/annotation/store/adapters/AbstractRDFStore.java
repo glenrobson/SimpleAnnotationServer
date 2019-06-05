@@ -303,16 +303,33 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		return tAnnotationList;
 	}
 
+
 	public List<PageAnnoCount> listAnnoPages() {
-		String tQueryString = "select ?pageId (count(?annoId) as ?count) where {"
+        String tQueryString = "select ?pageId (count(?annoId) as ?count) where {"
 										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ."
 										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
 									+ "}group by ?pageId order by ?pageId";
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
+        return listAnnoPagesQuery(tExec);
+    }
 
+    public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
+        String tQueryString = "select ?pageId (count(?annoId) as ?count) where {"
+										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ."
+										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on ."
+                                        + " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . "
+                                        + " ?target <http://purl.org/dc/terms/isPartOf>  <" + pManifest.getURI() + "> } "
+									+ "}group by ?pageId order by ?pageId";
+
+		QueryExecution tExec = this.getQueryExe(tQueryString);
+        return listAnnoPagesQuery(tExec);
+    }
+
+	private List<PageAnnoCount> listAnnoPagesQuery(final QueryExecution pQuery) {
+		
 		this.begin(ReadWrite.READ);
-		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		ResultSet results = pQuery.execSelect(); // Requires Java 1.7
 		this.end();
 		int i = 0;
 		List<PageAnnoCount> tAnnotations = new ArrayList<PageAnnoCount>();

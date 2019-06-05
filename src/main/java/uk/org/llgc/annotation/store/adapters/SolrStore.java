@@ -494,7 +494,28 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		}
 	}
 
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
+        return null;   
+    }    
 	public List<PageAnnoCount> listAnnoPages() {
+    // to Fix
+    	/*SolrQuery tQuery = new SolrQuery();
+			tQuery.setRows(0);
+			tQuery.setFacet(true);
+			tQuery.addFacetField("target");
+			tQuery.setFacetLimit(-1);
+			tQuery.setFacetSort("index");
+			tQuery.set("q", "type:oa\\:Annotation AND within:" + tManifestURI.replaceAll(":","\\\\:"));
+
+			QueryResponse tResponse  = ((SolrStore)_store).getClient().query(tQuery);
+			tTotalAnnos = tResponse.getResults().getNumFound();
+			FacetField tFacetCounts = tResponse.getFacetField("target");
+			Map<String,Long> tFacetMap = new HashMap<String,Long>();
+			for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
+				tFacetMap.put(tFacetValue.getName(), tFacetValue.getCount());
+			}
+			tAnnoPageCount = tFacetCounts.getValues().size();
+*/
 		return null;
 	}
 

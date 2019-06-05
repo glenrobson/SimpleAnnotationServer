@@ -1,0 +1,100 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "sc:Manifest",
+    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/manifest.json",
+    "label": "[Aberystwyth]",
+    "sequences": [
+        {
+            "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/sequence/Physical.json",
+            "@type": "sc:Sequence",
+            "label": "Current Page Order",
+            "viewingDirection": "left-to-right",
+            "viewingHint": "paged",
+            "canvases": [
+                {
+                    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132230.json",
+                    "@type": "sc:Canvas",
+                    "label": "[Aberystwyth]",
+                    "height": 1705,
+                    "width": 2448,
+                    "images": [
+                        {
+                            "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/annotation/1132230.json",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "resource": {
+                                "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/res/1132230.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/image/1132230",
+                                    "profile": "http://iiif.io/api/image/2/level1.json",
+                                    "height": 1705,
+                                    "width": 2448,
+                                    "tiles": [
+                                        {
+                                            "width": 256,
+                                            "scaleFactors": [
+                                                1,
+                                                2,
+                                                4,
+                                                8,
+                                                16
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "height": 1705,
+                                "width": 2448
+                            },
+                            "on": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132230.json"
+                        }
+                    ]
+                },
+                {
+                    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132232/canvas/1132232.json",
+                    "@type": "sc:Canvas",
+                    "label": "The south east view of Beaumaris Castle, in the Isle Of Anglesey:",
+                    "height": 2854,
+                    "width": 5629,
+                    "images": [
+                        {
+                            "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132232/annotation/1132232.json",
+                            "@type": "oa:Annotation",
+                            "motivation": "sc:painting",
+                            "resource": {
+                                "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132232/res/1132232.jpg",
+                                "@type": "dctypes:Image",
+                                "format": "image/jpeg",
+                                "service": {
+                                    "@context": "http://iiif.io/api/image/2/context.json",
+                                    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/image/1132232",
+                                    "profile": "http://iiif.io/api/image/2/level1.json",
+                                    "height": 2854,
+                                    "width": 5629,
+                                    "tiles": [
+                                        {
+                                            "width": 256,
+                                            "scaleFactors": [
+                                                1,
+                                                2,
+                                                4,
+                                                8,
+                                                16,
+                                                32
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "height": 2854,
+                                "width": 5629
+                            },
+                            "on": "https://damsssl.llgc.org.uk/iiif/2.0/1132232/canvas/1132232.json"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

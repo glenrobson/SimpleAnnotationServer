@@ -65,4 +65,5 @@ public interface StoreAdapter {
 	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException;
 
 	public List<PageAnnoCount> listAnnoPages() throws IOException;
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException;
 }
