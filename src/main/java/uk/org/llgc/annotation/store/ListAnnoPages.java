@@ -63,7 +63,7 @@ public class ListAnnoPages extends HttpServlet {
 				tHTML.append(tLine);
 			}
 
-			String tResult = tHTML.toString().replaceAll("##CONTENT##", tContent.toString());
+			String tResult = tHTML.toString().replace("##CONTENT##", tContent.toString());
 
 			pRes.setContentType("text/html");
 			pRes.getOutputStream().println(tResult);
