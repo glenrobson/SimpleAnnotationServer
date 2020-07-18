@@ -94,6 +94,8 @@ public class StoreConfig extends HttpServlet {
 	public String getBaseURI(final HttpServletRequest pReq) {
 		if (_props.containsKey("baseURI")) {
 			return _props.get("baseURI");// external hostname
+        } else if (pReq == null) { // This is the case during testing
+            return "http://example.com";
 		} else {
 			int tBase = 0;
 			String[] tURL = pReq.getRequestURL().toString().split("/");
