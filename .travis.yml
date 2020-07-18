@@ -3,4 +3,4 @@ after_script: travis/stop_solr.sh
 language: java
 jdk:
   - openjdk11
-script: mvn clean test
+script: chmod 755 ./travis/integration_tests.sh && ./travis/integration_tests.sh
