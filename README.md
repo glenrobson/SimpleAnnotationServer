@@ -48,7 +48,7 @@ You should now see Mirador with the default example objects. You can choose any 
 
 ## Further guides
 
-SimpleAnnotationServer or SAS aims to fulfil two main use cases; an easy to install and get going annotation server to work with Mirador and also allow it to be deployed to production. The guides below are split into user guides for those that want to use some of the more advanced features of SAS and guides for developers to set it up for production:
+SimpleAnnotationServer or SAS aims to fulfil two main use cases; an easy to install and get going annotation server and also a production quality annotation server. The guides below detail different operations you can undertake with SAS. In the next section it discusses how to develop with SAS and looks at some of the more complicated deployment options. 
 
 ### User guides
 
