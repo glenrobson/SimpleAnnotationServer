@@ -7,19 +7,21 @@ If you make any changes to the HTML, Javascript, css (anything apart from the Ja
 
 ## Updating Mirador
 
-Mirador is included in the SimpleAnnotationServer to aid quick deployment. If you would like to update Mirador follow the instructions on the [Mirador Site](https://github.com/IIIF/mirador) and copy everything from mirador/build/mirador/* to [src/main/webapp/mirador](../src/main/webapp/mirador).
+Mirador is included in the SimpleAnnotationServer to aid quick deployment. If you would like to update Mirador follow the instructions on the [Mirador Site](https://github.com/IIIF/mirador) and copy everything from mirador/build/mirador/* to [src/main/webapp/mirador-2.6.1](../src/main/webapp/mirador-2.6.1).
 
 ## Overloading config using Environment variables
 
-It is possible to overload any of the configuration specified in [src/main/webapp/WEB-INF/sas.properties](../src/main/webapp/WEB-INF/sas.properties) by prepending `SAS.` to any of the properties in sas.properties e.g:
+It is possible to overload any of the configuration specified in [src/main/webapp/WEB-INF/sas.properties](../src/main/webapp/WEB-INF/sas.properties) using environmental variables by prepending `SAS.` to any of the properties in sas.properties e.g:
 
 ```
 export SAS.store="solr"
 ```
 
+This is useful to configure the backend properties while deploying docker instances to AWS.
+
 ## Docker
 
-The SimpleAnnotationServer supports multiple backends and configuration. To aid development and deployment there are a number of docker files in [docker](../docker). These docker directories are explained in detail below but to simplify running these docker scripts there is a [runDocker](../runDocker.sh) script which takes an argument of either `Jena`, `Solr` or `Cloud` and will start a docker instance with that configuration. An example is below:
+The SimpleAnnotationServer supports multiple backends and configuration and to aid development and deployment there are a number of docker files in the [docker](../docker) directory. These docker directories are explained in detail below but to simplify running these docker scripts there is a [runDocker](../runDocker.sh) script which takes an argument of either `Jena`, `Solr` or `Cloud` and will start a docker instance with that configuration. An example is below:
 
 ```
 ./runDocker.sh Jena
@@ -35,7 +37,7 @@ docker build -t sas:latest -f docker/sas-tomcat/Dockerfile . && docker run -v /t
 
 Then go to:
 
-[http://0.0.0.0:8888/sas/](http://0.0.0.0:8888/sas/)
+[http://localhost:8888/sas/](http://0.0.0.0:8888/sas/)
 
 ### [sas-solr](../docker/sas-solr)
 
@@ -66,7 +68,7 @@ Then edit the [sas.properties](../src/main/webapp/WEB-INF/sas.properties) and un
 
 Note two cores will be created `annotations` and `test-annotations` for unit tests. To access SOLR once its running with docker-compose go to:
 
-[http://0.0.0.0:8983/](http://0.0.0.0:8983/)
+[http://localhost:8983/](http://0.0.0.0:8983/)
 
 
 ## Creating releases

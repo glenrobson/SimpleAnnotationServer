@@ -17,7 +17,7 @@ To verify you have the correct package installed, you can run the following comm
 $ java -version
 # java version "1.11.0_102"
 ``` 
-You should see version `1.11.x`. For more information on the install options see:
+You should see version `1.11.x`. :
 
 ### Step 1: Download
 
@@ -36,14 +36,15 @@ Extract the zip file, on a Mac double clicking on the file will extract it. **On
 Open up a terminal or command prompt and do the following:
 
 ```
-cd extracted_sas_directory
+cd extracted_sas_directory/sas
 java -jar dependency/jetty-runner.jar --port 8888 simpleAnnotationStore.war
 ```
 
-You should now be able to use the SimpleAnnotationServer by going to:
+Navigate to:
 
-[http://0.0.0.0:8888/index.html](http://0.0.0.0:8888/index.html)
+[http://localhost:8888/index.html](http://0.0.0.0:8888/index.html)
 
+You should now see Mirador with the default example objects. You can choose any manifest to start annotating
 
 ## Further guides
 
@@ -78,13 +79,13 @@ To begin working with Mirador and the Simple Annotation Server do the following:
 
  * Start Annotating
 
-Navigate to [http://localhost:8888/index.html](http://localhost:8888/index.html)
+Navigate to [http://localhost:8888/index.html](http://0.0.0.0:8888/index.html)
 
 You should now see Mirador with the default example objects. You can choose any manifest to start annotating.
 
 ## Docker installs
 
-There are a number of docker files in [docker](docker/) with different backend configurations. For details see [Docker dev details](doc/DevGuide.md#Docker) but to run the basic SAS instance with a Jena database you can run the following script:
+There are a number of docker files in the [docker](docker/) directory with different backend configurations. For details on the different options see the [dev guide](doc/DevGuide.md#Docker) but to run the basic SAS instance with a Jena database you can run the following script:
 
 ```
 ./runDocker.sh Jena
@@ -94,10 +95,12 @@ which will use this Dockerfile [docker/sas-tomcat/Dockerfile](docker/sas-tomcat/
 
 ### Developer guides
 
- * [Developing with SimpleAnnotationServer](doc/DevGuide.md) (Developing locally, Docker installs, deployment tricks and Jetty config)
+ * [Developing with SimpleAnnotationServer](doc/DevGuide.md)
+  * Developing locally, Docker installs, deployment tricks and Jetty config
  * [Connecting Fuseki with Jena to view triple store](doc/FusekiJena.md)
  * [Deploying to tomcat](doc/tomcat.md)
- * [Using the Sesame RDF store](doc/Sesame.md) **DEPERICATED**
+ * [Using the Sesame RDF store](doc/Sesame.md) 
+  * **DEPERICATED**
  * [Remote Annotation Store](doc/RemoteStore.md)
  * [Migrating annotations from one backend to another.](doc/MigratingData.md)
 
@@ -113,7 +116,7 @@ Note this project doesn't currently contain Authentication although it is possib
  * Authentication – Shibboleth, Facebook/Google
  * Annotation versioning
 
-Please add an issue if there are other enhancements which would be useful.
+Please add an [issue](https://github.com/glenrobson/SimpleAnnotationServer/issues) if there are other enhancements which would be useful.
 
 ## Thanks
 
