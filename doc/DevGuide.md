@@ -27,7 +27,7 @@ The SimpleAnnotationServer supports multiple backends and configuration and to a
 ./runDocker.sh Jena
 ```
 
-### [sas-tomcat](../docker/sas-tomcat)
+### [sas-tomcat](../docker/sas-tomcat)
 
 This is a simple docker with Jena as the backend and SAS running in tomcat. To access the SAS service you can build and run this docker using:
 
