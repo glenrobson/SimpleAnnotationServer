@@ -69,7 +69,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
             } else {
                 tHosts.add(pConnectionURL);
             }
-			_solrClient = new CloudSolrClient.Builder().withSolrUrl(tHosts).build();
+			_solrClient = new CloudSolrClient.Builder(tHosts).build();
 			((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);
 		}
 	}
