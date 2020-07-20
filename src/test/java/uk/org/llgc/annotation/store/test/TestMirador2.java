@@ -100,4 +100,22 @@ public class TestMirador2 extends TestUtils {
         Map<String,Object> tSelector = (Map<String,Object>)tOn.get("selector");
         assertEquals("Mirador requires this to be a fragment selector but selector was:", "oa:FragmentSelector",tSelector.get("@type"));
     }
+
+    @Test
+	public void TestNoBlankNode() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
+		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
+
+		String tAnnoId = (String)tAnnotationJSON.get("@id");
+		_logger.debug("ID " + tAnnoId);
+		Model tModel = _store.addAnnotation(tAnnotationJSON);
+
+		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
+
+		// Require on to be an map for mirador 2
+		assertTrue("On needs to be a Map in Mirador2 and it isn't.", tAnnotation.get("on") instanceof Map);
+
+		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
+		assertFalse("Annotation shouldn't have a blank node in on: " + ((Map<String,Map<String,String>>)tAnnotation.get("on")), ((Map<String,Map<String,String>>)tAnnotation.get("on")).containsKey("@id"));
+	}
+
 }
