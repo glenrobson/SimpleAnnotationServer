@@ -200,6 +200,25 @@ public class TestSearch extends TestUtils {
 	}
 
     @Test
+	public void testUTF8() throws IOException, IDConflictException, MalformedAnnotation {
+        Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));        
+
+        // Load annotation
+        Model tModel = _store.addAnnotation(tAnnotationJSON);
+
+        // Test UTF-8 search
+		SearchQuery tQuery = new SearchQuery("Καλημέρα κόσμε");
+		tQuery.setScope("http://example.com/manfiest/utf8.json");
+		Map<String, Object> tResultsJson = _store.search(tQuery);
+
+		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		assertEquals("Expected 1 result for 'Καλημέρα κόσμε' but found different", 1, tResults.size());
+		assertEquals("Expected single result for 'simple'","http://example.com/uft8", tResults.get(0).get("@id"));
+    }
+
+
+    @Test
 	public void testMirador() throws IOException, IDConflictException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationListSearch.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
