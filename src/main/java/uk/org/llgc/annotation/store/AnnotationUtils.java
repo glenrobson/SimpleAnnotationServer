@@ -302,6 +302,7 @@ public class AnnotationUtils {
 
 		final JsonLdOptions tOptions = new JsonLdOptions();
 		tOptions.format = "application/jsonld";
+		tOptions.setPruneBlankNodeIdentifiers(true);
 
 		StringWriter tStringOut = new StringWriter();
         if (pModel.supportsTransactions()) {
