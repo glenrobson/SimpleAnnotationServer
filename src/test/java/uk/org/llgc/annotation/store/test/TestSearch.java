@@ -304,13 +304,13 @@ public class TestSearch extends TestUtils {
 		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/examples/Cambrian_1804-01-28.json").getFile())); //annotaiton list
         String tShortId = _store.indexManifest(tManifest);
 
-        SearchQuery tQuery = new SearchQuery("PUBLIC");
+        SearchQuery tQuery = new SearchQuery("chimney");
 		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");
 		Map<String, Object> tResultsJson = _store.search(tQuery);
 
 		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
 
-		assertEquals("Expected 3 result for 'PUBLIC' but found different", 3, tResults.size());
+		assertEquals("Expected 3 result for 'chimney' but found different", 1, tResults.size());
 
         // Now test a default search
 

@@ -1,0 +1,19 @@
+version: '3'
+services:
+  web:
+    container_name: simpleannotationserver_solr_1 
+    build: 
+        context: .
+        dockerfile: docker/sas-solr/Dockerfile
+    ports:
+      - "8888:8080"
+  solr:
+    image: "solr:latest"
+    ports:
+      - "8983:8983" 
+    volumes:
+      - "./src/main/resources/solr:/tmp/config:ro"
+    entrypoint:
+      - bash
+      - "-c"
+      - "precreate-core testannotations /tmp/config; precreate-core annotations /tmp/config; exec solr -f"

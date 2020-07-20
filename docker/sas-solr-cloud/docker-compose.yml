@@ -1,0 +1,56 @@
+version: '3'
+services:
+  web:
+    container_name: simpleannotationserver_web_1 
+    build: 
+        context: .
+        dockerfile: docker/sas-solr-cloud/Dockerfile
+    networks:
+      - solr
+    ports:
+      - "8888:8080"
+
+  solr1:
+    image: solr:8.3
+    container_name: solr1
+    ports:
+     - "8981:8983"
+    environment:
+      - ZK_HOST=zoo1:2181
+    networks:
+      - solr
+    depends_on:
+      - zoo1
+  
+  create-collection:
+    image: solr:8.3
+    container_name: create-collection
+    environment:
+      - SOLR_HOST=solr1
+    volumes:
+      - "./src/main/resources/solr:/tmp/config:ro"
+    networks:
+      - solr
+    command:
+      - bash
+      - "-e"
+      - "-x"
+      - "-c"
+      - "wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://$$SOLR_HOST:8983/; solr create -c annotations -d /tmp/config -shards 2 -p 8983;solr create -c testannotations -d /tmp/config -shards 2 -p 8983"
+
+  zoo1:
+    image: zookeeper:3.5
+    container_name: zoo1
+    restart: always
+    hostname: zoo1
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: "*"
+    networks:
+      - solr
+  
+networks:
+  solr:

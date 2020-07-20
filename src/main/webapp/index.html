@@ -25,7 +25,7 @@
 
 
 		  		"show": true,
-		  		"buttons" : {"bookmark" : true, "layout" : true},
+		  		"buttons" : {"bookmark" : false, "layout" : true},
 		  		"userLogo": {"label": "IIIF", "attributes": {"href": "http://iiif.io"}},
                 "userButtons": [
                     {
@@ -46,7 +46,7 @@
                 ]
 		  },
 		  'showAddFromURLBox' : true,
-		  "saveSession": true,
+		  "saveSession": false,
         "data": [
             { "manifestUri": "http://dms-data.stanford.edu/data/manifests/Walters/qm670kv1873/manifest.json", "location": "Stanford University"},
             { "manifestUri": "http://dms-data.stanford.edu/data/manifests/Stanford/ege1/manifest.json", "location": "Stanford University"},
@@ -65,6 +65,15 @@
              { "manifestUri": "http://dams.llgc.org.uk/iiif/2.0/1465298/manifest.json", "location": "National Library of Wales"},
             { "manifestUri": "http://localhost:8888/examples/Cambrian_1804-01-28.json", "location": 'National Library of Wales'}
         ],
+      /*  "jsonStorageEndpoint": {
+            "name": "jsonblob api endpoint",
+            "module": "jsonblobapi",
+            "options": {
+                "ssl": false,
+                "port": "900",
+                "host": "jsonblob2.com"
+            }
+        },*/
         "windowObjects": [],
 		  /** Testing Annotations **/
 		  annotationEndpoint: {

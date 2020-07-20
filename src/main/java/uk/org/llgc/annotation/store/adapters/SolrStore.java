@@ -22,6 +22,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.response.FacetField;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
@@ -68,7 +69,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
             } else {
                 tHosts.add(pConnectionURL);
             }
-			_solrClient = new CloudSolrClient.Builder().withSolrUrl(tHosts).build();
+			_solrClient = new CloudSolrClient.Builder(tHosts).build();
 			((CloudSolrClient)_solrClient).setDefaultCollection(pCollection);
 		}
 	}
@@ -494,29 +495,49 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		}
 	}
 
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
-        return null;   
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException {
+        SolrQuery tQuery = new SolrQuery();
+        tQuery.setRows(0);
+        tQuery.setFacet(true);
+        tQuery.addFacetField("target");
+        tQuery.setFacetLimit(-1);
+        tQuery.setFacetSort("index");
+        tQuery.set("q", "type:oa\\:Annotation AND within:" + pManifest.getURI().replaceAll(":","\\\\:"));
+        try {
+            QueryResponse tResponse = _solrClient.query(tQuery);
+            long tTotalAnnos = tResponse.getResults().getNumFound();
+            FacetField tFacetCounts = tResponse.getFacetField("target");
+            List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
+            for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
+                tAnnoPageCount.add(new PageAnnoCount(tFacetValue.getName(), (int)tFacetValue.getCount()));
+            }
+            return tAnnoPageCount;
+        } catch (SolrServerException tExcept) {
+            tExcept.printStackTrace();
+            throw new IOException("Failed to run page count query due to " + tExcept.getMessage());
+        }
     }    
-	public List<PageAnnoCount> listAnnoPages() {
-    // to Fix
-    	/*SolrQuery tQuery = new SolrQuery();
-			tQuery.setRows(0);
-			tQuery.setFacet(true);
-			tQuery.addFacetField("target");
-			tQuery.setFacetLimit(-1);
-			tQuery.setFacetSort("index");
-			tQuery.set("q", "type:oa\\:Annotation AND within:" + tManifestURI.replaceAll(":","\\\\:"));
-
-			QueryResponse tResponse  = ((SolrStore)_store).getClient().query(tQuery);
-			tTotalAnnos = tResponse.getResults().getNumFound();
-			FacetField tFacetCounts = tResponse.getFacetField("target");
-			Map<String,Long> tFacetMap = new HashMap<String,Long>();
-			for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-				tFacetMap.put(tFacetValue.getName(), tFacetValue.getCount());
-			}
-			tAnnoPageCount = tFacetCounts.getValues().size();
-*/
-		return null;
+	public List<PageAnnoCount> listAnnoPages() throws IOException {
+        SolrQuery tQuery = new SolrQuery();
+        tQuery.setRows(0);
+        tQuery.setFacet(true);
+        tQuery.addFacetField("target");
+        tQuery.setFacetLimit(-1);
+        tQuery.setFacetSort("index");
+        tQuery.set("q", "type:oa\\:Annotation");
+        try {
+            QueryResponse tResponse = _solrClient.query(tQuery);
+            long tTotalAnnos = tResponse.getResults().getNumFound();
+            FacetField tFacetCounts = tResponse.getFacetField("target");
+            List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
+            for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
+                tAnnoPageCount.add(new PageAnnoCount(tFacetValue.getName(), (int)tFacetValue.getCount()));
+            }
+            return tAnnoPageCount;
+        } catch (SolrServerException tExcept) {
+            tExcept.printStackTrace();
+            throw new IOException("Failed to run page count query due to " + tExcept.getMessage());
+        }
 	}
 
 	// Solr Helper methods

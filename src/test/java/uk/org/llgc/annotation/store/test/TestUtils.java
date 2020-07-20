@@ -70,11 +70,12 @@ public class TestUtils {
 
 	public TestUtils(final Encoder pEncoder) throws IOException {
 		_annotationUtils = new AnnotationUtils(new File(getClass().getResource("/contexts").getFile()), pEncoder);
+        String tConfig = System.getenv("config") == null ? "test.properties" : System.getenv("config");
         _logger.debug("Reading in " + getClass().getResource("/contexts").getFile());
         _logger.debug("Calling load props");
-        _logger.debug("Reading props " + getClass().getResource("/test.properties").getFile());
+        _logger.debug("Reading props " + getClass().getResource("/" + tConfig).getFile());
 		_props = new Properties();
-		_props.load(new FileInputStream(new File(getClass().getResource("/test.properties").getFile())));
+		_props.load(new FileInputStream(new File(getClass().getResource("/" + tConfig).getFile())));
         _retainFailedData = _props.getProperty("retain_failed_data") != null ? _props.getProperty("retain_failed_data").equals("true") : false;
 	}
 

@@ -19,22 +19,27 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
-            <version>3.8.0</version>
+            <version>3.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-tdb</artifactId>
-            <version>3.8.0</version>
+            <version>3.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>3.8.0</version>
+            <version>3.16.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.14</version>
         </dependency>
         <dependency>
             <groupId>com.github.jsonld-java</groupId>
             <artifactId>jsonld-java</artifactId>
-            <version>0.12.1</version>
+            <version>0.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
@@ -44,7 +49,7 @@
         <dependency>
             <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>
-            <version>1.1.6</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
@@ -54,12 +59,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.9</version>
+            <version>2.11.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.9</version>
+            <version>2.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
@@ -74,7 +79,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.6</version>
+            <version>4.5.12</version>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
@@ -89,43 +94,43 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.11.1</version>
+            <version>2.13.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.11.1</version>
+            <version>2.13.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.11.1</version>
+            <version>2.13.3</version>
         </dependency>
 		  <dependency>
 			  <groupId>org.apache.solr</groupId>
 			  <artifactId>solr-solrj</artifactId>
-			  <version>7.5.0</version>
+			  <version>8.6.0</version>
 		  </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
   <groupId>javax.xml.bind</groupId>
   <artifactId>jaxb-api</artifactId>
-  <version>2.3.0</version>
+  <version>2.4.0-b180830.0359</version>
 </dependency>
 <dependency>
   <groupId>com.sun.xml.bind</groupId>
   <artifactId>jaxb-core</artifactId>
-  <version>2.3.0</version>
+  <version>3.0.0-M4</version>
 </dependency>
 <dependency>
   <groupId>com.sun.xml.bind</groupId>
   <artifactId>jaxb-impl</artifactId>
-  <version>2.3.0</version>
+  <version>3.0.0-M4</version>
 </dependency>
     </dependencies>
     <build>
@@ -187,7 +192,7 @@
             <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>2.3</version>
+            <version>2.4</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -195,9 +200,9 @@
                     <configuration>
                         <artifactItems>
                             <artifactItem>
-                                <groupId>org.mortbay.jetty</groupId>
+                                <groupId>org.eclipse.jetty</groupId>
                                 <artifactId>jetty-runner</artifactId>
-                                <version>7.5.4.v20111024</version>
+                                <version>9.4.2.v20170220</version>
                                 <destFileName>jetty-runner.jar</destFileName>
                             </artifactItem>
                         </artifactItems>

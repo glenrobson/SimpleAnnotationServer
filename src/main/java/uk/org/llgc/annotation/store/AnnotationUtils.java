@@ -248,7 +248,7 @@ public class AnnotationUtils {
 	public Model convertAnnoToModel(final Map<String,Object> pJson) throws IOException {
 		if (pJson.get("@context") == null) {
 			pJson.put("@context", this.getContext());
-		} else if (((String)pJson.get("@context")).trim().startsWith("file://")) {
+		} else if (pJson.get("@context") instanceof String && ((String)pJson.get("@context")).trim().startsWith("file://")) {
 			File tContext = new File(((String)pJson.get("@context")).trim().substring("file://".length()));
 			if (!tContext.exists()) {
 				pJson.put("@context", this.getContext());

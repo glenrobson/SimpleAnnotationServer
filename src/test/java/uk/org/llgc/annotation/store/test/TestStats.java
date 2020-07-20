@@ -21,6 +21,7 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.stats.ManifestStats;
 
 import com.github.jsonldjava.utils.JsonUtils;
@@ -89,5 +90,9 @@ public class TestStats extends TestUtils {
 
         int tTotalAnnos = tStats.getTotalAnnotations(tPageCounts);
         assertEquals("Expected 8 annos.",tTotalAnnos, 8);
+
+        List<PageAnnoCount> tAllPagesCount = _store.listAnnoPages();
+        assertEquals("Expected done to be 1 page.", tAllPagesCount.size(), 1);
+        assertEquals("Expected 8 annos on single page done", tAllPagesCount.get(0).getCount(), 8);
     }
 }
