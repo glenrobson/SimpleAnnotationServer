@@ -1,6 +1,7 @@
 version: '3'
 services:
   web:
+    container_name: simpleannotationserver_web_1 
     build: 
         context: .
         dockerfile: docker/sas-solr-cloud/Dockerfile
