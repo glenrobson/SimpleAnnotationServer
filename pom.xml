@@ -149,6 +149,7 @@
                         <additionalClasspathElement>${basedir}/src/main/webapp/</additionalClasspathElement>
                         <additionalClasspathElement>${basedir}/src/test/resources/</additionalClasspathElement>
                     </additionalClasspathElements>
+                    <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
             <plugin>
