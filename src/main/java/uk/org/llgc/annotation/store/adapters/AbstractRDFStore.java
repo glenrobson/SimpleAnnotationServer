@@ -217,15 +217,27 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                         tJsonAnno.put("resource", ((List)tJsonAnno.get("resource")).get(0));
                     }
 
+                    String tContent = "";
+                    if (tJsonAnno.get("resource") instanceof List) {
+                        // need to find which body matched the query
+                        for (Map<String,Object> tbody : (List<Map<String,Object>>)tJsonAnno.get("resource")) {
+                            if (((String)tbody.get("chars")).contains(pQuery.getQuery())) {
+                                tContent = (String)tbody.get("chars");
+                                break;
+                            }
+                        }
+                    } else {
+                        tContent = (String)((Map<String,Object>)tJsonAnno.get("resource")).get("chars");
+                    }
                     // Create snipet
-                    String tCharsString = ((String)((Map<String,Object>)tJsonAnno.get("resource")).get("chars")).replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", "");
+                    String tCharsString = tContent.replaceAll("<[ /]*[a-zA-Z0-9 ]*[ /]*>", "");
                     String[] tChars = tCharsString.split(" ");
                     String tSnippet = "";
                     if (tChars.length < 5) {
                         tSnippet = tCharsString;
                     } else {
                         int tFoundIndex = -1;
-                        for (int j = 0; i < tChars.length; j++) {
+                        for (int j = 0; j < tChars.length; j++) {
                             if (tChars[j].contains(pQuery.getQuery())) {
                                 tFoundIndex = j;
                                 break;

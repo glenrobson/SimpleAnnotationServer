@@ -222,6 +222,9 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	public String indexManifest(Map<String,Object> pManifest) throws IOException {
+        if (!((String)pManifest.get("@type")).equals("sc:Manifest")) {
+            throw new IOException("Couldn't load manifest as it wasn't a manifest");
+        }
 		String tShortId = this.createShortId((String)pManifest.get("@id"));
 		return this.indexManifest(tShortId, pManifest);
 	}
