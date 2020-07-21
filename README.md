@@ -98,6 +98,7 @@ which will use this Dockerfile [docker/sas-tomcat/Dockerfile](docker/sas-tomcat/
  * [Developing with SimpleAnnotationServer](doc/DevGuide.md)
   * Developing locally, Docker installs, deployment tricks and Jetty config
  * [Connecting Fuseki with Jena to view triple store](doc/FusekiJena.md)
+ * [SAS Endpoints](doc/Endpoints.md)
  * [Deploying to tomcat](doc/tomcat.md)
  * [Using the Sesame RDF store](doc/Sesame.md) 
   * **DEPERICATED**
