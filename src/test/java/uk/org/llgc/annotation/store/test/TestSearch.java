@@ -201,7 +201,7 @@ public class TestSearch extends TestUtils {
 
     @Test
 	public void testUTF8() throws IOException, IDConflictException, MalformedAnnotation {
-        Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));        
+        Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testUTF8Annotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));        
 
         // Load annotation
         Model tModel = _store.addAnnotation(tAnnotationJSON);
@@ -217,6 +217,24 @@ public class TestSearch extends TestUtils {
 		assertEquals("Expected single result for 'simple'","http://example.com/uft8", tResults.get(0).get("@id"));
     }
 
+     @Test
+	public void testAnnoWithTag() throws IOException, IDConflictException, MalformedAnnotation {
+        Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/mirador-2.1.4.json").getFile()), StoreConfig.getConfig().getBaseURI(null));        
+
+        // Load annotation
+        Model tModel = _store.addAnnotation(tAnnotationJSON);
+
+        // Test UTF-8 search
+		SearchQuery tQuery = new SearchQuery("tag");
+		tQuery.setScope("http://dms-data.stanford.edu/data/manifests/BnF/jr903ng8662/manifest.json");
+		Map<String, Object> tResultsJson = _store.search(tQuery);
+
+		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
+
+		assertEquals("Expected 1 result for 'tag' but found different", 1, tResults.size());
+		assertEquals("Expected single result for 'simple'","http://localhost:8888/annotation/1488244504042", tResults.get(0).get("@id"));
+		/**/System.out.println(JsonUtils.toPrettyString(tResults.get(0)));
+    }
 
     @Test
 	public void testMirador() throws IOException, IDConflictException, MalformedAnnotation {
@@ -256,6 +274,14 @@ public class TestSearch extends TestUtils {
         //    tExcpt.printStackTrace();
             throw tExcpt;
         }
+    }
+
+    @Test(expected = IOException.class)
+	public void loadAnnoListAsManifest() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile()));
+		String tShortId = _store.indexManifest(tManifest);
+
+        assertNull("Should fail to load annotation list as a manifest", tShortId);
     }
 
 
