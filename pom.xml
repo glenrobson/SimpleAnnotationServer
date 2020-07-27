@@ -11,7 +11,7 @@
 
         <jsf.version>2.2.15</jsf.version>
         <primefaces.version>7.0</primefaces.version>
-        <jetty.version>9.4.30.v202006112</jetty.version>
+        <jetty.version>9.4.29.v20200521</jetty.version>
     </properties>
     <dependencies>
         <dependency>
