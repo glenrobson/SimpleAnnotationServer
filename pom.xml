@@ -20,7 +20,11 @@
             <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
-        
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
         <dependency>
             <groupId>com.sun.faces</groupId>
             <artifactId>jsf-api</artifactId>
@@ -200,7 +204,20 @@
                         </property>
                     </properties>
                 </configuration>
-                            </plugin>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>apache-jstl</artifactId>
+                        <version>9.4.29.v20200521</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.apache.taglibs</groupId>
+                                <artifactId>taglibs-standard-impl</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -210,26 +227,26 @@
                 </configuration>
             </plugin>
             <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.1.2</version>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals><goal>copy</goal></goals>
-                    <configuration>
-                        <artifactItems>
-                            <artifactItem>
-                                <groupId>org.eclipse.jetty</groupId>
-                                <artifactId>jetty-runner</artifactId>
-                                <version>${jetty.version}</version>
-                                <destFileName>jetty-runner.jar</destFileName>
-                            </artifactItem>
-                        </artifactItems>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>copy</goal></goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-runner</artifactId>
+                                    <version>${jetty.version}</version>
+                                    <destFileName>jetty-runner.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
