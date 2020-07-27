@@ -1,0 +1,39 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <body>
+        <ui:composition>
+            <div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container-fluid">
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li>
+                                <c:if test="#{empty path}">
+                                    <a class="headerLink" href="index.html">Home</a>
+                                </c:if>
+                                <c:if test="#{not empty path}">
+                                    <a class="headerLink" href="../index.html">Home</a>
+                                </c:if>
+                            </li>
+                            <li>
+                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Stats" outcome="#{path}stats/index" ></h:link>
+                            </li>
+                            <li>
+                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Load Annotation List" outcome="#{path}populate" ></h:link>
+                            </li>
+                            <li>
+                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Index Manifest" outcome="#{path}uploadManifest" ></h:link>
+                            </li>
+                            <li>
+                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Download Annotations" outcome="#{path}listAnnos" ></h:link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+         </ui:composition>	
+    </body>
+</html>    

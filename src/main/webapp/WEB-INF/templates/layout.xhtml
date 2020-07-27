@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:insert name="head">
+        <ui:include src="head.xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+            <ui:param name="title" value="#{title}"></ui:param>
+        </ui:include>    
+    </ui:insert>    
+    <h:body>
+        <ui:insert name="menu">
+            <ui:include src="menu.xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+                <ui:param name="selected" value="#{selected-menu}"></ui:param>
+                <ui:param name="path" value="#{path}"></ui:param>
+            </ui:include>    
+        </ui:insert>    
+        
+        <ui:insert name="content" />
+    </h:body>
+</html>

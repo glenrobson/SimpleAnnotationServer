@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
 import org.apache.jena.tdb.TDBFactory;
@@ -136,21 +137,18 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 	}
 
-	public Map<String,Object> getManifest(final String pShortId) throws IOException {
+	public Manifest getManifest(final String pShortId) throws IOException {
 		String tManifestURI = this.getManifestId(pShortId);
 		if (tManifestURI == null || tManifestURI.trim().length() == 0) {
 			_logger.debug("Manifest URI not found for short id " + pShortId);
 			return null;
 		}
 		Model tModel = this.getNamedModel(tManifestURI);
+        Manifest tManifest = new RDFManifest(tModel);
+        tManifest.setURI(tManifestURI);
+        tManifest.setShortId(pShortId);
 
-		Map<String,Object> tJson = null;
-		try {
-			_annoUtils.frameManifest(tModel);
-		} catch (JsonLdError tException) {
-			throw new IOException("Failed to convert manifest to JsonLd due to "+ tException.toString());
-		}
-		return tJson;
+		return tManifest;
 	}
 
 	public Map<String, Object> search(final SearchQuery pQuery) throws IOException {
@@ -318,28 +316,37 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 
 	public List<PageAnnoCount> listAnnoPages() {
-        String tQueryString = "select ?pageId (count(?annoId) as ?count) where {"
-										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ."
-										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
-									+ "}group by ?pageId order by ?pageId";
-
+        String tQueryString = "select ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel (count(?annoId) as ?count) where {" +
+                                  "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
+                                  "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
+                                  "  OPTIONAL { ?target <http://purl.org/dc/terms/isPartOf> ?manifestId }" +
+                                  "}" +
+                                  "OPTIONAL {GRAPH ?manifestId {" +
+                                  "  ?manifestId <http://www.w3.org/2000/01/rdf-schema#label> ?manifestLabel ." +
+                                  "  ?manifestId <http://purl.org/dc/elements/1.1/identifier> ?shortId ." +
+                                  "  ?pageId <http://www.w3.org/2000/01/rdf-schema#label> ?canvasLabel " +
+                                  "  }}" +
+                                "}group by ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel order by ?pageId"; 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
-        return listAnnoPagesQuery(tExec);
+        return listAnnoPagesQuery(tExec, null);
     }
 
     public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
-        String tQueryString = "select ?pageId (count(?annoId) as ?count) where {"
-										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ."
-										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on ."
-                                        + " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . "
-                                        + " ?target <http://purl.org/dc/terms/isPartOf>  <" + pManifest.getURI() + "> } "
-									+ "}group by ?pageId order by ?pageId";
-
+        String tQueryString = "select ?pageId ?canvasLabel (count(?annoId) as ?count) where {" +
+                                  "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
+                                  "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
+                                  "  ?target <http://purl.org/dc/terms/isPartOf> <" + pManifest.getURI() + "> " +
+                                  "}" +
+                                  "GRAPH <" + pManifest.getURI() + "> {" +
+                                  "  ?pageId <http://www.w3.org/2000/01/rdf-schema#label> ?canvasLabel" +
+                                  "  }" +
+                                "}group by ?pageId ?canvasLabel order by ?pageId";
+        
 		QueryExecution tExec = this.getQueryExe(tQueryString);
-        return listAnnoPagesQuery(tExec);
+        return listAnnoPagesQuery(tExec, pManifest);
     }
 
-	private List<PageAnnoCount> listAnnoPagesQuery(final QueryExecution pQuery) {
+	private List<PageAnnoCount> listAnnoPagesQuery(final QueryExecution pQuery, final Manifest pManifest) {
 		
 		this.begin(ReadWrite.READ);
 		ResultSet results = pQuery.execSelect(); // Requires Java 1.7
@@ -352,8 +359,29 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 				Resource tPageId = soln.getResource("pageId") ; // Get a result variable - must be a resource
 				int tCount = soln.getLiteral("count").getInt();
 				_logger.debug("Found " + tPageId + " count " + tCount);
+                Manifest tManifest = pManifest;
+                if (pManifest == null) {
+                    // create Manifest from data
+                    if (soln.getLiteral("shortId") != null) {
+                        tManifest = new Manifest();
+                        tManifest.setShortId(soln.getLiteral("shortId").getString());
+                        tManifest.setURI(soln.getResource("manifestId").getURI());
+                        tManifest.setLabel(soln.getLiteral("manifestLabel").getString());
+                    } else if (soln.getResource("manifestId") != null) {
+                        // Manifest not loaded but may have a link to the manifest URI
+                        tManifest = new Manifest();
+                        tManifest.setURI(soln.getResource("manifestId").getURI());
+                    } else {
+                        // No linked manifest from canvas
+                        tManifest = null;
+                    }
+                }
+                String tCanvasLabel = "";
+                if (soln.getLiteral("canvasLabel") != null) {
+                    tCanvasLabel = soln.getLiteral("canvasLabel").getString();
+                }
 
-				tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount));
+				tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount, tCanvasLabel, tManifest));
 			}
 		}
 

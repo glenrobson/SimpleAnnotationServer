@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Index Manifest"></ui:param>
+        <ui:param name="selected-menu" value="listAnnost.xhtml"></ui:param>
+
+        <ui:define name = "content">
+            <p:panel header="Index Manifest">
+                <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                    <div class="container">
+                        <h1>Register manifest with annotation store</h1>
+                        <p>This page allows you to upload a link to a manifest so that it is registered with the repository. Annotations which are associated with this canvas are then linked to this manifest and also a IIIF Search API endpoint is created.</p>
+
+                        <form action="manifests" method="post">
+                            <p><b>URL to Manifest:</b> <input type="text" name="uri" id="uri" size="100"/></p>
+                            <br/>
+                            <input type="submit" value="Submit"/>
+                        </form>    
+                    </div>
+                </main>
+            </p:panel>
+        </ui:define>
+    </ui:composition>
+</html>

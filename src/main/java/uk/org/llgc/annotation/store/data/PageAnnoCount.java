@@ -1,13 +1,35 @@
 package uk.org.llgc.annotation.store.data;
 
+import uk.org.llgc.annotation.store.data.Manifest;
+
 public class PageAnnoCount {
 	protected int _count = 0;
 	protected String _pageId = "";
+    protected String _label = "";
+    protected Manifest _manifest = null;
 
-	public PageAnnoCount(final String pPageId, final int pCount) {
+	public PageAnnoCount(final String pPageId, final int pCount, final String pLabel, final Manifest pManifest) {
 		this.setPageId(pPageId);
 		this.setCount(pCount);
+        this.setLabel(pLabel);
+        this.setManifest(pManifest);
 	}
+
+    public Manifest getManifest() {
+        return _manifest;
+    }
+
+    public void setManifest(final Manifest pManifest) {
+        _manifest = pManifest;
+    }
+
+    public String getLabel() {
+        return _label;
+    }
+
+    public void setLabel(final String pLabel) {
+        _label = pLabel;
+    }
 	
 	/**
 	 * Get count.

@@ -43,10 +43,21 @@ public class AnnotationUtils {
 	protected File _contextDir = null;
 	protected Encoder _encoder = null;
 
+    // Called by servlet
+    public AnnotationUtils() {
+        try {
+            _contextDir = StoreConfig.getConfig().getRealPath("/contexts"); // pContextDir;
+            _encoder = StoreConfig.getConfig().getEncoder();
+        } catch (javax.servlet.ServletException tExcpt) {
+            tExcpt.printStackTrace();
+        }
+    }
+
+    // Called by tests
 	public AnnotationUtils(final File pContextDir, final Encoder pEncoder) {
-		_contextDir = pContextDir;
-		_encoder = pEncoder;
-	}
+        _contextDir = pContextDir;
+        _encoder = pEncoder;
+    }
 
 	/**
 	 * Convert a IIIF annotation list into a list of annotations that have fragement
@@ -293,7 +304,7 @@ public class AnnotationUtils {
 
 
 	public Map<String,Object> frameManifest(final Model pManifest) throws JsonLdError, IOException  {
-		final Map<String,Object> tContextJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL("http://iiif.io/api/presentation/2/manifest_frame.json").openStream());
+		final Map<String,Object> tContextJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL("https://iiif.io/api/presentation/2/manifest_frame.json").openStream());
 		return this.frame(pManifest, tContextJson);
 	}
 
