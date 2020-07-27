@@ -232,10 +232,10 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	protected String indexManifest(final String pShortId, Map<String,Object> pManifest) throws IOException {
 		String tManifestId = (String)pManifest.get("@id");
 
-		Map<String,Object> tExisting = this.getManifest(pShortId);
+		Manifest tExisting = this.getManifest(pShortId);
 		if (tExisting != null) {
-			if (((String)tExisting.get("@id")).equals((String)pManifest.get("@id"))) {
-				return (String)tExisting.get("short_id"); // manifest already indexed
+			if (tExisting.getURI().equals((String)pManifest.get("@id"))) {
+				return tExisting.getShortId(); // manifest already indexed
 			} else {
 				// there already exists a document with this id but its a different manifest so try and make id unique
 				return indexManifest(pShortId + "1", pManifest);
@@ -277,7 +277,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	protected abstract String indexManifestNoCheck(final String pShortID, final Map<String,Object> pManifest) throws IOException;
 	public abstract List<Manifest> getManifests() throws IOException;
 	public abstract String getManifestId(final String pShortId) throws IOException;
-	public abstract Map<String,Object> getManifest(final String pShortId) throws IOException;
+	public abstract Manifest getManifest(final String pShortId) throws IOException;
 
 	public Model getAnnotation(final String pId) throws IOException {
 		return getNamedModel(pId);

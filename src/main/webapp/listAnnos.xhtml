@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="List all the annotations in this store"></ui:param>
+        <ui:param name="selected-menu" value="listAnnost.xhtml"></ui:param>
+
+        <ui:define name = "content">
+            <p:panel header="Canvases with Annotations">
+                Below are the list of pages which have annotations:
+                <ul>
+                    <c:forEach items="#{storeService.listAnnoPages}" var="annoPage" varStatus="iterMetadata">
+                        <li>
+                            <a href="annotation/search?uri=#{annoPage.pageId}"><h:outputText value="#{annoPage.pageId}"/></a> (<h:outputText value="#{annoPage.count}"/> annotations)
+                        </li>
+                    </c:forEach>
+                </ul>
+            </p:panel>
+        </ui:define>
+    </ui:composition>
+</html>
+
+

@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.File;
 
+import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
@@ -68,6 +70,15 @@ public class StoreConfig extends HttpServlet {
 		this.overloadConfigFromEnviroment(tProps);
 		initConfig(this);
 	}
+
+    public File getRealPath(final String pPath) {
+        try {
+            return new File(super.getServletContext().getRealPath(pPath));
+        } catch (Exception tExcpt) {
+            tExcpt.printStackTrace();
+            return null;
+        }
+    }
 
 	protected void overloadConfigFromEnviroment(final Properties pProps) {
 		_props = new HashMap<String,String>();

@@ -1,10 +1,14 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1">
+  <context-param>
+    <param-name>primefaces.THEME</param-name>
+    <param-value>bootstrap</param-value>
+    </context-param>
 
-<web-app>
-    <display-name>Simple Annotation Server</display-name>
-    <filter>
+   <display-name>Simple Annotation Server</display-name>
+   <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>uk.org.llgc.annotation.store.filters.CorsFilter</filter-class>
     </filter>
@@ -12,6 +16,20 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <!-- Define the JSF servlet (manages the request processing life cycle 
+    for JavaServer Faces) -->
+    <servlet>
+        <servlet-name>faces-servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <!-- Map following files to the JSF servlet -->
+    <servlet-mapping>
+        <servlet-name>faces-servlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
+        </servlet-mapping>
+   
 	<servlet>
 		<servlet-name>InitServer</servlet-name>
 		<servlet-class>uk.org.llgc.annotation.store.StoreConfig</servlet-class>
@@ -67,23 +85,6 @@
         <servlet-name>IIIFSearchAPI</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.IIIFSearchAPI</servlet-class>
     </servlet>
-	 <servlet>
-        <servlet-name>ListManifests</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.stats.ListManifests</servlet-class>
-    </servlet>
-	 <servlet>
-        <servlet-name>ManifestStats</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.stats.ManifestStats</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ListManifests</servlet-name>
-        <url-pattern>/stats/</url-pattern>
-        <url-pattern>/stats/index.html</url-pattern>
-    </servlet-mapping>
-	 <servlet-mapping>
-        <servlet-name>ManifestStats</servlet-name>
-        <url-pattern>/stats/*</url-pattern>
-    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>IIIFSearchAPI</servlet-name>

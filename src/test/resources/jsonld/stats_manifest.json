@@ -14,7 +14,7 @@
                 {
                     "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132230.json",
                     "@type": "sc:Canvas",
-                    "label": "[Aberystwyth]",
+                    "label": "[Aberystwyth] - page 1",
                     "height": 1705,
                     "width": 2448,
                     "images": [

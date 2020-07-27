@@ -42,30 +42,29 @@ import java.nio.charset.Charset;
 public interface StoreAdapter {
 
 	public void init(final AnnotationUtils pAnnoUtils);
+
+    // CRUD annotations
 	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException, MalformedAnnotation;
 	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException, MalformedAnnotation;
+	public Model getAnnotation(final String pId) throws IOException;
+	public void deleteAnnotation(final String pAnnoId) throws IOException;
 
 	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException, MalformedAnnotation;
 
+    // CRUD manifests
 	public String indexManifest(Map<String,Object> pManifest) throws IOException;
 	public List<Manifest> getManifests() throws IOException;
 	public String getManifestId(final String pShortId) throws IOException;
-	public Map<String,Object> getManifest(final String pShortId) throws IOException;
-	public Map<String, Object> getAllAnnotations() throws IOException;
+	public Manifest getManifest(final String pShortId) throws IOException;
 	public List<String> getManifestForCanvas(final String pCanvasId) throws IOException;
 
+    // Search
 	public Map<String, Object> search(final SearchQuery pQuery) throws IOException;
-
-	/**
-	 * Return the annotaiton with the given id
-	 * @return the annotation with id. If there is no annotation with that id return null
-	 */
-	public Model getAnnotation(final String pId) throws IOException;
-
-	public void deleteAnnotation(final String pAnnoId) throws IOException;
-
 	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException;
 
+    // Used in ListAnnotations can we get rid?
+	public Map<String, Object> getAllAnnotations() throws IOException;
+    // Stats
 	public List<PageAnnoCount> listAnnoPages() throws IOException;
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException;
 }
