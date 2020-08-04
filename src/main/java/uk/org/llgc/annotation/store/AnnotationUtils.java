@@ -49,7 +49,7 @@ public class AnnotationUtils {
             _contextDir = StoreConfig.getConfig().getRealPath("/contexts"); // pContextDir;
             _encoder = StoreConfig.getConfig().getEncoder();
         } catch (javax.servlet.ServletException tExcpt) {
-            tExcpt.printStackTrace();
+            //tExcpt.printStackTrace();
         }
     }
 

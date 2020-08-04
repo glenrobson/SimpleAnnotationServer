@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
@@ -26,6 +27,9 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.DC;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
@@ -67,7 +71,6 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		return tAnnotations;
 	}
 
-// TODO add junit test
 	public List<Manifest> getManifests() throws IOException {
 		String tQueryString = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 										"select ?manifest ?label ?shortId where {"  +
@@ -104,6 +107,47 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		return tManifests;
 	}
+
+	public List<Manifest> getSkeletonManifests() throws IOException {
+        String tQueryString = "select ?manifestId ?manifestLabel  where {" +
+                                  "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
+                                  "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
+                                  "  OPTIONAL { ?target <http://purl.org/dc/terms/isPartOf> ?manifestId } ." +
+                                  "  OPTIONAL { ?manifestId <http://www.w3.org/2000/01/rdf-schema#label> ?manifestLabel }" +
+                                  "}" +
+                                  "OPTIONAL {GRAPH ?manifestId {" +
+                                  "  ?manifestId <http://purl.org/dc/elements/1.1/identifier> ?shortId ." +
+                                  "  }}" +
+                                  " FILTER (!bound(?shortId)) " + 
+                                "} group by ?manifestId ?manifestLabel"; 
+		QueryExecution tExec = this.getQueryExe(tQueryString);
+        this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		int i = 0;
+		List<Manifest> tManifests = new ArrayList<Manifest>();
+		if (results != null) {
+			while (results.hasNext()) {
+				QuerySolution soln = results.nextSolution() ;
+				Resource tManifestURI = soln.getResource("manifestId") ; // Get a result variable - must be a resource
+
+				_logger.debug("Found manifest " + tManifestURI.getURI());
+                Manifest tManifest = new Manifest();
+                tManifest.setURI(tManifestURI.getURI());
+                if (soln.getLiteral("label") != null) {
+                    tManifest.setLabel(soln.getLiteral("label").getString());
+                }    
+
+				tManifests.add(tManifest);
+			}
+		} else {
+			_logger.debug("no Manifests loaded");
+		}
+		this.end();
+
+		return tManifests;
+
+
+    }
 
 	public String getManifestId(final String pShortId) throws IOException {
 		String tQueryString = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
@@ -314,9 +358,48 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		return tAnnotationList;
 	}
 
+    public Canvas resolveCanvas(final String pShortId) throws IOException {
+        String tQueryString =   "select ?canvas ?label where {" +
+										"   GRAPH ?canvas { " +
+										"	 ?canvas <http://purl.org/dc/elements/1.1/identifier> \"" + pShortId + "\" ." +
+										"	 ?canvas <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Canvas> ." +
+										"	 OPTIONAL { ?canvas  <http://www.w3.org/2000/01/rdf-schema#label> ?label } " +
+										"   } " +
+										"}";
+		QueryExecution tExec = this.getQueryExe(tQueryString);
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		Canvas tCanvas = null;
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+            Resource tCanvasResource = soln.getResource("canvas");
+            String tLabel = "";
+            if (soln.getLiteral("label") != null) {
+                tLabel = soln.getLiteral("label").getString();
+            }
+            tCanvas = new Canvas(tCanvasResource.getURI(), tLabel);
+            tCanvas.setShortId(pShortId);
+		}
+        return tCanvas;
+    }
+
+    protected abstract void storeCanvas(final String pGraphName, final Model pModel) throws IOException;
+
+    public void storeCanvas(final Canvas pCanvas) throws IOException {
+		Model tModel = ModelFactory.createDefaultModel();
+        Resource tCanvasURI = tModel.createResource(pCanvas.getId());
+        tModel.add(tModel.createStatement(tCanvasURI, RDF.type, tModel.createResource("http://iiif.io/api/presentation/2#Canvas")));
+        tModel.add(tModel.createStatement(tCanvasURI, DC.identifier, pCanvas.getShortId()));
+        if (pCanvas.getLabel() != null && !pCanvas.getLabel().trim().isEmpty()) {
+            tModel.add(tModel.createStatement(tCanvasURI, RDFS.label, pCanvas.getLabel()));
+        }
+
+        storeCanvas(pCanvas.getId(), tModel);
+    }
 
 	public List<PageAnnoCount> listAnnoPages() {
-        String tQueryString = "select ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel (count(?annoId) as ?count) where {" +
+        String tQueryString = "select ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
                                   "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
                                   "  OPTIONAL { ?target <http://purl.org/dc/terms/isPartOf> ?manifestId }" +
@@ -326,28 +409,35 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                                   "  ?manifestId <http://purl.org/dc/elements/1.1/identifier> ?shortId ." +
                                   "  ?pageId <http://www.w3.org/2000/01/rdf-schema#label> ?canvasLabel " +
                                   "  }}" +
-                                "}group by ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel order by ?pageId"; 
+                                  "OPTIONAL { GRAPH ?{ " +
+                                  "	 ?canvas <http://purl.org/dc/elements/1.1/identifier> ?canvasShortId ." +
+                                  "	 ?canvas <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Canvas> " +
+                                  "  }}" +
+                                "}group by ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId order by ?pageId"; 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
         return listAnnoPagesQuery(tExec, null);
     }
 
     public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
-        String tQueryString = "select ?pageId ?canvasLabel (count(?annoId) as ?count) where {" +
+        String tQueryString = "select ?pageId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
                                   "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
                                   "  ?target <http://purl.org/dc/terms/isPartOf> <" + pManifest.getURI() + "> " +
                                   "}" +
-                                  "GRAPH <" + pManifest.getURI() + "> {" +
+                                  "OPTIONAL {GRAPH <" + pManifest.getURI() + "> {" +
                                   "  ?pageId <http://www.w3.org/2000/01/rdf-schema#label> ?canvasLabel" +
-                                  "  }" +
-                                "}group by ?pageId ?canvasLabel order by ?pageId";
+                                  "  }}" +
+                                  "OPTIONAL { GRAPH ?pageId{ " +
+                                  "	 ?canvas <http://purl.org/dc/elements/1.1/identifier> ?canvasShortId ." +
+                                  "	 ?canvas <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Canvas> " +
+                                  "  }}" +
+                                "}group by ?pageId ?canvasLabel ?canvasShortId order by ?pageId";
         
 		QueryExecution tExec = this.getQueryExe(tQueryString);
         return listAnnoPagesQuery(tExec, pManifest);
     }
 
 	private List<PageAnnoCount> listAnnoPagesQuery(final QueryExecution pQuery, final Manifest pManifest) {
-		
 		this.begin(ReadWrite.READ);
 		ResultSet results = pQuery.execSelect(); // Requires Java 1.7
 		this.end();
@@ -380,8 +470,18 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                 if (soln.getLiteral("canvasLabel") != null) {
                     tCanvasLabel = soln.getLiteral("canvasLabel").getString();
                 }
+                Canvas tCanvas = new Canvas(tPageId.getURI(), tCanvasLabel);
+                if (soln.getLiteral("canvasShortId") != null) {
+                    tCanvas.setShortId(soln.getLiteral("canvasShortId").getString());
+                } else {
+                    try {
+                        storeCanvas(tCanvas);
+                    } catch (IOException tExcpt) {
+                        tExcpt.printStackTrace();
+                    }
+                }
 
-				tAnnotations.add(new PageAnnoCount(tPageId.getURI(), tCount, tCanvasLabel, tManifest));
+				tAnnotations.add(new PageAnnoCount(tCanvas, tCount, tManifest));
 			}
 		}
 

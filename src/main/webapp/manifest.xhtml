@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+
+                <c:set var="tManifest" value="#{storeService.getManifest(param['manifest'])}" scope="request" />
+
+                <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
+                <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
+                <p>This manifest has been loaded to the SimpleAnnotationServer and the following options are available:</p>
+                <ul>
+                    <!--<li><a href="">Annotate</a></li>-->
+                    <li><a href="stats/manifest.xhtml?manifest=#{tManifest.shortId}">View annotation statistics</a></li>
+                    <li><a href="annotations.xhtml?manifest=#{tManifest.shortId}">Download annotations</a></li>
+                </ul>
+                <h2>IIIF Search Service</h2>
+                <p>A IIIF search service is available for this manifest:</p>
+                <ul>
+                    <li><a id="search_url" href="search-api/#{tManifest.shortId}/search" data-relative="true"><span data-relative="true">search-api/#{tManifest.shortId}/search</span></a></li>
+                </ul>    
+                <p>To add this search service to your manifest add the following json snippet to your manifest at the top level just after the <code>label</code>:</p>
+<pre>
+"service": {
+    "profile": "http://iiif.io/api/search/0/search",
+    "@id": <span data-relative="true">search-api/#{tManifest.shortId}/search</span>,
+    "@context": "http://iiif.io/api/search/0/context.json"
+},
+</pre>
+                <p>For example see this manifest snippet:</p>
+<pre>
+{
+    "@context":"http://iiif.io/api/presentation/2/context.json",
+    "@id": "<h:outputText value="#{tManifest.URI}" escape="false" />",
+    "@type":"sc:Manifest",
+    "label": "<h:outputText value="#{tManifest.label}" escape="false" />",
+    "service": {
+        "profile": "http://iiif.io/api/search/0/search",
+        "@id": <span data-relative="true">search-api/#{tManifest.shortId}/search</span>,
+        "@context": "http://iiif.io/api/search/0/context.json"
+    },
+    "sequences" : [
+  ....
+</pre>
+                <script>
+                    var elements = document.querySelectorAll('[data-relative]');
+                    for (var i = 0; i &lt; elements.length; i++) {
+                        relativeToAbsolute(elements[i]);
+                    }
+                    function relativeToAbsolute(el) {
+                        var url = '';
+                        if (el.tagName.toLowerCase() === 'a') {
+                            url = el.href;
+                        } else {
+                            url = el.textContent.trim();
+                        }
+                        var link  = document.createElement("a");
+                        link.href=url;
+                        var fullURL = link.href;
+                        if (el.tagName.toLowerCase() === 'a') {
+                            el.href = fullURL;
+                        } else {
+                            el.textContent = fullURL;
+                        }
+
+                    }
+                </script>
+                </div>
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>
+

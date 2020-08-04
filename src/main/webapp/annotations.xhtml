@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <c:if test="#{empty param['manifest']}">
+                        <!-- Skeleton Manifest -->
+                        <c:set var="tCanvases" value="#{storeService.listAnnoPages(param['uri'])}" scope="request" />
+                        <c:set var="tManifest" value="#{storeService.getManifestFromAnnotations(tCanvases)}" scope="request" />
+                        
+                        <c:if test="#{empty tManifest.label}">
+                            <h1>Annotations for <h:outputText value="#{tManifest.URI}"/></h1>
+                        </c:if>
+                        <c:if test="#{not empty tManifest.label}">
+                            <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
+                        </c:if>
+                    </c:if>
+
+                    <c:if test="#{not empty param['manifest']}">
+                        <!-- Indexed Manifest -->
+                        <c:set var="tManifest" value="#{storeService.getManifest(param['manifest'])}" scope="request" />
+                        <c:set var="tCanvases" value="#{storeService.listAnnoPages(tManifest)}" scope="request" />
+                        <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
+                    </c:if>
+                    <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
+                    <p>The list of canvases which have annotations are below. There is a link to the Annotation List which can be downloaded and linked to the manifest. This is done by adding a <code>otherContent</code> section to the relevant canvas in the manifest. For example:</p>
+                    <c:if test="#{not empty tCanvases}">
+<pre>
+{
+    "@id": "#{tCanvases.get(0).canvas.id}",
+    "@type": "sc:Canvas",
+    "images": [
+    ...
+    ],
+    "otherContent": [ {
+        "@id": "http://example.com/sas/annotation/list/#{tCanvases.get(0).canvas.shortId}.json",
+        "@type": "sc:AnnotationList",
+        "label": "My fantastic annotations"
+    }]
+}
+</pre>
+                    <ul>
+                        <c:forEach items="#{tCanvases}" var="annoPage" varStatus="iterMetadata">
+                            <li>
+                                <c:if test="#{not empty annoPage.canvas.label}">
+                                    <c:set var="tLabel" value="#{annoPage.canvas.label}"/>
+                                </c:if>
+                                <c:if test="#{empty annoPage.canvas.label}">
+                                    <c:set var="tLabel" value="#{annoPage.canvas.id}" />
+                                </c:if>
+                                <c:set var="short_id" value="#{annoPage.canvas.shortId}" />
+                                <a href="annotation/list/#{short_id}.json"><h:outputText value="#{tLabel}"/></a> - <h:outputText value="#{annoPage.count}"/> annotations
+                            </li>
+                        </c:forEach>
+                    </ul>
+
+                    </c:if>
+                    <c:if test="#{empty tCanvases}">
+<pre>
+{
+    "@id": "http://example.com/canvas/1",
+    "@type": "sc:Canvas",
+    "images": [
+    ...
+    ],
+    "otherContent": [ {
+        "@id": "http://example.com/sas/annotation/list/short-id.json",
+        "@type": "sc:AnnotationList",
+        "label": "My fantastic annotations"
+    }]
+}
+</pre>
+                        <p>No annotations found. Start annotating!</p>
+                    </c:if>
+                </div>
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>
+

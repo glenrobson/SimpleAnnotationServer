@@ -18,7 +18,7 @@
                 <ul>
                     <c:forEach items="#{storeService.listAnnoPages}" var="annoPage" varStatus="iterMetadata">
                         <li>
-                            <a href="annotation/search?uri=#{annoPage.pageId}"><h:outputText value="#{annoPage.pageId}"/></a> (<h:outputText value="#{annoPage.count}"/> annotations)
+                            <a href="annotation/search?uri=#{annoPage.canvas.id}"><h:outputText value="#{annoPage.canvas.id}"/></a> (<h:outputText value="#{annoPage.count}"/> annotations)
                         </li>
                     </c:forEach>
                 </ul>

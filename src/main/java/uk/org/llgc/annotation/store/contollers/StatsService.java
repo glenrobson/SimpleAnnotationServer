@@ -38,7 +38,14 @@ public class StatsService {
     @PostConstruct
     public void init() {
         _store = StoreConfig.getConfig().getStore();
+        _store.init(new AnnotationUtils());
     }
+
+    public void init(final AnnotationUtils pUtils) {
+        _store = StoreConfig.getConfig().getStore();
+        _store.init(pUtils);
+    }
+
 
     protected Manifest getManifestFromId(final String pShortId) throws IOException {
         if (_manifests.containsKey(pShortId)) {
@@ -95,10 +102,10 @@ public class StatsService {
             int tMax = 0;
             for (PageAnnoCount tCount : tPageCounts) {
                 String tKey = "";
-                if (tCount.getLabel().replaceAll("'","").length() > 9) {
-                    tKey = tCount.getLabel().replaceAll("'","").substring(0,10);
+                if (tCount.getCanvas().getLabel().replaceAll("'","").length() > 9) {
+                    tKey = tCount.getCanvas().getLabel().replaceAll("'","").substring(0,10);
                 } else {
-                    tKey = tCount.getLabel().replaceAll("'","");
+                    tKey = tCount.getCanvas().getLabel().replaceAll("'","");
                 }
                 if (annoCounts.getData().containsKey(tKey)) {
                     int i = 1;

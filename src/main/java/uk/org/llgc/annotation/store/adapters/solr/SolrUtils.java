@@ -63,7 +63,7 @@ public class SolrUtils {
 
 	public SolrQuery getQuery() {
 		SolrQuery tQuery = new SolrQuery();
-		tQuery.setFields("id", "type", "motivation","body", "target","selector", "short_id", "within", "data", "canvas");
+		tQuery.setFields("id", "type", "motivation","body", "target","selector", "short_id", "within", "data", "canvas", "label");
 		tQuery.setRows(1000);
 
 		return tQuery;

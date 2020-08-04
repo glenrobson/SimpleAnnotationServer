@@ -71,6 +71,11 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 		_logger.debug("Prefered RDF Format " + ((HTTPRepository)_repo).getPreferredRDFFormat());
 	}
 
+
+    protected void storeCanvas(final String pGraphName, final Model pModel) throws IOException {
+        // TODO
+    }
+
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
 		// Convert remote Json-Ld context to a local one by embedding context in json

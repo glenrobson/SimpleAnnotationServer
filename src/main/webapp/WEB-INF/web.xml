@@ -85,6 +85,15 @@
         <servlet-name>IIIFSearchAPI</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.IIIFSearchAPI</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AnnotationList</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.AnnotationListServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AnnotationList</servlet-name>
+        <url-pattern>/annotation/list/*</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>IIIFSearchAPI</servlet-name>

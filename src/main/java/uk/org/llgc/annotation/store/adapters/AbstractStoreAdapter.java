@@ -27,6 +27,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -276,8 +277,12 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	public abstract Map<String, Object> search(final SearchQuery pQuery) throws IOException;
 	protected abstract String indexManifestNoCheck(final String pShortID, final Map<String,Object> pManifest) throws IOException;
 	public abstract List<Manifest> getManifests() throws IOException;
+	public abstract List<Manifest> getSkeletonManifests() throws IOException;
 	public abstract String getManifestId(final String pShortId) throws IOException;
 	public abstract Manifest getManifest(final String pShortId) throws IOException;
+
+    public abstract Canvas resolveCanvas(final String pShortId) throws IOException;
+    public abstract void storeCanvas(final Canvas pCanvas) throws IOException;
 
 	public Model getAnnotation(final String pId) throws IOException {
 		return getNamedModel(pId);

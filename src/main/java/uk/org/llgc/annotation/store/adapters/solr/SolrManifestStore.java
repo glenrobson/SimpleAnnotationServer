@@ -9,6 +9,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.FacetField;
 
 import java.io.IOException;
 
@@ -41,7 +42,7 @@ public class SolrManifestStore {
 	public Manifest getManifest(final String pShortId) throws IOException {
         SolrQuery tQuery = this.getManifestQuery();
 
-		tQuery.set("q", "short_id:" + _utils.escapeChars(pShortId));
+		tQuery.set("q", "short_id:\"" + pShortId + "\"");
 
 		try {
 			QueryResponse tResponse  = _solrClient.query(tQuery);
@@ -108,6 +109,28 @@ public class SolrManifestStore {
 				tQuery.setStart(tStart);
 				tResponse = _solrClient.query(tQuery);
 			} while (tStart < tResultNo);
+		} catch (SolrServerException tExcpt) {
+			tExcpt.printStackTrace();
+			throw new IOException("Failed to remove annotations due to " + tExcpt);
+		}
+		return tManifests;
+    }
+
+	public List<Manifest> getSkeletonManifests() throws IOException {
+        SolrQuery tQuery = this.getManifestQuery();
+		tQuery.set("q", "within:*");
+        tQuery.setFacet(true);
+        tQuery.addFacetField("within");
+
+		List<Manifest> tManifests = new ArrayList<Manifest>();
+		try {
+			QueryResponse tResponse = _solrClient.query(tQuery);
+            FacetField tFacetCounts = tResponse.getFacetField("within");
+            for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
+                Manifest tManifest = new Manifest();
+                tManifest.setURI(tFacetValue.getName());
+                tManifests.add(tManifest);
+            }
 		} catch (SolrServerException tExcpt) {
 			tExcpt.printStackTrace();
 			throw new IOException("Failed to remove annotations due to " + tExcpt);

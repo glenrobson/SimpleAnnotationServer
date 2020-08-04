@@ -52,6 +52,12 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		return tJsonLDModel;
 	}
 
+    protected void storeCanvas(final String pGraphName, final Model pModel) throws IOException {
+		_dataset.begin(ReadWrite.WRITE) ;
+		_dataset.addNamedModel(pGraphName, pModel);
+		_dataset.commit();
+    }
+
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
 		_dataset.begin(ReadWrite.WRITE) ; // should probably move this to deleted state
 		_dataset.removeNamedModel(pAnnoId);
