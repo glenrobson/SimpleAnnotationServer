@@ -1,0 +1,46 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <h1>Indexed Manifests</h1>
+                    <p>The following manifests have been indexed and you can view the search information and stats:</p>
+                    <ul>
+                        <c:forEach items="#{storeService.manifests}" var="manifest" varStatus="iterMetadata">
+                            <li>
+                                <a href="manifest.xhtml?manifest=#{manifest.shortId}"><h:outputText value="#{manifest.label}"/></a>
+                            </li>
+                        </c:forEach>
+                    </ul>
+
+                    <h2>Annotated Manifests</h2>
+                    <p>These manifests have been annotated but not indexed. You can download annotations but its not possible to see stats or use the IIIF Search API. To index one of these manifests upload the manifest <a href="uploadManifest.xhtml">here</a>.</p>
+
+                    <ul>
+                        <c:forEach items="#{storeService.annoManifests}" var="manifest" varStatus="iterMetadata">
+                            <li>
+                                <a href="annotations.xhtml?uri=#{manifest.URI}">
+                                    <c:if test="#{not empty manifest.label}">
+                                        <h:outputText value="#{manifest.label}"/>
+                                    </c:if>
+                                    <c:if test="#{empty manifest.label}">
+                                        <h:outputText value="#{manifest.URI}"/>
+                                    </c:if>
+                                </a>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </div>
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>
+

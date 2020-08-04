@@ -31,6 +31,8 @@ import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.PageAnnoCount;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -102,4 +104,45 @@ public class TestModel extends TestUtils {
         assertEquals("Unexpected amount of canvases", 2, tManifest.getCanvases().size());
         assertEquals("Wrong label for first Canvas", "Image 1", tManifest.getCanvases().get(0).getLabel());
     } 
+
+    @Test
+    public void testSkeletonManifests() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+
+        _store.addAnnotation(tAnnotation);
+
+        List<Manifest> tManifests = _store.getSkeletonManifests();
+        assertEquals("Unexpected amount of manifests in store.", 1, tManifests.size());
+        assertEquals("ID doesn't match", "http://example.com/manfiest/test/manifest.json", tManifests.get(0).getURI());
+
+        Manifest tManifest = new Manifest();
+        tManifest.setURI("http://example.com/manfiest/test/manifest.json");
+        List<PageAnnoCount> tAnnoList = _store.listAnnoPages(tManifest);
+        assertEquals("Unexpected amount of annotations for this manifest.", 1, tAnnoList.size());
+        assertEquals("Unexpected canvas ID", "http://example.com/manfiest/test/canvas/1.json", tAnnoList.get(0).getCanvas().getId());
+
+        assertEquals("Incorrect short id", "857085d28ae8df537449a85b5272d516", tAnnoList.get(0).getCanvas().getShortId());
+        Canvas tRetrievedCanvas = _store.resolveCanvas(tAnnoList.get(0).getCanvas().getShortId());
+        assertNotNull("Failed to retrieve canvas", tRetrievedCanvas);
+    }
+
+    @Test
+    public void testStoreCanvas() throws IOException, IDConflictException, MalformedAnnotation {
+        Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+        _store.addAnnotation(tAnnotation);
+
+        Canvas tCanvas = new Canvas("http://example.com/manfiest/test/canvas/1.json","");
+        String tShortId = "857085d28ae8df537449a85b5272d516";
+        assertEquals("Unexpected canvas short id", tShortId, tCanvas.getShortId());
+
+        _store.storeCanvas(tCanvas);
+
+        Canvas tRetrievedCanvas = _store.resolveCanvas(tShortId);
+        assertNotNull("Failed to retrieve canvas", tRetrievedCanvas);
+
+        assertEquals("Unexpected Canvas Id", "http://example.com/manfiest/test/canvas/1.json", tRetrievedCanvas.getId());
+        assertEquals("Unexpected Canvas label", "", tRetrievedCanvas.getLabel());
+        assertEquals("Unexpected Short Id", tShortId, tRetrievedCanvas.getShortId());
+
+    }
 }

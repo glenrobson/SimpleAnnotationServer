@@ -89,7 +89,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 		// Only index what is neccesary for searching, everything else goes into data
 		tDoc.addField("id", (String)pJson.get("@id"));
-		_utils.addMultiple(tDoc, "type",pJson.get("@type"));
+		_utils.addMultiple(tDoc, "type", pJson.get("@type"));
 		_utils.addMultiple(tDoc, "motivation", pJson.get("motivation"));
 		Date tCreated = null;
 		try {
@@ -142,6 +142,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 					_logger.info(JsonUtils.toPrettyString(pJson));
 				}
 				_utils.addSingle(tDoc, "target", tOn.get("source"));
+                Canvas tCanvas = new Canvas((String)tDoc.get("target").getValue(), "");
+                _utils.addMultiple(tDoc, "short_id", tCanvas.getShortId());
 				if (tOn.get("selector") != null) { // index xywh in case in future you want to search within bounds
 					Map<String,Object> tSelector = (Map<String, Object>)tOn.get("selector");
 					if (tSelector.get("value") instanceof String) {
@@ -254,6 +256,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         return _manifestStore.getManifests();
     }
 
+	public List<Manifest> getSkeletonManifests() throws IOException {
+        return _manifestStore.getSkeletonManifests();
+    }
+
 	protected String indexManifestNoCheck(final String pShortId, Map<String,Object> pManifest) throws IOException {
         Manifest tManifest = new Manifest(pManifest, pShortId);
         _manifestStore.indexManifestNoCheck(tManifest);
@@ -268,6 +274,49 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	public Manifest getManifest(final String pShortId) throws IOException {
 		return _manifestStore.getManifest(pShortId);
 	}
+
+    public Canvas resolveCanvas(final String pShortId) throws IOException {
+        SolrQuery tQuery = _utils.getQuery();
+		tQuery.set("q", "short_id:\"" + pShortId + "\"");
+        try {
+			QueryResponse tResponse = _solrClient.query(tQuery);
+            if (tResponse.getResults().isEmpty()) {
+                // Failed to find Canvas
+                return null;
+            }
+            SolrDocument tResult = tResponse.getResults().get(0);
+            String tLabel = "";
+            if (tResult.get("label") != null) {
+                tLabel = (String)tResult.get("label");
+            }
+            Canvas tCanvas = new Canvas((String)tResult.get("target"), tLabel);
+            tCanvas.setShortId(pShortId);
+            if (tResult.get("label") != null) {
+                tCanvas.setLabel((String)tResult.get("label"));
+            }
+            return tCanvas;
+		} catch (SolrServerException tException) {
+			throw new IOException("Failed to run solr query due to " + tException.toString());
+		}
+    }
+
+    public void storeCanvas(final Canvas pCanvas) throws IOException {
+        SolrQuery tQuery = _utils.getQuery();
+		tQuery.set("q", "NOT short_id:* AND target:\"" + pCanvas.getId() + "\"");
+
+        try {
+			QueryResponse tResponse = _solrClient.query(tQuery);
+            for (SolrDocument tResult : tResponse.getResults()) {
+                Map<String,Object> tAnnoJson =  this.buildAnnotation(tResult, false);
+                // This will add the canvas short_id to old annotations that don't have it
+                super.updateAnnotation(tAnnoJson);
+            }
+		} catch (SolrServerException tException) {
+			throw new IOException("Failed to run solr query due to " + tException.toString());
+        } catch (MalformedAnnotation tException) {
+			throw new IOException("Failed to run solr query due to " + tException.toString());
+		}
+    }
 
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
 		List<String> tOldIds = new ArrayList<String>();
@@ -411,15 +460,22 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         tQuery.setFacet(true);
         tQuery.addFacetField("target");
         tQuery.setFacetLimit(-1);
+        tQuery.setFacetMinCount(1);
         tQuery.setFacetSort("index");
-        tQuery.set("q", "type:oa\\:Annotation AND within:" + pManifest.getURI().replaceAll(":","\\\\:"));
+        tQuery.set("q", "type:\"oa:Annotation\" AND within:\"" + pManifest.getURI() + "\"");
         try {
             QueryResponse tResponse = _solrClient.query(tQuery);
             long tTotalAnnos = tResponse.getResults().getNumFound();
             FacetField tFacetCounts = tResponse.getFacetField("target");
             List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
             for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-                tAnnoPageCount.add(new PageAnnoCount(tFacetValue.getName(), (int)tFacetValue.getCount(), pManifest.getCanvas(tFacetValue.getName()).getLabel(), pManifest)); // TODO add canvas label
+                String tLabel = "";
+                if (pManifest.getCanvas(tFacetValue.getName()) != null) {
+                    tLabel = pManifest.getCanvas(tFacetValue.getName()).getLabel();
+                }
+                Canvas tCanvas = new Canvas(tFacetValue.getName(), tLabel);
+                this.storeCanvas(tCanvas);
+                tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacetValue.getCount(), pManifest)); 
             }
             return tAnnoPageCount;
         } catch (SolrServerException tExcept) {
@@ -442,7 +498,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
             FacetField tFacetCounts = tResponse.getFacetField("target");
             List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
             for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-                tAnnoPageCount.add(new PageAnnoCount(tFacetValue.getName(), (int)tFacetValue.getCount(), "", null)); // TODO add manifest and canvas label
+                Canvas tCanvas = new Canvas(tFacetValue.getName(), "");// TODO add manifest and canvas label
+                tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacetValue.getCount(), null)); 
             }
             return tAnnoPageCount;
         } catch (SolrServerException tExcept) {

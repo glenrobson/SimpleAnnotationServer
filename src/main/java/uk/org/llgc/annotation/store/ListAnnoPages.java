@@ -43,9 +43,9 @@ public class ListAnnoPages extends HttpServlet {
 		StringBuffer tContent = new StringBuffer();
 		for (PageAnnoCount tPage : tAnnotations) {
 			tContent.append("<li><a href=\"annotation/search?uri=");
-			tContent.append(tPage.getPageId());
+			tContent.append(tPage.getCanvas().getId());
 			tContent.append("\">");
-			tContent.append(tPage.getPageId());
+			tContent.append(tPage.getCanvas().getId());
 			tContent.append("</a> ");
 			tContent.append("(");
 			tContent.append(tPage.getCount());

@@ -71,16 +71,19 @@ public class TestStats extends TestUtils {
     @Test
     public void testStats() throws IOException, IDConflictException, MalformedAnnotation {
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/stats_AnnotationList.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
-
         // Upload Newspaper annotation list
         _store.addAnnotationList(tAnnotationListJSON);
+
+        // Upload unrelated annotation list to check counts
+        Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+        _store.addAnnotation(tAnnotation);
 
         // Upload Manifest
 		Map<String, Object> tManifestJson = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/stats_manifest.json").getFile())); //annotaiton list
         String tShortId = _store.indexManifest(tManifestJson);
         Manifest tManifest = new Manifest(tManifestJson, tShortId);
         StatsService tStats = new StatsService();
-        tStats.init();
+        tStats.init(_annotationUtils);
 
         List<PageAnnoCount> tPageCounts = tStats.getManifestAnnoCount(tManifest);
         assertEquals("Expected size of 1.", 1, tPageCounts.size());
@@ -105,7 +108,7 @@ public class TestStats extends TestUtils {
         assertEquals("Expected to be done and done to add up to the number of canvases", tToDo + tDone, tManifest.getCanvases().size());
 
         PageAnnoCount tPage1 = tPageCounts.get(0);
-        assertEquals("Mistmatch with canvas label ",  "[Aberystwyth] - page 1", tPage1.getLabel());
+        assertEquals("Mistmatch with canvas label ",  "[Aberystwyth] - page 1", tPage1.getCanvas().getLabel());
         assertEquals("Mistmatch between annotation count and expected manifest", "https://damsssl.llgc.org.uk/iiif/2.0/1132230/manifest.json", tPage1.getManifest().getURI());
         assertEquals("Mistmatch between expected Manifest label", "[Aberystwyth]", tPage1.getManifest().getLabel());
     }

@@ -63,12 +63,27 @@ public class ManifestUpload extends HttpServlet {
 			tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tID).openStream());
 		} else {
 			InputStream tManifestStream = pReq.getInputStream();
+            /*java.io.BufferedReader tReader = new java.io.BufferedReader(new java.io.InputStreamReader(tManifestStream));
+            String tLine = tReader.readLine();
+            while (tLine != null) {
+                System.out.println(tLine);
+                tLine = tReader.readLine();
+            }*/
+
 			tManifest = (Map<String,Object>)JsonUtils.fromInputStream(tManifestStream);
 		}
 
 		String tShortId = _store.indexManifest(tManifest);
+        Manifest tManifestObject = new Manifest(tManifest, tShortId);
+        Map<String,Map<String,String>> tJson = new HashMap<String,Map<String,String>>();
+        Map<String,String> tLinks = new HashMap<String,String>();
+        tJson.put("loaded", tLinks);
+        tLinks.put("uri", tManifestObject.getURI());
+        tLinks.put("short_id", tManifestObject.getShortId());
 
-		pRes.sendRedirect(StoreConfig.getConfig().getBaseURI(pReq) + "/search-api/" + tShortId + "/search");
+        pRes.setContentType("application/json");
+        pRes.setCharacterEncoding("UTF-8");
+        JsonUtils.write(pRes.getWriter(), tJson);
 	}
 
 	// if asked for without path then return collection of manifests that are loaded

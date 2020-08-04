@@ -18,14 +18,81 @@
                     <div class="container">
                         <h1>Register manifest with annotation store</h1>
                         <p>This page allows you to upload a link to a manifest so that it is registered with the repository. Annotations which are associated with this canvas are then linked to this manifest and also a IIIF Search API endpoint is created.</p>
+                        <div class="alert alert-danger" role="alert" id="messages" style="display:none">
+                        </div>
 
                         <form action="manifests" method="post">
                             <p><b>URL to Manifest:</b> <input type="text" name="uri" id="uri" size="100"/></p>
                             <br/>
-                            <input type="submit" value="Submit"/>
+                            <button type="button" id="indexButton" class="btn btn-primary mb-2" onclick="sendURL();return false;">Index</button>
                         </form>    
                     </div>
                 </main>
+
+                <script> 
+                    var getJSON = function(url, callback) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', url, true);
+                        xhr.responseType = 'json';
+                        xhr.onload = function() {
+                            if (xhr.readyState === 4 &amp;&amp; xhr.status === 200) {
+                               /* 
+                                 Can't do this because all of the annotations won't match the id of the manifest...       
+                                 if (url !== xhr.response["@id"]) {
+                                    // If location of Manifest doesn't match id of manifest
+                                    // update manifest
+                                    xhr.response["@id"] = url;
+                                }*/
+                                callback(xhr.status, xhr.response);
+                            } else {
+                                showMessage("Failed to load " + url + " due to " + xhr.status + ": '" + xhr.statusText + "'");
+                            }
+                        };
+                        xhr.send();
+                    };
+                    var sendJson = function sendJson(status, data) {
+                        var xhr = new XMLHttpRequest();
+                        var url = "url";
+                        xhr.open("POST", "manifests", true);
+                        xhr.setRequestHeader("Content-Type", "application/json");
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4 &amp;&amp; xhr.status === 200) {
+                                var json = JSON.parse(xhr.responseText);
+                                window.location.href = 'manifest.xhtml?manifest=' + json.loaded.short_id;
+                            } else {
+                                showMessage("Failed to index " + data['@id'] + " due to " + xhr.status + ": '" + xhr.statusText + "'");
+                            }
+                        };
+                        xhr.send(JSON.stringify(data));
+                    };
+
+                    function showMessage(message) {
+                        var messages = document.getElementById('messages');
+                        messages.textContent = message;
+                        messages.style.display = 'block';
+                        clearLoading();
+                    }
+
+                    function setLoading() {
+                        var button = document.getElementById('indexButton');
+                        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Indexing...';
+                        button.disabled = true;
+                    }
+
+                    function clearLoading() {
+                        var button = document.getElementById('indexButton');
+                        button.innerHTML = 'Index';
+                        button.disabled = false;
+                    }
+
+                    function sendURL() {
+                        setLoading();
+                        var messages = document.getElementById('messages');
+                        messages.style.display = 'none';
+                        var uri = document.getElementById('uri');
+                        getJSON(uri.value, sendJson);  
+                    }
+                </script>
             </p:panel>
         </ui:define>
     </ui:composition>

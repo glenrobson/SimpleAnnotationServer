@@ -20,6 +20,7 @@ import org.apache.jena.riot.Lang;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -54,9 +55,14 @@ public interface StoreAdapter {
     // CRUD manifests
 	public String indexManifest(Map<String,Object> pManifest) throws IOException;
 	public List<Manifest> getManifests() throws IOException;
+	public List<Manifest> getSkeletonManifests() throws IOException;
 	public String getManifestId(final String pShortId) throws IOException;
 	public Manifest getManifest(final String pShortId) throws IOException;
 	public List<String> getManifestForCanvas(final String pCanvasId) throws IOException;
+
+    // CRUD canvas
+    public Canvas resolveCanvas(final String pShortId) throws IOException;
+    public void storeCanvas(final Canvas pCanvas) throws IOException;
 
     // Search
 	public Map<String, Object> search(final SearchQuery pQuery) throws IOException;
@@ -64,7 +70,7 @@ public interface StoreAdapter {
 
     // Used in ListAnnotations can we get rid?
 	public Map<String, Object> getAllAnnotations() throws IOException;
-    // Stats
 	public List<PageAnnoCount> listAnnoPages() throws IOException;
+    // Stats
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException;
 }
