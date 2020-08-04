@@ -7,7 +7,7 @@ phases:
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - IMAGE_NAME="sas"
-      - REPOSITORY_URI=082101253860.dkr.ecr.eu-west-2.amazonaws.com/simple_annotation_server
+      - REPOSITORY_URI=082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas
       - IMAGE_TAG=prod_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
