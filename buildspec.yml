@@ -14,7 +14,7 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - echo Image_tag $IMAGE_TAG
-      - docker build -t sas:latest -f docker/sas-tomcat/Dockerfile .
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG -f docker/sas-tomcat/Dockerfile .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG 
   post_build:
     commands:
