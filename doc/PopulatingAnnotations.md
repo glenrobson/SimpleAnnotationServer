@@ -6,7 +6,7 @@ If you already have an IIIF Annotation List you can populate the Annotation Serv
 
 To load this navigate to:
 
-[http://localhost:8888/populate.html](http://localhost:8888/populate.html)
+[http://localhost:8888/populate.html](http://localhost:8888/populate.xhtml)
 
 and add the Annotation list in the box and click submit. Wait until you see SUCCESS displayed in the browser. If you loaded the example Newspaper Manifest in [Adding your own Manifests](NewManifests.md) you can navigate to:
 
