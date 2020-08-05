@@ -21,7 +21,7 @@
                 <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
                 <p>This manifest has been loaded to the SimpleAnnotationServer and the following options are available:</p>
                 <ul>
-                    <!--<li><a href="">Annotate</a></li>-->
+                    <li><a href="index.html?iiif-content=#{tManifest.URI}">Annotate</a></li>
                     <li><a href="stats/manifest.xhtml?manifest=#{tManifest.shortId}">View annotation statistics</a></li>
                     <li><a href="annotations.xhtml?manifest=#{tManifest.shortId}">Download annotations</a></li>
                 </ul>

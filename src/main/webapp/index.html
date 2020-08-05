@@ -17,9 +17,10 @@
   <script type="text/javascript">
 
     $(function() {
-      Mirador({
+      var configuration = {
         "id": "viewer",
         "layout": "1x1",
+        "buildPath": "mirador-2.6.1/",
 		  "mainMenuSettings" :
 		  {
 
@@ -57,8 +58,6 @@
             { "manifestUri": "http://dms-data.stanford.edu/data/manifests/Stanford/ege1/manifest.json", "location": "Stanford University"},
             { "manifestUri": "http://dms-data.stanford.edu/data/manifests/BnF/jr903ng8662/manifest.json ", "location": "Stanford University"},
             { "manifestUri": "http://dams.llgc.org.uk/iiif/4574752/manifest.json", "location": "National Library of Wales"},
-            { "manifestUri": "http://iiif.biblissima.fr/manifests/ark:/12148/btv1b84539771/manifest.json", "location":'BnF' },
-            { "manifestUri": "http://iiif.biblissima.fr/manifests/ark:/12148/btv1b10500687r/manifest.json", "location": 'BnF'},
             { "manifestUri": "http://www.e-codices.unifr.ch/metadata/iiif/sl-0002/manifest.json", "location": 'e-codices'},
             { "manifestUri": "http://www.e-codices.unifr.ch/metadata/iiif/bge-cl0015/manifest.json", "location": 'e-codices'},
              { "manifestUri": "https://data.ucd.ie/api/img/manifests/ucdlib:40851", "location": "University College Dublin"},
@@ -70,28 +69,45 @@
              { "manifestUri": "http://dams.llgc.org.uk/iiif/2.0/1465298/manifest.json", "location": "National Library of Wales"},
             { "manifestUri": "http://localhost:8888/examples/Cambrian_1804-01-28.json", "location": 'National Library of Wales'}
         ],
-      /*  "jsonStorageEndpoint": {
-            "name": "jsonblob api endpoint",
-            "module": "jsonblobapi",
-            "options": {
-                "ssl": false,
-                "port": "900",
-                "host": "jsonblob2.com"
-            }
-        },*/
         "windowObjects": [],
-		  /** Testing Annotations **/
 		  annotationEndpoint: {
 				name: 'Simple Annotation Store Endpoint',
 				module: 'SimpleASEndpoint',
 				options: {
 					url: 'annotation',
-				  storeId: 'comparison',
-				  APIKey: 'user_auth'
 				}
 		  }
-      });
+      };
+        // From Getty code: http://www.getty.edu/art/collection/static/viewers/mirador/?manifest=https://data.getty.edu/museum/api/iiif/1895/manifest.json
+        function getURLParameter(param) {
+            if(typeof(param) == "string" && param.length > 0) {
+                if(typeof(window.location.search) == "string" && window.location.search.length > 0) {
+                    var _results = new RegExp(param + "=([^&]*)", "i").exec(window.location.search);
+                    if(typeof(_results) == "object" && _results !== null && typeof(_results.length) == "number" && _results.length > 0 && _results[1]) {
+                        if(typeof(_results[1]) == "string" && _results[1].length > 0) {
+                            return unescape(_results[1]);
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        var manifest = getURLParameter("iiif-content");
+        if(typeof(manifest) == "string" && manifest.length > 0) {
+            
+            configuration.data = [{
+                "manifestUri": manifest,
+            }];
+            configuration.windowObjects = [{
+                "loadedManifest": manifest,
+            }];
+        }
+
+        Mirador(configuration);
+
     });
-  </script>
+
+      </script>
 </body>
 </html>
