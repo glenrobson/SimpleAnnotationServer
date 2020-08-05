@@ -54,13 +54,13 @@ public class TestSetup extends TestUtils {
     @After
     public void tearDown() throws IOException {
         //super.tearDown();
-        removeEnv("SAS.baseURI");
-        removeEnv("SAS.encoder");
-        removeEnv("SAS.store");
-        removeEnv("SAS.data_dir");
-        removeEnv("SAS.repo_url");
-        removeEnv("SAS.solr_connection");
-        removeEnv("SAS.solr_collection");
+        removeEnv("SAS_baseURI");
+        removeEnv("SAS_encoder");
+        removeEnv("SAS_store");
+        removeEnv("SAS_data_dir");
+        removeEnv("SAS_repo_url");
+        removeEnv("SAS_solr_connection");
+        removeEnv("SAS_solr_collection");
     }
 
     @Test
@@ -74,13 +74,13 @@ public class TestSetup extends TestUtils {
         tProps.setProperty("solr_connection", "properties_solr_connection");
         tProps.setProperty("solr_collection", "properties_solr_collection");
 
-        setEnv("SAS.baseURI","env_baseuri");
-        setEnv("SAS.encoder","env_encoder");
-        setEnv("SAS.store","env_store");
-        setEnv("SAS.data_dir","env_data_dir");
-        setEnv("SAS.repo_url","env_repo_url");
-        setEnv("SAS.solr_connection","env_solr_connection");
-        setEnv("SAS.solr_collection","env_solr_collection");
+        setEnv("SAS_baseURI","env_baseuri");
+        setEnv("SAS_encoder","env_encoder");
+        setEnv("SAS_store","env_store");
+        setEnv("SAS_data_dir","env_data_dir");
+        setEnv("SAS_repo_url","env_repo_url");
+        setEnv("SAS_solr_connection","env_solr_connection");
+        setEnv("SAS_solr_collection","env_solr_collection");
         StoreConfig tConfig = new StoreConfig(tProps);
 
         Map<String, String> tNewProps = tConfig.getProps();

@@ -90,9 +90,12 @@ public class StoreConfig extends HttpServlet {
             }
         }
 		for (String tKey : pProps.stringPropertyNames()) {
-			if (System.getProperty("SAS." + tKey) != null) {
-				_logger.debug("Overloading " + tKey + " with value " + System.getProperty("SAS." + tKey) + " from System.getProperty");
-				_props.put(tKey, System.getProperty("SAS." + tKey));
+			if (System.getProperty("SAS_" + tKey) != null) {
+				_logger.debug("Overloading " + tKey + " with value " + System.getProperty("SAS_" + tKey) + " from System.getProperty");
+				_props.put(tKey, System.getProperty("SAS_" + tKey));
+            } else if (System.getenv("SAS_" + tKey) != null) {    
+				_logger.debug("Overloading " + tKey + " with value " + System.getenv("SAS_" + tKey) + " from System.getenv");
+				_props.put(tKey, System.getenv("SAS_" + tKey));
 			} else {
                 if (!pProps.getProperty(tKey).equals(EMPTY)) {
     				_props.put(tKey, pProps.getProperty(tKey));
