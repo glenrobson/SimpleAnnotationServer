@@ -19,6 +19,8 @@ import com.github.jsonldjava.utils.JsonUtils;
 import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -35,7 +37,6 @@ public class Create extends HttpServlet {
 		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
-		_store.init(_annotationUtils);
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
@@ -46,18 +47,17 @@ public class Create extends HttpServlet {
 		}
 		_logger.debug("JSON in:");
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
-
 		try {
-			Model tModel = _store.addAnnotation(tAnnotationJSON);
-
-			Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
+			Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
+            AnnotationList tAnnotationList = new AnnotationList();
+            tAnnotationList.add(tAnno);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");
 			pRes.setCharacterEncoding("UTF-8");
 			_logger.debug("JSON out:");
-			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
+			_logger.debug(JsonUtils.toPrettyString(tAnnotationList.toJson()));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList.toJson()));
 		} catch (IDConflictException tException) {
 			tException.printStackTrace();
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);

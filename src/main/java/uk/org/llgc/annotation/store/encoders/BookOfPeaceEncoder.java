@@ -11,8 +11,10 @@ import java.util.HashMap;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
-import org.jdom2.xpath.XPath;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.jdom2.JDOMException;
+import org.jdom2.filter.Filters;
 
 import java.io.StringReader;
 import java.io.IOException;
@@ -130,7 +132,7 @@ public class BookOfPeaceEncoder implements Encoder {
 				if (tBody.get("foaf:primaryTopic") != null) {
 					// Annotation already has a person
 					Map<String,Object> tPersonLink = (Map<String,Object>)tBody.get("foaf:primaryTopic");
-					List tTopics = new ArrayList(); // turn value into an array
+					List<Map<String,Object>> tTopics = new ArrayList<Map<String,Object>>(); // turn value into an array
 					tTopics.add(tPersonLink);
 					tTopics.add(tHeading);
 					tBody.put("foaf:primaryTopic", tTopics);
@@ -164,7 +166,9 @@ public class BookOfPeaceEncoder implements Encoder {
 	}
 
 	protected String getField(final Document pDoc, final String pPath) throws JDOMException {
-		List<Element> tList = (List<Element>)XPath.selectNodes(pDoc, pPath);
+        XPathFactory xFactory = XPathFactory.instance();
+        XPathExpression<Element> expr = xFactory.compile(pPath, Filters.element());
+		List<Element> tList = expr.evaluate(pDoc);
 		StringBuffer tBuffer = new StringBuffer();
 		for (Element tEl : tList) {
 			if (tEl.getText().trim().length() > 0) {

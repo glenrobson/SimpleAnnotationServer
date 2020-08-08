@@ -90,4 +90,8 @@ public class Canvas {
     public String toString() {
         return "Canvas:\n\tid: " + _id + "\n\tShort id: " + _shortId + "\n\tLabel: " + _label; 
     }
+
+    public boolean equals(final Object pOther) {  
+        return _id.equals(((Canvas)pOther).getId());
+    }
 }

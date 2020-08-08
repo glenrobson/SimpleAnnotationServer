@@ -1,50 +1,7 @@
 {
     "@context": "http://iiif.io/api/presentation/2/context.json",
     "@id": "https://example.com/manifest.json",
-    "label": "Broken Manifest",
     "@type": "sc:Manifest",
     "sequences": [
-        {
-            "@context": "http://iiif.io/api/presentation/2/context.json",
-            "@id": "https://example.com/sequence/1",
-            "@type": "sc:Sequence",
-            "label": "Current Page Order",
-            "viewingHint": "individuals",
-            "canvases": [
-                {
-                    "@id": "https://example.com/canvas/1",
-                    "@type": "sc:Canvas",
-                    "label": "recto",
-                    "width": 13401,
-                    "height": 9092,
-                    "images": [
-                        {
-                            "resource": {
-                                "service": {
-                                    "@id": "https://iiif.ucd.ie/loris/ucdlib:42220",
-                                    "@context": "http://iiif.io/api/image/2/context.json",
-                                    "profile": "http://iiif.io/api/image/2/level2.json"
-                                },
-                                "format": "image/jpeg",
-                                "height": 9092,
-                                "width": 13401,
-                                "@id": "https://iiif.ucd.ie/loris/ucdlib:42220/full/full/0/default.jpg",
-                                "@type": "dcTypes:Image"
-                            },
-                            "on": "https://example.com/canvas/1",
-                            "motivation": "sc:painting"
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "service": [
-        {
-            "@context": "http://geojson.org/geojson-context.jsonld",
-            "@id": "https://example.com/geo.json",
-            "label": "Bounding box coordinates",
-            "profile": "http://geojson.org/geojson-spec.html"
-        }
     ]
 }

@@ -16,11 +16,11 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import org.apache.jena.rdf.model.Model;
-
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.Annotation;
 
 public class Update extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Update.class.getName());
@@ -33,7 +33,6 @@ public class Update extends HttpServlet {
 		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
-		_store.init(_annotationUtils);
 	}
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		_logger.debug("get called");
@@ -48,18 +47,18 @@ public class Update extends HttpServlet {
 			}
 			_logger.debug("JSON in:");
 			_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
-			String tAnnoId = (String)tAnnotationJSON.get("@id");
+            Annotation tUpdate = new Annotation(tAnnotationJSON);
+			Annotation tSavedAnno = _store.updateAnnotation(tUpdate);
 
-			Model tModel = _store.updateAnnotation(tAnnotationJSON);
-
-			Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
+            AnnotationList tAnnoList = new AnnotationList();
+            tAnnoList.add(tSavedAnno);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");
 			pRes.setCharacterEncoding("UTF-8");
 			_logger.debug("JSON out:");
-			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
+			_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson()));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson()));
 		} catch (IOException tException) {
 			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();

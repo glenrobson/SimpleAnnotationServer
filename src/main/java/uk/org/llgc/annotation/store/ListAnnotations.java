@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.data.AnnotationList;
 
 public class ListAnnotations extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(ListAnnotations.class.getName()); 
@@ -36,14 +37,14 @@ public class ListAnnotations extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotations = _store.getAllAnnotations();
+		AnnotationList tAnnotations = _store.getAllAnnotations();
 
 		StringBuffer tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
 		tURI.append("/annotation/");
-		tAnnotations.put("@id", tURI.toString());
+		tAnnotations.setId(tURI.toString());
 
 		pRes.setContentType("application/ld+json; charset=UTF-8");
 		pRes.setCharacterEncoding("UTF-8");
-		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotations));
+		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotations.toJson()));
 	}
 }

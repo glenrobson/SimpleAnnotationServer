@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store.adapters;
+package uk.org.llgc.annotation.store.adapters.rdf;
 
 import java.util.List;
 import java.util.Map;
@@ -18,14 +18,20 @@ import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.AnnoListNav;
+import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter;
 
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
@@ -47,10 +53,36 @@ import org.apache.jena.query.ResultSet;
 
 public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractRDFStore.class.getName());
+	protected AnnotationUtils _annoUtils = null;
+    public AbstractRDFStore(final AnnotationUtils pUtils) {
+        _annoUtils = pUtils;
+    }
 
-	public List<Model> getAnnotationsFromPage(final String pPageId) throws IOException {
+	public Annotation addAnnotationSafe(final Annotation pAnno) throws IOException {
+        Model tAnno = addAnnotationSafe(pAnno.toJson());
+        Annotation tAfter = this.convertModel(tAnno);
+        return tAfter;
+    }
+
+	public Annotation getAnnotation(final String pId) throws IOException {
+		Model tAnno = this.getNamedModel(pId);
+        if (tAnno == null) {
+            return null;
+        }
+        return this.convertModel(tAnno);
+    }
+
+    protected Annotation convertModel(final Model pModel) throws IOException {
+        Map<String,Object> tJson = _annoUtils.frameAnnotation(pModel, false);
+        return new Annotation(tJson);
+    }
+
+	protected abstract Model getNamedModel(final String pContext) throws IOException;
+	protected abstract Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException;
+
+	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException {
 		String tQueryString = "select ?annoId ?graph where {"
-										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> <" + pPageId + "> ."
+										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> <" + pPage.getId() + "> ."
 										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
 									+ "}";
 
@@ -60,14 +92,18 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		this.begin(ReadWrite.READ);
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
 		int i = 0;
-		List<Model> tAnnotations = new ArrayList<Model>();
+		AnnotationList tAnnotations = new AnnotationList();
+        List<String> tAnnoIds = new ArrayList<String>();
 		while (results.hasNext()) {
 			QuerySolution soln = results.nextSolution() ;
 			Resource tAnnoId = soln.getResource("annoId") ; // Get a result variable - must be a resource
+            tAnnoIds.add(tAnnoId.getURI());
 
-			tAnnotations.add(this.getNamedModel(tAnnoId.getURI()));
 		}
 		this.end();
+        for (String tAnnoId : tAnnoIds) {
+			tAnnotations.add(this.getAnnotation(tAnnoId));
+        }
 		return tAnnotations;
 	}
 
@@ -195,7 +231,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		return tManifest;
 	}
 
-	public Map<String, Object> search(final SearchQuery pQuery) throws IOException {
+	public AnnotationList search(final SearchQuery pQuery) throws IOException {
 		String tQueryString = "PREFIX oa: <http://www.w3.org/ns/oa#> "
 									 + "PREFIX cnt: <http://www.w3.org/2011/content#> "
                                      + "PREFIX dcterms: <http://purl.org/dc/terms/> "
@@ -203,19 +239,15 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 									 + "  GRAPH ?graph { ?anno oa:hasTarget ?target . "
 									 + "  ?anno oa:hasBody ?body . "
                                      + "  ?target dcterms:isPartOf <" + pQuery.getScope() + "> ."
-									 + "  ?body <" + super.FULL_TEXT_PROPERTY + "> ?content ."
+									 + "  ?body <" + Annotation.FULL_TEXT_PROPERTY + "> ?content ."
 									 + "  FILTER regex(str(?content), \".*" + pQuery.getQuery() + ".*\")"
 									 + "  }"
 									 + "} ORDER BY ?anno";
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
-		Map<String,Object> tAnnotationList = new HashMap<String,Object>();
-		tAnnotationList.put("@context", "http://iiif.io/api/presentation/2/context.json");
-		tAnnotationList.put("@type", "sc:AnnotationList");
+		AnnotationList tAnnotationList = new AnnotationList();
 
-		List<Map<String,Object>> tResources = new ArrayList<Map<String,Object>>();
-		tAnnotationList.put("resources", tResources);
 		this.begin(ReadWrite.READ);
 		List<QuerySolution> tResults = ResultSetFormatter.toList(tExec.execSelect());
 		this.end();
@@ -227,25 +259,24 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 					tEnd = tResults.size();
 				}
 				int tResultNo = tResults.size();
-                Map<String,String> tWithin = new HashMap<String,String>();
-                tAnnotationList.put("within",tWithin);
-                tWithin.put("@type","sc:Layer");
-                tWithin.put("total","" + tResults.size());
+                AnnoListNav tWithin = new AnnoListNav();
+                tAnnotationList.setNav(tWithin);
+                tWithin.setResults(tResults.size());
 				if (tResultNo > pQuery.getResultsPerPage()) { // if paginating
 					int tNumberOfPages = (int)(tResults.size() / pQuery.getResultsPerPage());
 					int tPageNo = pQuery.getPage();
-                    tAnnotationList.put("startIndex", tPageNo);
+                    tAnnotationList.setStartIndex(tPageNo);
 					if (tNumberOfPages != pQuery.getPage()) { // not on last page
 						int tPage = tPageNo + 1;
 						pQuery.setPage(tPage);
-						tAnnotationList.put("next",pQuery.toURI().toString());
+						tAnnotationList.setNext(pQuery.toURI().toString());
 					}
 					pQuery.setPage(0);
-					tWithin.put("first", pQuery.toURI().toString());
+					tWithin.setFirst(pQuery.toURI().toString());
 					pQuery.setPage(tNumberOfPages);
-					tWithin.put("last", pQuery.toURI().toString());
+					tWithin.setLast(pQuery.toURI().toString());
 				} else {
-                    tAnnotationList.put("startIndex", 0);
+                    tAnnotationList.setStartIndex(0);
                 }
 				for (int i = tStart; i < tEnd; i++) {
 					QuerySolution soln = tResults.get(i);
@@ -303,7 +334,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                     }
                     tJsonAnno.put("label", tSnippet);
 
-					tResources.add(tJsonAnno);
+					tAnnotationList.add(new Annotation(tJsonAnno));
 				}
 			}
 		} catch (URISyntaxException tException) {
@@ -316,7 +347,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	}
 
 
-	public Map<String, Object> getAllAnnotations() throws IOException {
+	public AnnotationList getAllAnnotations() throws IOException {
 		// get all annotations but filter our manifest annotations
 		String tQueryString = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
 									 "select ?anno where { " +
@@ -330,12 +361,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
         this.end();
 		int i = 0;
-		Map<String,Object> tAnnotationList = new HashMap<String,Object>();
-		tAnnotationList.put("@context", "http://iiif.io/api/presentation/2/context.json");
-		tAnnotationList.put("@type", "sc:AnnotationList");
-
-		List<Map<String,Object>> tResources = new ArrayList<Map<String,Object>>();
-		tAnnotationList.put("resources", tResources);
+		AnnotationList tAnnotationList = new AnnotationList();
 
 		try {
 			if (results != null) {
@@ -343,12 +369,8 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 				while (results.hasNext()) {
 					QuerySolution soln = results.nextSolution() ;
 					Resource tAnnoURI = soln.getResource("anno") ; // Get a result variable - must be a resource
-                    _logger.debug("Found + " + tAnnoURI.getURI());
-					Model tAnno = this.getNamedModel(tAnnoURI.getURI());
 
-					Map<String,Object> tJsonAnno = _annoUtils.frameAnnotation(tAnno, false);
-
-					tResources.add(tJsonAnno);
+					tAnnotationList.add(this.getAnnotation(tAnnoURI.getURI()));
 				}
 			}
 		} catch (JsonLdError tException) {
@@ -492,18 +514,20 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		throw new UnsupportedOperationException("Either getQueryExe must be implemented in a subclass or you should overload listAnnoPages and getAnnotationsFromPage");
 	}
 
-	public List<String> getManifestForCanvas(final String pCanvasId) throws IOException {
+	public Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException {
 		String tQueryString =   "PREFIX oa: <http://www.w3.org/ns/oa#> " +
 										"PREFIX sc: <http://iiif.io/api/presentation/2#> " +
 										"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 										"PREFIX dcterms: <http://purl.org/dc/terms/>" +
-										"select ?manifest where {" +
+                                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+										"select ?manifest ?label where {" +
 										"   GRAPH ?graph { " +
 										"	 ?manifest sc:hasSequences ?seqence ." +
+                                        "    optional { ?manifest <rdfs:label> ?label }." + 
 										"	 ?seqence ?sequenceCount ?seqenceId ." +
 										"	 ?seqenceId rdf:type sc:Sequence ." +
 										"	 ?seqenceId sc:hasCanvases ?canvasList ." +
-										"	 ?canvasList rdf:rest*/rdf:first <" + pCanvasId + "> " +
+										"	 ?canvasList rdf:rest*/rdf:first <" + pCanvas.getId() + "> " +
 										"   } " +
 										"}";
 
@@ -511,28 +535,27 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		this.begin(ReadWrite.READ);
 		ResultSet results = tExec.execSelect(); // Requires Java 1.7
 		this.end();
-		List<String> tParents = new ArrayList();
-		if (results != null) {
-			while (results.hasNext()) {
-				QuerySolution soln = results.nextSolution() ;
-				Resource tManifestURI = soln.getResource("manifest");
+        Manifest tManifest = null;
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+            Resource tManifestURI = soln.getResource("manifest");
 
-				tParents.add(tManifestURI.toString());
-			}
+            Literal tLabel = soln.getLiteral("label");
+            tManifest = new Manifest();
+            tManifest.setURI(tManifestURI.getURI());
+            if (tLabel != null) {
+                tManifest.setLabel(tLabel.toString());
+            } 
 		}
+        return tManifest;
+    }
 
-		if (tParents.isEmpty()) {
-			return null;
-		} else {
-			return tParents;
-		}
-	}
+	protected abstract String indexManifestOnly(final String pShortId, Map<String, Object> pManifest) throws IOException;
 
-	protected abstract String indexManifestOnly(final String pShortId, Map<String,Object> pManifest) throws IOException;
-
-	protected String indexManifestNoCheck(final String pShortId, Map<String,Object> pManifest) throws IOException {
-		String tShortId = this.indexManifestOnly(pShortId, pManifest);
-		String tManifestURI = (String)pManifest.get("@id");
+	protected String indexManifestNoCheck(final String pShortId, Manifest pManifest) throws IOException {
+        pManifest.setShortId(pShortId);
+        pManifest.toJson().put(DC.identifier.getURI(), pShortId);
+		String tShortId = this.indexManifestOnly(pShortId, pManifest.toJson());
 		// Now update any annotations which don't contain a link to this manifest.
 		String tQueryString =   "PREFIX oa: <http://www.w3.org/ns/oa#> " +
 										"PREFIX sc: <http://iiif.io/api/presentation/2#> " +
@@ -540,7 +563,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 										"PREFIX dcterms: <http://purl.org/dc/terms/>" +
 										"select distinct ?graph ?canvas {" +
 										"   GRAPH ?graph2 { " +
-										"	 <" + tManifestURI + "> sc:hasSequences ?seqence ." +
+										"	 <" + pManifest.getURI() + "> sc:hasSequences ?seqence ." +
 										"	 ?seqence ?sequenceCount ?seqenceId ." +
 										"	 ?seqenceId rdf:type sc:Sequence ." +
 										"	 ?seqenceId sc:hasCanvases ?canvasList ." +
@@ -549,7 +572,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 										"	 GRAPH ?graph {" +
 										"		?source oa:hasSource ?canvas ." +
 										"		?anno oa:hasTarget ?source ." +
-										"		  filter not exists {?source dcterms:isPartOf <" + tManifestURI + "> }" +
+										"		  filter not exists {?source dcterms:isPartOf <" + pManifest.getURI() + "> }" +
 										"  }" +
 										"}";
 
@@ -568,22 +591,16 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
             }
             for (Map<String, String> tResult: tUris) {
                 String tURI = tResult.get("anno_id");
-                String tCanvasId = tResult.get("canvas_id");
-				Model tAnnoModel = this.getNamedModel(tURI);
+                Canvas tCanvas = new Canvas(tResult.get("canvas_id"), "");
+				Annotation tAnno = this.getAnnotation(tURI);
                 // should add within without turning it back and forth into json
 
-                if (tAnnoModel != null) {
+                if (tAnno != null) {
     				// add within
-    				Map<String,Object> tJsonAnno = null;
-    				try {
-    					tJsonAnno = _annoUtils.frameAnnotation(tAnnoModel, false);
-    				} catch (JsonLdError tException) {
-    					throw new IOException("Failed to convert annotation to json for " + tURI + " due to " + tException.toString());
-    				}
-    				super.addWithin(tJsonAnno, tManifestURI, tCanvasId);
+    				tAnno.addWithin(pManifest, tCanvas);
 
                     try {
-        				super.updateAnnotation(tJsonAnno);
+        				super.updateAnnotation(tAnno);
                     } catch (MalformedAnnotation tExcpt) {
                         throw new IOException("Failed to reload annotation after updating the within: " + tExcpt);
                     }

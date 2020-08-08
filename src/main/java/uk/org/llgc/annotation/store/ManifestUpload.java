@@ -57,10 +57,10 @@ public class ManifestUpload extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		String tID = "";
-		Map<String, Object> tManifest = null;
+		Map<String, Object> tManifestJson = null;
 		if (pReq.getParameter("uri") != null) {
 			tID = pReq.getParameter("uri");
-			tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tID).openStream());
+			tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tID).openStream());
 		} else {
 			InputStream tManifestStream = pReq.getInputStream();
             /*java.io.BufferedReader tReader = new java.io.BufferedReader(new java.io.InputStreamReader(tManifestStream));
@@ -70,16 +70,16 @@ public class ManifestUpload extends HttpServlet {
                 tLine = tReader.readLine();
             }*/
 
-			tManifest = (Map<String,Object>)JsonUtils.fromInputStream(tManifestStream);
+			tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(tManifestStream);
 		}
 
+        Manifest tManifest = new Manifest(tManifestJson, null);
 		String tShortId = _store.indexManifest(tManifest);
-        Manifest tManifestObject = new Manifest(tManifest, tShortId);
-        Map<String,Map<String,String>> tJson = new HashMap<String,Map<String,String>>();
+        Map<String,Object> tJson = new HashMap<String,Object>();
         Map<String,String> tLinks = new HashMap<String,String>();
         tJson.put("loaded", tLinks);
-        tLinks.put("uri", tManifestObject.getURI());
-        tLinks.put("short_id", tManifestObject.getShortId());
+        tLinks.put("uri", tManifest.getURI());
+        tLinks.put("short_id", tManifest.getShortId());
 
         pRes.setContentType("application/json");
         pRes.setCharacterEncoding("UTF-8");

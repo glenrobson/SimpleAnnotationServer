@@ -23,6 +23,8 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.contollers.StatsService;
 
@@ -56,11 +58,12 @@ public class TestStats extends TestUtils {
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/stats_AnnotationList.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
         // Upload Newspaper annotation list
-        _store.addAnnotationList(tAnnotationListJSON);
+        AnnotationList tList = new AnnotationList(tAnnotationListJSON);
+        _store.addAnnotationList(tList);
 
         // Upload Manifest
 		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/stats_manifest.json").getFile())); //annotaiton list
-        String tShortId = _store.indexManifest(tManifest);
+        String tShortId = _store.indexManifest(new Manifest(tManifest));
 
         List<Manifest> tManifests = _store.getManifests();
         assertEquals("Found " + tManifests.size() + " expected 1", 1, tManifests.size());
@@ -72,15 +75,16 @@ public class TestStats extends TestUtils {
     public void testStats() throws IOException, IDConflictException, MalformedAnnotation {
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/stats_AnnotationList.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
         // Upload Newspaper annotation list
-        _store.addAnnotationList(tAnnotationListJSON);
+        AnnotationList tList = new AnnotationList(tAnnotationListJSON);
+        _store.addAnnotationList(tList);
 
         // Upload unrelated annotation list to check counts
         Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
-        _store.addAnnotation(tAnnotation);
+        _store.addAnnotation(new Annotation(tAnnotation));
 
         // Upload Manifest
 		Map<String, Object> tManifestJson = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/stats_manifest.json").getFile())); //annotaiton list
-        String tShortId = _store.indexManifest(tManifestJson);
+        String tShortId = _store.indexManifest(new Manifest(tManifestJson));
         Manifest tManifest = new Manifest(tManifestJson, tShortId);
         StatsService tStats = new StatsService();
         tStats.init(_annotationUtils);

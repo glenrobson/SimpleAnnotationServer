@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Date;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -30,6 +31,10 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.Body;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -72,65 +77,71 @@ public class TestPublish extends TestUtils {
 	public void testPublish() throws IOException, IDConflictException, MalformedAnnotation {
 		List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
-		List<Model> tAnnosAsModel = _store.addAnnotationList(tAnnotationListJSON);
-		// add models to single model and use sparql or something to test for valid content
-		Model tMasterModel = tAnnosAsModel.get(0);
-		String tOtherId = "";
-		String tKnownID = "http://example.com/annotation/1";
-		_annoIds.add(tKnownID);
-		for (int i = 1; i < tAnnosAsModel.size(); i++) {
-			StmtIterator tResults = tAnnosAsModel.get(i).listStatements(null,tMasterModel.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),tMasterModel.createResource("http://www.w3.org/ns/oa#Annotation"));
-			Statement tResult = tResults.nextStatement();
-			String tId = tResult.getSubject().toString();
-			_annoIds.add(tId);
-			if (!tId.equals(tKnownID)) {
-				tOtherId = tId;
-			}
+		AnnotationList tAnnoList = _store.addAnnotationList(new AnnotationList(tAnnotationListJSON));
 
-			tMasterModel.add(tAnnosAsModel.get(i));
-		}
-
-		this.testAnnotation(tMasterModel, tKnownID, "Test content 1","http://example.com/image1#xywh=0,132,102,10");
-		this.testAnnotation(tMasterModel, tOtherId, "Test Content 2","http://example.com/image1#xywh=1873,132,102,10");
+        for (Annotation tAnno : tAnnoList.getAnnotations()) {
+            assertEquals("Unexpected canvas", "http://example.com/image1", tAnno.getTargets().get(0).getCanvas().getId());
+            String tRegion = "";
+            if (tAnno.getId().equals("http://example.com/annotation/1")) {
+                tRegion = "xywh=0,132,102,10";
+            } else {
+                tRegion = "xywh=1873,132,102,10";
+            }
+            assertEquals("Unexpected region", tRegion, tAnno.getTargets().get(0).getRegion());
+        }
 	}
-
 
 	@Test
 	public void testCreate() throws IOException, IDConflictException, MalformedAnnotation {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
+		Map<String, Object> tBeforeJson = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+        Annotation tBefore = new Annotation(tBeforeJson);
+		Annotation tAfter = _store.addAnnotation(tBefore);
+        Map<String, Object> tAfterJson = tAfter.toJson();
 
-		_annoIds.add(super.getAnnoId(tModel));
-		this.testAnnotation(tModel, "Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
+        assertNotNull("Saving annotation should have created an ID", tAfterJson.get("@id"));
+        assertEquals("Type different", tBeforeJson.get("@type"), tAfterJson.get("@type"));
+        assertEquals("Motivation different lenghts", ((List)tBeforeJson.get("motivation")).size(), ((List)tAfterJson.get("motivation")).size());
+        assertEquals("Motivation different ", ((List)tBeforeJson.get("motivation")).get(0), ((List)tAfterJson.get("motivation")).get(0));
+
+        assertTrue("Resource should be a Map and it was " + tAfterJson.get("resource").getClass().getName(), tAfterJson.get("resource") instanceof List);
+        assertEquals("Body type wrong", "dctypes:Text",((Map<String,Object>)((List)tAfterJson.get("resource")).get(0)).get("@type"));
+        assertEquals("Body format wrong", "text/html",((Map<String,Object>)((List)tAfterJson.get("resource")).get(0)).get("format"));
+        assertEquals("Body chars wrong", "<p>Bob Smith</p>",((Map<String,Object>)((List)tAfterJson.get("resource")).get(0)).get("chars"));
+        
+        assertTrue("Target (on) should be a Map", tAfterJson.get("on") instanceof Map);
+        assertEquals("target type wrong", "oa:SpecificResource",((Map<String,Object>)tAfterJson.get("on")).get("@type"));
+        assertEquals("target canvas wrong", "http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json",((Map<String,Object>)tAfterJson.get("on")).get("full"));
+        assertEquals("target selector type wrong", "oa:FragmentSelector",((Map<String,Object>)((Map<String,Object>)tAfterJson.get("on")).get("selector")).get("@type"));
+        assertEquals("target selector value wrong", "xywh=5626,1853,298,355",((Map<String,Object>)((Map<String,Object>)tAfterJson.get("on")).get("selector")).get("value"));
 	}
 
-	// test reuse of id
 	@Test
 	public void testDelete() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
-		String tAnnoID = super.getAnnoId(tModel);
-		_annoIds.add(tAnnoID);
-		_store.deleteAnnotation(tAnnoID);
+		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
+		_store.deleteAnnotation(tAnno.getId());
 		//RDFDataMgr.write(System.out, tDelModel, Lang.NQUADS);
-		assertNull("Annotation should be deleted but it isn't.", _store.getAnnotation(tAnnoID));
+		assertNull("Annotation should be deleted but it isn't.", _store.getAnnotation(tAnno.getId()));
+        String tOrignalId = tAnno.getId();
+        // test reuse of id
+        tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
+        assertEquals("Couldn't re add annotation", tOrignalId, tAnno.getId());
 	}
 
 	@Test
 	public void testUpdate() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
-		_annoIds.add(super.getAnnoId(tModel));
+		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		_logger.debug("ID : " + (String)tAnnotationJSON.get("@id"));
 		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
 
-		tModel = _store.updateAnnotation(tAnnotationJSON);
+		tAnno = _store.updateAnnotation(new Annotation(tAnnotationJSON));
 
-		this.testAnnotation(tModel, "New String","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
+        assertTrue("Resource should be a Map", tAnno.toJson().get("resource") instanceof List);
+        assertEquals("Body chars wrong", "<p>New String</p>",((Map<String,Object>)((List)tAnno.toJson().get("resource")).get(0)).get("chars"));
 	}
 
 	@Test
@@ -138,33 +149,26 @@ public class TestPublish extends TestUtils {
 		List<Map<String, Object>> tAnnotationList = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/testAnnotationList2.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
 		for (Map<String,Object> tAnnotation : tAnnotationList) {
-			Model tModel = _store.addAnnotation(tAnnotation);
-			_annoIds.add(super.getAnnoId(tModel));
+			_store.addAnnotation(new Annotation(tAnnotation));
 		}
 
-		List<Model> tAnnotationsModel = _store.getAnnotationsFromPage("http://example.com/image2");
-		Model tModel = ModelFactory.createDefaultModel();
-		for (Model tModelAnno : tAnnotationsModel) {
-            if (tModelAnno.supportsTransactions()) {
-                tModelAnno.begin();
-            }
-            tModel.add(tModelAnno);
-            if (tModelAnno.supportsTransactions()) {
-                tModelAnno.commit();
-            }
-		}
-		this.testAnnotation(tModel, "http://example.com/annotation/2", "Test content 1a","http://example.com/image2#xywh=0,132,102,10");
-		this.testAnnotation(tModel, "http://example.com/annotation/3", "Test Content 2a","http://example.com/image2#xywh=1873,132,102,10");
+		AnnotationList tPageAnnos = _store.getAnnotationsFromPage(new Canvas("http://example.com/image2", ""));
+
+        assertEquals("Different number of annotations than expected", 2, tPageAnnos.size());
+        Annotation tAnno1 = tPageAnnos.get("http://example.com/annotation/2");
+        assertNotNull("First anno not found", tAnno1);
+        Annotation tAnno2 = tPageAnnos.get("http://example.com/annotation/3");
+        assertNotNull("Second anno not found", tAnno2);
 	}
 
 	@Test
 	public void testUTF8() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/utf-8.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
-		_annoIds.add(super.getAnnoId(tModel));
+		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		this.testAnnotation(tModel, "http://example.com/annotation/utf-8", new String("UTF 8 test â".getBytes("UTF8"),"UTF8"),"http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891217.json#xywh=5626,1853,298,355");
+        Body tBody = tAnno.getBodies().get(0);
+        assertEquals("UTF string didn't match.", "<p>UTF 8 test â</p>", tBody.toJson().get("chars"));
 	}
 
 	//@Test(expected=IDConflictException.class)
@@ -173,45 +177,34 @@ public class TestPublish extends TestUtils {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 		Map<String, Object> tAnnotationJSON2 = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotationId.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		_store.addAnnotation(tAnnotationJSON);
-		_annoIds.add((String)tAnnotationJSON.get("@id"));
+		_store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		 Model tSecondAnno = _store.addAnnotation(tAnnotationJSON2);
-		_annoIds.add(super.getAnnoId(tSecondAnno));
+		 Annotation tSecondAnno = _store.addAnnotation(new Annotation(tAnnotationJSON2));
 
-		 this.testAnnotation(tSecondAnno,"http://example.com/annotation/clash1","Bob Smith","http://dev.llgc.org.uk/iiif/examples/photos/canvas/3891216.json#xywh=5626,1853,298,355");
+         assertEquals("Unexpected ID for second Anno", "http://example.com/annotation/clash1", tSecondAnno.getId());
 	}
 
 	@Test
 	public void testDates() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		String tAnnoId = (String)tAnnotationJSON.get("@id");
-		_logger.debug("ID " + tAnnoId);
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
-		_annoIds.add(super.getAnnoId(tModel));
+		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		Resource tAnnoRes = tModel.getResource(tAnnoId);
-		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
-		assertNotNull("Annotation missing created date", tCreatedSt);
-		String tCreatedDate = tCreatedSt.getString();
+        Date tCreatedDate = tAnno.getCreated();
+		assertNotNull("Annotation missing created date", tCreatedDate);
+		assertNull("Annotation has a modification date and it shouldn't",tAnno.getModified());
 
-		Statement tModifiedSt = tAnnoRes.getProperty(DCTerms.modified);
-		assertNull("Annotation has a modification date and it shouldn't",tModifiedSt);
-
-		_logger.debug("ID : " + (String)tAnnotationJSON.get("@id"));
 		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
-		Thread.sleep(1000);
 
-		tModel = _store.updateAnnotation(tAnnotationJSON);
-		tAnnoRes = tModel.getResource(tAnnoId);
+		tAnno  = _store.updateAnnotation(new Annotation(tAnnotationJSON));
+		assertNotNull("Annotation missing created date after update.", tAnno.getCreated());
+		assertEquals("Created date is different on update.", tCreatedDate, tAnno.getCreated());
 
-		tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
-		assertNotNull("Annotation missing created date after update.", tCreatedSt);
-		assertEquals("Created date is different on update.", tCreatedDate, tCreatedSt.getString());
+		assertNotNull("Annotation is missing modification date after update. ", tAnno.getModified());
 
-		tModifiedSt = tAnnoRes.getProperty(DCTerms.modified);
-		assertNotNull("Annotation is missing modification date after update. ", tModifiedSt);
+        // Check in correct place in JSON
+        assertNotNull("Anno missing create date in json", tAnno.toJson().get("dcterms:created"));
+        assertNotNull("Anno missing modification date in json", tAnno.toJson().get("dcterms:modified"));
 	}
 
 	@Test
@@ -237,13 +230,13 @@ public class TestPublish extends TestUtils {
 	public void testBrokenAnnotation() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/brokenAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
         try {
-    		Model tAnnoModel = _store.addAnnotation(tAnnotationJSON);
+    		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
         } catch (MalformedAnnotation tExcpt) {
             //tExcpt.printStackTrace();
         }
 
         tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
-		Model tAnnoModel = _store.addAnnotation(tAnnotationJSON);
+		Annotation tAnnoModel = _store.addAnnotation(new Annotation(tAnnotationJSON));
         assertNotNull("Failed to load good annotation after bad.",tAnnoModel);
 	}
 }

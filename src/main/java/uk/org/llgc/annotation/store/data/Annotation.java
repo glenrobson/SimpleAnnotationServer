@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Date;
+
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
@@ -26,11 +28,56 @@ public class Annotation {
     protected static Logger _logger = LogManager.getLogger(Annotation.class.getName());
 	protected SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     protected Map<String,Object> _annotation = null;
+    protected List<Body> _bodies = null;
+    protected List<Target> _targets = null;
 
     public Annotation(final Map<String,Object> pAnno) {
-        _annotation = pAnno;
+        this.setJson(pAnno);
+    }
+
+    public void setJson(final Map<String, Object> pJson) {
+        _annotation = pJson;
+        this.init();
+    }
+
+    protected void init() {
+        this.standaiseAnno();
         this.expandTarget();
         addMetadata();
+
+        _bodies = new ArrayList<Body>();
+        if (_annotation.get("resource") != null) {
+            if (_annotation.get("resource") instanceof List) {
+                for (Object tBody : (List<Object>)_annotation.get("resource")) {
+                    _bodies.add(new Body(tBody));
+                }
+            } else {
+                _bodies.add(new Body(_annotation.get("resource")));
+            }
+        }
+
+        _targets = new ArrayList<Target>();
+        if (_annotation.get("on") != null) {
+            if (_annotation.get("on") instanceof List) {
+                for (Object tTarget : (List<Object>)_annotation.get("on")) {
+                    _targets.add(new Target(tTarget));
+                }
+            } else {
+                _targets.add(new Target(_annotation.get("on")));
+            }
+        }
+    }
+
+    protected void standaiseAnno() {
+        // Compact created
+        if (_annotation.get("http://purl.org/dc/terms/created") != null) {
+            _annotation.put("dcterms:created", _annotation.get("http://purl.org/dc/terms/created"));
+            _annotation.remove("http://purl.org/dc/terms/created");
+        }
+        if (_annotation.get("http://purl.org/dc/terms/modified") != null) {
+            _annotation.put("dcterms:modified", _annotation.get("http://purl.org/dc/terms/modified"));
+            _annotation.remove("http://purl.org/dc/terms/modified");
+        }
     }
 
     public String getId() {
@@ -41,16 +88,91 @@ public class Annotation {
         _annotation.put("@id", pId);
     }
 
+    // In search api this is the snippet
+    public void setLabel(final String pLabel) {
+        _annotation.put("label", pLabel);
+    }
+
+    public String getType() {
+        return (String)_annotation.get("@type");
+    }
+
+    public void setType(final String pType) {
+        _annotation.put("@type", pType);
+    }
+
+    public List<String> getMotivations() {
+        List<String> tMotivations = new ArrayList<String>();
+        if (_annotation.get("motivation") instanceof String) {
+            tMotivations.add((String)_annotation.get("motivation"));
+        } else {
+            tMotivations = (List<String>)_annotation.get("motivation");
+        }
+        return tMotivations;
+    }
+
+    public void setMotivations(final List<String> pMotivations) {
+        _annotation.put("motivation", pMotivations);
+    }
+
     public void setCreated(final String pDate) {
-        _annotation.put(DCTerms.created.getURI(), pDate);
+        if (_annotation.get("dcterms:" + DCTerms.created.getLocalName()) == null) {
+            _annotation.put("dcterms:" + DCTerms.created.getLocalName(), pDate);
+        }
     }
 
     public void setCreated(final Date pDate) {
-        _annotation.put(DCTerms.created.getURI(), _dateFormatter.format(pDate));
+        _annotation.put("dcterms:" + DCTerms.created.getLocalName(), _dateFormatter.format(pDate));
+    }
+
+    public Date getCreated() {
+        if (_annotation.get("dcterms:" + DCTerms.created.getLocalName()) == null) {
+            return null;
+        } else {
+            String tDate = (String)_annotation.get("dcterms:" + DCTerms.created.getLocalName());
+            try {
+                return _dateFormatter.parse(tDate);
+            } catch (ParseException tExcpt) {
+                // This shouldn't happen as date is created above...
+                tExcpt.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    public Date getModified() {
+        if (_annotation.get("dcterms:" + DCTerms.modified.getLocalName()) == null) {
+            return null;
+        } else {
+            String tDate = (String)_annotation.get("dcterms:" + DCTerms.modified.getLocalName());
+            try {
+                return _dateFormatter.parse(tDate);
+            } catch (ParseException tExcpt) {
+                // This shouldn't happen as date is created above...
+                tExcpt.printStackTrace();
+                return null;
+            }
+        }
     }
 
     public void updateModified() {
-		_annotation.put(DCTerms.modified.getURI(), _dateFormatter.format(new Date()));
+		_annotation.put("dcterms:" + DCTerms.modified.getLocalName(), _dateFormatter.format(new Date()));
+    }
+
+    public void addWithin(final Manifest pManifest, final Canvas pCanvas) {
+        for (Target tTarget : this.getTargets()) {
+            if (tTarget.getCanvas().equals(pCanvas)) {
+                tTarget.setManifest(pManifest);
+            }
+        }
+    }
+
+    public List<Body> getBodies() {
+        return _bodies; 
+    }
+
+    public List<Target> getTargets() {
+        return _targets; 
     }
 
     /**
@@ -67,14 +189,14 @@ public class Annotation {
             throw new MalformedAnnotation("URI: " + this.getId() + " is invalid due to " + tExcpt.getMessage());
         }
 
-        List<Map<String, Object>> tOnList = this.getOn();
-        if (tOnList == null) {
+        if (_annotation.get("on") == null) {
             throw new MalformedAnnotation("Missing on");
         }
         StringBuffer tOutput = new StringBuffer();
         boolean tMalformed = false;
-        for (Map<String, Object> tOn : tOnList) {
+        for (Target tTarget : this.getTargets()) {
             // Look to see if selector value is an array. It should be a string.
+            Map<String, Object> tOn = tTarget.toJson();
             if (tOn.get("selector") != null
                     && tOn.get("selector") instanceof Map
                     && ((Map<String,Object>)tOn.get("selector")).get("value") != null
@@ -91,52 +213,21 @@ public class Annotation {
         }
     }
 
-    public List<Map<String,Object>> getMissingWithin() {
-        List<Map<String,Object>> tOnList = this.getOn();
-        List<Map<String,Object>> tMissingOnList = new ArrayList<Map<String,Object>>();
-        for (Map<String, Object> tOn : tOnList) {
-            if (tOn.get("within") == null) {
-                tMissingOnList.add(tOn);
-			}
-		}
-		return tMissingOnList;
-    }
+    public List<Target> getMissingWithin() {
+        List<Target> tMissing = new ArrayList<Target>();
 
-    public List<Map<String,Object>> getOn() {
-        if (_annotation.get("on") instanceof List) {
-            return (List<Map<String,Object>>)_annotation.get("on");
-        } else if (_annotation.get("on") instanceof Map) {
-            return map2list((Map<String,Object>)_annotation.get("on"));
+        for (Target tTarget : this.getTargets()) {
+            if (tTarget.getManifest() == null) {
+                tMissing.add(tTarget);
+            }
         }
-
-        return null; // invalid annotation
+		return tMissing;
     }
 
     protected void addMetadata() {
 		// Add create date if it doesn't already have one
-		if (_annotation.get("dcterms:created") == null && _annotation.get("created") == null && _annotation.get("http://purl.org/dc/terms/created") == null) {
-			_annotation.put(DCTerms.created.getURI(), _dateFormatter.format(new Date()));
-		}
-		if (_annotation.get("resource") != null) {
-			String tRepalceStr = "<[ /]*[a-zA-Z0-9 ]*[ /]*>";
-			if (_annotation.get("resource") instanceof List) {
-				for (Map<String,Object> tResource : (List<Map<String,Object>>)_annotation.get("resource")) {
-					if (tResource.get("chars") != null) {
-						// add a field which contains the text with all of the html markup removed
-						String tCleaned = ((String)tResource.get("chars")).replaceAll(tRepalceStr,"");
-						tResource.put(FULL_TEXT_PROPERTY,tCleaned);
-					}
-				}
-			} else {
-				if (((Map<String,Object>)_annotation.get("resource")).get("chars") != null) {
-					String tCleaned = ((String)((Map<String,Object>)_annotation.get("resource")).get("chars")).replaceAll(tRepalceStr,"");
-					((Map<String,Object>)_annotation.get("resource")).put(FULL_TEXT_PROPERTY,tCleaned);
-				} else {
-					_logger.debug("Not adding full text as no chars in resource");
-				}
-			}
-		} else {
-			_logger.debug("Not adding full text as no resource");
+		if (this.getCreated() == null) {
+			this.setCreated(new Date());
 		}
 	}
 

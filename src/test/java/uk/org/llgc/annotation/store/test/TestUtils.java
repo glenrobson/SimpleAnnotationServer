@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
-import uk.org.llgc.annotation.store.adapters.SolrStore;
+import uk.org.llgc.annotation.store.adapters.solr.SolrStore;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -61,7 +61,6 @@ public class TestUtils {
 	@Rule
 	public TemporaryFolder _testFolder = new TemporaryFolder();
 	protected Properties _props = null;
-	protected List<String> _annoIds = new ArrayList<String>();
     protected boolean _retainFailedData = false;
 
 	public TestUtils() throws IOException {
@@ -93,9 +92,9 @@ public class TestUtils {
 		}
 
 		StoreConfig tConfig = new StoreConfig(_props);
+        tConfig.setAnnotationUtils(_annotationUtils);
 		_store = StoreConfig.getConfig().getStore();
         _logger.debug("Store is " + _store);
-		_store.init(_annotationUtils);
 	}
 
 	public String getAnnoId(final Model pModel) {

@@ -31,6 +31,7 @@ import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 
@@ -80,10 +81,11 @@ public class TestModel extends TestUtils {
 		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests != null && tLoadedManifests.isEmpty());
 
 		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
-		String tShortId = _store.indexManifest(tManifestJson);
+		String tShortId = _store.indexManifest(new Manifest(tManifestJson));
 
         Manifest tManifest = _store.getManifest(tShortId);
 
+        assertNotNull("Manifest not found", tManifest);
         assertEquals("Indexed manifest title doesn't match the original", "http://example.com/manfiest/test/manifest.json", tManifest.getURI());
         assertEquals("Indexed manifest label doesn't match the original", "Test Manifest", tManifest.getLabel());
         assertEquals("Indexed manifest shortId doesn't match the original", tShortId, tManifest.getShortId());
@@ -109,7 +111,7 @@ public class TestModel extends TestUtils {
     public void testSkeletonManifests() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
 
-        _store.addAnnotation(tAnnotation);
+        _store.addAnnotation(new Annotation(tAnnotation));
 
         List<Manifest> tManifests = _store.getSkeletonManifests();
         assertEquals("Unexpected amount of manifests in store.", 1, tManifests.size());
@@ -129,7 +131,7 @@ public class TestModel extends TestUtils {
     @Test
     public void testStoreCanvas() throws IOException, IDConflictException, MalformedAnnotation {
         Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
-        _store.addAnnotation(tAnnotation);
+        _store.addAnnotation(new Annotation(tAnnotation));
 
         Canvas tCanvas = new Canvas("http://example.com/manfiest/test/canvas/1.json","");
         String tShortId = "857085d28ae8df537449a85b5272d516";
@@ -145,4 +147,14 @@ public class TestModel extends TestUtils {
         assertEquals("Unexpected Short Id", tShortId, tRetrievedCanvas.getShortId());
 
     }
+
+    @Test
+    public void testShortId() throws IOException {
+        Manifest tManifest = new Manifest();
+        tManifest.setURI("https://api-pre.library.tamu.edu/fcrepo/rest/mwbManifests/CofeEarHis/Full_Manifest");
+        String tShortId = tManifest.getShortId();
+        assertNotNull("Short id shouldn't be null",tShortId);
+        assertNotEquals("Short id shouldn't be empty",tShortId, "");
+    }
+
 }
