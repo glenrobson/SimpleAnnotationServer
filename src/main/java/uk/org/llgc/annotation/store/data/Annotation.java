@@ -78,6 +78,13 @@ public class Annotation {
             _annotation.put("dcterms:modified", _annotation.get("http://purl.org/dc/terms/modified"));
             _annotation.remove("http://purl.org/dc/terms/modified");
         }
+        if (_annotation.get("resource") != null && _annotation.get("resource") instanceof Map) {
+            // turn into Array?
+            List tList = new ArrayList();
+            tList.add(_annotation.get("resource"));
+            
+            _annotation.put("resource"};
+        }
     }
 
     public String getId() {

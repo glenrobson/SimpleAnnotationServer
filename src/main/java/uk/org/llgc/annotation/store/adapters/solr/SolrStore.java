@@ -104,7 +104,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
             Canvas tCanvas = tTarget.getCanvas();
             tDoc.addField("target", tCanvas.getId());
             tDoc.addField("short_id", tCanvas.getShortId());
-            tDoc.addField("within", tTarget.getManifest().getURI());
+            if (tTarget.getManifest() != null) {
+                tDoc.addField("within", tTarget.getManifest().getURI());
+            }
         }
 		String tJson = JsonUtils.toString(pAnno.toJson());
 		tDoc.addField("data", Base64.getEncoder().encodeToString(tJson.getBytes("UTF-8")));
