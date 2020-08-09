@@ -13,8 +13,12 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.StoreConfig;
 
 import org.apache.jena.vocabulary.DCTerms;
+
+import javax.servlet.ServletException;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -27,12 +31,31 @@ public class Annotation {
     public static final String FULL_TEXT_PROPERTY = "http://dev.llgc.org.uk/sas/full_text";
     protected static Logger _logger = LogManager.getLogger(Annotation.class.getName());
 	protected SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	protected Encoder _encoder = null;
     protected Map<String,Object> _annotation = null;
     protected List<Body> _bodies = null;
     protected List<Target> _targets = null;
 
     public Annotation(final Map<String,Object> pAnno) {
+        this(pAnno, null);
+    }
+
+    public Annotation(final Map<String,Object> pAnno, final Encoder pEncoder) {
+        if (pEncoder == null) {
+            try {
+                _encoder = StoreConfig.getConfig().getEncoder();
+            } catch (ServletException tExcpt) {
+                System.err.println("Failed to load encoder from config");
+                tExcpt.printStackTrace();
+            }
+        } else {
+            _encoder = pEncoder;
+        }
         this.setJson(pAnno);
+    }
+
+    public void setEncoder(final Encoder pEncoder) {
+        _encoder = pEncoder;
     }
 
     public void setJson(final Map<String, Object> pJson) {
@@ -44,6 +67,9 @@ public class Annotation {
         this.standaiseAnno();
         this.expandTarget();
         addMetadata();
+        if (_encoder != null) {
+            _encoder.encode(_annotation);
+        }
 
         _bodies = new ArrayList<Body>();
         if (_annotation.get("resource") != null) {
@@ -301,7 +327,14 @@ public class Annotation {
     }
 
     public Map<String,Object> toJson() {
-        return _annotation;
+        if (_encoder != null) {
+            Map<String,Object> tClone = (Map<String,Object>)((HashMap)_annotation).clone();
+            _encoder.decode(tClone);
+
+            return tClone;
+        } else {    
+            return _annotation;
+        }
     }
 
     public Map<String,Object> jsonTargetRect() {

@@ -108,9 +108,9 @@ public class TestBOR extends TestUtils {
 
 		_logger.debug("Adding annotation");
 		Annotation tAnno  = _store.addAnnotation(new Annotation(tAnnotationJSON));
+        tAnno.setEncoder(new BookOfPeaceEncoder());
 
 		String tContent = (String)((List<Map<String,Object>>)tAnno.toJson().get("resource")).get(0).get("chars");
-
 		assertTrue("Missing rank", tContent.contains("<span property=\"ns:rank\" class=\"rank\">Engr.Capt.</span>"));
 		assertTrue("Missing name", tContent.contains("<span property=\"ns:name\" class=\"name\">Walter Ken Williams,</span>"));
 		assertTrue("Missing place", tContent.contains("<span property=\"ns:place\" class=\"place\">Cardiff</span>"));

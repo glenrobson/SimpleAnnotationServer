@@ -165,17 +165,21 @@ public class SolrManifestStore {
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tPageSize = tResponse.getResults().size();
 			int tStart = 0;
-			Manifest tManifest = new Manifest();
-			do {
-				for (SolrDocument tResult : tResponse.getResults()) {
-					tManifest.setURI((String)tResult.get("id"));
-				}
+            if (tResultNo > 0) {
+                Manifest tManifest = new Manifest();
+                do {
+                    for (SolrDocument tResult : tResponse.getResults()) {
+                        tManifest.setURI((String)tResult.get("id"));
+                    }
 
-				tStart += tPageSize;
-				tQuery.setStart(tStart);
-				tResponse = _solrClient.query(tQuery);
-			} while (tStart < tResultNo);
-            return tManifest;
+                    tStart += tPageSize;
+                    tQuery.setStart(tStart);
+                    tResponse = _solrClient.query(tQuery);
+                } while (tStart < tResultNo);
+                return tManifest;
+            } else {
+                return null;
+            }
 		} catch (SolrServerException tException) {
 			_logger.error("failed to find manifest for this canvas due to: " + tException.toString());
 			throw new IOException("Failed to find manifest for canvasid " + pCanvasId + " due to " + tException.toString());

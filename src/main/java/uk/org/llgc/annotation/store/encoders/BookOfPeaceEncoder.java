@@ -225,10 +225,20 @@ public class BookOfPeaceEncoder implements Encoder {
 					tHTML.append(this.getContent(tPerson.get("http://rdf.muninn-project.org/ontologies/military#heldRank")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("heldRank") != null) {
+					tHTML.append("<span property=\"ns:rank\" class=\"rank\">");
+					tHTML.append(tPerson.get("heldRank"));
+					tHTML.append("</span> ");
+				}
 
 				if (tPerson.get("foaf:name") != null) {
 					tHTML.append("<span property=\"ns:name\" class=\"name\">");
 					tHTML.append(this.getContent(tPerson.get("foaf:name")));
+					tHTML.append("</span> ");
+				}
+                if (tPerson.get("name") != null) {
+					tHTML.append("<span property=\"ns:name\" class=\"name\">");
+					tHTML.append(tPerson.get("name"));
 					tHTML.append("</span> ");
 				}
 
@@ -237,16 +247,33 @@ public class BookOfPeaceEncoder implements Encoder {
 					tHTML.append(this.getContent(tPerson.get("foaf:based_near")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("based_near") != null) {
+					tHTML.append("<span property=\"ns:place\" class=\"place\">");
+					tHTML.append(tPerson.get("based_near"));
+					tHTML.append("</span> ");
+				}
+
 
 				if (tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit") != null) {
 					tHTML.append("<span property=\"ns:unit\" class=\"unit\">");
 					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("servedInUnit") != null) {
+					tHTML.append("<span property=\"ns:unit\" class=\"unit\">");
+					tHTML.append(tPerson.get("servedInUnit"));
+					tHTML.append("</span> ");
+				}
+
 
 				if (tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip") != null) {
 					tHTML.append("<span property=\"ns:ship\" class=\"ship\">");
 					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip")));
+					tHTML.append("</span> ");
+				}
+                if (tPerson.get("servedOnShip") != null) {
+					tHTML.append("<span property=\"ns:ship\" class=\"ship\">");
+					tHTML.append(tPerson.get("servedOnShip"));
 					tHTML.append("</span> ");
 				}
 
@@ -255,6 +282,12 @@ public class BookOfPeaceEncoder implements Encoder {
 					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/waw/def#awarded")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("awarded") != null) {
+					tHTML.append("<span property=\"ns:medal\" class=\"medal\">");
+					tHTML.append(tPerson.get("awarded"));
+					tHTML.append("</span> ");
+				}
+
 
 			}	
 			tBody.remove("foaf:primaryTopic");
