@@ -41692,6 +41692,10 @@ $.SimpleASEndpoint = function (options) {
         contentType: 'application/json; charset=utf-8',
         success: function(data) {
           _this.fixOn(data);
+          // this is what updates the viewer
+          data.endpoint = _this;
+          data.fullId = data['@id'];
+          data['@id'] = shortId;
           if (typeof returnSuccess === 'function') {
             returnSuccess(data);
           }
@@ -41704,7 +41708,7 @@ $.SimpleASEndpoint = function (options) {
           }
         }
       });
-      // this is what updates the viewer
+
       annotation.endpoint = _this;
       annotation.fullId = annotation['@id'];
       annotation['@id'] = shortId;

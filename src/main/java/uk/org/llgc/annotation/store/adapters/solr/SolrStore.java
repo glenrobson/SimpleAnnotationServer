@@ -26,6 +26,7 @@ import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.Body;
@@ -265,7 +266,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		}
 	}
 
-	public AnnotationList search(final SearchQuery pQuery) throws IOException {
+	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException {
 		StringBuffer tSolrQuery = new StringBuffer("text:\"");
 		tSolrQuery.append(pQuery.getQuery());
 		tSolrQuery.append("\"");
@@ -296,7 +297,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         tQuery.setHighlight(true);
         tQuery.addHighlightField("text");
 
-        AnnotationList tAnnoList = new AnnotationList();
+        IIIFSearchResults tAnnoList = new IIIFSearchResults();
 		try {
 			tAnnoList.setId(pQuery.toURI().toString());
 			QueryResponse tResponse = _solrClient.query(tQuery);

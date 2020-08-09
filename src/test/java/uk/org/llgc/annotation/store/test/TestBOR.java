@@ -109,7 +109,6 @@ public class TestBOR extends TestUtils {
 		_logger.debug("Adding annotation");
 		Annotation tAnno  = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-        System.out.println(tAnno);
 		String tContent = (String)((List<Map<String,Object>>)tAnno.toJson().get("resource")).get(0).get("chars");
 
 		assertTrue("Missing rank", tContent.contains("<span property=\"ns:rank\" class=\"rank\">Engr.Capt.</span>"));

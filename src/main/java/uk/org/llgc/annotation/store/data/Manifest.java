@@ -121,7 +121,7 @@ public class Manifest {
 	 * @return shortId as String.
 	 */
 	public String getShortId() {
-        if (_shortId.isEmpty()) {
+        if (_shortId == null || _shortId.isEmpty()) {
             if (_URI.endsWith("manifest.json")) {
                 String[] tURI = _URI.split("/");
                 _shortId = tURI[tURI.length - 2];

@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.servlets.oa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,12 +23,13 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
-
-public class Search extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Search.class.getName());
+public class CanvasAnnotations extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(CanvasAnnotations.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -51,7 +52,7 @@ public class Search extends HttpServlet {
 
         pRes.setContentType("application/ld+json; charset=UTF-8");
         pRes.setCharacterEncoding("UTF-8");
-        /**/_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson()));
-        pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson()));
+        /**/_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
+        pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
     }
 }

@@ -9,6 +9,7 @@ import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -177,7 +178,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;
 	public abstract Annotation addAnnotationSafe(final Annotation pJson) throws IOException;
-	public abstract AnnotationList search(final SearchQuery pQuery) throws IOException;
+	public abstract IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
 	protected abstract String indexManifestNoCheck(final String pShortID, final Manifest pManifest) throws IOException;
 	public abstract List<Manifest> getManifests() throws IOException;
 	public abstract List<Manifest> getSkeletonManifests() throws IOException;

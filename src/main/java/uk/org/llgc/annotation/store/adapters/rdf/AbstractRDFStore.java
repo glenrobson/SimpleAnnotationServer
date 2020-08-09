@@ -20,6 +20,7 @@ import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
@@ -231,7 +232,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		return tManifest;
 	}
 
-	public AnnotationList search(final SearchQuery pQuery) throws IOException {
+	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException {
 		String tQueryString = "PREFIX oa: <http://www.w3.org/ns/oa#> "
 									 + "PREFIX cnt: <http://www.w3.org/2011/content#> "
                                      + "PREFIX dcterms: <http://purl.org/dc/terms/> "
@@ -246,7 +247,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
-		AnnotationList tAnnotationList = new AnnotationList();
+		IIIFSearchResults tAnnotationList = new IIIFSearchResults();
 
 		this.begin(ReadWrite.READ);
 		List<QuerySolution> tResults = ResultSetFormatter.toList(tExec.execSelect());

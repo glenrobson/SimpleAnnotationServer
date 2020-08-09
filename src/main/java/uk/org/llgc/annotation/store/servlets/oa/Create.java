@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.servlets.oa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,6 +18,8 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import org.apache.jena.rdf.model.Model;
 
+import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Annotation;
@@ -49,15 +51,13 @@ public class Create extends HttpServlet {
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 		try {
 			Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
-            AnnotationList tAnnotationList = new AnnotationList();
-            tAnnotationList.add(tAnno);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");
 			pRes.setCharacterEncoding("UTF-8");
 			_logger.debug("JSON out:");
-			_logger.debug(JsonUtils.toPrettyString(tAnnotationList.toJson()));
-			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList.toJson()));
+			_logger.debug(JsonUtils.toPrettyString(tAnno.toJson()));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tAnno.toJson()));
 		} catch (IDConflictException tException) {
 			tException.printStackTrace();
 			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);

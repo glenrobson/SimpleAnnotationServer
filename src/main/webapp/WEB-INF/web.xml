@@ -46,20 +46,20 @@
 	    <load-on-startup>1</load-on-startup> <!-- this needs to be the first one to start -->
 	</servlet>
     <servlet>
-        <servlet-name>Search</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.Search</servlet-class>
+        <servlet-name>CanvasAnnotations</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.oa.CanvasAnnotations</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Create</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.Create</servlet-class>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.oa.Create</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Update</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.Update</servlet-class>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.oa.Update</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>Destroy</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.Destroy</servlet-class>
+        <servlet-name>Delete</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.oa.Delete</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Populate</servlet-name>
@@ -75,7 +75,7 @@
     </servlet>
     <servlet>
         <servlet-name>UploadManifest</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.ManifestUpload</servlet-class>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.ManifestUpload</servlet-class>
         <init-param>
             <param-name>manifest_dir</param-name>
             <param-value>/manifests</param-value>
@@ -108,7 +108,7 @@
         <url-pattern>/manifests/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>Search</servlet-name>
+        <servlet-name>CanvasAnnotations</servlet-name>
         <url-pattern>/annotation/search</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
@@ -120,7 +120,7 @@
         <url-pattern>/annotation/update/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>Destroy</servlet-name>
+        <servlet-name>Delete</servlet-name>
         <url-pattern>/annotation/destroy/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>

@@ -5,6 +5,7 @@ import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -39,7 +40,7 @@ public interface StoreAdapter {
     public void storeCanvas(final Canvas pCanvas) throws IOException;
 
     // Search
-	public AnnotationList search(final SearchQuery pQuery) throws IOException;
+	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
 	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException;
 
     // Used in ListAnnotations can we get rid?

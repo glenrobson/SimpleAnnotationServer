@@ -304,6 +304,49 @@ public class Annotation {
         return _annotation;
     }
 
+    public Map<String,Object> jsonTargetRect() {
+        Map<String,Object> tClone = (Map<String,Object>)((HashMap)_annotation).clone();
+        collapseFragment(tClone);
+        if (((List)tClone.get("resource")).size() == 1) {
+            tClone.put("resource", ((List)tClone.get("resource")).get(0)); 
+        }
+        return tClone;
+    }
+
+    // Need to move fragement into on
+	public void collapseFragment(final Map<String,Object> pAnnotationJson) {
+		if (pAnnotationJson.get("on") instanceof Map) {
+            collapseFragmentOn(pAnnotationJson, (Map<String,Object>)pAnnotationJson.get("on"));
+		} else if (pAnnotationJson.get("on") instanceof List) {
+            for (Map<String,Object> tOn : (List<Map<String,Object>>)pAnnotationJson.get("on")) {
+                collapseFragmentOn(pAnnotationJson, tOn);
+            }
+		}	// otherwise its already collapsed as its a string
+	}
+	public void collapseFragmentOn(final Map<String,Object> pAnnotationJson, final Map<String,Object> pOn) {
+		if (pOn.get("selector") != null) {
+			try {
+                String tFragement = "";
+                if (((Map)pOn.get("selector")).get("value") != null) {
+    				tFragement = (String)((Map)pOn.get("selector")).get("value");
+                } else {
+    				tFragement = (String)((Map)((Map)pOn.get("selector")).get("default")).get("value");
+                }
+				String tTarget = (String)pOn.get("full");
+				pAnnotationJson.put("on", tTarget + "#" + tFragement);
+			} catch (ClassCastException tExcpt) {
+				System.err.println("Failed to transform annotation");
+				try {
+					System.out.println(JsonUtils.toPrettyString(pAnnotationJson));
+				} catch (IOException	tIOExcpt) {
+					System.out.println("Failed to print failing annotation " + tIOExcpt);
+				}
+				throw tExcpt;
+			}
+		}
+	}
+
+
     public String toString() {
         try {
             return JsonUtils.toPrettyString(_annotation);

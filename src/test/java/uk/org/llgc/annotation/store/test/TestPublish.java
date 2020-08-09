@@ -136,7 +136,7 @@ public class TestPublish extends TestUtils {
 
 		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
+		((List<Map<String,Object>>)tAnnotationJSON.get("resource")).get(0).put("chars","<p>New String</p>");
 
 		tAnno = _store.updateAnnotation(new Annotation(tAnnotationJSON));
 
@@ -194,7 +194,7 @@ public class TestPublish extends TestUtils {
 		assertNotNull("Annotation missing created date", tCreatedDate);
 		assertNull("Annotation has a modification date and it shouldn't",tAnno.getModified());
 
-		((Map<String,Object>)tAnnotationJSON.get("resource")).put("chars","<p>New String</p>");
+		((List<Map<String,Object>>)tAnnotationJSON.get("resource")).get(0).put("chars","<p>New String</p>");
 
 		tAnno  = _store.updateAnnotation(new Annotation(tAnnotationJSON));
 		assertNotNull("Annotation missing created date after update.", tAnno.getCreated());

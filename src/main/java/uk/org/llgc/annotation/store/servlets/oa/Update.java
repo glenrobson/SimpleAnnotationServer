@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.servlets.oa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +21,8 @@ import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 
 public class Update extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Update.class.getName());
@@ -50,15 +52,12 @@ public class Update extends HttpServlet {
             Annotation tUpdate = new Annotation(tAnnotationJSON);
 			Annotation tSavedAnno = _store.updateAnnotation(tUpdate);
 
-            AnnotationList tAnnoList = new AnnotationList();
-            tAnnoList.add(tSavedAnno);
-
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");
 			pRes.setCharacterEncoding("UTF-8");
 			_logger.debug("JSON out:");
-			_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson()));
-			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson()));
+			_logger.debug(JsonUtils.toPrettyString(tSavedAnno.toJson()));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tSavedAnno.toJson()));
 		} catch (IOException tException) {
 			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();
