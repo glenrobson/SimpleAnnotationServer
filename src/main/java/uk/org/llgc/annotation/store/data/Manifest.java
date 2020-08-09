@@ -37,7 +37,7 @@ public class Manifest {
             throw new IOException("Can't create manifest as type was incorrect. Expected sc:Manifest but got: " + this.getType());
         }
         if (this.getCanvases().isEmpty()) {
-            throw new IOException("Can't load manifest as t has no pages.");
+            throw new IOException("Can't load manifest as it has no pages.");
         }
         this.setShortId(pShortId);
         this.setURI((String)pJson.get("@id"));
