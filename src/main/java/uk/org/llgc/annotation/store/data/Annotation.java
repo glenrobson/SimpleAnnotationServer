@@ -83,7 +83,7 @@ public class Annotation {
             List tList = new ArrayList();
             tList.add(_annotation.get("resource"));
             
-            _annotation.put("resource"};
+            _annotation.put("resource", tList);
         }
     }
 
