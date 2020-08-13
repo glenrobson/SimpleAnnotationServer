@@ -64,7 +64,7 @@ docker-compose -f docker/sas-solr-cloud/docker-compose.yml --project-directory .
 echo "Testing ElasticSearch:"
 
 echo "Starting ElasticSearch:"
-docker-compose -f docker/sas-elastic/docker-compose.yml --project-directory . up -d elasticsearch
+docker-compose -f docker/sas-elastic/docker-compose.yml --project-directory . up -d elastic
 http_code=100
 while [ "$http_code" != "200" ]
 do 
