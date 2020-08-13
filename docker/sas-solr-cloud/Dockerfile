@@ -13,6 +13,7 @@ RUN rm -r /usr/local/tomcat/webapps/* && \
   mkdir /annotation-data
 # copy SAS from build image
 COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/ROOT
+COPY --from=buildstage /usr/src/sas /usr/src/sas
 # copy properties
 COPY docker/sas-solr-cloud/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 
