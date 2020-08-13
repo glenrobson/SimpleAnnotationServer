@@ -14,6 +14,7 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.rdf.jena.JenaStore;
 import uk.org.llgc.annotation.store.adapters.rdf.sesame.SesameStore;
 import uk.org.llgc.annotation.store.adapters.solr.SolrStore;
+import uk.org.llgc.annotation.store.adapters.elastic.ElasticStore;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
@@ -26,7 +27,7 @@ import java.io.FileInputStream;
 import java.io.File;
 
 import java.net.URL;
-
+import java.net.URISyntaxException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -155,8 +156,6 @@ public class StoreConfig extends HttpServlet {
 		StoreAdapter tAdapter = null;
 		String tStore = _props.get("store");
 
-        
-
 		if (tStore.equals("jena")) {
 			tAdapter = new JenaStore(_annotationUtils, _props.get("data_dir"));
 		} else if (tStore.equals("sesame")) {
@@ -164,12 +163,20 @@ public class StoreConfig extends HttpServlet {
 		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
 			String tCollection = null;
 			if (tStore.equals("solr-cloud")) {
-					tCollection = _props.get("solr_collection");
-					if (tCollection == null || tCollection.trim().length() == 0) {
-						throw new IllegalArgumentException("If you are using solr-cloud you must specify the solr_collection field.");
-					}
+                tCollection = _props.get("solr_collection");
+                if (tCollection == null || tCollection.trim().length() == 0) {
+                    throw new IllegalArgumentException("If you are using solr-cloud you must specify the solr_collection field.");
+                }
 			}
 			tAdapter = new SolrStore(_props.get("solr_connection"), tCollection);
+        } else if (tStore.equals("elastic")) {
+            try {
+                tAdapter = new ElasticStore(_props.get("elastic_connection"));
+            } catch (URISyntaxException tExcpt) {
+                throw new IllegalArgumentException("Failed to create Elastic connection due a problem with the conection URL");
+            } catch (IOException tExcpt) {
+                throw new IllegalArgumentException("Failed to create Elastic connection due a problem with the conection URL");
+            }
 		} else {
             _logger.error("Couldn't find a store for '" + tStore + "'.");
         }

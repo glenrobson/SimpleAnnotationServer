@@ -328,8 +328,7 @@ public class TestSearch extends TestUtils {
 		Map<String, Object> tResultsJson = _store.search(tQuery).toJson();
 
 		List<Map<String,Object>> tResults = (List<Map<String,Object>>)tResultsJson.get("resources");
-
-		assertEquals("Expected 3 result for 'chimney' but found different", 1, tResults.size());
+		assertEquals("Expected 1 result for 'chimney' but found different", 1, tResults.size());
 
         // Now test a default search
 

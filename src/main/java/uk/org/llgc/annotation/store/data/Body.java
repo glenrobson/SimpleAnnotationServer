@@ -40,8 +40,8 @@ public class Body {
 
     public String getIndexableContent() {
         String tContent = "";
-        if (_json.get("chars") != null) {
-            tContent = (String)_json.get("chars");
+        if (_json.get(FULL_TEXT_PROPERTY) != null) {
+            tContent = (String)_json.get(FULL_TEXT_PROPERTY);
         }
         return tContent;
     }

@@ -112,7 +112,6 @@ public class TestModel extends TestUtils {
 		Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
 
         _store.addAnnotation(new Annotation(tAnnotation));
-
         List<Manifest> tManifests = _store.getSkeletonManifests();
         assertEquals("Unexpected amount of manifests in store.", 1, tManifests.size());
         assertEquals("ID doesn't match", "http://example.com/manfiest/test/manifest.json", tManifests.get(0).getURI());

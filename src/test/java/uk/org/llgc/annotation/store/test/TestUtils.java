@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import java.net.URISyntaxException;
+import java.net.URI;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.solr.SolrStore;
+import uk.org.llgc.annotation.store.adapters.elastic.ElasticStore;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
@@ -50,6 +54,10 @@ import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 
 import java.util.Properties;
 
@@ -95,6 +103,10 @@ public class TestUtils {
         tConfig.setAnnotationUtils(_annotationUtils);
 		_store = StoreConfig.getConfig().getStore();
         _logger.debug("Store is " + _store);
+
+		if (_props.getProperty("store").equals("elastic")) {
+            ((ElasticStore)_store).setRefreshPolicy(org.elasticsearch.action.support.WriteRequest.RefreshPolicy.IMMEDIATE);
+        }
 	}
 
 	public String getAnnoId(final Model pModel) {
@@ -153,6 +165,17 @@ public class TestUtils {
 				tException.printStackTrace();
 				throw new IOException("Failed to remove annotations due to " + tException);
 			}
+		} else if (tStore.equals("elastic")) {
+            try {
+                URI tConectionString = new URI((String)_props.get("elastic_connection"));
+                RestHighLevelClient tClient = ElasticStore.buildClient(tConectionString);
+                String tIndex = tConectionString.getPath().replace("/","");
+                
+                tClient.indices().delete(new DeleteIndexRequest(tIndex), RequestOptions.DEFAULT);
+            } catch (URISyntaxException tExcpt) {
+				tExcpt.printStackTrace();
+				throw new IOException("Failed to remove annotations due to " + tExcpt);
+            }
 		} else if (tStore.equals("sesame")) {
 			try {
 				HTTPRepository tRepo = new HTTPRepository(_props.getProperty("repo_url"));

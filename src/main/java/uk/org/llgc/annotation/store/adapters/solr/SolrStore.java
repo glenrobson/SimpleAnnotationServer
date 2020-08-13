@@ -89,7 +89,6 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 // id, motivation, body, target, selector, within, data, short_id, label
 	public Annotation addAnnotationSafe(final Annotation pAnno) throws IOException {
 		SolrInputDocument tDoc = new SolrInputDocument();
-
 		// Only index what is neccesary for searching, everything else goes into data
 		tDoc.addField("id", pAnno.getId());
 		tDoc.addField("type", pAnno.getType());

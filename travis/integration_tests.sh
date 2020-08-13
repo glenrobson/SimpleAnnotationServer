@@ -61,5 +61,24 @@ fi
 
 docker-compose -f docker/sas-solr-cloud/docker-compose.yml --project-directory . down 
 
+echo "Testing ElasticSearch:"
+
+echo "Starting ElasticSearch:"
+docker-compose -f docker/sas-elastic/docker-compose.yml --project-directory . up -d elasticsearch
+http_code=100
+while [ "$http_code" != "200" ]
+do 
+    http_code=`curl --write-out %{http_code} --silent --output /dev/null "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=50s"`
+    echo "$http_code";
+done
+
+export "config=elastic.properties"
+echo "Running test"
+mvn test
+if [ $? -ne 0 ]; then
+    failures="${failures} Failed Elastic tests\n"
+    failed=1
+fi    
+
 echo "$failures"
 exit $failed

@@ -16,6 +16,9 @@ elif [[ "$backend" =~ [Ss]olr ]]; then
 elif [[ "$backend" =~ [Cc]loud ]]; then
     echo "Running SAS with SOLR Cloud on port 8888"
     docker-compose -f docker/sas-solr-cloud/docker-compose.yml --project-directory . up
+elif [[ "$backend" =~ [Ee]lastic ]]; then
+    echo "Running SAS with Elastic Cloud on port 8888"
+    docker-compose -f docker/sas-elastic/docker-compose.yml --project-directory . up
 else
     echo "I don't recognise '$backend'. Options are Jena / Solr / Cloud"
 fi
