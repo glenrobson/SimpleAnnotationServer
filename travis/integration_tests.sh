@@ -52,8 +52,6 @@ do
     running=`docker ps --filter "name=create-collection" |wc -l`
 done
 docker exec -t solr1 /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
-docker ps
-docker logs simpleannotationserver_web_1
 # Due to the way docker-compose and SOLR works we can't access the SOLR cloud
 # from this machine. Instead we have to run the test within the cluster
 docker exec --workdir /usr/src/sas simpleannotationserver_web_1 /usr/bin/mvn test
