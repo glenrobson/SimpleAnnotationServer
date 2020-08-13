@@ -27,7 +27,7 @@ echo "Testing solr:"
 
 echo "Starting SOLR:"
 docker-compose -f docker/sas-solr/docker-compose.yml --project-directory . up -d solr
-docker exec -t simpleannotationserver_solr_1 /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
+docker exec -t sas_solr /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
 
 export "config=solr.properties"
 echo "Running test"
@@ -51,12 +51,12 @@ do
     sleep 5
     running=`docker ps --filter "name=create-collection" |wc -l`
 done
-docker exec -t solr1 /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
+docker exec -t sas_solr1 /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
 docker ps
 docker logs simpleannotationserver_web_1
 # Due to the way docker-compose and SOLR works we can't access the SOLR cloud
 # from this machine. Instead we have to run the test within the cluster
-docker exec -t --workdir /usr/src/sas simpleannotationserver_web_1 /usr/bin/mvn test
+docker exec -t --workdir /usr/src/sas simpleannotationserver_web_1 mvn test
 if [ $? -ne 0 ]; then
     failures="${failures} Failed SOLR Cloud tests\n"
     failed=1
