@@ -98,6 +98,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         _client = buildClient(tConectionString);
 
         _index = tConectionString.getPath().replace("/","");
+        if (_index == null || _index.trim().isEmpty()) {
+            throw new IOException("No index specified in connection string " + pConnectionURL);
+        }
         createIndex();
 	}
 
