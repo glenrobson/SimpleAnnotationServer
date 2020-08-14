@@ -261,6 +261,7 @@ public class Annotation {
 		// Add create date if it doesn't already have one
 		if (this.getCreated() == null) {
 			this.setCreated(new Date());
+            this.updateModified();
 		}
 	}
 

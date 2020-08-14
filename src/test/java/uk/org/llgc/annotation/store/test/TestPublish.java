@@ -192,7 +192,8 @@ public class TestPublish extends TestUtils {
 
         Date tCreatedDate = tAnno.getCreated();
 		assertNotNull("Annotation missing created date", tCreatedDate);
-		assertNull("Annotation has a modification date and it shouldn't",tAnno.getModified());
+        Date tOrignMod = tAnno.getModified();
+		assertNotNull("Annotation is modification date",tAnno.getModified());
 
 		((List<Map<String,Object>>)tAnnotationJSON.get("resource")).get(0).put("chars","<p>New String</p>");
 
@@ -201,6 +202,7 @@ public class TestPublish extends TestUtils {
 		assertEquals("Created date is different on update.", tCreatedDate, tAnno.getCreated());
 
 		assertNotNull("Annotation is missing modification date after update. ", tAnno.getModified());
+        assertNotEquals("Modification date should have changed after update orginal: " + tOrignMod + " after update: " + tAnno.getModified(), tOrignMod.getTime(), tAnno.getModified().getTime());
 
         // Check in correct place in JSON
         assertNotNull("Anno missing create date in json", tAnno.toJson().get("dcterms:created"));
