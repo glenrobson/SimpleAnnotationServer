@@ -177,6 +177,10 @@ public class Annotation {
         if (_annotation.get("dcterms:" + DCTerms.modified.getLocalName()) == null) {
             return null;
         } else {
+            if (_annotation.get("dcterms:" + DCTerms.modified.getLocalName()) instanceof List) {
+                // invalid really so just reset
+                this.updateModified();
+            }
             String tDate = (String)_annotation.get("dcterms:" + DCTerms.modified.getLocalName());
             try {
                 return _dateFormatter.parse(tDate);
