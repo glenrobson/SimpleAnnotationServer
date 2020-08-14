@@ -61,6 +61,11 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
+import com.amazonaws.auth.AWS4Signer;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import org.apache.http.HttpRequestInterceptor;
+
 import java.text.ParseException;
 
 import java.util.Map;
@@ -106,10 +111,21 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     // Used in unit test to manage test
     public static RestHighLevelClient buildClient(final URI pConnectionURL) {
         //final CredentialsProvider credentialsProvider =new BasicCredentialsProvider();credentialsProvider.setCredentials(AuthScope.ANY,new UsernamePasswordCredentials("username", "password"));
-        RestClientBuilder builder = RestClient.builder(new HttpHost(pConnectionURL.getHost(), pConnectionURL.getPort(), pConnectionURL.getScheme()));
-        RestHighLevelClient tClient = new RestHighLevelClient(builder);
+        if (System.getenv("AWS_REGION") != null && System.getenv("AWS_ACCESS_KEY_ID") != null && System.getenv("AWS_SECRET_ACCESS_KEY") != null) {
+            String tServiceName = "es";
+            AWSCredentialsProvider credentialsProvider = new EnvironmentVariableCredentialsProvider();
+            AWS4Signer signer = new AWS4Signer();
+            signer.setServiceName(tServiceName);
+            signer.setRegionName(System.getenv("AWS_REGION")); // ENV
+            HttpRequestInterceptor interceptor = new AWSRequestSigningApacheInterceptor(tServiceName, signer, credentialsProvider);
+            return new RestHighLevelClient(RestClient.builder(new HttpHost(pConnectionURL.getHost(), pConnectionURL.getPort(), pConnectionURL.getScheme())).setHttpClientConfigCallback(hacb -> hacb.addInterceptorLast(interceptor)));
+        } else {
+            RestClientBuilder builder = RestClient.builder(new HttpHost(pConnectionURL.getHost(), pConnectionURL.getPort(), pConnectionURL.getScheme()));
+         
+            RestHighLevelClient tClient = new RestHighLevelClient(builder);
 
-        return tClient ;
+            return tClient ;
+        }
     }
 
     protected void createIndex() throws IOException {

@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","solr_collection"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection"};
     protected AnnotationUtils _annotationUtils = null;
 
 	public StoreConfig() {
@@ -173,8 +173,10 @@ public class StoreConfig extends HttpServlet {
             try {
                 tAdapter = new ElasticStore(_props.get("elastic_connection"));
             } catch (URISyntaxException tExcpt) {
+                tExcpt.printStackTrace();
                 throw new IllegalArgumentException("Failed to create Elastic connection due a problem with the conection URL");
             } catch (IOException tExcpt) {
+                tExcpt.printStackTrace();
                 throw new IllegalArgumentException("Failed to create Elastic connection due a problem with the conection URL");
             }
 		} else {
