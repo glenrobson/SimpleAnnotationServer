@@ -15,6 +15,9 @@ import java.net.URLEncoder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.NameValuePair;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+
 public class SearchQuery {
 	protected String _query = "";
 	protected List<String> _motivations = null;
@@ -32,7 +35,7 @@ public class SearchQuery {
 	public SearchQuery(final URI pURI) throws ParseException {
 		this.setBaseURI(pURI);
 
-		List<NameValuePair> tParamsList = URLEncodedUtils.parse(pURI, "UTF-8");
+		List<NameValuePair> tParamsList = URLEncodedUtils.parse(pURI, Charset.forName("UTF-8"));
 		Map<String,String> tParams = new HashMap<String,String>();
 		for (NameValuePair tCurrent : tParamsList) {
 			tParams.put(tCurrent.getName(), tCurrent.getValue());
@@ -75,24 +78,28 @@ public class SearchQuery {
 
 	public String toQueryString() {
 		StringBuffer tBuff = new StringBuffer("q=");
-		tBuff.append(URLEncoder.encode(_query));
-
-		if (_motivations != null) {
-			tBuff.append("&");
-			tBuff.append(URLEncoder.encode(this.convertListToString("motivation", _motivations)));
-		}
-		if (_dates != null) {
-			tBuff.append("&");
-			tBuff.append(this.convertListToString("date", _dates));
-		}	
-		if (_users != null) {
-			tBuff.append("&");
-			tBuff.append(URLEncoder.encode(this.convertListToString("user", _users)));
-		}	
-		if (_page != 0) {
-			tBuff.append("&");
-			tBuff.append("page=" + _page);
-		}	
+        try {
+            tBuff.append(URLEncoder.encode(_query, "UTF-8"));
+            if (_motivations != null) {
+                tBuff.append("&");
+                tBuff.append(URLEncoder.encode(this.convertListToString("motivation", _motivations), "UTF-8"));
+            }
+            if (_dates != null) {
+                tBuff.append("&");
+                tBuff.append(this.convertListToString("date", _dates));
+            }	
+            if (_users != null) {
+                tBuff.append("&");
+                tBuff.append(URLEncoder.encode(this.convertListToString("user", _users), "UTF-8"));
+            }	
+            if (_page != 0) {
+                tBuff.append("&");
+                tBuff.append("page=" + _page);
+            }	
+        } catch (UnsupportedEncodingException tExcpt) {
+            // shouldn't happen as UTF-8 should be supported.
+            tExcpt.printStackTrace();
+        }
 		return tBuff.toString();
 	}
 

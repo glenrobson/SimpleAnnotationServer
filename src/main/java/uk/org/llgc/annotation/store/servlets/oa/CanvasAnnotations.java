@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.servlets.oa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,12 +21,15 @@ import javax.servlet.ServletException;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
-
-public class Search extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Search.class.getName());
+public class CanvasAnnotations extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(CanvasAnnotations.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -45,19 +48,11 @@ public class Search extends HttpServlet {
 		if (pReq.getParameter("uri") == null || pReq.getParameter("uri").trim().length() == 0) {
 			return; // for some reason Mirador is sending blank uri requests
 		}
-		List<Model> tAnnotations = _store.getAnnotationsFromPage(pReq.getParameter("uri"));
-        try {
-            List tAnnotationList = _annotationUtils.createAnnotationList(tAnnotations);
+        AnnotationList tAnnoList = _store.getAnnotationsFromPage(new Canvas(pReq.getParameter("uri"), ""));
 
-            pRes.setContentType("application/ld+json; charset=UTF-8");
-            pRes.setCharacterEncoding("UTF-8");
-            /**/_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-            pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
-        } catch (MalformedAnnotation tExcpt) {
-            tExcpt.printStackTrace();
-            pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            pRes.setContentType("text/plain");
-            pRes.getOutputStream().println("Falied to load annotation as it was badly informed: " + tExcpt.toString());
-        }
+        pRes.setContentType("application/ld+json; charset=UTF-8");
+        pRes.setCharacterEncoding("UTF-8");
+        /**/_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
+        pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
     }
 }

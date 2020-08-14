@@ -28,6 +28,7 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.data.Annotation;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -72,14 +73,12 @@ public class TestMirador214 extends TestUtils {
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
 		_logger.debug("ID " + tAnnoId);
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
-
-		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
+		Annotation tAnnotation = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
 		// Require on to be an array
-		assertTrue("On needs to be an array and it isn't.", tAnnotation.get("on") instanceof List);
+		assertTrue("On needs to be an array and it isn't.", tAnnotation.toJson().get("on") instanceof List);
 
 		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
-		assertNotNull("Default rect present ", ((Map<String,Map<String,String>>)((List<Map<String,Object>>)tAnnotation.get("on")).get(0).get("selector")).get("default").get("value"));
+		assertNotNull("Default rect present ", (((Map<String,String>)((Map<String, Object>)tAnnotation.getTargets().get(0).toJson().get("selector")).get("default")).get("value")));
 	}
 }

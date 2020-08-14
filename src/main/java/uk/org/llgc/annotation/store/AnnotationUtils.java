@@ -233,13 +233,13 @@ public class AnnotationUtils {
 
 	public List<Map<String,Object>> createAnnotationList(final List<Model> pAnnotations) throws IOException, MalformedAnnotation {
 		final Object contextJson = JsonUtils.fromInputStream(new FileInputStream(new File(_contextDir, "annotation_frame.json")));
-		((Map)contextJson).put("@context", this.getContext());
+		((Map<String, Object>)contextJson).put("@context", this.getContext());
 
 		final JsonLdOptions options = new JsonLdOptions();
 		options.format = "application/jsonld";
 
 		Map<String, Object> tRoot = this.buildAnnotationListHead();
-		List tResources = (List)tRoot.get("resources");
+		List<Map<String,Object>> tResources = (List<Map<String,Object>>)tRoot.get("resources");
 		for (Model tAnnotation : pAnnotations) {
             Annotation tAnno = null;
 			try {

@@ -11,8 +11,10 @@ import java.util.HashMap;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
-import org.jdom2.xpath.XPath;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.jdom2.JDOMException;
+import org.jdom2.filter.Filters;
 
 import java.io.StringReader;
 import java.io.IOException;
@@ -130,7 +132,7 @@ public class BookOfPeaceEncoder implements Encoder {
 				if (tBody.get("foaf:primaryTopic") != null) {
 					// Annotation already has a person
 					Map<String,Object> tPersonLink = (Map<String,Object>)tBody.get("foaf:primaryTopic");
-					List tTopics = new ArrayList(); // turn value into an array
+					List<Map<String,Object>> tTopics = new ArrayList<Map<String,Object>>(); // turn value into an array
 					tTopics.add(tPersonLink);
 					tTopics.add(tHeading);
 					tBody.put("foaf:primaryTopic", tTopics);
@@ -164,7 +166,9 @@ public class BookOfPeaceEncoder implements Encoder {
 	}
 
 	protected String getField(final Document pDoc, final String pPath) throws JDOMException {
-		List<Element> tList = (List<Element>)XPath.selectNodes(pDoc, pPath);
+        XPathFactory xFactory = XPathFactory.instance();
+        XPathExpression<Element> expr = xFactory.compile(pPath, Filters.element());
+		List<Element> tList = expr.evaluate(pDoc);
 		StringBuffer tBuffer = new StringBuffer();
 		for (Element tEl : tList) {
 			if (tEl.getText().trim().length() > 0) {
@@ -221,10 +225,20 @@ public class BookOfPeaceEncoder implements Encoder {
 					tHTML.append(this.getContent(tPerson.get("http://rdf.muninn-project.org/ontologies/military#heldRank")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("heldRank") != null) {
+					tHTML.append("<span property=\"ns:rank\" class=\"rank\">");
+					tHTML.append(tPerson.get("heldRank"));
+					tHTML.append("</span> ");
+				}
 
 				if (tPerson.get("foaf:name") != null) {
 					tHTML.append("<span property=\"ns:name\" class=\"name\">");
 					tHTML.append(this.getContent(tPerson.get("foaf:name")));
+					tHTML.append("</span> ");
+				}
+                if (tPerson.get("name") != null) {
+					tHTML.append("<span property=\"ns:name\" class=\"name\">");
+					tHTML.append(tPerson.get("name"));
 					tHTML.append("</span> ");
 				}
 
@@ -233,16 +247,33 @@ public class BookOfPeaceEncoder implements Encoder {
 					tHTML.append(this.getContent(tPerson.get("foaf:based_near")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("based_near") != null) {
+					tHTML.append("<span property=\"ns:place\" class=\"place\">");
+					tHTML.append(tPerson.get("based_near"));
+					tHTML.append("</span> ");
+				}
+
 
 				if (tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit") != null) {
 					tHTML.append("<span property=\"ns:unit\" class=\"unit\">");
 					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedInUnit")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("servedInUnit") != null) {
+					tHTML.append("<span property=\"ns:unit\" class=\"unit\">");
+					tHTML.append(tPerson.get("servedInUnit"));
+					tHTML.append("</span> ");
+				}
+
 
 				if (tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip") != null) {
 					tHTML.append("<span property=\"ns:ship\" class=\"ship\">");
 					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/bor/def#servedOnShip")));
+					tHTML.append("</span> ");
+				}
+                if (tPerson.get("servedOnShip") != null) {
+					tHTML.append("<span property=\"ns:ship\" class=\"ship\">");
+					tHTML.append(tPerson.get("servedOnShip"));
 					tHTML.append("</span> ");
 				}
 
@@ -251,6 +282,12 @@ public class BookOfPeaceEncoder implements Encoder {
 					tHTML.append(this.getContent(tPerson.get("http://data.llgc.org.uk/waw/def#awarded")));
 					tHTML.append("</span> ");
 				}
+                if (tPerson.get("awarded") != null) {
+					tHTML.append("<span property=\"ns:medal\" class=\"medal\">");
+					tHTML.append(tPerson.get("awarded"));
+					tHTML.append("</span> ");
+				}
+
 
 			}	
 			tBody.remove("foaf:primaryTopic");

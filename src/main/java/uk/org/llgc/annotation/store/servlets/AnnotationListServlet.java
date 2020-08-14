@@ -35,7 +35,7 @@ public class AnnotationListServlet extends HttpServlet {
 
         Canvas tCanvas = _store.resolveCanvas(tCanvasShortID);
 
-        AnnotationList tList = new AnnotationList(_store.getAnnotationsFromPage(tCanvas.getId()));
+        AnnotationList tList = _store.getAnnotationsFromPage(tCanvas);
         tList.setId(StoreConfig.getConfig().getBaseURI(pReq) + "/annotation/list/" + tCanvasShortID + ".json");
 
         pRes.setContentType("application/ld+json; charset=UTF-8");

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.AnnotationUtils;
        
 public class Manifest {
 	protected String _URI = "";
@@ -23,10 +24,27 @@ public class Manifest {
 	public Manifest() {
 	}
 
-    public Manifest(final Map<String, Object> pJson, final String pShortId) {
+    /*
+     * Set manifest before it has a short id
+     */
+     public Manifest(final Map<String, Object> pJson) throws IOException {
+        this(pJson, "");
+    }
+
+    public Manifest(final Map<String, Object> pJson, final String pShortId) throws IOException {
         this.setJson(pJson);
+        if (!this.getType().equals("sc:Manifest")) {
+            throw new IOException("Can't create manifest as type was incorrect. Expected sc:Manifest but got: " + this.getType());
+        }
+        if (this.getCanvases().isEmpty()) {
+            throw new IOException("Can't load manifest as it has no pages.");
+        }
         this.setShortId(pShortId);
         this.setURI((String)pJson.get("@id"));
+    }
+
+    public Map<String, Object> toJson() {
+        return _json;
     }
 
     public void setJson(final Map<String, Object> pJson) {
@@ -34,17 +52,20 @@ public class Manifest {
         this.setURI((String)_json.get("@id"));
         this.setLabel((String)_json.get("label")); // will fail if there is a multilingual string
 
-
         Map<String,Object> tSequence = null;
-        if (_json.get("sequences") instanceof List) {
-            tSequence = ((List<Map<String, Object>>)_json.get("sequences")).get(0);
+        if (_json.get("sequences") instanceof List ) {
+            if (!((List)_json.get("sequences")).isEmpty()) {
+                tSequence = ((List<Map<String, Object>>)_json.get("sequences")).get(0);
+            }
         } else {
             tSequence = (Map<String, Object>)_json.get("sequences");
         }
 
         _canvases = new ArrayList<Canvas>();
-        for (Map<String, Object> tCanvas : (List<Map<String, Object>>)tSequence.get("canvases")) {
-            _canvases.add(new Canvas((String)tCanvas.get("@id"), (String)tCanvas.get("label")));
+        if (tSequence != null) {
+            for (Map<String, Object> tCanvas : (List<Map<String, Object>>)tSequence.get("canvases")) {
+                _canvases.add(new Canvas((String)tCanvas.get("@id"), (String)tCanvas.get("label")));
+            }
         }
     }
 
@@ -100,6 +121,18 @@ public class Manifest {
 	 * @return shortId as String.
 	 */
 	public String getShortId() {
+        if (_shortId == null || _shortId.isEmpty()) {
+            if (_URI.endsWith("manifest.json")) {
+                String[] tURI = _URI.split("/");
+                _shortId = tURI[tURI.length - 2];
+            } else {
+                try {
+                    _shortId = AnnotationUtils.getHash(_URI, "md5");
+                } catch (IOException tExcpt) {
+                    tExcpt.printStackTrace();
+                }
+            }
+        }
 	    return _shortId;
 	}
 	
@@ -133,6 +166,14 @@ public class Manifest {
     
     public List<Canvas> getCanvases() {
         return _canvases;
+    }
+
+    public boolean equals(Object pOther) {
+        if (pOther instanceof Manifest) {
+            return _URI.equals(((Manifest)pOther).getURI());
+        } else {
+            return false;
+        }
     }
 
     public String toString() {

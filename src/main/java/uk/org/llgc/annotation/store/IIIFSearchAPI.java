@@ -27,6 +27,7 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.DateRange;
+import uk.org.llgc.annotation.store.data.AnnotationList;
 
 public class IIIFSearchAPI extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(IIIFSearchAPI.class.getName()); 
@@ -74,18 +75,10 @@ public class IIIFSearchAPI extends HttpServlet {
 			return;
 		}
 
-		Map<String, Object> tResults = _store.search(tQuery);
-		if (tBaseURI != null && tBaseURI.startsWith("https://damsssl")) {
-			List<Map<String,Object>> tAnnotations = (List<Map<String,Object>>)tResults.get("resources");
-			for (Map<String,Object> tAnno : tAnnotations) {
-				String tNewOn = ((String)tAnno.get("on")).replaceAll("http://dams","https://damsssl");
-				tAnno.put("on", tNewOn);
-			}
-		}
+		AnnotationList tResults = _store.search(tQuery);
 
 		pRes.setContentType("application/ld+json; charset=UTF-8");
 		pRes.setCharacterEncoding("UTF-8");
-		//**/_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-		pRes.getWriter().println(JsonUtils.toPrettyString(tResults));
+		pRes.getWriter().println(JsonUtils.toPrettyString(tResults.toJson()));
 	}
 }

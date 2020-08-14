@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.servlets.oa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,17 +16,17 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import org.apache.jena.rdf.model.Model;
-
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
-import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 
-import java.net.URISyntaxException;
+public class Update extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(Update.class.getName());
 
-public class Create extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Create.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
 
@@ -35,44 +35,38 @@ public class Create extends HttpServlet {
 		Encoder tEncoder = StoreConfig.getConfig().getEncoder();
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
-		_store.init(_annotationUtils);
+	}
+	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+		_logger.debug("get called");
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation");
-		if (tAnnotationJSON.get("@context") instanceof String) {
-			Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(super.getServletContext().getResourceAsStream("/contexts/iiif-2.0.json"));
-			tAnnotationJSON.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
-		}
-		_logger.debug("JSON in:");
-		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
-
 		try {
-			Model tModel = _store.addAnnotation(tAnnotationJSON);
-
-			Map<String, Object> tAnnotationList = _annotationUtils.createAnnotationList(tModel);
+			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation");
+			if (tAnnotationJSON.get("@context") instanceof String) {
+				Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(super.getServletContext().getResourceAsStream("/contexts/iiif-2.0.json"));
+				tAnnotationJSON.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
+			}
+			_logger.debug("JSON in:");
+			_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
+            Annotation tUpdate = new Annotation(tAnnotationJSON);
+			Annotation tSavedAnno = _store.updateAnnotation(tUpdate);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");
 			pRes.setCharacterEncoding("UTF-8");
 			_logger.debug("JSON out:");
-			_logger.debug(JsonUtils.toPrettyString(tAnnotationList));
-			pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotationList));
-		} catch (IDConflictException tException) {
+			_logger.debug(JsonUtils.toPrettyString(tSavedAnno.toJson()));
+			pRes.getWriter().println(JsonUtils.toPrettyString(tSavedAnno.toJson()));
+		} catch (IOException tException) {
+			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();
-			pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			pRes.setContentType("text/plain");
-			pRes.getOutputStream().println("Failed to load annotation due to conflict in ID: " + tException.toString());
+			throw tException;
         } catch (MalformedAnnotation tExcpt) {
             tExcpt.printStackTrace();
             pRes.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             pRes.setContentType("text/plain");
             pRes.getOutputStream().println("Falied to load annotation as it was badly informed: " + tExcpt.toString());
-		} catch (IOException tException) {
-
-			System.err.println("Exception occured trying to add annotation:");
-			tException.printStackTrace();
-			throw tException;
 		}
 	}
 }

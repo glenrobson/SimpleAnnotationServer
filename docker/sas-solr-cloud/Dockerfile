@@ -11,9 +11,9 @@ FROM tomcat:9-jre11 AS runstage
 # remove tomcat default webapps and create data directory
 RUN rm -r /usr/local/tomcat/webapps/*
 # copy SAS from build image
-COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/sas
+COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/ROOT
 # copy properties
-COPY docker/sas-solr-cloud/sas.properties /usr/local/tomcat/webapps/sas/WEB-INF
+COPY docker/sas-solr-cloud/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 
 # Used for testing:
 COPY . /usr/src/sas

@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store.adapters;
+package uk.org.llgc.annotation.store.adapters.rdf.jena;
 
 import org.apache.jena.query.*;
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +12,10 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
+import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.adapters.rdf.AbstractRDFStore;
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 
 import java.util.Map;
 import java.util.List;
@@ -32,11 +35,12 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 
 	protected Dataset _dataset = null;
 
-	public JenaStore(final String pDataDir) {
+	public JenaStore(final AnnotationUtils pUtils, final String pDataDir) {
+        super(pUtils);
 		_dataset = TDBFactory.createDataset(pDataDir);
 	}
 
-	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
+	protected Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		String tJson = JsonUtils.toString(pJson);
 
         _logger.debug("Converting: " + tJson);

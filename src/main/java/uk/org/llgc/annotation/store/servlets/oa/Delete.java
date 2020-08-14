@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store;
+package uk.org.llgc.annotation.store.servlets.oa;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,9 +16,11 @@ import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.StoreConfig;
 
-public class Destroy extends HttpServlet {
-	protected static Logger _logger = LogManager.getLogger(Destroy.class.getName()); 
+public class Delete extends HttpServlet {
+	protected static Logger _logger = LogManager.getLogger(Delete.class.getName()); 
 	protected StoreAdapter _store = null;
 
 	public void init(final ServletConfig pConfig) throws ServletException {

@@ -22,6 +22,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Mirador214;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -72,28 +74,27 @@ public class TestMirador2 extends TestUtils {
 
 		String tAnnoId = (String)tAnnotationJSON.get("@id");
 		_logger.debug("ID " + tAnnoId);
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
+		Map<String, Object> tAnnoJson = tAnno.toJson();
 
 		// Require on to be an map for mirador 2
-		assertTrue("On needs to be a Map in Mirador2 and it isn't.", tAnnotation.get("on") instanceof Map);
+		assertTrue("On needs to be a Map in Mirador2 and it isn't.", tAnnoJson.get("on") instanceof Map);
 
 		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
-		assertNotNull("FragmentSelector present", ((Map<String,Map<String,String>>)tAnnotation.get("on")).get("selector").get("value"));
+		assertNotNull("FragmentSelector present", ((Map<String,Map<String,String>>)tAnnoJson.get("on")).get("selector").get("value"));
 	}
 
     @Test
     public void testPopulate() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/annos_master_version1.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
 
-        List<Model> tModel = _store.addAnnotationList(tAnnotationListJSON);
+        AnnotationList tList = new AnnotationList(tAnnotationListJSON);
+        AnnotationList tAnnotations = _store.addAnnotationList(tList);
 
-		List<Map<String, Object>> tAnnotations = _annotationUtils.createAnnotationList(tModel);
+        assertEquals("Exported list was a different size to the one supplied.", tAnnotationListJSON.size(), tAnnotations.getAnnotations().size());
 
-        assertEquals("Exported list was a different size to the one supplied.", tAnnotationListJSON.size(), tAnnotations.size());
-
-        Map<String,Object> tAnno1 = tAnnotations.get(0);
+        Map<String,Object> tAnno1 = tAnnotations.getAnnotations().get(0).toJson();
 		assertTrue("For Mirador 2 on doesn't need to be an array ", tAnno1.get("on") instanceof Map);
 
         Map<String,Object> tOn = (Map<String,Object>)tAnno1.get("on");
@@ -105,11 +106,9 @@ public class TestMirador2 extends TestUtils {
 	public void TestNoBlankNode() throws IOException, IDConflictException, InterruptedException, MalformedAnnotation {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(new FileInputStream(getClass().getResource("/jsonld/testAnnotation.json").getFile()), StoreConfig.getConfig().getBaseURI(null));
 
-		String tAnnoId = (String)tAnnotationJSON.get("@id");
-		_logger.debug("ID " + tAnnoId);
-		Model tModel = _store.addAnnotation(tAnnotationJSON);
+		Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
-		Map<String, Object> tAnnotation = _annotationUtils.createAnnotationList(tModel);
+		Map<String, Object> tAnnotation = tAnno.toJson();
 
 		// Require on to be an map for mirador 2
 		assertTrue("On needs to be a Map in Mirador2 and it isn't.", tAnnotation.get("on") instanceof Map);

@@ -3,6 +3,7 @@ package uk.org.llgc.annotation.store;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -10,10 +11,12 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
-import uk.org.llgc.annotation.store.adapters.JenaStore;
-import uk.org.llgc.annotation.store.adapters.SesameStore;
-import uk.org.llgc.annotation.store.adapters.SolrStore;
+import uk.org.llgc.annotation.store.adapters.rdf.jena.JenaStore;
+import uk.org.llgc.annotation.store.adapters.rdf.sesame.SesameStore;
+import uk.org.llgc.annotation.store.adapters.solr.SolrStore;
+import uk.org.llgc.annotation.store.adapters.elastic.ElasticStore;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.AnnotationUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -24,8 +27,7 @@ import java.io.FileInputStream;
 import java.io.File;
 
 import java.net.URL;
-
-import javax.servlet.http.HttpServletRequest;
+import java.net.URISyntaxException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +35,8 @@ import org.apache.logging.log4j.Logger;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","solr_collection"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection"};
+    protected AnnotationUtils _annotationUtils = null;
 
 	public StoreConfig() {
 		_props = null;
@@ -68,15 +71,24 @@ public class StoreConfig extends HttpServlet {
 			throw new ServletException("Failed to load config file due to: " + tExcpt.getMessage());
 		}
 		this.overloadConfigFromEnviroment(tProps);
+        _annotationUtils = new AnnotationUtils(this.getRealPath("/contexts"), getEncoder());
+        
 		initConfig(this);
 	}
+
+    public AnnotationUtils getAnnotationUtils() {
+        return _annotationUtils;
+    }
+
+    public void setAnnotationUtils(final AnnotationUtils pAnnoUtils) {
+        _annotationUtils = pAnnoUtils;
+    }
 
     public File getRealPath(final String pPath) {
         try {
             return new File(super.getServletContext().getRealPath(pPath));
         } catch (Exception tExcpt) {
-            tExcpt.printStackTrace();
-            return null;
+            return new File(getClass().getResource(pPath).getFile());
         }
     }
 
@@ -143,19 +155,30 @@ public class StoreConfig extends HttpServlet {
 
 		StoreAdapter tAdapter = null;
 		String tStore = _props.get("store");
+
 		if (tStore.equals("jena")) {
-			tAdapter = new JenaStore(_props.get("data_dir"));
+			tAdapter = new JenaStore(_annotationUtils, _props.get("data_dir"));
 		} else if (tStore.equals("sesame")) {
-			tAdapter = new SesameStore(_props.get("repo_url"));
+			tAdapter = new SesameStore(_annotationUtils, _props.get("repo_url"));
 		} else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
 			String tCollection = null;
 			if (tStore.equals("solr-cloud")) {
-					tCollection = _props.get("solr_collection");
-					if (tCollection == null || tCollection.trim().length() == 0) {
-						throw new IllegalArgumentException("If you are using solr-cloud you must specify the solr_collection field.");
-					}
+                tCollection = _props.get("solr_collection");
+                if (tCollection == null || tCollection.trim().length() == 0) {
+                    throw new IllegalArgumentException("If you are using solr-cloud you must specify the solr_collection field.");
+                }
 			}
 			tAdapter = new SolrStore(_props.get("solr_connection"), tCollection);
+        } else if (tStore.equals("elastic")) {
+            try {
+                tAdapter = new ElasticStore(_props.get("elastic_connection"));
+            } catch (URISyntaxException tExcpt) {
+                tExcpt.printStackTrace();
+                throw new IllegalArgumentException("Failed to create Elastic connection due a problem with the conection URL");
+            } catch (IOException tExcpt) {
+                tExcpt.printStackTrace();
+                throw new IllegalArgumentException("Failed to create Elastic connection due a problem with the conection URL");
+            }
 		} else {
             _logger.error("Couldn't find a store for '" + tStore + "'.");
         }
@@ -168,11 +191,15 @@ public class StoreConfig extends HttpServlet {
 		if (_props.get("encoder") != null) {
 			try {
 				Class tClass = Class.forName(_props.get("encoder"));
-				tEncoder = (Encoder)tClass.newInstance();
+				tEncoder = (Encoder)tClass.getDeclaredConstructor().newInstance();
 				tEncoder.init(_props);
 			} catch (ClassNotFoundException tExcpt) {
 				throw new ServletException("The Encoder you specified in the configuration is either incorrect or dosn't exist in the classpath " + _props.get("encoder"));
 			} catch (InstantiationException tExcpt) {
+				throw new ServletException("The Encoder must have a default constructor " + _props.get("encoder"));
+			} catch (NoSuchMethodException tExcpt) {
+				throw new ServletException("The Encoder must have a default constructor " + _props.get("encoder"));
+			} catch (InvocationTargetException tExcpt) {
 				throw new ServletException("The Encoder must have a default constructor " + _props.get("encoder"));
 			} catch (IllegalAccessException tExcpt) {
 				throw new ServletException("The default constructor must be public " + _props.get("encoder"));

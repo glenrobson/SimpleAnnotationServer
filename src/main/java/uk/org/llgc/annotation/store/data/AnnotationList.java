@@ -12,11 +12,26 @@ import org.apache.jena.rdf.model.Model;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
 public class AnnotationList {
-    protected List<Model> _annotations = null;
+    protected List<Annotation> _annotations = null;
     protected String _id = "";
 
-    public AnnotationList(final List<Model> pAnnotations) {
-        _annotations = pAnnotations;
+    public AnnotationList() {
+        _annotations = new ArrayList<Annotation>();
+    }
+
+    public AnnotationList(final List<Map<String, Object>> pAnnos) {
+        _annotations = new ArrayList<Annotation>();
+        for (Map<String,Object> tAnno : pAnnos) {
+            _annotations.add(new Annotation(tAnno));
+        }
+    }
+
+    public AnnotationList(final List<Model> pAnnotations, final boolean pCompact) throws IOException {
+        _annotations = new ArrayList<Annotation>();
+        AnnotationUtils tUtils = new AnnotationUtils();
+        for (Model tModel : pAnnotations) {
+            _annotations.add(new Annotation(tUtils.frameAnnotation(tModel, pCompact)));
+        }
     }
     
     /**
@@ -37,20 +52,45 @@ public class AnnotationList {
          _id = pId;
     }
 
+    public void add(final Annotation pAnno) {
+        _annotations.add(pAnno);
+    }
+    
+    public Annotation get(final String pAnnoId) {
+        for (Annotation tAnno : _annotations) {
+            if (tAnno.getId().equals(pAnnoId)) {
+                return tAnno;
+            }
+        }
+        return null;
+    }
+
+    public int size() {
+        return _annotations.size();
+    }
+
+    public List<Annotation> getAnnotations() {
+        return _annotations;
+    }
+    
+    public void setAnnotations(final List<Annotation> pAnnos) {
+        _annotations = pAnnos;
+    }
+
     public Map<String, Object> toJson() throws IOException {
         Map<String,Object> tJson = new HashMap<String,Object>();
         tJson.put("@context", "http://iiif.io/api/presentation/2/context.json");
         tJson.put("@id", _id);
         tJson.put("@type", "sc:AnnotationList");
+
         List<Map<String,Object>> tAnnos = new ArrayList<Map<String,Object>>();
         tJson.put("resources", tAnnos);
 
-        System.out.println("Number of annos: " + _annotations.size());
-        AnnotationUtils tUtils = new AnnotationUtils();
-        for (Model tModel : _annotations) {
-            tAnnos.add(tUtils.frameAnnotation(tModel, false));
+        for (Annotation tAnno: _annotations) {
+            tAnnos.add(tAnno.toJson());
         }
 
         return tJson;
     }
+    
 }

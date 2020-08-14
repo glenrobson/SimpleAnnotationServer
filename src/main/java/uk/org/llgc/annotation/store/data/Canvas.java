@@ -16,6 +16,31 @@ public class Canvas {
         this.setId(pId);
         this.setLabel(pLabel);
     }
+
+    public Canvas(final Map<String, Object> pJson) {
+        if (pJson.get("@id") != null) {
+            _id = (String)pJson.get("@id");
+        }
+        if (pJson.get("label") != null) {
+            _label = (String)pJson.get("label");
+        }
+        if (pJson.get("http://purl.org/dc/terms/identifier") != null) {
+            _shortId = (String)pJson.get("http://purl.org/dc/terms/identifier");
+        }
+    }
+
+    public Map<String, Object> toJson() {
+        Map<String, Object> tJson = new HashMap<String,Object>();
+        tJson.put("@id", _id);
+        tJson.put("@type", "sc:Canvas");
+        if (_label != null && !_label.trim().isEmpty()) {
+            tJson.put("label", _label);
+        }
+        if (_shortId != null && !_shortId.trim().isEmpty()) {
+            tJson.put("http://purl.org/dc/terms/identifier", _shortId);
+        }
+        return tJson;
+    }
     
     /**
      * Get uri.
@@ -89,5 +114,9 @@ public class Canvas {
 
     public String toString() {
         return "Canvas:\n\tid: " + _id + "\n\tShort id: " + _shortId + "\n\tLabel: " + _label; 
+    }
+
+    public boolean equals(final Object pOther) {  
+        return _id.equals(((Canvas)pOther).getId());
     }
 }

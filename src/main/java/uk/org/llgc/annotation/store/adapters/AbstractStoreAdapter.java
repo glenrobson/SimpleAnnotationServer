@@ -3,171 +3,105 @@ package uk.org.llgc.annotation.store.adapters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.vocabulary.DCTerms;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.Lang;
-
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.ReadWrite;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-
-import java.nio.charset.Charset;
-
-import com.github.jsonldjava.utils.JsonUtils;
-
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
+import com.github.jsonldjava.utils.JsonUtils;
 
-import java.util.HashMap;
+import org.apache.jena.query.ReadWrite;
+
+import java.io.IOException;
+
 import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.text.SimpleDateFormat;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
-    public static final String FULL_TEXT_PROPERTY = Annotation.FULL_TEXT_PROPERTY;
-
     protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName());
 	protected AnnotationUtils _annoUtils = null;
-    protected SimpleDateFormat _dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 	public void init(final AnnotationUtils pAnnoUtils) {
 		_annoUtils = pAnnoUtils;
 	}
 
-	public List<Model> addAnnotationList(final List<Map<String,Object>> pJson) throws IOException, IDConflictException, MalformedAnnotation {
-		List<Model> tModel = new ArrayList<Model>();
-		for (Map<String,Object> tAnno : pJson) {
-			tModel.add(this.addAnnotation(tAnno));
+	public AnnotationList addAnnotationList(final AnnotationList pAnnoList) throws IOException, IDConflictException, MalformedAnnotation {
+        AnnotationList tUpdatedList = new AnnotationList();
+		for (Annotation tAnno : pAnnoList.getAnnotations()) {
+			tUpdatedList.getAnnotations().add(this.addAnnotation(tAnno));
 		}
-		return tModel;
+		return tUpdatedList;
 	}
 
     /**
      * Take the annotation add a unique ID if it doesn't have one
      * also add within links to the manifest if one can be found.
      */
-	public Model addAnnotation(final Map<String,Object> pJson) throws IOException, IDConflictException, MalformedAnnotation {
-        Annotation tAnno = new Annotation(pJson);
-        tAnno.checkValid();
-		if (this.getNamedModel(tAnno.getId()) != null) {
-			_logger.debug("Found existing annotation with id " + tAnno.getId());
-			tAnno.setId(tAnno.getId() + "1");
-			if (tAnno.getId().length() > 400) {
-				throw new IDConflictException("Tried multiple times to make this id unique but have failed " + tAnno.getId());
+	public Annotation addAnnotation(final Annotation pAnno) throws IOException, IDConflictException, MalformedAnnotation {
+        pAnno.checkValid();
+		if (this.getAnnotation(pAnno.getId()) != null) {
+			_logger.debug("Found existing annotation with id " + pAnno.getId());
+			pAnno.setId(pAnno.getId() + "1");
+			if (pAnno.getId().length() > 400) {
+				throw new IDConflictException("Tried multiple times to make this id unique but have failed " + pAnno.getId());
 			}
-			return this.addAnnotation(tAnno.toJson());
+			return this.addAnnotation(pAnno);
 		} else {
-			this.expandTarget(pJson);
-            this.addWithins(tAnno);
+            this.addWithins(pAnno);
 			
-			return addAnnotationSafe(pJson);
+			return addAnnotationSafe(pAnno);
 		}
 	}
 
-	public Model updateAnnotation(final Map<String,Object> pJson) throws IOException, MalformedAnnotation {
-        Annotation tAnno = new Annotation(pJson);
-        tAnno.checkValid();
-		_logger.debug("processing " + JsonUtils.toPrettyString(tAnno.toJson()));
+	public Annotation updateAnnotation(final Annotation pAnno) throws IOException, MalformedAnnotation {
+        pAnno.checkValid();
 		// add modified date and retrieve created date
-		_logger.debug("ID " + tAnno.getId());
-		Model tStoredAnno = this.getNamedModel(tAnno.getId());
+		_logger.debug("ID " + pAnno.getId());
+		Annotation tStoredAnno = this.getAnnotation(pAnno.getId());
         if (tStoredAnno == null) {
-            throw new IOException("Failed to find annotation with id " + tAnno.getId() + " so couldn't update.");
+            throw new IOException("Failed to find annotation with id " + pAnno.getId() + " so couldn't update.");
         }
         this.begin(ReadWrite.READ);
-		Resource tAnnoRes = tStoredAnno.getResource(tAnno.getId());
-		Statement tCreatedSt = tAnnoRes.getProperty(DCTerms.created);
-		if (tCreatedSt != null) {
-            tAnno.setCreated(tCreatedSt.getString());
+		if (tStoredAnno.getCreated() != null) {
+            pAnno.setCreated(tStoredAnno.getCreated());
 		}
         this.end();
-        tAnno.updateModified();
-		_logger.debug("Modified annotation " + tAnno.toString());
-		deleteAnnotation(tAnno.getId());
+		_logger.debug("Modified annotation " + pAnno.toString());
+		deleteAnnotation(pAnno.getId());
 
-		addWithins(tAnno);
+		this.addWithins(pAnno);
+        pAnno.updateModified();
 
-		return addAnnotationSafe(pJson);
+		return addAnnotationSafe(pAnno);
 	}
 
     protected void addWithins(final Annotation pAnno) throws IOException {
-        List<Map<String, Object>> tMissingWithins = pAnno.getMissingWithin();
+        List<Target> tMissingWithins = pAnno.getMissingWithin();
         if (tMissingWithins != null && !tMissingWithins.isEmpty()) {
             // missing within so check to see if the canvas maps to a manifest
             String tCanvasId = "";
-            for (Map<String,Object> tOn : tMissingWithins) {
-                tCanvasId = (String)tOn.get("full");
+            for (Target tTarget: tMissingWithins) {
+                Canvas tCanvas = tTarget.getCanvas();
 
-                List<String> tManifestURI = getManifestForCanvas(tCanvasId);
-                if (tManifestURI != null && !tManifestURI.isEmpty()) {
-                    List<Map<String,String>> tWithinLinks = new ArrayList<Map<String,String>>();
-                    for (String tManifest : tManifestURI) {
-                        tWithinLinks.add(this.createWithin(tManifest));
-                    }
-                    tOn.put("within", tWithinLinks.size() == 1 ? tWithinLinks.get(0) : tWithinLinks);
+                Manifest tManifest = this.getManifestForCanvas(tCanvas);
+                if (tManifest != null) {
+                    tTarget.setManifest(tManifest);
                 }
             }
         }
     }
 
-    protected Map<String,String> createWithin(final String pManifestURI) {
-        Map<String,String> tWithin = new HashMap<String,String>();
-        tWithin.put("@id", pManifestURI);
-        tWithin.put("@type", "sc:Manifest");
-        return tWithin;
-    }
+    /*
+        // This is in Annotation.java
+        public void expandTarget(final Map<String,Object> pJson) {
 
-    // Could add to Annotation class
-    protected void addWithin(Map<String, Object> pAnnoJson, final String pManifestURI, final String pTargetId) {
-        Annotation tAnno = new Annotation(pAnnoJson);
-        for (Map<String,Object> tOn : tAnno.getOn()) {
-            if (tOn.get("full").equals(pTargetId)) {
-                if (tOn.get("within") != null) {
-                    if (tOn.get("within") instanceof Map) {
-                        if (((Map<String,String>)tOn.get("within")).get("@id").equals(pManifestURI)) {
-                            // job done this anno already links to the manifest.
-                        } else {
-                            // this contains a within but links to another manifest.
-                            List<Map<String,String>> tWithinLinks = new ArrayList<Map<String,String>>();
-                            tWithinLinks.add((Map<String,String>)tOn.get("within"));
-                            tWithinLinks.add(this.createWithin(pManifestURI));
-                            tOn.put("within", tWithinLinks);
-                        }
-                    } else {
-                        // Must be a list check to see if this manifest id is present if not add it.
-                        if (!((List<String>)tOn.get("within")).contains(pManifestURI)) {
-                            ((List<String>)tOn.get("within")).add(pManifestURI);
-                        }
-                    }
-                } else {
-                    tOn.put("within", pManifestURI);
-                }
-            }
-        }
-    }
-
-    public void expandTarget(final Map<String,Object> pJson) {
 		String tURI = null;
 		Map<String,Object> tSpecificResource = null;
 		if (pJson.get("on") instanceof String) {
@@ -196,7 +130,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 		tFragement.put("@type", "oa:FragmentSelector");
 		tFragement.put("value", tURI.substring(tIndexOfHash + 1));
-	}
+	}*/
 
 	protected boolean isMissingWithin(final Map<String,Object> pAnno) {
 		if (pAnno.get("on") != null) {
@@ -209,46 +143,25 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		}
 		return true;
 	}
-	protected String getFirstCanvasId(final Object pOn) {
-		if (pOn instanceof Map) {
-			return (String)((Map<String,Object>)pOn).get("full");
-		} else if (pOn instanceof String) {
-			String tURL = (String)pOn;
-			return tURL.split("#")[0];
-		} else if (pOn instanceof List) {
-			return getFirstCanvasId(((List)pOn).get(0));
-		}
-		_logger.error("On in annotation is a format I don't regocnise its a format type " + pOn.getClass().getName());
-		return null;
+
+	public String indexManifest(Manifest pManifest) throws IOException {
+		return this.indexManifest(pManifest.getShortId(), pManifest);
 	}
 
-	public String indexManifest(Map<String,Object> pManifest) throws IOException {
-        if (!((String)pManifest.get("@type")).equals("sc:Manifest")) {
-            throw new IOException("Couldn't load manifest as it wasn't a manifest");
-        }
-		String tShortId = this.createShortId((String)pManifest.get("@id"));
-		return this.indexManifest(tShortId, pManifest);
-	}
-
-	protected String indexManifest(final String pShortId, Map<String,Object> pManifest) throws IOException {
-		String tManifestId = (String)pManifest.get("@id");
-
+	protected String indexManifest(final String pShortId, final Manifest pManifest) throws IOException {
 		Manifest tExisting = this.getManifest(pShortId);
 		if (tExisting != null) {
-			if (tExisting.getURI().equals((String)pManifest.get("@id"))) {
+			if (tExisting.getURI().equals(pManifest.getURI())) {
 				return tExisting.getShortId(); // manifest already indexed
 			} else {
 				// there already exists a document with this id but its a different manifest so try and make id unique
 				return indexManifest(pShortId + "1", pManifest);
 			}
 		}
-		pManifest.put("short_id",pShortId);//may need to make this a uri...
 
-		Map<String,Object> tShortIdContext = new HashMap<String,Object>();
-		tShortIdContext.put("@id","http://purl.org/dc/elements/1.1/identifier");
-		Map<String,Object> tExtraContext = new HashMap<String,Object>();
-		tExtraContext.put("short_id", tShortIdContext);
-		if (pManifest.get("@context") instanceof List) {
+		pManifest.setShortId(pShortId);
+
+		/*if (pManifest.get("@context") instanceof List) {
 			List<Map<String,Object>> tListContext = (List<Map<String,Object>>)pManifest.get("@context");
 			tListContext.add(tExtraContext);
 		} else {
@@ -258,24 +171,15 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 			tListContext.add(tExtraContext);
 
 			pManifest.put("@context", tListContext);
-		}
+		}*/
 
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
 
-	public String createShortId(final String pLongId) throws IOException {
-		if (pLongId.endsWith("manifest.json")) {
-			String[] tURI = pLongId.split("/");
-			return tURI[tURI.length - 2];
-		} else {
-			return _annoUtils.getHash(pLongId, "md5");
-		}
-	}
-
-	public abstract List<String> getManifestForCanvas(final String pCanvasId) throws IOException;
-	public abstract Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException;
-	public abstract Map<String, Object> search(final SearchQuery pQuery) throws IOException;
-	protected abstract String indexManifestNoCheck(final String pShortID, final Map<String,Object> pManifest) throws IOException;
+	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;
+	public abstract Annotation addAnnotationSafe(final Annotation pJson) throws IOException;
+	public abstract IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
+	protected abstract String indexManifestNoCheck(final String pShortID, final Manifest pManifest) throws IOException;
 	public abstract List<Manifest> getManifests() throws IOException;
 	public abstract List<Manifest> getSkeletonManifests() throws IOException;
 	public abstract String getManifestId(final String pShortId) throws IOException;
@@ -284,20 +188,11 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
     public abstract Canvas resolveCanvas(final String pShortId) throws IOException;
     public abstract void storeCanvas(final Canvas pCanvas) throws IOException;
 
-	public Model getAnnotation(final String pId) throws IOException {
-		return getNamedModel(pId);
-	}
-
-	protected abstract Model getNamedModel(final String pName) throws IOException;
+	public abstract Annotation getAnnotation(final String pId) throws IOException;
 
 	protected void begin(final ReadWrite pWrite) {
 	}
 	protected void end() {
 	}
-
-	protected Model convertAnnoToModel(final Map<String,Object> pJson) throws IOException {
-		return _annoUtils.convertAnnoToModel(pJson);
-	}
-
 }
 

@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store.adapters;
+package uk.org.llgc.annotation.store.adapters.rdf.sesame;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,11 +37,13 @@ import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
 
-
+import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
+import uk.org.llgc.annotation.store.adapters.rdf.AbstractRDFStore;
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +68,8 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 
 	protected Repository _repo = null;
 
-	public SesameStore(final String pRepositoryURL) {
+	public SesameStore(final AnnotationUtils pUtils, final String pRepositoryURL) {
+        super(pUtils);
 		_repo = new HTTPRepository(pRepositoryURL);
 		_logger.debug("Prefered RDF Format " + ((HTTPRepository)_repo).getPreferredRDFFormat());
 	}
@@ -77,7 +80,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
     }
 
 	public Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
-		Resource tContext = _repo.getValueFactory().createURI((String)pJson.get("@id"));
+		Resource tContext = _repo.getValueFactory().createIRI((String)pJson.get("@id"));
 		// Convert remote Json-Ld context to a local one by embedding context in json
 		if (pJson.get("@context") instanceof String) {
 			URL tContextURL = new URL(pJson.get("@context").toString());
@@ -128,7 +131,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	protected Model getNamedModel(final String pContext) throws IOException {
-		return this.getModelFromContext(this.createURI(pContext));
+		return this.getModelFromContext(this.createIRI(pContext));
 	}
 
 	protected Model getModelFromContext(final Resource pContext) throws IOException {
@@ -173,7 +176,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
-		Resource tContext = _repo.getValueFactory().createURI(pAnnoId);
+		Resource tContext = _repo.getValueFactory().createIRI(pAnnoId);
 		RepositoryConnection tConn = null;
 		try {
 			tConn = _repo.getConnection();
@@ -201,7 +204,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 	 * index manifest but no need to check if the short id is unique as this has been checked else where
 	 */
 	protected String indexManifestOnly(final String pShortId, Map<String,Object> pManifest) throws IOException {
-		Resource tContext = _repo.getValueFactory().createURI((String)pManifest.get("@id"));
+		Resource tContext = _repo.getValueFactory().createIRI((String)pManifest.get("@id"));
 
 		String tJson = JsonUtils.toString(pManifest);
 		
@@ -251,7 +254,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 		return new QueryEngineHTTP(((HTTPRepository)_repo).getRepositoryURL(),pQuery);
 	}
 
-	protected Resource createURI(final String pURI) {
-		return  _repo.getValueFactory().createURI(pURI);
+	protected Resource createIRI(final String pURI) {
+		return  _repo.getValueFactory().createIRI(pURI);
 	}
 }

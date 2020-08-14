@@ -157,7 +157,7 @@ public class SolrManifestStore {
 		}
     }
 
-	public List<String> getManifestForCanvas(final String pCanvasId) throws IOException {
+	public Manifest getManifestForCanvas(final String pCanvasId) throws IOException {
         try {
 			SolrQuery tQuery = _utils.getQuery();
 			tQuery.set("q", "canvas:\"" + _utils.escapeChars(pCanvasId) + "\"");
@@ -165,21 +165,21 @@ public class SolrManifestStore {
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tPageSize = tResponse.getResults().size();
 			int tStart = 0;
-			List<String> tWithin = new ArrayList<String>();
-			do {
-				for (SolrDocument tResult : tResponse.getResults()) {
-					tWithin.add((String)tResult.get("id"));
-				}
+            if (tResultNo > 0) {
+                Manifest tManifest = new Manifest();
+                do {
+                    for (SolrDocument tResult : tResponse.getResults()) {
+                        tManifest.setURI((String)tResult.get("id"));
+                    }
 
-				tStart += tPageSize;
-				tQuery.setStart(tStart);
-				tResponse = _solrClient.query(tQuery);
-			} while (tStart < tResultNo);
-			if (tWithin.size() > 0) {
-				return tWithin;
-			} else {
-				return null;
-			}
+                    tStart += tPageSize;
+                    tQuery.setStart(tStart);
+                    tResponse = _solrClient.query(tQuery);
+                } while (tStart < tResultNo);
+                return tManifest;
+            } else {
+                return null;
+            }
 		} catch (SolrServerException tException) {
 			_logger.error("failed to find manifest for this canvas due to: " + tException.toString());
 			throw new IOException("Failed to find manifest for canvasid " + pCanvasId + " due to " + tException.toString());
