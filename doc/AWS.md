@@ -264,7 +264,7 @@ To run tasks they need to be added to a Service. Services then run on a cluster 
 
 You will then be given the option of a template. Select the Networking only Fargate template. 
 
-Give your cluster a name. 
+Give your cluster a name e.g. ECSCluster. 
 
 For this guide don't create a VPC or enable CloudWatch insights. Click create cluster. Now you have a cluster we will create a service that will run the SAS tasks.
 
@@ -319,5 +319,148 @@ You have now create the infrastructure to Run SAS and you now need to create the
 
 ### Deployment - CodePipeline 
 
+Now you have the service setup we need to connect it to GitHub so that any changes to the master branch will cause the service to update with the latest version of the code. The Annotations that have been created will be stored in ElasticSearch and so will be unaffected by the upgraded code. Before starting the work on creating this automated build process we need to fork the SAS github repo into your own account. This allows you to make changes and maintain your own version of SAS. To do this navigate to:
+
+https://github.com/glenrobson/SimpleAnnotationServer
+
+and click on the fork link at the top right of the screen. This will copy the SAS source to your GitHub repo. To make the build process work for your ECS setup you will need to change the buildspec.yml file which is used to know where to send DockerImages to and how to build them. The buildspec.yml looks like:
+
+```
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - IMAGE_NAME="sas"
+      - REPOSITORY_URI=082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas
+      - IMAGE_TAG=prod_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - echo Image_tag $IMAGE_TAG
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG -f docker/sas-tomcat/Dockerfile .
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest 
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI
+      - echo Writing image definitions file...
+      - printf '[{"name":"SAS","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+    files: imagedefinitions.json
+```
+
+You will need to make two changes. The first is with the following line:
+
+```
+  - REPOSITORY_URI=082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas
+```
+
+Where you will have to change the Repository URI to your own repository. Remember to leave `/sas` at the end. The second changes is with the imagedefinitions.json file and this line:
+
+```
+      - printf '[{"name":"SAS","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+```
+
+Name `"SAS"` should be change to the name of your container configured above. The suggested name was SAS_container so the line would look like:
+
+```
+      - printf '[{"name":"SAS_container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+```
+
+Now you have the copy of SAS in your own GitHub repo you are ready to get started configuring the build process.
+
+#### Stage 1 - Pipeline
+
+To build this process we will be using a tool from AWS called CodePipeline. To start navigate to `CodePipeline` in the list of AWS services and click Create Pipeline. The creation is split into 5 stages. The first is pipeline settings and you can use the following options:
+
+**Pipeline name**: Again ensure that the name of the process is included in the name. I went for SASPipeline
+
+**Service role**: Select New service role unless you already have a pipeline configure. Call it CodePipelineRole
+
+Leave advanced settings as is. 
+
+#### Stage 2 - Source
+For the source section we need to connect to the GitHub site and select the correct repository and branch. Select `GitHub` as the source provider and click Connect to GitHub to give AWS permission to your repository. Then select the following options:
+
+**Repository**: Your forked copy of SimpleAnnotationServer
+
+**Branch**: Master
+
+**Change detection**: GitHub webhooks
+
+#### Stage 3 - Build stage
+
+This is the process that will build the Docker Image and there are two options but we will use AWS Code Build to build the image. This realise on a `buildspec.yml` file that needs to be in the root of your repository. As explained earlier you will have to customise the copy in your forked repository to ensure it points to the correct ECS repository. First enter the following build configuration:
+
+**Build provider**: AWS CodeBuild
+
+**Region**: enter the region you are using 
+
+**Project name**: here we will have to create a new project to build our Docker Image. We will make the process generic enough that this build process (AWS CodeBuilder build) can be used for any future pipelines that need to build using Docker. When you click Create Project you will be taken to a new window where you will configure AWS CodeBuild. Use the following options but note new versions are made available so if there is a new version choose that one rather than the ones specified below:
+
+**Name**: DockerBuilder
+
+**Description**: Optional but I used: "Build a Docker Image from Github"
+
+**Environment image**: Managed image
+
+**Operating system**: Amazon Linux 2
+
+**Runtime**: Standard
+
+**Image**: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+
+**Image version**: Always use the latest image for this runtime version
+
+**Environment type**: Linux
+
+**Privileged**: Yes
+
+**Service role**: New service role
+
+**Role name**: Codebuild-Docker-role
+
+**Build specifications**: Use a `buildspec` file
+
+**Batch configuration**: leave unchecked
+
+**CloudWatch logs**: Tick this but leave everything else blank. 
+
+Click continue to CodePipeline. You should now have a populated build process and you can fill in the rest of the build stage configuration:
+
+**Environment variables**: Don't add any. 
+
+**Build type**: Single build
+
+Now click next to go on to the deploy stage.
+
+#### Stage 4 - Deploy
+
+This connects the build process with the ECS service you want to update. Use the following values:
+
+**Deploy provider**: Amazon ECS
+
+**Region**: select your AWS region
+
+**Cluster name**: select your cluster (ECSCluster was suggeted earlier)
+
+**Service name**: select your service (SAS-Service was suggested earlier)
+
+**Image definitions file**: `imagedefinitions.json` this comes from the buildspec.yml file
+
+**Deployment timeout**: leave this blank. 
+
+#### Stage 5 - Review
+
+Check the settings and then click create pipeline. 
+
+You should now have a pipeline that automatically runs when you make a change to the master branch on your forked repositorty. To check this works commit a change to master and see if it is picked up by CodePipeline. You can monitor the process by clicking on the pipline and watching the animation as it goes through the source, build and deploy processes. If you want to manually trigger a release click the release change button. 
 
 
+## Troubleshooting and mointoring 
