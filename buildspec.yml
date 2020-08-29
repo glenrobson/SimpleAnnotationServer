@@ -22,6 +22,6 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI
       - echo Writing image definitions file...
-      - printf '[{"name":"SAS_container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"SAS-container-8080","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 artifacts:
     files: imagedefinitions.json
