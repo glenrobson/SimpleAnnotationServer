@@ -463,4 +463,4 @@ Check the settings and then click create pipeline.
 You should now have a pipeline that automatically runs when you make a change to the master branch on your forked repositorty. To check this works commit a change to master and see if it is picked up by CodePipeline. You can monitor the process by clicking on the pipline and watching the animation as it goes through the source, build and deploy processes. If you want to manually trigger a release click the release change button. 
 
 
-## Troubleshooting and mointoring 
+## Troubleshooting and monitoring 
