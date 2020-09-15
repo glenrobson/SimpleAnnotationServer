@@ -40,7 +40,6 @@ public class ManifestUpload extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(ManifestUpload.class.getName());
 	protected AnnotationUtils _annotationUtils = null;
 	protected StoreAdapter _store = null;
-	protected File _manifestDir = null;
 
 	public void init(final ServletConfig pConfig) throws ServletException {
 		super.init(pConfig);
@@ -48,13 +47,6 @@ public class ManifestUpload extends HttpServlet {
 		_annotationUtils = new AnnotationUtils(new File(super.getServletContext().getRealPath("/contexts")), tEncoder);
 		_store = StoreConfig.getConfig().getStore();
 		_store.init(_annotationUtils);
-		_manifestDir = new File(super.getServletContext().getRealPath(pConfig.getInitParameter("manifest_dir")));
-		if (!_manifestDir.exists()) {
-			_logger.debug("Making " + _manifestDir.getPath());
-			_manifestDir.mkdirs();
-		} else {
-			_logger.debug("exists " + _manifestDir.getPath());
-		}
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
