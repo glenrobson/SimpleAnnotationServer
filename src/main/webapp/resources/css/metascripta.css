@@ -1,5 +1,6 @@
 .manifest-panel-controls {
     text-align: right;
+    margin-right:10px;
 }
 .mirador-container #url-load-form {
     margin-left: 25px;
