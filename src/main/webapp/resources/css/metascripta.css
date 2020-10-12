@@ -1,0 +1,14 @@
+.manifest-panel-controls {
+    text-align: right;
+}
+.mirador-container #url-load-form {
+    margin-left: 25px;
+}
+.mirador-container #manifest-search-form label {
+    margin-left: 100px;
+}
+#manifest-search-form::before {
+    content: "Your Reference Shelf";
+    font-weight: 600;
+    font-size: 1.2em;
+}
