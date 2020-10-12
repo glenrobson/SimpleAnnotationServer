@@ -20,7 +20,7 @@
     $(function() {
       var configuration = {
         "id": "viewer",
-        "layout": "1x1",
+        "layout": "1x2",
         "buildPath": "mirador-2.6.1/",
 	"mainMenuSettings" :
 	{
@@ -49,27 +49,50 @@
 			"attributes": { "href": "manifests.xhtml"}
 		}
 		]
-	  },
-	  'showAddFromURLBox' : true,
-	  "saveSession": false,
-          "data": [
+	},
+	"showAddFromURLBox" : true,
+	"saveSession": false,
+        "data": [
             { "manifestUri": "https://metascripta.org/iiif//VFL_VTL_03199_01.json", "location": "METAscripta / St. Louis University"},
             { "manifestUri": "https://digi.vatlib.it/iiif/MSS_Vat.lat.3197/manifest.json", "location": "Digivatlib"},
             { "manifestUri": "https://www.wdl.org/en/item/10650/manifest ", "location": "World Digital Library"},
-          ],
-          "windowObjects": [],
-		annotationEndpoint: {
-			name: 'Simple Annotation Store Endpoint',
-			module: 'SimpleASEndpoint',
-			options: {
-				url: 'annotation',
+        ],
+        "windowObjects": [],
+	"annotationEndpoint": {
+		name: 'Simple Annotation Store Endpoint',
+		module: 'SimpleASEndpoint',
+		options: {
+			url: 'annotation',
+		}
+	},
+	"windowSettings" : {
+		"viewType" : 'ImageView',
+		"sidePanel" : true,
+		"sidePanelVisible" : true,
+		"sidePanelOptions" : {
+			"toc" : false,
+			"annotations" : true,
+			"tocTabAvailable": false,
+			"layersTabAvailable": false,
+			"searchTabAvailable": true,
+			"annotationTabAvailable": true
+		},
+		"canvasControls": { // The types of controls available to be displayed on a canvas
+			"annotations" : {
+			  "annotationLayer" : true, //whether or not to make annotation layer available in this window
+			  "annotationCreation" : true, /*whether or not to make annotation creation available in this window,
+				       only valid if annotationLayer is set to True and an annotationEndpoint is defined.
+				       This setting does NOT affect whether or not a user can edit an individual annotation that has already been created.*/
+			  "annotationState" : 'on', //[_'off'_, 'on'] whether or not to turn on the annotation layer on window load
+			  "annotationRefresh" : true, //whether or not to display the refresh icon for annotations
 			}
-		  },
-          "sidePanelOptions" : {
-          	"tocTabAvailable": true,
-          	"layersTabAvailable": true,
-          	"searchTabAvailable": true
-   	}
+		}
+	},
+        "sidePanelOptions" : {
+        	"tocTabAvailable": false,
+          	"searchTabAvailable": true,
+		"layersTabAvailable": true,
+	}
       };
 	    
         // From Getty code: http://www.getty.edu/art/collection/static/viewers/mirador/?manifest=https://data.getty.edu/museum/api/iiif/1895/manifest.json
