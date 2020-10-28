@@ -8,6 +8,8 @@ RUN mvn $MVN_ARGS package
 
 # runnable container stage
 FROM tomcat:9-jre11 AS runstage
+ARG AWS_DEFAULT_REGION
+ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 # remove tomcat default webapps and create data directory
 RUN rm -r /usr/local/tomcat/webapps/* 
 # copy SAS from build image
