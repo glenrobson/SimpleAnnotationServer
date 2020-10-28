@@ -21,6 +21,32 @@ body {
     text-align: left;
 }
 
+.mainbox {
+    width: 100%;
+    max-width: 350px;
+    padding: 15px;
+    padding-bottom: 15px;
+    margin: auto;
+    margin-top: auto;
+    margin-top: 50px;
+    padding-bottom: 50px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px 1px #ddd
+}
+
+.btn-google {
+    color: #545454;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px 1px #ddd;
+    padding-right: 5px;
+    margin-bottom: 3px;
+}
+
+.btn-google img {
+    padding-bottom: 4px;
+    padding-right: 5px;
+}
+
 .container, .jumbotron {
     height:110%;
     padding-bottom: 0px;

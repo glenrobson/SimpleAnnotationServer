@@ -183,6 +183,12 @@
             <version>4.13</version>
             <scope>test</scope>
         </dependency>
+        <!-- Authentication -->
+        <dependency>
+            <groupId>com.github.scribejava</groupId>
+            <artifactId>scribejava-apis</artifactId>
+            <version>7.1.1</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>simpleAnnotationStore</finalName>

@@ -6,34 +6,53 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <body>
         <ui:composition>
-            <div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
-                <div class="container-fluid">
-                    <div class="navbar-collapse collapse">
-                        <ul class="nav navbar-nav">
-                            <li>
-                                <c:if test="#{empty path}">
-                                    <a class="headerLink" href="index.html">Home</a>
-                                </c:if>
-                                <c:if test="#{not empty path}">
-                                    <a class="headerLink" href="../index.html">Home</a>
-                                </c:if>
-                            </li>
-                            <li>
+            <c:set var="isAuth" value="#{userService.authenticated}" scope="request" />
+
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+                <a class="navbar-brand" href="#">SAS</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <c:if test="#{empty path}">
+                                <a class="nav-link" href="index.html">Home</a>
+                            </c:if>
+                            <c:if test="#{not empty path}">
+                                <a class="nav-link" href="../index.html">Home</a>
+                            </c:if>
+                        </li>
+                        <c:if test="#{isAuth}">
+                            <li class="nav-item">
                                 <h:link styleClass="headerLink" icon="fas fa-upload" value="Stats" outcome="#{path}stats/index" ></h:link>
                             </li>
-                            <li>
+                            <li class="nav-item">
                                 <h:link styleClass="headerLink" icon="fas fa-upload" value="Load Annotation List" outcome="#{path}populate" ></h:link>
                             </li>
-                            <li>
+                            <li class="nav-item">
                                 <h:link styleClass="headerLink" icon="fas fa-upload" value="Index Manifest" outcome="#{path}uploadManifest" ></h:link>
                             </li>
-                            <li>
+                            <li class="nav-item">
                                 <h:link styleClass="headerLink" icon="fas fa-upload" value="View Annotations" outcome="#{path}manifests" ></h:link>
                             </li>
-                        </ul>
+                        </c:if>
+                    </ul>
+                    <div class="mt-2 mt-md-0">
+                        <c:if test="#{not isAuth and not path.equals('login')}">
+                            <c:if test="#{empty path}">
+                                <a href="login.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
+                            </c:if>
+                            <c:if test="#{not empty path}">
+                                <a href="../login.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
+                            </c:if>
+                        </c:if>
+                        <c:if test="#{isAuth}">
+                            <img src="#{userService.user.picture}" alt="user avatar"/>
+                        </c:if>
                     </div>
                 </div>
-            </div>
+            </nav>
          </ui:composition>	
     </body>
 </html>    
