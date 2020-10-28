@@ -16,7 +16,13 @@ COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomc
 COPY docker/sas-auth/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 
 # Download auth config
-RUN apt-get update
-RUN apt-get install -y awscli
+# Install the AWS CLI
+RUN apt-get update && 
+    apt-get -y install python curl unzip && cd /tmp && 
+    curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" 
+    -o "awscli-bundle.zip" && 
+    unzip awscli-bundle.zip && 
+    ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws && 
+    rm awscli-bundle.zip && rm -rf awscli-bundle
 RUN aws s3 cp --region eu-west-2 s3://sasconfig/auth.json /usr/local/tomcat/webapps/ROOT/WEB-INF/
 # use default port and entrypoint
