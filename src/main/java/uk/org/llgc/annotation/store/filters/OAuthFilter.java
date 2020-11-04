@@ -29,8 +29,13 @@ import uk.org.llgc.annotation.store.contollers.UserService;
 import uk.org.llgc.annotation.store.StoreConfig;
 
 public class OAuthFilter implements Filter {
+    protected String _loginPage = "/login.xhtml";
 
-	public void init(final FilterConfig filterConfig) {
+	public void init(final FilterConfig pConfig) {
+        if (pConfig.getInitParameter("LOGIN_PAGE") != null) {
+            // Allow default login page to be overwritten
+            _loginPage = pConfig.getInitParameter("LOGIN_PAGE");
+        }
 	}
 
 	public void doFilter(final ServletRequest pRequest, final ServletResponse pRes, final FilterChain pChain) throws IOException, ServletException {
@@ -50,7 +55,7 @@ public class OAuthFilter implements Filter {
                     ((HttpServletResponse)pRes).sendRedirect("/login?type=" + StoreConfig.getConfig().getAuthTargets().get(0).getId());
                 } else {
                     // Otherwise ask the user how they want to authenticate
-                    ((HttpServletResponse)pRes).sendRedirect("/login.xhtml");
+                    ((HttpServletResponse)pRes).sendRedirect(_loginPage);
                 }
                 return;
             } else {

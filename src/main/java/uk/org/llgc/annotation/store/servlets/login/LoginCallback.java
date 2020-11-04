@@ -64,8 +64,11 @@ public class LoginCallback extends HttpServlet {
                 
             UserService tUsers = new UserService(tSession);
             tUsers.setUser(tUser);
-                
-            pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
+            if (tSession.getAttribute("oauth_url") != null) {
+                pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
+            } else {
+                pRes.sendRedirect("index.html");
+            }
         } catch (InterruptedException tExcpt) {
             tExcpt.printStackTrace();
         } catch (ExecutionException tExcpt) {

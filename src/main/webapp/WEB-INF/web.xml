@@ -11,10 +11,18 @@
     <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>uk.org.llgc.annotation.store.filters.OAuthFilter</filter-class>
+        <!-- 
+            Uncomment this if you would like to have a custom login page which isn't login.xhtml
+            <init-param>
+			<param-name>LOGIN_PAGE</param-name>
+			<param-value>https://catalog.metascripta.org/</param-value>
+		</init-param>
+        -->
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/local.html</url-pattern>
+        <url-pattern>/auth.xhtml</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -106,6 +114,18 @@
         <servlet-name>Login</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.servlets.login.OAuth</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.login.Logout</servlet-class>
+        <init-param>
+            <param-name>post_logout_url</param-name>
+            <param-value>/auth.xhtml</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Login</servlet-name>
         <url-pattern>/login</url-pattern>

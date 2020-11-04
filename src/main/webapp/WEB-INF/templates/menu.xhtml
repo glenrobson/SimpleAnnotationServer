@@ -25,32 +25,50 @@
                         </li>
                         <c:if test="#{isAuth}">
                             <li class="nav-item">
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Stats" outcome="#{path}stats/index" ></h:link>
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Stats" outcome="#{path}stats/index" ></h:link>
                             </li>
                             <li class="nav-item">
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Load Annotation List" outcome="#{path}populate" ></h:link>
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Load Annotation List" outcome="#{path}populate" ></h:link>
                             </li>
                             <li class="nav-item">
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Index Manifest" outcome="#{path}uploadManifest" ></h:link>
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Index Manifest" outcome="#{path}uploadManifest" ></h:link>
                             </li>
                             <li class="nav-item">
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="View Annotations" outcome="#{path}manifests" ></h:link>
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="View Annotations" outcome="#{path}manifests" ></h:link>
                             </li>
                         </c:if>
                     </ul>
-                    <div class="mt-2 mt-md-0">
                         <c:if test="#{not isAuth and not path.equals('login')}">
+                            <div class="mt-2 mt-md-0">
                             <c:if test="#{empty path}">
                                 <a href="login.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
                             </c:if>
                             <c:if test="#{not empty path}">
                                 <a href="../login.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
                             </c:if>
+                    </div>
                         </c:if>
                         <c:if test="#{isAuth}">
-                            <img src="#{userService.user.picture}" alt="user avatar"/>
+                            <div class="dropdown">
+                                <c:if test="#{not empty userService.user.picture}">
+                                    <a  id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <div class="image-cropper">
+                                            <img src="#{userService.user.picture}" alt="user avatar" class="user_image"/>
+                                        </div>
+                                    </a>
+                                </c:if>
+                                <c:if test="#{empty userService.user.picture}">
+                                    <button class="user_info btn btn btn-secondary" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <h:outputText value="#{userService.user.avatar}" />
+                                    </button>
+                                </c:if>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu2">
+                                    <button class="dropdown-item" type="button">Profile</button>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="/logout" class="dropdown-item" type="button">Logout</a>
+                                </div>
+                            </div>
                         </c:if>
-                    </div>
                 </div>
             </nav>
          </ui:composition>	

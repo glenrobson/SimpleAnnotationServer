@@ -106,3 +106,24 @@ ul.nav a.vote {
     border-width: .2em;
     margin-right: 10px;
 }
+
+.user_info {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 2px;
+}
+
+.image-cropper {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.user_image {
+  display: inline;
+  margin: 0 auto;
+  height: 100%;
+  width: auto;
+}

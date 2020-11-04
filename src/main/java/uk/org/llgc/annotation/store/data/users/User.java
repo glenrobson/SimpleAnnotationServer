@@ -21,6 +21,15 @@ public class User {
         _isAdmin = pValue;
     }
 
+    public String getAvatar() {
+       /* String[] tNames = _name.split(" ");
+        if (tNames.length > 1) {
+            return tNames[0].substring(0,1).toUpperCase() + tNames[1].substring(0,1).toUpperCase();
+        } else { */
+            return _name.substring(0,1).toUpperCase();
+        // }
+    }
+
     public String toString() {
         return "Id: " + _id + "\nName: " + _name + "\nEmail: " + _email + "\nPic: " + _pic;
     }

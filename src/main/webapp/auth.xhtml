@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="List all the annotations in this store"></ui:param>
+        <ui:param name="selected-menu" value="listAnnost.xhtml"></ui:param>
+
+        <ui:define name = "content">
+            <iframe id="mirador" style="height: 91vh; width: 100vw; padding-top: 5px;"/>
+            <script> 
+                //<![CDATA[
+                var miradorURl = "mirador.html"
+                var manifest = getURLParameter("iiif-content");
+                if(typeof(manifest) == "string" && manifest.length > 0) {
+                    miradorURl += "?iiif-content=" + manifest;
+                }
+                var iframe = document.getElementById('mirador');
+                iframe.src = miradorURl;
+                //]]>
+            </script>
+        </ui:define>
+    </ui:composition>
+</html>
+
+
