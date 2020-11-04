@@ -11,13 +11,11 @@
     <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>uk.org.llgc.annotation.store.filters.OAuthFilter</filter-class>
-        <!-- 
-            Uncomment this if you would like to have a custom login page which isn't login.xhtml
+        <!-- Uncomment this if you would like to have a custom login page which isn't login.xhtml-->
             <init-param>
 			<param-name>LOGIN_PAGE</param-name>
 			<param-value>https://catalog.metascripta.org/</param-value>
 		</init-param>
-        -->
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
