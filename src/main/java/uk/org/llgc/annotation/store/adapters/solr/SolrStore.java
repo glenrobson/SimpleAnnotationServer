@@ -483,7 +483,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
                 tUser.setShortId((String)pDoc.get("short_id"));
                 tUser.setName((String)pDoc.get("name"));
                 tUser.setEmail(((List<String>)pDoc.get("email")).get(0));
-                if (pDoc.get("picture") != null) {
+                if (pDoc.get("picture") != null && !((List<String>)pDoc.get("picture")).isEmpty()) {
                     tUser.setPicture(((List<String>)pDoc.get("picture")).get(0));
                 }
                 if (pDoc.get("group") != null) {
@@ -512,7 +512,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tDoc.addField("name", pUser.getName());
 		tDoc.addField("type", "User");
 		tDoc.addField("email", pUser.getEmail());
-        if (pUser.getPicture() != null && pUser.getPicture().isEmpty()) {
+        if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tDoc.addField("picture", pUser.getPicture());
         }
         if (pUser.isAdmin()) {
