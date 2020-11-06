@@ -50,16 +50,19 @@ public class OAuthFilter implements Filter {
                 }
 
                 tSession.setAttribute("oauth_url", tCallingURL);        
+               /*
+                    This auto login page is too confusing especially if you've logged out as it 
+                    logs you straight back in...
                 if (StoreConfig.getConfig().getAuthTargets().size() == 1) {
                     // if there is only 1 target forward straight onto the oauth process
                     ((HttpServletResponse)pRes).sendRedirect("/login?type=" + StoreConfig.getConfig().getAuthTargets().get(0).getId());
-                } else {
+                } else {*/
                     // Otherwise ask the user how they want to authenticate
-                    ((HttpServletResponse)pRes).sendRedirect(_loginPage);
-                }
+                ((HttpServletResponse)pRes).sendRedirect(_loginPage);
+                //}
                 return;
             } else {
-                System.out.println("Found user: " + tSession.getAttribute("user"));
+                System.out.println("Found logged in user: " + tSession.getAttribute("user"));
             }
         }
         pChain.doFilter(pReq, pRes);

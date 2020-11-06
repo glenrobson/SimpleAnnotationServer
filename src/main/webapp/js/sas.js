@@ -13,4 +13,49 @@ function getURLParameter(param) {
     }
     return null;
 }
+function ajaxForm(config) {
+    var original = setLoading(config.action.button, config.action.verb);
+    var form=document.getElementById(config.form);
+    $.ajax({
+        url: form.action,
+        data: $("form").serialize(),
+        type: 'POST',
+        success: function(data) {
+            showMessage("info", data.message);
+            clearLoading(config.action.button, original);
+        },
+        error: function(data) {
+            if (data.status === 500) {
+                showMessage("error", data.statusText);
+            } else {
+                showMessage("error", data.message);
+            }
+            clearLoading(config.action.button, original);
+        }
+    });
+    return false;
+}
+function showMessage(messageType, message) {
+    var messages = document.getElementById('messages');
+    messages.textContent = message;
+    if (messageType === "info") {
+        messages.className = "alert alert-info";
+    } else {
+        messages.className = "alert alert-danger";
+    }
+    messages.style.display = 'block';
+}
 
+function setLoading(buttonName, verb) {
+    var button = document.getElementById(buttonName);
+    var orig = button.innerHTML;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>' + verb + '...';
+    button.disabled = true;
+    return orig;
+}
+
+function clearLoading(buttonName, content) {
+    var button = document.getElementById(buttonName);
+    button.innerHTML = content;
+    button.disabled = false;
+}

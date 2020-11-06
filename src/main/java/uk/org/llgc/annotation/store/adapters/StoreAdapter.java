@@ -7,6 +7,7 @@ import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -42,6 +43,11 @@ public interface StoreAdapter {
     // Search
 	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
 	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException;
+
+    // CRUD users
+    public User retrieveUser(final User pUser) throws IOException;
+    public User getUser(final User pUser) throws IOException;
+    public User saveUser(final User pUser) throws IOException;
 
     // Used in ListAnnotations can we get rid?
 	public AnnotationList getAllAnnotations() throws IOException;

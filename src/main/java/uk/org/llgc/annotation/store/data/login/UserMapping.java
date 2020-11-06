@@ -19,10 +19,10 @@ public class UserMapping {
         return _endpoint;
     }
 
-    public User createUser(final Map<String,Object> pResponse) {
+    public User createUser(final String pBaseURL, final Map<String,Object> pResponse) {
         User tUser = new User();
-        tUser.setId(_type + "_" + this.getKey("id", pResponse));
-
+        tUser.setId(pBaseURL + "/user/" + Math.abs(_type.hashCode()) + "/" + this.getKey("id", pResponse));
+        tUser.setShortId(_type + "_" + this.getKey("id", pResponse));
         if (this.isIn("name", pResponse)) {
             tUser.setName(this.getKey("name", pResponse));
         }

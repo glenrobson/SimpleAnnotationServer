@@ -32,6 +32,7 @@ import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -460,5 +461,63 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		return tResults;
 	}
 
+
+    public User getUser(final User pUser) throws IOException {
+        User tUser = new User();
+        tUser.setToken(pUser.getToken());
+
+        SolrQuery tQuery = new SolrQuery();
+		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod");
+		tQuery.setRows(1000);
+
+		tQuery.set("q", "type:\"User\" AND short_id:\"" + pUser.getShortId() + "\"");
+
+		try {
+			QueryResponse tResponse  = _solrClient.query(tQuery);
+
+			if (tResponse.getResults().size() == 1) {
+                SolrDocument pDoc = tResponse.getResults().get(0);
+                // Build helpers to convert from SOLR to annotation
+
+                tUser.setId((String)pDoc.get("id"));
+                tUser.setShortId((String)pDoc.get("short_id"));
+                tUser.setName((String)pDoc.get("name"));
+                tUser.setEmail((String)pDoc.get("email"));
+                if (pDoc.get("picture") != null) {
+                    tUser.setPicture((String)pDoc.get("picture"));
+                }
+                if (pDoc.get("group") != null && pDoc.get("group").equals("admin")) {
+                    tUser.setAdmin(true);
+                }
+                tUser.setAuthenticationMethod((String)pDoc.get("authenticationMethod"));
+			} else if (tResponse.getResults().size() == 0) {
+				return null; // no annotation found with supplied id
+			} else {
+				throw new IOException("Found " + tResponse.getResults().size() + " Users with ID " + pUser.getShortId());
+			}
+		} catch (SolrServerException tException) {
+			throw new IOException("Failed to run solr query due to " + tException.toString());
+		}
+        return tUser;
+    }
+
+    public User saveUser(final User pUser) throws IOException {
+		SolrInputDocument tDoc = new SolrInputDocument();
+		tDoc.addField("id", pUser.getId());
+		tDoc.addField("short_id", pUser.getShortId());
+		tDoc.addField("name", pUser.getName());
+		tDoc.addField("type", "User");
+		tDoc.addField("email", pUser.getEmail());
+        if (pUser.getPicture() != null && pUser.getPicture().isEmpty()) {
+            tDoc.addField("picture", pUser.getPicture());
+        }
+        if (pUser.isAdmin()) {
+            tDoc.addField("group", "admin");
+        }    
+		tDoc.addField("authenticationMethod", pUser.getAuthenticationMethod());
+
+		_utils.addDoc(tDoc, true);
+        return pUser;
+    }
 
 }

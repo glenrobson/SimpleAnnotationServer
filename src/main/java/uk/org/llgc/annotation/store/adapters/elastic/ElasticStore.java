@@ -18,6 +18,7 @@ import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -145,6 +146,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                         .startObject("type")
                             .field("type", "keyword")
                         .endObject()
+                        .startObject("creator")
+                            .field("type", "keyword")
+                        .endObject()
                         .startObject("created")
                             .field("type", "date")
                         .endObject()
@@ -210,6 +214,22 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                                     .field("type", "text")
                                 .endObject()
                             .endObject()
+                        .endObject()
+                        // User
+                        .startObject("name")
+                            .field("type", "text")
+                        .endObject()
+                        .startObject("email")
+                            .field("type", "text")
+                        .endObject()
+                        .startObject("picture")
+                            .field("type", "keyword")
+                        .endObject()
+                        .startObject("group")
+                            .field("type", "keyword")
+                        .endObject()
+                        .startObject("authenticationMethod")
+                            .field("type", "keyword")
                         .endObject()
                     .endObject()
                 .endObject();
@@ -607,4 +627,70 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
         return tAnnoPageCount;
 	}
+
+    public User getUser(final User pUser) throws IOException {
+        User tSavedUser = new User();
+        tSavedUser.setToken(pUser.getToken());
+
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("type", "User"));
+        tBuilder.must(QueryBuilders.matchQuery("short_id", pUser.getShortId()));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(tBuilder);
+        searchSourceBuilder.size(1);
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        if (searchHits.length == 0) {
+            return null; // No user saved
+        } else if (searchHits.length > 1) {
+            throw new IOException("Found " + searchHits.length + " with id " + pUser.getShortId());
+        } else {
+            Map<String, Object> tJson = searchHits[0].getSourceAsMap();
+            tSavedUser.setId((String)tJson.get("id"));
+            tSavedUser.setShortId((String)tJson.get("short_id"));
+            tSavedUser.setName((String)tJson.get("name"));
+            tSavedUser.setEmail((String)tJson.get("email"));
+            if (tJson.get("picture") != null) {
+                tSavedUser.setPicture((String)tJson.get("picture"));
+            }
+            if (tJson.get("group") != null && tJson.get("group").toString().equals("admin")) {
+                tSavedUser.setAdmin(true);
+            }
+            tSavedUser.setAuthenticationMethod((String)tJson.get("authenticationMethod"));
+        }
+             
+        return tSavedUser;         
+    }
+    public User saveUser(final User pUser) throws IOException {
+        IndexRequest tIndex = new IndexRequest(_index);
+        tIndex.id(pUser.getShortId());
+        Map<String, Object> tJson = this.user2json(pUser);
+        tIndex.source(tJson);
+	
+        tIndex.setRefreshPolicy(_policy);
+        _client.index(tIndex, RequestOptions.DEFAULT);
+
+        return pUser;
+    }
+
+    protected Map<String, Object> user2json(final User pUser) {
+        Map<String,Object> tJson = new HashMap<String,Object>();
+        tJson.put("type", "User");
+        tJson.put("short_id", pUser.getShortId());
+        tJson.put("name", pUser.getName());
+        tJson.put("email", pUser.getEmail());
+        if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
+            tJson.put("picture", pUser.getPicture());
+        }
+        if (pUser.isAdmin()) {
+            tJson.put("group", "admin");
+        }
+        tJson.put("authenticationMethod", pUser.getAuthenticationMethod());
+
+        return tJson;
+    }
 }

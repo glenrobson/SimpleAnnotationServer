@@ -11,24 +11,31 @@ import javax.servlet.http.HttpSession;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.StoreConfig;
 
 import java.util.List;
+
+import java.io.IOException;
 
 @RequestScoped
 @ManagedBean
 public class UserService {
-
+    protected StoreAdapter _store = null;
     protected HttpSession _session = null;
 
     public UserService() {
+        init();
     }
 
     public UserService(final HttpSession pSession) {
         _session = pSession;
+        init();
     }
- 
+
     @PostConstruct
     public void init() {
+        _store = StoreConfig.getConfig().getStore();
     }
 
     protected HttpSession getSession() {
@@ -41,8 +48,11 @@ public class UserService {
         }
     }
 
-    public void setUser(final User pUser) {
-        this.getSession().setAttribute("user", pUser);
+    public void setUser(final User pUser) throws IOException {
+        // Try to get from Store to enhance this logged in user
+        // If not present then this method should also add the user to the database
+        User tEnhancedUser = _store.retrieveUser(pUser);
+        this.getSession().setAttribute("user", tEnhancedUser);
     }
 
     public User getUser() {
@@ -52,6 +62,11 @@ public class UserService {
         } else {
             return null;
         }
+    }
+
+    public String getRelativeId() {
+        User tUser = this.getUser();
+        return tUser.getId().substring(tUser.getId().lastIndexOf("user/"));
     }
 
     public boolean isAuthenticated() {

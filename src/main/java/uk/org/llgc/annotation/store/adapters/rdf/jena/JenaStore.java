@@ -56,7 +56,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		return tJsonLDModel;
 	}
 
-    protected void storeCanvas(final String pGraphName, final Model pModel) throws IOException {
+    protected void storeModel(final String pGraphName, final Model pModel) throws IOException {
 		_dataset.begin(ReadWrite.WRITE) ;
 		_dataset.addNamedModel(pGraphName, pModel);
 		_dataset.commit();

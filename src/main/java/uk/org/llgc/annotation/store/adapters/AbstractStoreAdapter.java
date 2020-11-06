@@ -11,6 +11,7 @@ import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -176,6 +177,17 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
 
+    public User retrieveUser(final User pUser) throws IOException {
+        User tSavedUser = this.getUser(pUser);
+        if (tSavedUser == null) {
+            return this.saveUser(pUser);
+        } else {
+            return tSavedUser;
+        }
+    }
+
+
+
 	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;
 	public abstract Annotation addAnnotationSafe(final Annotation pJson) throws IOException;
 	public abstract IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
@@ -187,6 +199,9 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
     public abstract Canvas resolveCanvas(final String pShortId) throws IOException;
     public abstract void storeCanvas(final Canvas pCanvas) throws IOException;
+
+    public abstract User getUser(final User pUser) throws IOException;
+    public abstract User saveUser(final User pUser) throws IOException;
 
 	public abstract Annotation getAnnotation(final String pId) throws IOException;
 

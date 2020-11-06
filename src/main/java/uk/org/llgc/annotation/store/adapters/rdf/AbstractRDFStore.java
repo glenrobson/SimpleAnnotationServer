@@ -22,6 +22,7 @@ import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -33,12 +34,16 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
+
+
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -407,7 +412,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         return tCanvas;
     }
 
-    protected abstract void storeCanvas(final String pGraphName, final Model pModel) throws IOException;
+    protected abstract void storeModel(final String pGraphName, final Model pModel) throws IOException;
 
     public void storeCanvas(final Canvas pCanvas) throws IOException {
 		Model tModel = ModelFactory.createDefaultModel();
@@ -418,10 +423,79 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
             tModel.add(tModel.createStatement(tCanvasURI, RDFS.label, pCanvas.getLabel()));
         }
 
-        storeCanvas(pCanvas.getId(), tModel);
+        storeModel(pCanvas.getId(), tModel);
     }
 
-	public List<PageAnnoCount> listAnnoPages() {
+    public User getUser(final User pUser) throws IOException {
+        Model tUserModel = getNamedModel(pUser.getId());
+        if (tUserModel == null) {
+            return null;
+        } else {
+            this.begin(ReadWrite.READ);
+            User tSavedUser = new User();
+            tSavedUser.setToken(pUser.getToken());
+            StmtIterator tStatements = tUserModel.listStatements();
+            while (tStatements.hasNext()) {
+                Statement tStatement = tStatements.nextStatement();
+                //System.out.println("User statement " + tStatement.toString());
+                if (tStatement.getPredicate().equals(RDF.type) && tStatement.getObject().equals(FOAF.Person)) {
+                    tSavedUser.setId(tStatement.getSubject().getURI());
+                }
+                if (tStatement.getPredicate().equals(DC.identifier)) {
+                    tSavedUser.setShortId(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.name)) {
+                    tSavedUser.setName(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.mbox)) {
+                    tSavedUser.setEmail(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.accountName)) {
+                    tSavedUser.setAuthenticationMethod(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.img)) {
+                    tSavedUser.setPicture(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.member) && tStatement.getSubject().getURI().equals("sas.permissions.admin")) {
+                    tSavedUser.setAdmin(true);
+                }
+            }
+            this.end();
+            return tSavedUser;
+        }
+    }
+
+    public User saveUser(final User pUser) throws IOException {
+        if (getNamedModel(pUser.getId()) != null) {
+            this.deleteAnnotation(pUser.getId());
+        }
+        Model tModel = ModelFactory.createDefaultModel();
+        Resource tPersonURI = tModel.createResource(pUser.getId());
+        tModel.add(tModel.createStatement(tPersonURI, RDF.type, FOAF.Person));
+        tModel.add(tModel.createStatement(tPersonURI, DC.identifier, pUser.getShortId()));
+        tModel.add(tModel.createStatement(tPersonURI, FOAF.name, pUser.getName()));
+        tModel.add(tModel.createStatement(tPersonURI, FOAF.mbox, pUser.getEmail()));
+        if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
+            tModel.add(tModel.createStatement(tPersonURI, FOAF.img, pUser.getPicture()));
+        }
+
+        Resource tAccount = tModel.createResource();
+        tModel.add(tModel.createStatement(tPersonURI, FOAF.account, tAccount));
+        tModel.add(tModel.createStatement(tAccount, RDF.type, FOAF.OnlineAccount));
+        tModel.add(tModel.createStatement(tAccount, FOAF.accountName, pUser.getAuthenticationMethod()));
+
+        if (pUser.isAdmin()) {
+            Resource tAdminGroup = tModel.createResource("sas.permissions.admin");
+            tModel.add(tModel.createStatement(tAdminGroup, FOAF.member, tPersonURI));
+            tModel.add(tModel.createStatement(tAdminGroup, RDF.type, FOAF.Group));
+        }
+
+        this.storeModel(pUser.getId(), tModel);
+
+        return pUser;
+    }
+
+   	public List<PageAnnoCount> listAnnoPages() {
         String tQueryString = "select ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
                                   "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +

@@ -33,7 +33,6 @@ public class OAuth extends HttpServlet {
         HttpSession tSession = pReq.getSession();
         if (pReq.getParameter("type") != null) {
             OAuthTarget tTarget = StoreConfig.getConfig().getAuthTarget(pReq.getParameter("type"));
-            System.out.println("Callback URL: " + StoreConfig.getConfig().getBaseURI(pReq) + "/login-callback");
             if (tTarget != null) {
                 final String secretState = tTarget.getId() + new Random().nextInt(999_999);
                 final OAuth20Service service = new ServiceBuilder(tTarget.getClientId())
@@ -46,7 +45,7 @@ public class OAuth extends HttpServlet {
                 if (tTarget.getAdditionalParams() != null) {
                     additionalParams = tTarget.getAdditionalParams();
                 }
-                //force to reget refresh token (if user are asked not the first time)
+                //force to re-get refresh token (if user are asked not the first time)
                 //additionalParams.put("prompt", "consent");
                 final String authorizationUrl = service.createAuthorizationUrlBuilder()
                         .state(secretState)

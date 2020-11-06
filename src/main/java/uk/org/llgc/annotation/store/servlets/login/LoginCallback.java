@@ -41,12 +41,7 @@ public class LoginCallback extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        for (String tKey : Collections.list(pReq.getParameterNames())) {
-            System.out.println("Key: " + tKey + "\tValue: " + pReq.getParameter(tKey));
-        }
         HttpSession tSession = pReq.getSession();
-        System.out.println("Original URL: " + tSession.getAttribute("oauth_url"));
-        System.out.println("Secret match (" + pReq.getParameter("state") + " = " + tSession.getAttribute("oauth_state") + ") is " + pReq.getParameter("state").equals(tSession.getAttribute("oauth_state")));
         try {
             OAuthTarget tTarget = (OAuthTarget)tSession.getAttribute("oauth_target");
             final OAuth20Service service = new ServiceBuilder(tTarget.getClientId())
@@ -59,8 +54,9 @@ public class LoginCallback extends HttpServlet {
             final OAuthRequest request = new OAuthRequest(Verb.GET, tTarget.getMapping().getEndpoint());
             service.signRequest(accessToken, request);
             Response tResponse = service.execute(request);
-            User tUser = tTarget.getMapping().createUser((Map<String,Object>)JsonUtils.fromString(tResponse.getBody()));
+            User tUser = tTarget.getMapping().createUser(StoreConfig.getConfig().getBaseURI(pReq),(Map<String,Object>)JsonUtils.fromString(tResponse.getBody()));
             tUser.setToken(accessToken);
+            tUser.setAuthenticationMethod(tTarget.getId());
                 
             UserService tUsers = new UserService(tSession);
             tUsers.setUser(tUser);
