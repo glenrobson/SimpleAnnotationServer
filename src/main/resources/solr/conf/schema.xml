@@ -144,7 +144,6 @@
     <field name="body" type="text_general" multiValued="true" indexed="true" stored="true"/>
     <field name="canvas" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="created" type="date" multiValued="false" indexed="true" stored="true"/>
-    <field name="creator" type="date" multiValued="false" indexed="true" stored="true"/>
     <field name="data" type="string" multiValued="false" indexed="false" stored="true"/>
     <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
     <field name="label" type="string" multiValued="true" indexed="true" stored="true"/>
