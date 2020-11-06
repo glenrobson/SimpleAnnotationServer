@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.contollers.AuthorisationController;
 import uk.org.llgc.annotation.store.data.users.User;
 
 import java.util.Map;
@@ -34,10 +35,11 @@ public class UserServlet extends HttpServlet {
 
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
         User tLoggedInUser = (User)pReq.getSession().getAttribute("user");
         User tUser = getUser(pReq);
         Map<String,Object> tResponse = new HashMap<String,Object>();
-        if (tLoggedInUser.getId().equals(tUser.getId()) || tLoggedInUser.isAdmin()) {
+        if (tAuth.changeUserDetails(tUser)) {
             tUser.setName(pReq.getParameter("name"));
             tUser.setEmail(pReq.getParameter("email"));
 
