@@ -482,12 +482,16 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
                 tUser.setId((String)pDoc.get("id"));
                 tUser.setShortId((String)pDoc.get("short_id"));
                 tUser.setName((String)pDoc.get("name"));
-                tUser.setEmail((String)pDoc.get("email"));
+                tUser.setEmail(((List<String>)pDoc.get("email")).get(0));
                 if (pDoc.get("picture") != null) {
-                    tUser.setPicture((String)pDoc.get("picture"));
+                    tUser.setPicture(((List<String>)pDoc.get("picture")).get(0));
                 }
-                if (pDoc.get("group") != null && pDoc.get("group").equals("admin")) {
-                    tUser.setAdmin(true);
+                if (pDoc.get("group") != null) {
+                    for (String tGroup : (List<String>)pDoc.get("group")) {
+                        if (tGroup.equals("admin")) {
+                            tUser.setAdmin(true);
+                        }
+                    }
                 }
                 tUser.setAuthenticationMethod((String)pDoc.get("authenticationMethod"));
 			} else if (tResponse.getResults().size() == 0) {
