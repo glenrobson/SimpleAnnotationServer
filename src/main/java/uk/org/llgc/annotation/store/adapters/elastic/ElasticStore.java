@@ -679,6 +679,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
     protected Map<String, Object> user2json(final User pUser) {
         Map<String,Object> tJson = new HashMap<String,Object>();
+        tJson.put("id", pUser.getId());
         tJson.put("type", "User");
         tJson.put("short_id", pUser.getShortId());
         tJson.put("name", pUser.getName());
