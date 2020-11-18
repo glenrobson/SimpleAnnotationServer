@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.contollers.AuthorisationController;
 
 public class ListAnnotations extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(ListAnnotations.class.getName()); 
