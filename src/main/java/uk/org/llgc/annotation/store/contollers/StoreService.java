@@ -30,14 +30,6 @@ public class StoreService {
         _store = StoreConfig.getConfig().getStore();
     }
 
-    public List<PageAnnoCount> getListAnnoPages() {
-        try {
-            return _store.listAnnoPages();
-        } catch (IOException tExcpt) {
-            return new ArrayList<PageAnnoCount>();
-        }
-    }
-
     public List<PageAnnoCount> listAnnoPages(final String pURI) {
         Manifest tManifest = new Manifest();
         tManifest.setURI(pURI);

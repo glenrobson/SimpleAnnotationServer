@@ -416,30 +416,6 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         }
     }    
 
-	public List<PageAnnoCount> listAnnoPages() throws IOException {
-        SolrQuery tQuery = new SolrQuery();
-        tQuery.setRows(0);
-        tQuery.setFacet(true);
-        tQuery.addFacetField("target");
-        tQuery.setFacetLimit(-1);
-        tQuery.setFacetSort("index");
-        tQuery.set("q", "type:oa\\:Annotation");
-        try {
-            QueryResponse tResponse = _solrClient.query(tQuery);
-            long tTotalAnnos = tResponse.getResults().getNumFound();
-            FacetField tFacetCounts = tResponse.getFacetField("target");
-            List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
-            for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-                Canvas tCanvas = new Canvas(tFacetValue.getName(), "");// TODO add manifest and canvas label
-                tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacetValue.getCount(), null)); 
-            }
-            return tAnnoPageCount;
-        } catch (SolrServerException tExcept) {
-            tExcept.printStackTrace();
-            throw new IOException("Failed to run page count query due to " + tExcept.getMessage());
-        }
-	}
-
 	public Annotation buildAnnotation(final SolrDocument pDoc, final boolean pCollapseOn) throws IOException {
 		Map<String,Object> tAnnotation = (Map<String,Object>)JsonUtils.fromString(new String(Base64.getDecoder().decode((String)pDoc.get("data"))));
 

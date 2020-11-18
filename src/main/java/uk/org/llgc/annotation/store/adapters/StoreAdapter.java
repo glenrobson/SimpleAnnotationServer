@@ -59,7 +59,6 @@ public interface StoreAdapter {
 
     // Used in ListAnnotations can we get rid?
 	public AnnotationList getAllAnnotations() throws IOException;
-	public List<PageAnnoCount> listAnnoPages() throws IOException; // TODO
     // Stats
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException; // TODO
 }

@@ -596,7 +596,6 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         }
 	}
 
-
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.termQuery("target.within.id", pManifest.getURI()));
@@ -619,25 +618,6 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
         return tAnnoPageCount;
     }    
-
-	public List<PageAnnoCount> listAnnoPages() throws IOException {
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.aggregation(AggregationBuilders.terms("pages").field("target.id").size(10000));
-        searchSourceBuilder.size(0);
-        SearchRequest searchRequest = new SearchRequest(_index);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
-        Terms tFacets = searchResponse.getAggregations().get("pages");
-        List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
-        for (Bucket tFacet : tFacets.getBuckets()) {
-            String tLabel = "";
-            Canvas tCanvas = new Canvas(tFacet.getKeyAsString(), tLabel);
-            this.storeCanvas(tCanvas);
-            tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacet.getDocCount(), null));
-        }
-
-        return tAnnoPageCount;
-	}
 
     public User getUser(final User pUser) throws IOException {
         User tSavedUser = new User();

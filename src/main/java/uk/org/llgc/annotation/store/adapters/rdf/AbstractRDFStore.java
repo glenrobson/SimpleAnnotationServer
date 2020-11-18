@@ -690,26 +690,6 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         this.deleteAnnotation(pCollection.getId());
     }
 
-    public List<PageAnnoCount> listAnnoPages() {
-        String tQueryString = "select ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
-                                  "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
-                                  "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
-                                  "  OPTIONAL { ?target <http://purl.org/dc/terms/isPartOf> ?manifestId }" +
-                                  "}" +
-                                  "OPTIONAL {GRAPH ?manifestId {" +
-                                  "  ?manifestId <http://www.w3.org/2000/01/rdf-schema#label> ?manifestLabel ." +
-                                  "  ?manifestId <http://purl.org/dc/elements/1.1/identifier> ?shortId ." +
-                                  "  ?pageId <http://www.w3.org/2000/01/rdf-schema#label> ?canvasLabel " +
-                                  "  }}" +
-                                  "OPTIONAL { GRAPH ?{ " +
-                                  "	 ?canvas <http://purl.org/dc/elements/1.1/identifier> ?canvasShortId ." +
-                                  "	 ?canvas <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Canvas> " +
-                                  "  }}" +
-                                "}group by ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId order by ?pageId"; 
-		QueryExecution tExec = this.getQueryExe(tQueryString);
-        return listAnnoPagesQuery(tExec, null);
-    }
-
     public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
         String tQueryString = "select ?pageId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
