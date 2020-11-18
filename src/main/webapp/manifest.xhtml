@@ -15,15 +15,15 @@
             <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
                 <div class="container">
 
-                <c:set var="tManifest" value="#{storeService.getManifest(param['manifest'])}" scope="request" />
+                <c:set var="tManifest" value="#{storeService.getManifestId(param['iiif-content'])}" scope="request" />
 
                 <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
                 <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
                 <p>This manifest has been loaded to the SimpleAnnotationServer and the following options are available:</p>
                 <ul>
                     <li><a href="index.html?iiif-content=#{tManifest.URI}">Annotate</a></li>
-                    <li><a href="stats/manifest.xhtml?manifest=#{tManifest.shortId}">View annotation statistics</a></li>
-                    <li><a href="annotations.xhtml?manifest=#{tManifest.shortId}">Download annotations</a></li>
+                    <li><a href="stats/manifest.xhtml?iiif-content=#{tManifest.URI}">View annotation statistics</a></li>
+                    <li><a href="annotations.xhtml?iiif-content=#{tManifest.URI}">Download annotations</a></li>
                 </ul>
                 <h2>IIIF Search Service</h2>
                 <p>A IIIF search service is available for this manifest:</p>

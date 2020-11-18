@@ -18,6 +18,7 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.contollers.UserService;
 
 public class AnnotationListServlet extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(AnnotationList.class.getName()); 
@@ -30,12 +31,13 @@ public class AnnotationListServlet extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        UserService tUserService = new UserService(pReq.getSession());
         String[] tRequestURI = pReq.getRequestURI().split("/");
         String tCanvasShortID = tRequestURI[tRequestURI.length -1].replace(".json","");
 
         Canvas tCanvas = _store.resolveCanvas(tCanvasShortID);
 
-        AnnotationList tList = _store.getAnnotationsFromPage(tCanvas);
+        AnnotationList tList = _store.getAnnotationsFromPage(tUserService.getUser(), tCanvas);
         tList.setId(StoreConfig.getConfig().getBaseURI(pReq) + "/annotation/list/" + tCanvasShortID + ".json");
 
         pRes.setContentType("application/ld+json; charset=UTF-8");

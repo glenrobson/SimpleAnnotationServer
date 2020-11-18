@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.StoreConfig;
 
@@ -81,16 +82,25 @@ public class StoreService {
 
     public List<Manifest> getAnnoManifests() {
         try {
-            return _store.getSkeletonManifests();
+            UserService tService = new UserService();
+            return _store.getSkeletonManifests(tService.getUser());
         } catch (IOException tExcpt) {
             return new ArrayList<Manifest>();
         }
     }
 
 
-    public Manifest getManifest(final String pShortId) {
+    public Manifest getManifest(final String pId) {
         try {
-            return _store.getManifest(pShortId);
+            return _store.getManifest(pId);
+        } catch (IOException tExcpt) {
+            return new Manifest();
+        }
+    }
+
+    public Manifest getManifestId(final String pURI) {
+        try {
+            return _store.getManifest(pURI);
         } catch (IOException tExcpt) {
             return new Manifest();
         }

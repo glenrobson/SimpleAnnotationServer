@@ -43,7 +43,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	protected Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		String tJson = JsonUtils.toString(pJson);
 
-        _logger.debug("Converting: " + tJson);
+        _logger.debug("Converting: " + JsonUtils.toPrettyString(pJson));
 		Model tJsonLDModel = ModelFactory.createDefaultModel();
 
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);

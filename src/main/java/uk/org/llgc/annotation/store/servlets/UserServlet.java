@@ -14,9 +14,12 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.contollers.AuthorisationController;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.contollers.UserService;
 
 import java.util.Map;
 import java.util.HashMap;
+
+import java.net.URISyntaxException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +39,7 @@ public class UserServlet extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-        User tLoggedInUser = (User)pReq.getSession().getAttribute("user");
+        User tLoggedInUser = new UserService(pReq.getSession()).getUser();
         User tUser = getUser(pReq);
         Map<String,Object> tResponse = new HashMap<String,Object>();
         if (tAuth.changeUserDetails(tUser)) {
@@ -71,7 +74,11 @@ public class UserServlet extends HttpServlet {
         String tPersonURI = StoreConfig.getConfig().getBaseURI(pReq) + relativeId;
 
         User tSkeletonUser = new User();
-        tSkeletonUser.setId(tPersonURI);
+        try {
+            tSkeletonUser.setId(tPersonURI);
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Unable to add user because " + tPersonURI + " is not a valid URI");
+        }
 
         User tFullUser = _store.getUser(tSkeletonUser);
         return tFullUser;

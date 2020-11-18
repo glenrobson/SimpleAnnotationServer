@@ -2,6 +2,7 @@ package uk.org.llgc.annotation.store.adapters.solr;
 
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrDocument;
@@ -116,9 +117,13 @@ public class SolrManifestStore {
 		return tManifests;
     }
 
-	public List<Manifest> getSkeletonManifests() throws IOException {
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
         SolrQuery tQuery = this.getManifestQuery();
-		tQuery.set("q", "within:*");
+        String tUserQuery = "";
+        if (!pUser.isAdmin()) {
+            tUserQuery = " AND creator:\"" + pUser.getId() + "\"";
+        }
+		tQuery.set("q", "within:*" + tUserQuery);
         tQuery.setFacet(true);
         tQuery.addFacetField("within");
 

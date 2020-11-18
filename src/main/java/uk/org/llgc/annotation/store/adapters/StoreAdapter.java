@@ -3,6 +3,7 @@ package uk.org.llgc.annotation.store.adapters;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
@@ -31,27 +32,34 @@ public interface StoreAdapter {
     // CRUD manifests
 	public String indexManifest(final Manifest pManifest) throws IOException;
 	public List<Manifest> getManifests() throws IOException;
-	public List<Manifest> getSkeletonManifests() throws IOException;
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException;
 	public String getManifestId(final String pShortId) throws IOException;
-	public Manifest getManifest(final String pShortId) throws IOException;
-	public Manifest getManifestForCanvas(final Canvas pCanvasId) throws IOException;
+	public Manifest getManifest(final String pId) throws IOException;
+	public Manifest getManifestForCanvas(final Canvas pCanvasId) throws IOException; 
 
     // CRUD canvas
     public Canvas resolveCanvas(final String pShortId) throws IOException;
     public void storeCanvas(final Canvas pCanvas) throws IOException;
 
     // Search
-	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
-	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException;
+	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException; // TODO
+	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException;
 
     // CRUD users
     public User retrieveUser(final User pUser) throws IOException;
     public User getUser(final User pUser) throws IOException;
     public User saveUser(final User pUser) throws IOException;
 
+    // CRUD Collections
+    public Collection createCollection(final Collection pCollection) throws IOException;
+    public List<Collection> getCollections(final User pUser) throws IOException;
+    public Collection getCollection(final String pId) throws IOException;
+    public void deleteCollection(final Collection pCollection) throws IOException;
+    public void updateCollection(final Collection pCollection) throws IOException;
+
     // Used in ListAnnotations can we get rid?
 	public AnnotationList getAllAnnotations() throws IOException;
-	public List<PageAnnoCount> listAnnoPages() throws IOException;
+	public List<PageAnnoCount> listAnnoPages() throws IOException; // TODO
     // Stats
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException;
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException; // TODO
 }

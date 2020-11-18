@@ -94,7 +94,7 @@ public class TestStats extends TestUtils {
         assertEquals("Expected 8 annotations for the first page.", 8, tPageCounts.get(0).getCount());
 
         // Now test how many images are left to do.
-        PieChartModel tModel = tStats.getPercentAnnotated(tManifest.getShortId());
+        PieChartModel tModel = tStats.getPercentAnnotated(tManifest.getURI());
         assertEquals("Expected a pie chart of size 2",tModel.getData().size(), 2);
         Set<String> tKeys = tModel.getData().keySet();
         int tDone = 0;

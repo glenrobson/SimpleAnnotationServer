@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.Annotation;
@@ -150,7 +151,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	protected String indexManifest(final String pShortId, final Manifest pManifest) throws IOException {
-		Manifest tExisting = this.getManifest(pShortId);
+		Manifest tExisting = this.getManifest(pManifest.getURI());
 		if (tExisting != null) {
 			if (tExisting.getURI().equals(pManifest.getURI())) {
 				return tExisting.getShortId(); // manifest already indexed
@@ -173,7 +174,9 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 			pManifest.put("@context", tListContext);
 		}*/
-
+        if (pManifest.getCanvases().isEmpty()) {
+            throw new IOException("Failed to load manifest " + pManifest.getURI() + " because it had no pages");
+        }
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
 
@@ -186,16 +189,19 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
         }
     }
 
-
+    public void updateCollection(final Collection pCollection) throws IOException {
+        this.deleteCollection(pCollection);
+        this.createCollection(pCollection);
+    }
 
 	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;
 	public abstract Annotation addAnnotationSafe(final Annotation pJson) throws IOException;
 	public abstract IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
 	protected abstract String indexManifestNoCheck(final String pShortID, final Manifest pManifest) throws IOException;
 	public abstract List<Manifest> getManifests() throws IOException;
-	public abstract List<Manifest> getSkeletonManifests() throws IOException;
+	public abstract List<Manifest> getSkeletonManifests(final User pUser) throws IOException;
 	public abstract String getManifestId(final String pShortId) throws IOException;
-	public abstract Manifest getManifest(final String pShortId) throws IOException;
+	public abstract Manifest getManifest(final String pId) throws IOException;
 
     public abstract Canvas resolveCanvas(final String pShortId) throws IOException;
     public abstract void storeCanvas(final Canvas pCanvas) throws IOException;

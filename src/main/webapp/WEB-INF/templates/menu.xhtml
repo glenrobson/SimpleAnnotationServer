@@ -15,36 +15,29 @@
                 </button>
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <c:if test="#{empty path}">
-                                <a class="nav-link" href="index.html">Home</a>
-                            </c:if>
-                            <c:if test="#{not empty path}">
-                                <a class="nav-link" href="../index.html">Home</a>
-                            </c:if>
-                        </li>
                         <c:if test="#{isAuth}">
                             <li class="nav-item">
-                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Stats" outcome="#{path}stats/index" ></h:link>
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Collections" outcome="#{path}collections" ></h:link>
                             </li>
                             <li class="nav-item">
-                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Load Annotation List" outcome="#{path}populate" ></h:link>
-                            </li>
-                            <li class="nav-item">
-                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Index Manifest" outcome="#{path}uploadManifest" ></h:link>
-                            </li>
-                            <li class="nav-item">
-                                <h:link styleClass="nav-link" icon="fas fa-upload" value="View Annotations" outcome="#{path}manifests" ></h:link>
+                                <div class="dropdown">
+                                    <a id="importDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"  class="nav-link">
+                                        Import
+                                    </a>
+                                    <div class="dropdown-menu " aria-labelledby="importDropdown">
+                                        <h:link styleClass="dropdown-item" icon="fas fa-upload" value="Annotations" outcome="#{path}populate" ></h:link>
+                                    </div>
+                                </div>
                             </li>
                         </c:if>
                     </ul>
                         <c:if test="#{not isAuth and not path.equals('login')}">
                             <div class="mt-2 mt-md-0">
                             <c:if test="#{empty path}">
-                                <a href="login.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
+                                <a href="collections.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
                             </c:if>
                             <c:if test="#{not empty path}">
-                                <a href="../login.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
+                                <a href="#{path}collections.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
                             </c:if>
                     </div>
                         </c:if>

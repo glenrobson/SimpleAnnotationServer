@@ -17,9 +17,25 @@
             <script> 
                 //<![CDATA[
                 var miradorURl = "mirador.html"
-                var manifest = getURLParameter("iiif-content");
-                if(typeof(manifest) == "string" && manifest.length > 0) {
-                    miradorURl += "?iiif-content=" + manifest;
+                var iiifcontent = getURLParameter("iiif-content");
+                if(typeof(iiifcontent) == "string" && iiifcontent.length > 0) {
+                    mirador += "?iiif-content=" + iiifcontent;
+                } else {
+                    var manifest = getURLParameter("manifest");
+                    var manifestAdded = false;
+                    if(typeof(manifest) == "string" && manifest.length > 0) {
+                        miradorURl += "?manifest=" + manifest;
+                        manifestAdded = true;
+                    }
+                    var collection = getURLParameter("collection");
+                    if(typeof(collection) == "string" && collection.length > 0) {
+                        if (manifestAdded) {
+                            miradorURl += "&amp;";
+                        } else {
+                            miradorURl += "?";
+                        }
+                        miradorURl += "collection=" + collection;
+                    }
                 }
                 var iframe = document.getElementById('mirador');
                 iframe.src = miradorURl;

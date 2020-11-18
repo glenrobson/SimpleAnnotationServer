@@ -14,7 +14,7 @@
         <ui:define name = "content">
             <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
                 <div class="container">
-                    <c:if test="#{empty param['manifest']}">
+                    <c:if test="#{empty param['iiif-content']}">
                         <!-- Skeleton Manifest -->
                         <c:set var="tCanvases" value="#{storeService.listAnnoPages(param['uri'])}" scope="request" />
                         <c:set var="tManifest" value="#{storeService.getManifestFromAnnotations(tCanvases)}" scope="request" />
@@ -27,9 +27,9 @@
                         </c:if>
                     </c:if>
 
-                    <c:if test="#{not empty param['manifest']}">
+                    <c:if test="#{not empty param['iiif-content']}">
                         <!-- Indexed Manifest -->
-                        <c:set var="tManifest" value="#{storeService.getManifest(param['manifest'])}" scope="request" />
+                        <c:set var="tManifest" value="#{storeService.getManifest(param['iiif-content'])}" scope="request" />
                         <c:set var="tCanvases" value="#{storeService.listAnnoPages(tManifest)}" scope="request" />
                         <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
                     </c:if>

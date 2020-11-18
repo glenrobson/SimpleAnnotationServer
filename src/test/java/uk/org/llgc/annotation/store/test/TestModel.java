@@ -83,7 +83,7 @@ public class TestModel extends TestUtils {
 		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
 		String tShortId = _store.indexManifest(new Manifest(tManifestJson));
 
-        Manifest tManifest = _store.getManifest(tShortId);
+        Manifest tManifest = _store.getManifest((String)tManifestJson.get("@id"));
 
         assertNotNull("Manifest not found", tManifest);
         assertEquals("Indexed manifest title doesn't match the original", "http://example.com/manfiest/test/manifest.json", tManifest.getURI());
@@ -112,7 +112,7 @@ public class TestModel extends TestUtils {
 		Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
 
         _store.addAnnotation(new Annotation(tAnnotation));
-        List<Manifest> tManifests = _store.getSkeletonManifests();
+        List<Manifest> tManifests = _store.getSkeletonManifests(super.createAdminUser());
         assertEquals("Unexpected amount of manifests in store.", 1, tManifests.size());
         assertEquals("ID doesn't match", "http://example.com/manfiest/test/manifest.json", tManifests.get(0).getURI());
 

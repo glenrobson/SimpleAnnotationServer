@@ -28,6 +28,7 @@ import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
@@ -192,8 +193,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         return _manifestStore.getManifests();
     }
 
-	public List<Manifest> getSkeletonManifests() throws IOException {
-        return _manifestStore.getSkeletonManifests();
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
+        return _manifestStore.getSkeletonManifests(pUser);
     }
 
 	protected String indexManifestNoCheck(final String pShortId, final Manifest pManifest) throws IOException {
@@ -336,9 +337,13 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		return tAnnoList;
 	}
 
-	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException {
+	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException {
 		SolrQuery tQuery = _utils.getQuery();
-		tQuery.set("q", "target:" + _utils.escapeChars(pPage.getId()));
+        String tUserQuery = "";
+        if (!pUser.isAdmin()) {
+            tUserQuery = " AND creator:\"" + pUser.getId() + "\"";
+        }
+		tQuery.set("q", "target:" + _utils.escapeChars(pPage.getId()) + tUserQuery);
 
         AnnotationList tAnnoList = new AnnotationList();
 		try {
@@ -479,7 +484,11 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
                 SolrDocument pDoc = tResponse.getResults().get(0);
                 // Build helpers to convert from SOLR to annotation
 
-                tUser.setId((String)pDoc.get("id"));
+                try {
+                    tUser.setId((String)pDoc.get("id"));
+                } catch (URISyntaxException tExcpt) {
+                    throw new IOException("Id is not a URI: " + pDoc.get("id") + "\"" + tExcpt);
+                }
                 tUser.setShortId((String)pDoc.get("short_id"));
                 tUser.setName((String)pDoc.get("name"));
                 tUser.setEmail(((List<String>)pDoc.get("email")).get(0));
@@ -524,4 +533,17 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         return pUser;
     }
 
+
+    public Collection createCollection(final Collection pCollection) throws IOException {
+        return null;
+    }
+    public List<Collection> getCollections(final User pUser) throws IOException {
+        return null;
+    }
+    public Collection getCollection(final String pId) throws IOException {
+        return null;
+    }
+
+    public void deleteCollection(final Collection pCollection) throws IOException {
+    }
 }

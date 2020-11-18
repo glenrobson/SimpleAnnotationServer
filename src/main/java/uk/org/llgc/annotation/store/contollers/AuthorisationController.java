@@ -13,6 +13,8 @@ import uk.org.llgc.annotation.store.data.login.OAuthTarget;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.Collection;
 
 import java.util.List;
 
@@ -33,9 +35,26 @@ public class AuthorisationController {
         _users = new UserService(pSession);
         init();
     }
+    public AuthorisationController(final UserService pService) {
+        _users = pService;
+        init();
+    }
 
     @PostConstruct
     public void init() {
+    }
+
+    private User getUser() {
+        if (tUser == null) {
+            return _users.getUser();
+        } else {
+            return tUser;
+        }
+    }
+    private User tUser = null;
+    // Only for use with unit testing!
+    public void setUser(final User pUser) {
+        tUser = pUser;
     }
 
     /**
@@ -43,7 +62,34 @@ public class AuthorisationController {
      * or user is admin
      */
     public boolean changeUserDetails(final User pUserToChange) {
-        User tLoggedInUser = _users.getUser();
+        User tLoggedInUser = this.getUser();
         return tLoggedInUser.getId().equals(pUserToChange.getId()) || tLoggedInUser.isAdmin();
+    }
+
+    public boolean allowUpdate(final Annotation pSavedAnno, final Annotation pNewAnno) {
+        User tLoggedInUser = this.getUser();
+        return (pSavedAnno.getCreator() != null && pSavedAnno.getCreator().getId().equals(tLoggedInUser.getId()) || tLoggedInUser.isAdmin());
+    }
+
+    public boolean allowDelete(final Annotation pSavedAnno) {
+        User tLoggedInUser = this.getUser();
+        return (pSavedAnno.getCreator() != null && pSavedAnno.getCreator().getId().equals(tLoggedInUser.getId()) || tLoggedInUser.isAdmin());
+    }
+
+    public boolean allowDeleteCollection(final Collection pCollection) {
+        User tLoggedInUser = this.getUser();
+        return (pCollection.getUser() != null && pCollection.getUser().getId().equals(tLoggedInUser.getId())) || tLoggedInUser.isAdmin();
+    }
+
+    public boolean allowCollectionEdit(final Collection pCollection) {
+        User tLoggedInUser = this.getUser();
+        System.out.println("Logged in user " + tLoggedInUser);
+        System.out.println("Collection " + pCollection);
+        return (pCollection.getUser() != null && pCollection.getUser().getId().equals(tLoggedInUser.getId())) || tLoggedInUser.isAdmin();
+    }
+
+    public boolean allowExportAllAnnotations() {
+        User tLoggedInUser = this.getUser();
+        return tLoggedInUser.isAdmin(); // Only admin can do this
     }
 }

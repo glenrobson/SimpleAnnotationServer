@@ -32,6 +32,7 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -248,4 +249,14 @@ public class TestUtils {
 		return tResult;
 	}
 
+    protected User createAdminUser() {
+        User tUser = new User();
+        try {
+            tUser.setId("http://example.com/admin");
+        } catch (URISyntaxException tExcpt) {
+        }
+        tUser.setAdmin(true);
+
+        return tUser;
+    }
 }

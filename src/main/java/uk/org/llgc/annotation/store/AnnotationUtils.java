@@ -308,6 +308,19 @@ public class AnnotationUtils {
 		return this.frame(pManifest, tContextJson);
 	}
 
+    public Map<String,Object> frameCollection(final Model pCollection) throws JsonLdError, IOException  {
+		final Map<String,Object> tFrameJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(new File(_contextDir,"collection_frame.json")));
+		Map<String,Object> tCollectionsJson = this.frame(pCollection, tFrameJson);
+        tCollectionsJson.remove("sc:hasCollections");
+        tCollectionsJson.remove("sc:hasManifests");
+        tCollectionsJson.remove("sc:hasParts");
+        if (tCollectionsJson.get("dcterms:creator") instanceof Map) {
+            tCollectionsJson.put("dcterms:creator", ((Map<String,Object>)tCollectionsJson.get("dcterms:creator")).get("@id"));
+        }
+        return tCollectionsJson;
+	}
+
+
 	public Map<String,Object> frame(final Model pModel, final Map<String,Object> pFrame) throws JsonLdError, IOException {
 		pFrame.put("@context", this.getContext());
 
@@ -324,7 +337,6 @@ public class AnnotationUtils {
             pModel.commit();
         }
 		Map<String,Object> tFramed = (Map<String,Object>)JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), pFrame,  tOptions);
-
 		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);
 		if (tJsonLd.get("@context") == null) {
 			tJsonLd.put("@context", this.getExternalContext());

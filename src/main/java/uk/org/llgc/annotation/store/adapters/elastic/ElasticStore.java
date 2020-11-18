@@ -14,6 +14,7 @@ import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
@@ -303,11 +304,18 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         _client.delete(tDelete, RequestOptions.DEFAULT);
 	}
 
-	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException {
+	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException {
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("target.id", pPage.getId()));
+
+        if (!pUser.isAdmin()) {
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+        }
+
         AnnotationList tList = new AnnotationList();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.size(10000);
-        searchSourceBuilder.query(QueryBuilders.termQuery("target.id", pPage.getId()));
+        searchSourceBuilder.query(tBuilder);
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
@@ -447,9 +455,12 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     // TODO note this will return indexed manifests as well as non indexed..
-	public List<Manifest> getSkeletonManifests() throws IOException {
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(AggregationBuilders.terms("manifests").field("target.within.id").size(10000));
+        if (!pUser.isAdmin()) {
+            searchSourceBuilder.query(QueryBuilders.termQuery("creator", pUser.getId()));
+        }
         searchSourceBuilder.size(0);
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(searchSourceBuilder);
@@ -650,7 +661,11 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
             throw new IOException("Found " + searchHits.length + " with id " + pUser.getShortId());
         } else {
             Map<String, Object> tJson = searchHits[0].getSourceAsMap();
-            tSavedUser.setId((String)tJson.get("id"));
+            try {
+                tSavedUser.setId((String)tJson.get("id"));
+            } catch (URISyntaxException tExcpt) {
+                throw new IOException("Unable to create user as ID was not a URI: " + tExcpt);
+            }
             tSavedUser.setShortId((String)tJson.get("short_id"));
             tSavedUser.setName((String)tJson.get("name"));
             tSavedUser.setEmail((String)tJson.get("email"));
@@ -693,5 +708,19 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         tJson.put("authenticationMethod", pUser.getAuthenticationMethod());
 
         return tJson;
+    }
+
+
+    public Collection createCollection(final Collection pCollection) throws IOException {
+        return null;
+    }
+
+    public List<Collection> getCollections(final User pUser) throws IOException {
+        return null;
+    }
+    public Collection getCollection(final String pId) throws IOException {
+        return null;
+    }
+    public void deleteCollection(final Collection pCollection) throws IOException {
     }
 }

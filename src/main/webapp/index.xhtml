@@ -1,0 +1,35 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Welcome to the Simple Annotation Server"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <br/>
+                    <h1>Simple Annotation Server</h1>
+                    <p>Welcome to the Simple Annotation Server. With this you can create collections of IIIF content and then add annotations.</p>
+                    <p><a href="collections.xhtml">Login or Sign up</a> to see your collections.</p>
+
+                    <h2>Demo</h2>
+                    <p>Here is a demo of the main features of the Simple Annotation Server (SAS) including:</p>
+                    <ul>
+                        <li>Adding IIIF Manifests to your collection</li>
+                        <li>Annotating your manifests</li>
+                        <li>Searching your annotations</li>
+                    </ul>
+                     <video id="demo_video" controls="true" width="95%">
+                          <source src="videos/SAS_Demo.mp4" type="video/mp4"/>
+                          Your browser does not support the video tag.
+                    </video> 
+                </div>
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>
+

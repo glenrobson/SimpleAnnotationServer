@@ -47,16 +47,15 @@ public class StatsService {
     }
 
 
-    protected Manifest getManifestFromId(final String pShortId) throws IOException {
-        if (_manifests.containsKey(pShortId)) {
-            return _manifests.get(pShortId);
+    protected Manifest getManifest(final String pId) throws IOException {
+        if (_manifests.containsKey(pId)) {
+            return _manifests.get(pId);
         } else {
-            Manifest tManifest = _store.getManifest(pShortId);
+            Manifest tManifest = _store.getManifest(pId);
 
-            _manifests.put(pShortId, tManifest);
+            _manifests.put(pId, tManifest);
             return tManifest;
         }
-
     }
 
     public List<PageAnnoCount> getManifestAnnoCount(final Manifest pManifest) throws IOException {
@@ -69,10 +68,10 @@ public class StatsService {
         }
     }
 
-    public PieChartModel getPercentAnnotated(final String pShortId) {
+    public PieChartModel getPercentAnnotated(final String pId) {
         PieChartModel tModel = new PieChartModel();
         try {
-            Manifest tManifest = this.getManifestFromId(pShortId);
+            Manifest tManifest = this.getManifest(pId);
      
             int tTranscribedTotal = this.getManifestAnnoCount(tManifest).size();
             int tCanvasTotal = tManifest.getCanvases().size();
@@ -89,10 +88,10 @@ public class StatsService {
         return tModel;
     }
 
-    public BarChartModel getManifestAnnoCount(final String pShortId) {
+    public BarChartModel getManifestAnnoCount(final String pURI) {
         BarChartModel model = new BarChartModel();
         try {
-            Manifest tManifest = this.getManifestFromId(pShortId);
+            Manifest tManifest = this.getManifest(pURI);
 
             // Get list of all annotations
             List<PageAnnoCount> tPageCounts = this.getManifestAnnoCount(tManifest);

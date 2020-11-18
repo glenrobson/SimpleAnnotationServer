@@ -37,14 +37,17 @@ public class ListAnnotations extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		AnnotationList tAnnotations = _store.getAllAnnotations();
+        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+        if (tAuth.allowExportAllAnnotations()) {
+            AnnotationList tAnnotations = _store.getAllAnnotations();
 
-		StringBuffer tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
-		tURI.append("/annotation/");
-		tAnnotations.setId(tURI.toString());
+            StringBuffer tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
+            tURI.append("/annotation/");
+            tAnnotations.setId(tURI.toString());
 
-		pRes.setContentType("application/ld+json; charset=UTF-8");
-		pRes.setCharacterEncoding("UTF-8");
-		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotations.toJson()));
+            pRes.setContentType("application/ld+json; charset=UTF-8");
+            pRes.setCharacterEncoding("UTF-8");
+            pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotations.toJson()));
+        }
 	}
 }

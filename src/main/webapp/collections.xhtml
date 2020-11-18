@@ -1,0 +1,65 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <div class="wrapper">
+                <nav id="sidebar">
+                    <div class="sidebar-header">
+                        <h3>Collections</h3>
+                    </div>
+
+                    <ul id="collections" class="list-unstyled components">
+                    </ul>
+
+                    <div id="sidebar_actions">
+                        <button type="button" id="indexButton" class="btn btn-primary mb-2" data-toggle="modal" data-target="#createCollection">Add Collection</button>
+                    </div>    
+                </nav>    
+                <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="main_panel" class="bs-docs-masthead">
+                    <div id="collectionContainer" class="container">
+                        <h1 id="collectionName"></h1>
+                        <p>Collection level actions:</p>
+                        <a id="openAll" class="btn btn-primary mb-2">Open all</a>
+                        <button type="button" id="deleteCollection" class="btn btn-primary mb-2" data-mode="delete_collection" onclick="showConfirm(event);">Delete collection</button>
+                        <hr/>
+
+                        <h3>Manifests</h3>
+                    <!--<p>These manifests have been annotated but not indexed. You can download annotations but its not possible to see stats or use the IIIF Search API. To index one of these manifests upload the manifest <a href="uploadManifest.xhtml">here</a>.</p>-->
+                        <button type="button" id="indexButton" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addManifest">Add</button>
+
+                    <ul id="manifests" class="media-list">
+                        <!--<c:forEach items="#{storeService.annoManifests}" var="manifest" varStatus="iterMetadata">
+                            <li>
+                                <a href="annotations.xhtml?uri=#{manifest.URI}">
+                                    <c:if test="#{not empty manifest.label}">
+                                        <h:outputText value="#{manifest.label}"/>
+                                    </c:if>
+                                    <c:if test="#{empty manifest.label}">
+                                        <h:outputText value="#{manifest.URI}"/>
+                                    </c:if>
+                                </a>
+                            </li>
+                        </c:forEach>-->
+                    </ul>
+                </div>
+            </main>
+        </div>
+        <script src="js/collection.js"></script>
+        <script>
+            initCollections('/inbox.json');
+        </script>
+        <ui:include src="WEB-INF/templates/dialogues/createCollection.xhtml"/>
+        <ui:include src="WEB-INF/templates/dialogues/addManifest.xhtml"/>
+        <ui:include src="WEB-INF/templates/dialogues/moveManifest.xhtml"/>
+        <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
+        </ui:define>
+    </ui:composition>
+</html>
+

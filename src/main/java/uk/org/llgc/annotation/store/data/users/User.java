@@ -5,6 +5,11 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import java.util.Date;
+
 public class User {
 	protected static Logger _logger = LogManager.getLogger(User.class.getName());
 
@@ -16,8 +21,33 @@ public class User {
     protected boolean _isAdmin = false;
     protected OAuth2AccessToken _token = null;
     protected String _authenticationMethod = "";
+    protected Date _created = null;
+    protected Date _lastModified = null;
 
     public User() {
+        _created = new Date();
+        _lastModified = _created;
+    }
+
+    public Date getCreated() {
+        return _created;
+    }
+
+    public void setCreated(final Date pDate) {
+        _created = pDate;
+    }
+
+    public Date getLastModified() {
+        return _lastModified;
+    }
+
+    public void setLastModified(final Date pDate) {
+        _lastModified = pDate;
+    }
+
+    public Date updateLastModified() {
+        _lastModified = new Date();
+        return _lastModified;
     }
 
     public boolean isAdmin() {
@@ -46,7 +76,7 @@ public class User {
     }
 
     public String toString() {
-        return "Id: " + _id + "\nName: " + _name + "\nEmail: " + _email + "\nPic: " + _pic;
+        return "Id: " + _id + "\nShortid: " + _shortId +  "\nName: " + _name + "\nEmail: " + _email + "\nPic: " + _pic + "\nCreated: " + _created.getTime() + "\nAdmin: " + _isAdmin + "\nAuth method: " + _authenticationMethod;
     }
 
     /**
@@ -63,7 +93,8 @@ public class User {
      *
      * @param id the value to set.
      */
-    public void setId(final String pId) {
+    public void setId(final String pId) throws URISyntaxException {
+        new URI(pId);
          _id = pId;
     }
 
@@ -183,6 +214,7 @@ public class User {
                 && _name.equals(pOtherUser.getName())
                 && _email.equals(pOtherUser.getEmail())
                 && _isAdmin == pOtherUser.isAdmin()
+                && _created.equals(pOtherUser.getCreated())
                 && _authenticationMethod.equals(pOtherUser.getAuthenticationMethod());
     }
 }

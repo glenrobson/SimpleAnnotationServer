@@ -8,9 +8,6 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-
-   
-
     <ui:composition template="../WEB-INF/templates/layout.xhtml">
         <ui:param name="title" value="List all the annotations in this store"></ui:param>
         <ui:param name="path" value="/"></ui:param>
@@ -24,10 +21,10 @@
 
 
             <p:panel header="Annotations per Canvas">
-                <p:chart type="bar" model="#{statsService.getManifestAnnoCount(param['manifest'])}" style="height500px;"/>
+                <p:chart type="bar" model="#{statsService.getManifestAnnoCount(param['iiif-content'])}" style="height500px;"/>
             </p:panel>
             <p:panel header="Percentage of items transcribed">
-                <p:chart type="pie" model="#{statsService.getPercentAnnotated(param['manifest'])}" style="height:300px; width:500px;"/>
+                <p:chart type="pie" model="#{statsService.getPercentAnnotated(param['iiif-content'])}" style="height:300px; width:500px;"/>
             </p:panel>
         </ui:define>
     </ui:composition>

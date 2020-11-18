@@ -2,6 +2,8 @@ package uk.org.llgc.annotation.store.data.login;
 
 import java.util.Map;
 
+import java.net.URISyntaxException;
+
 import uk.org.llgc.annotation.store.data.users.User;
 
 public class UserMapping {
@@ -21,8 +23,14 @@ public class UserMapping {
 
     public User createUser(final String pBaseURL, final Map<String,Object> pResponse) {
         User tUser = new User();
-        tUser.setId(pBaseURL + "/user/" + Math.abs(_type.hashCode()) + "/" + this.getKey("id", pResponse));
-        tUser.setShortId(_type + "_" + this.getKey("id", pResponse));
+        try {
+            tUser.setId(pBaseURL + "/user/" + Math.abs(_type.hashCode()) + "/" + this.getKey("id", pResponse));
+        } catch (URISyntaxException tExcpt) {
+            System.err.println("Failed to create user URI but failed due to " + tExcpt);
+            tExcpt.printStackTrace();
+            return null;
+        }
+        tUser.setShortId(Math.abs(_type.hashCode()) + "/" + this.getKey("id", pResponse));
         if (this.isIn("name", pResponse)) {
             tUser.setName(this.getKey("name", pResponse));
         }

@@ -24,6 +24,7 @@ import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.contollers.UserService;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -61,7 +62,9 @@ public class Populate extends HttpServlet {
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationListJSON));
 
 		try {
-			_store.addAnnotationList(new AnnotationList(tAnnotationListJSON));
+            AnnotationList tList = new AnnotationList(tAnnotationListJSON);
+            tList.setCreator(new UserService(pReq.getSession()).getUser());
+			_store.addAnnotationList(tList);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("text/plain");

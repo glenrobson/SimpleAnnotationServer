@@ -20,9 +20,11 @@ import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.contollers.UserService;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -43,14 +45,12 @@ public class Create extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation");
-		if (tAnnotationJSON.get("@context") instanceof String) {
-			Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(super.getServletContext().getResourceAsStream("/contexts/iiif-2.0.json"));
-			tAnnotationJSON.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
-		}
-		_logger.debug("JSON in:");
+        _logger.debug("JSON in:");
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 		try {
-			Annotation tAnno = _store.addAnnotation(new Annotation(tAnnotationJSON));
+            Annotation tAnno = new Annotation(tAnnotationJSON);
+            tAnno.setCreator(new UserService(pReq.getSession()).getUser());
+			tAnno = _store.addAnnotation(tAnno);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);
 			pRes.setContentType("application/ld+json; charset=UTF-8");

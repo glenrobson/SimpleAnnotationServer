@@ -6,16 +6,19 @@
         <param-name>primefaces.THEME</param-name>
         <param-value>bootstrap</param-value>
     </context-param>
+    <welcome-file-list>  
+        <welcome-file>index.xhtml</welcome-file>  
+    </welcome-file-list>    
 
     <display-name>Simple Annotation Server</display-name>
     <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>uk.org.llgc.annotation.store.filters.OAuthFilter</filter-class>
-        <!-- Uncomment this if you would like to have a custom login page which isn't login.xhtml -->
+        <!-- Uncomment this if you would like to have a custom login page which isn't login.xhtml
             <init-param>
 			<param-name>LOGIN_PAGE</param-name>
 			<param-value>https://catalog.metascripta.org/</param-value>
-		</init-param>
+		</init-param>-->
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
@@ -23,6 +26,11 @@
         <url-pattern>/auth.xhtml</url-pattern>
         <url-pattern>/profile.xhtml</url-pattern>
         <url-pattern>/user/*</url-pattern>
+        <url-pattern>/annotation/*</url-pattern> <!-- This covers search, add, update and delete annotations -->
+        <url-pattern>/collection/*</url-pattern>
+        <url-pattern>/collections.xhtml</url-pattern>
+        <url-pattern>/manifest.xhtml</url-pattern>
+        <url-pattern>/view.xhtml</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -126,6 +134,15 @@
         <servlet-name>User</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.servlets.UserServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Collections</servlet-name>
+        <servlet-class>uk.org.llgc.annotation.store.servlets.CollectionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Collections</servlet-name>
+        <url-pattern>/collection/*</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>User</servlet-name>
         <url-pattern>/user/*</url-pattern>
@@ -145,10 +162,6 @@
         <url-pattern>/login-callback</url-pattern>
     </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>AnnotationList</servlet-name>
-        <url-pattern>/annotation/list/*</url-pattern>
-    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>IIIFSearchAPI</servlet-name>
@@ -161,6 +174,12 @@
     <servlet-mapping>
         <servlet-name>UploadManifest</servlet-name>
         <url-pattern>/manifests/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Annotations -->
+    <servlet-mapping>
+        <servlet-name>AnnotationList</servlet-name>
+        <url-pattern>/annotation/list/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CanvasAnnotations</servlet-name>

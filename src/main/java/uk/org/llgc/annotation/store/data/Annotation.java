@@ -15,6 +15,7 @@ import java.text.ParseException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.jena.vocabulary.DCTerms;
 
@@ -35,6 +36,7 @@ public class Annotation {
     protected Map<String,Object> _annotation = null;
     protected List<Body> _bodies = null;
     protected List<Target> _targets = null;
+    protected User _creator = null;
 
     public Annotation(final Map<String,Object> pAnno) {
         this(pAnno, null);
@@ -56,6 +58,24 @@ public class Annotation {
 
     public void setEncoder(final Encoder pEncoder) {
         _encoder = pEncoder;
+    }
+
+    public void setCreator(final User pUser) {
+        _annotation.put("dcterms:creator", pUser.getId());
+        _creator = pUser;
+    }
+
+    public User getCreator() {
+        if (_creator == null && _annotation.get("dcterms:creator") != null) {
+            _creator = new User();
+            try {
+                _creator.setId((String)_annotation.get("dcterms:creator"));
+            } catch(URISyntaxException tExcept) {
+                System.err.println("Failed to load user to annotation as the ID was no a URI: " + _annotation.get("dcterms:creator"));
+                return null;
+            }
+        }
+        return _creator;
     }
 
     public void setJson(final Map<String, Object> pJson) {
@@ -92,6 +112,8 @@ public class Annotation {
                 _targets.add(new Target(_annotation.get("on")));
             }
         }
+        // Ensure motivation is an array
+        this.getMotivations();
     }
 
     protected void standaiseAnno() {
@@ -138,6 +160,7 @@ public class Annotation {
         List<String> tMotivations = new ArrayList<String>();
         if (_annotation.get("motivation") instanceof String) {
             tMotivations.add((String)_annotation.get("motivation"));
+            _annotation.put("motivation", tMotivations);
         } else {
             tMotivations = (List<String>)_annotation.get("motivation");
         }
