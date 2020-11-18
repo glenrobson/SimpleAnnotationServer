@@ -91,10 +91,6 @@
         <servlet-class>uk.org.llgc.annotation.store.Populate</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>List</servlet-name>
-        <servlet-class>uk.org.llgc.annotation.store.ListAnnoPages</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>ListAllAnnos</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.ListAnnotations</servlet-class>
     </servlet>
@@ -200,10 +196,6 @@
     <servlet-mapping>
         <servlet-name>Populate</servlet-name>
         <url-pattern>/annotation/populate</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>List</servlet-name>
-        <url-pattern>/list.html</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ListAllAnnos</servlet-name>
