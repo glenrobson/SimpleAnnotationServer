@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import uk.org.llgc.annotation.store.servlets.login.LoginCallback;
-import uk.org.llgc.annotation.store.contollers.UserService;
+import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.StoreConfig;
 
 public class OAuthFilter implements Filter {

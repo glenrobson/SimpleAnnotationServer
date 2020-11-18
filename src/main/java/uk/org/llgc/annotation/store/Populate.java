@@ -24,7 +24,7 @@ import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
-import uk.org.llgc.annotation.store.contollers.UserService;
+import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;

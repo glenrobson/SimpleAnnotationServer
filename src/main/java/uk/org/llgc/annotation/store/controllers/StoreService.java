@@ -1,4 +1,4 @@
-package uk.org.llgc.annotation.store.contollers;
+package uk.org.llgc.annotation.store.controllers;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ApplicationScoped;

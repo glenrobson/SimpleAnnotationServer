@@ -26,7 +26,7 @@ import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
-import uk.org.llgc.annotation.store.contollers.StatsService;
+import uk.org.llgc.annotation.store.controllers.StatsService;
 
 import com.github.jsonldjava.utils.JsonUtils;
 

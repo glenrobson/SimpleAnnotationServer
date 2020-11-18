@@ -20,7 +20,7 @@ import org.apache.jena.rdf.model.Model;
 
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
-import uk.org.llgc.annotation.store.contollers.UserService;
+import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Annotation;

@@ -12,8 +12,8 @@ import java.io.IOException;
 
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
-import uk.org.llgc.annotation.store.contollers.AuthorisationController;
-import uk.org.llgc.annotation.store.contollers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
+import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.users.User;

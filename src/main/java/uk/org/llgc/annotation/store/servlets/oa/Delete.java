@@ -20,8 +20,8 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.data.users.User;
-import uk.org.llgc.annotation.store.contollers.UserService;
-import uk.org.llgc.annotation.store.contollers.AuthorisationController;
+import uk.org.llgc.annotation.store.controllers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 public class Delete extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Delete.class.getName()); 

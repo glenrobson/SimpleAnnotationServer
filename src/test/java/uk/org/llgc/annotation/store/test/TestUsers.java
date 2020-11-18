@@ -27,7 +27,7 @@ import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.users.User;
-import uk.org.llgc.annotation.store.contollers.AuthorisationController;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 import com.github.jsonldjava.utils.JsonUtils;
 

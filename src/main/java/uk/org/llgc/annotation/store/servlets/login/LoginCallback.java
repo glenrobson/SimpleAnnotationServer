@@ -28,7 +28,7 @@ import java.util.Map;
 
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
-import uk.org.llgc.annotation.store.contollers.UserService;
+import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.StoreConfig;
 
 import com.github.jsonldjava.utils.JsonUtils;

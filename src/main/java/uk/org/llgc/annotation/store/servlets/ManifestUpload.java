@@ -37,8 +37,8 @@ import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
-import uk.org.llgc.annotation.store.contollers.AuthorisationController;
-import uk.org.llgc.annotation.store.contollers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
+import uk.org.llgc.annotation.store.controllers.UserService;
 
 
 public class ManifestUpload extends HttpServlet {
