@@ -133,6 +133,36 @@ public class Annotation {
             
             _annotation.put("resource", tList);
         }
+
+
+        // Ensure on is an array
+        if (_annotation.get("on") != null && !(_annotation.get("on") instanceof String)) {
+            List<Map<String, Object>> tOns = new ArrayList<Map<String,Object>>();
+            if (_annotation.get("on") instanceof List) {
+                tOns = (List<Map<String, Object>>)_annotation.get("on");
+            } else {
+                tOns.add((Map<String, Object>)_annotation.get("on"));
+                _annotation.put("on", tOns);
+            }
+            // Ensure selector.item is an object not an array
+            for (Map<String,Object> tOn: tOns) {
+                if (tOn.get("@type") != null && tOn.get("@type").equals("oa:SpecificResource") && tOn.get("selector") != null) {
+                    Map<String,Object> tSelector = (Map<String,Object>)tOn.get("selector");
+                    if (tSelector.get("item") != null && tSelector.get("item") instanceof List) {
+                        List<Map<String,Object>> tItems = (List<Map<String,Object>>)tSelector.get("item");
+                        if (tItems.size() > 1) {
+                            System.err.println("I think this is an invalid annotation as there are multiple items and I expected only one: " + this.getId());
+                            try { 
+                                System.out.println(JsonUtils.toPrettyString(_annotation));
+                            } catch (IOException tExcpt) {
+                                System.err.println("Failed to print annotation due to " + tExcpt);
+                            }
+                        }
+                        tSelector.put("item", tItems.get(0));
+                    }
+                }
+            }
+        }
     }
 
     public String getId() {

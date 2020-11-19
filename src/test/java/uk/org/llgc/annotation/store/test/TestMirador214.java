@@ -75,10 +75,32 @@ public class TestMirador214 extends TestUtils {
 		_logger.debug("ID " + tAnnoId);
 		Annotation tAnnotation = _store.addAnnotation(new Annotation(tAnnotationJSON));
 
+        // Mirador DualStrategy test:
+        /*
+            if (annotation.on && jQuery.isArray(annotation.on) && annotation.on.length > 0 && typeof annotation.on[0] === 'object' &&
+          annotation.on[0].selector && typeof annotation.on[0].selector === 'object' &&
+          annotation.on[0].selector['@type'] === 'oa:Choice' &&
+          annotation.on[0].selector.default && typeof annotation.on[0].selector.default === 'object' &&
+          annotation.on[0].selector.default.value && typeof annotation.on[0].selector.default.value === 'string' &&
+          annotation.on[0].selector.item && typeof annotation.on[0].selector.item === 'object' &&
+          annotation.on[0].selector.item.value && typeof annotation.on[0].selector.item.value === 'string'
+        ) {
+        return annotation.on[0].selector.default.value.indexOf('xywh=') === 0 && annotation.on[0].selector.item.value.indexOf('<svg') === 0;
+
+        */
+
 		// Require on to be an array
 		assertTrue("On needs to be an array and it isn't.", tAnnotation.toJson().get("on") instanceof List);
+		assertTrue("First object in on must be a map", ((List)tAnnotation.toJson().get("on")).get(0) instanceof Map);
+        Map<String, Object> tSelector = (Map<String,Object>)((List<Map<String,Object>>)tAnnotation.toJson().get("on")).get(0).get("selector");
 
+		assertEquals("Selector should be a choice", "oa:Choice", (String)tSelector.get("@type"));
 		//System.out.println(JsonUtils.toPrettyString(tAnnotation));
-		assertNotNull("Default rect present ", (((Map<String,String>)((Map<String, Object>)tAnnotation.getTargets().get(0).toJson().get("selector")).get("default")).get("value")));
+		assertTrue("Default present and is Map", tSelector.get("default") instanceof Map);
+		assertTrue("Default value should be String", ((Map)tSelector.get("default")).get("value") instanceof String);
+		assertTrue("Selector item should be Map", tSelector.get("item") instanceof Map);
+		assertTrue("Selector item value should be string", ((Map)tSelector.get("item")).get("value") instanceof String);
+		assertTrue("Default should be xywh", ((String)((Map<String,Object>)tSelector.get("default")).get("value")).indexOf("xywh") != -1);
+		assertTrue("Item should be svg", ((String)((Map<String,Object>)tSelector.get("item")).get("value")).indexOf("<svg") != -1);
 	}
 }
