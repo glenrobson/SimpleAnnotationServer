@@ -32,7 +32,6 @@
                 "sidePanelVisible" : false,
             },
             "saveSession": false,
-            "data": [ { "collectionUri": "manifests/", "location": "Local Manifests"} ],
             annotationEndpoint: {
                 name: 'Simple Annotation Store Endpoint',
                 module: 'SimpleASEndpoint',
@@ -47,14 +46,26 @@
             }
         };
 
-        var manifest = getURLParameter("iiif-content");
+        var manifest = getURLParameter("manifest");
+        var collection = getURLParameter("collection");
+        console.log("Manifest " + manifest + " collection: " + collection);
+        var collectionAdded = false;
+        if(typeof(collection) == "string" && collection.length > 0) {
+            configuration.data = [{
+                "collectionUri": collection,
+                "location": "Local Manifests"
+            }];
+            collectionAdded = true;
+        }
         if(typeof(manifest) == "string" && manifest.length > 0) {
-            
-            configuration.data.push({
-                "manifestUri": manifest,
-            });
+            if (!collectionAdded) { 
+                configuration.data = [{
+                    "manifestUri": manifest,
+                    "location": "Local Manifests"
+                }];
+            }
             configuration.windowObjects = [{
-                "loadedManifest": manifest,
+                "loadedManifest": manifest
             }];
         }
 
@@ -62,31 +73,53 @@
         // Every time a manifest is loaded send it for indexing and 
         // add IIIF search service so you can search your annotations
         mirador.eventEmitter.subscribe('manifestReceived', function(event, newManifest) {
-            console.log("Found manifest " + newManifest.uri);
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "manifests", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        var json = JSON.parse(xhr.responseText);
-                        console.log("Search API for " + newManifest.uri + " avilable at: search-api/" + json.loaded.short_id + "/search");
-                        newManifest.jsonLd['service'] = {
-                            profile: 'http://iiif.io/api/search/0/search',
-                            '@id': 'search-api/' + json.loaded.short_id + "/search",
-                            '@context': 'http://iiif.io/api/search/0/context.json'
-                        }
+            $.ajax({
+                url: '/manifests/',
+                data: {
+                    "collection": collection,
+                    "manifest": newManifest.uri
+                },
+                type: 'GET',
+                success: function(data) {
+                    var json = data;
+                    console.log("Search API for " + newManifest.uri + " avilable at: search-api/" + json.loaded.short_id + "/search");
+                    newManifest.jsonLd['service'] = {
+                        profile: 'http://iiif.io/api/search/0/search',
+                        '@id': 'search-api/' + json.loaded.short_id + "/search",
+                        '@context': 'http://iiif.io/api/search/0/context.json'
+                    }
+                },
+                error: function(data) {
+                    var json = data.responseJSON;
+                    if (json.code === 404) {
+                        // Now need to index the manifest
+                        newManifest.jsonLd['within'] = collection;
+                        $.ajax({
+                            url: '/manifests/',
+                            data: JSON.stringify(newManifest.jsonLd),
+                            type: 'POST',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function(data) {
+                                var json = data;
+                                console.log("Search API for " + newManifest.uri + " avilable at: search-api/" + json.loaded.short_id + "/search");
+                                newManifest.jsonLd['service'] = {
+                                    profile: 'http://iiif.io/api/search/0/search',
+                                    '@id': 'search-api/' + json.loaded.short_id + "/search",
+                                    '@context': 'http://iiif.io/api/search/0/context.json'
+                                }
+                            },
+                            error: function(data) {
+                                console.log('Failed to load manifest: ' + data.responseJSON.message);
+                            }
+                        });
                     } else {
-                        console.log("Failed to index " + newManifest.uri + " due to " + xhr.status + ": '" + xhr.statusText + "'");
+                        console.log('Failed to find manifest: ' + data.responseJSON.message);
                     }
                 }
-            };
-            xhr.send(JSON.stringify(newManifest.jsonLd));
-
+            });
         });
-
-        });
-
+      });
       </script>
 </body>
 </html>

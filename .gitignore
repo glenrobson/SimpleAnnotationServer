@@ -5,6 +5,6 @@ src/main/webapp/demo.html
 /data
 cache
 index-2.6.1.html
-src/main/webapp/stats
+src/main/webapp/stats/*.json
 .aws-credentials
 auth.json

@@ -25,6 +25,7 @@ import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.controllers.AuthorisationController;
@@ -32,12 +33,14 @@ import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 import com.github.jsonldjava.utils.JsonUtils;
 
 import java.net.URISyntaxException;
+import java.net.URI;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
+import java.text.ParseException;
 
 public class TestUsers extends TestUtils {
 	protected static Logger _logger = LogManager.getLogger(TestUsers.class.getName());
@@ -299,7 +302,7 @@ public class TestUsers extends TestUtils {
     }
 
     @Test 
-    public void testDates() throws IOException, IDConflictException, MalformedAnnotation, URISyntaxException, URISyntaxException {
+    public void testDates() throws IOException, IDConflictException, MalformedAnnotation, URISyntaxException {
         User tUser = new User();
         tUser.setId("http://example.com/user1");
         tUser.setShortId("user1");
@@ -331,6 +334,65 @@ public class TestUsers extends TestUtils {
 
         assertEquals("Created date should be the same after update " + tUser.getCreated().getTime() + " " + tStoredUpdatedUser.getCreated().getTime(), tUser.getCreated(), tStoredUpdatedUser.getCreated());
         assertEquals("Last mod date should be updated", tUpdatedUser.getLastModified(), tStoredUpdatedUser.getLastModified());
+    }
+
+    @Test 
+    public void testSearch() throws IOException, IDConflictException, MalformedAnnotation, URISyntaxException, ParseException {
+        Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+        Map<String, Object> tAnnotation2 = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+        Annotation tAnno1 = new Annotation(tAnnotation);
+        Annotation tAnno2 = new Annotation(tAnnotation2);
+        tAnno1.setId("http://example.com/user1/anno1");
+        tAnno2.setId("http://example.com/user2/anno1");
+
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tAnno1.setCreator(tUser1);
+
+        User tUser2 = new User();
+        tUser2.setId("http://example.com/user2");
+        tAnno2.setCreator(tUser2);
+
+        User tAdminUser = new User();
+        tAdminUser.setId("http://example.com/admin");
+        tAdminUser.setAdmin(true);
+
+        _store.addAnnotation(tAnno1);
+        _store.addAnnotation(tAnno2);
+
+        Manifest tManifest = tAnno1.getTargets().get(0).getManifest(); // Both annotations target the same canvas
+
+        SearchQuery tQuery = new SearchQuery(new URI("http://example.com/search"));
+        tQuery.setResultsPerPage(100);
+        tQuery.setScope(tManifest.getURI());
+        tQuery.addUser(tUser1);
+		AnnotationList tResults1 = _store.search(tQuery);
+
+        tQuery = new SearchQuery(new URI("http://example.com/search"));
+        tQuery.setResultsPerPage(100);
+        tQuery.setScope(tManifest.getURI());
+        tQuery.addUser(tUser2);
+		AnnotationList tResults2 = _store.search(tQuery);
+
+        tQuery = new SearchQuery(new URI("http://example.com/search"));
+        tQuery.setResultsPerPage(100);
+        tQuery.setScope(tManifest.getURI());
+        tQuery.addUser(tAdminUser);
+		AnnotationList tAdminResults = _store.search(tQuery);
+
+        assertEquals("Expected 1 annotation for user 1",1, tResults1.size()); 
+        assertEquals("Unexpected ID for anntoation","http://example.com/user1/anno1", tResults1.get(0).getId()); 
+
+        assertEquals("Expected 1 annotation for user 2",1, tResults2.size()); 
+        assertEquals("Unexpected ID for anntoation","http://example.com/user2/anno1", tResults2.get(0).getId()); 
+
+        assertEquals("Expected 2 annotation for admin",2, tAdminResults.size()); 
+        List<String> tAnnoIds = new ArrayList<String>();
+        for (Annotation tAnno : tAdminResults.getAnnotations()) {
+            tAnnoIds.add(tAnno.getId());
+        }
+        assertTrue("Hoped to find user1's annos in list but it wasn't found.",tAnnoIds.contains("http://example.com/user1/anno1"));
+        assertTrue("Hoped to find user2's annos in list but it wasn't found.",tAnnoIds.contains("http://example.com/user2/anno1"));
     }
 
 }

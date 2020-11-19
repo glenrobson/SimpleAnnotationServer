@@ -282,12 +282,20 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	}
 
 	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException {
+        String tUserTest = "";
+        if (pQuery.getUsers() != null) {
+            User tUser = pQuery.getUsers().get(0);
+            if (!tUser.isAdmin()) {
+                tUserTest = " ?annoId <http://purl.org/dc/terms/creator> <" + tUser.getId() + "> .";
+            }
+        }    
 		String tQueryString = "PREFIX oa: <http://www.w3.org/ns/oa#> "
 									 + "PREFIX cnt: <http://www.w3.org/2011/content#> "
                                      + "PREFIX dcterms: <http://purl.org/dc/terms/> "
 									 + "select ?anno ?content ?graph where { "
 									 + "  GRAPH ?graph { ?anno oa:hasTarget ?target . "
 									 + "  ?anno oa:hasBody ?body . "
+                                     + tUserTest
                                      + "  ?target dcterms:isPartOf <" + pQuery.getScope() + "> ."
 									 + "  ?body <" + Annotation.FULL_TEXT_PROPERTY + "> ?content ."
 									 + "  FILTER regex(str(?content), \".*" + pQuery.getQuery() + ".*\")"

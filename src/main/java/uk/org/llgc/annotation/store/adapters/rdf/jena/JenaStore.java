@@ -8,6 +8,7 @@ import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.JenaTransactionException;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -87,7 +88,14 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	protected void begin(final ReadWrite pWrite) {
-		_dataset.begin(pWrite);
+        try {
+            _dataset.begin(pWrite);
+        } catch (JenaTransactionException tExcpt) {
+            System.err.println("In transaction so going to try and close it before re-openning");
+            tExcpt.printStackTrace();
+            this.end();
+            _dataset.begin(pWrite);
+        }
 	}
 	protected void end() {
 		_dataset.end();

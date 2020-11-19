@@ -142,7 +142,6 @@ public class Annotation {
                 tOns = (List<Map<String, Object>>)_annotation.get("on");
             } else {
                 tOns.add((Map<String, Object>)_annotation.get("on"));
-                _annotation.put("on", tOns);
             }
             // Ensure selector.item is an object not an array
             for (Map<String,Object> tOn: tOns) {

@@ -102,6 +102,7 @@ public class StatsService {
 
             // Get list of all annotations
             List<PageAnnoCount> tPageCounts = this.getAnnoCountData(pManifest);
+            System.out.println(tPageCounts);
      
             ChartSeries annoCounts = new ChartSeries();
             annoCounts.setLabel("Number of annotations");

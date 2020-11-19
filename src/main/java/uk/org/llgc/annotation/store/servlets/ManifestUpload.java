@@ -71,8 +71,8 @@ public class ManifestUpload extends HttpServlet {
 			tID = pReq.getParameter("uri");
 			tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tID).openStream());
 
-            if (pReq.getParameter("collectionURI") != null) {
-                tCollectionId = pReq.getParameter("collectionURI");
+            if (pReq.getParameter("collection") != null) {
+                tCollectionId = pReq.getParameter("collection");
             }
 		} else {
 			InputStream tManifestStream = pReq.getInputStream();
@@ -124,35 +124,40 @@ public class ManifestUpload extends HttpServlet {
     }
 
 	// if asked for without path then return collection of manifests that are loaded
-/*	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		String tRequestURI = pReq.getRequestURI();
-		String[] tSplitURI = tRequestURI.split("/");
+	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        String tCollectionId = pReq.getParameter("collection");
+        String tManifestId = pReq.getParameter("manifest");
 
-		// Return collection
-		List<Manifest> tManifests = _store.getManifests();
+        Manifest tManifest = _store.getManifest(tManifestId);
+        if (tManifest == null) {
+            Map<String,Object> tResponse = new HashMap<String,Object>();
+            tResponse.put("code", pRes.SC_NOT_FOUND);
+            tResponse.put("message", "Manifest is not loaded");
+            sendJson(pRes, HttpServletResponse.SC_NOT_FOUND, tResponse);
+        } else {
+            if (tCollectionId != null) {
+                Collection tCollection = _store.getCollection(tCollectionId);
+                if (tCollection != null && !tCollection.contains(tManifest)) {
+                    AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+                    if (tAuth.allowCollectionEdit(tCollection)) {
+                        tCollection.add(tManifest);
+                        _store.updateCollection(tCollection);
+                    } else {
+                        Map<String,Object> tResponse = new HashMap<String,Object>();
+                        tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                        tResponse.put("message", "You can only edit your own collections unless you are Admin");
+                        this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                        return;
+                    }
+                }
+            }
+            Map<String,Object> tJson = new HashMap<String,Object>();
+            Map<String,String> tLinks = new HashMap<String,String>();
+            tJson.put("loaded", tLinks);
+            tLinks.put("uri", tManifest.getURI());
+            tLinks.put("short_id", tManifest.getShortId());
 
-		Map<String,Object> tCollection = new HashMap<String,Object>();
-
-		tCollection.put("@context", "http://iiif.io/api/presentation/2/context.json");
-		tCollection.put("@id", StoreConfig.getConfig().getBaseURI(pReq) + "/annotation//collection/managed.json");
-		tCollection.put("@type", "sc:Collection");
-		tCollection.put("label","Collection of all manifests known by this annotation server");
-
-		List<Map<String,Object>> tMembers = new ArrayList<Map<String,Object>>();
-		for (Manifest tManifest : tManifests) {
-			Map<String, Object> tManifestJson = new HashMap<String,Object>();
-			tManifestJson.put("@id", tManifest.getURI());
-			tManifestJson.put("@type", "sc:Manifest");
-
-			tMembers.add(tManifestJson);
-		}
-
-		tCollection.put("members", tMembers);
-		tCollection.put("manifests", tMembers);
-
-		pRes.setStatus(HttpServletResponse.SC_CREATED);
-		pRes.setContentType("application/ld+json; charset=UTF-8");
-		pRes.setCharacterEncoding("UTF-8");
-		JsonUtils.write(pRes.getWriter(), tCollection);
-	}*/
+            this.sendJson(pRes, pRes.SC_OK, tJson);
+        }
+    }
 }

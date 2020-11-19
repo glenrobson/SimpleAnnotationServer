@@ -28,6 +28,7 @@
         <url-pattern>/user/*</url-pattern>
         <url-pattern>/annotation/*</url-pattern> <!-- This covers search, add, update and delete annotations -->
         <url-pattern>/collection/*</url-pattern>
+        <url-pattern>/stats/*</url-pattern>
         <url-pattern>/collections.xhtml</url-pattern>
         <url-pattern>/manifest.xhtml</url-pattern>
         <url-pattern>/view.xhtml</url-pattern>

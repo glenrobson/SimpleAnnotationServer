@@ -136,6 +136,10 @@ public class Collection {
         _manifests.add(pManifest);
     }
 
+    public boolean contains(final Manifest pManifest) {
+        return this.getManifest(pManifest.getURI()) != null; 
+    }
+
 
     public String createId(final String pBaseURL) {
         _id = pBaseURL + _user.getShortId() + "/" + new Date().getTime() + ".json";
