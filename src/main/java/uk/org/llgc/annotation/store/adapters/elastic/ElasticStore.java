@@ -232,6 +232,20 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                         .startObject("authenticationMethod")
                             .field("type", "keyword")
                         .endObject()
+                        .startObject("members")
+                            .field("type", "object")
+                            .startObject("properties")
+                                .startObject("id")
+                                    .field("type", "keyword")
+                                .endObject()
+                                .startObject("type")
+                                    .field("type", "keyword")
+                                .endObject()
+                                .startObject("label")
+                                    .field("type", "text")
+                                .endObject()
+                            .endObject()
+                        .endObject()
                     .endObject()
                 .endObject();
             tRequest.mapping(tMapping);
@@ -263,6 +277,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 		tJson.put("created", pAnno.getCreated());
 		tJson.put("modified", pAnno.getModified());
 		tJson.put("motivation", pAnno.getMotivations());
+        if (pAnno.getCreator() != null && !pAnno.getCreator().isAdmin()) {
+            tJson.put("creator", pAnno.getCreator().getId());
+        }
 
         List<String> tBodies = new ArrayList<String>();
         for (Body tBody : pAnno.getBodies()) {
@@ -403,20 +420,32 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
 	public String getManifestId(final String pShortId) throws IOException {
-        Manifest tManifest = this.getManifest(pShortId);
-        if (tManifest != null) {
-            return tManifest.getURI();
-        } else {
-            return null;
-        } 
-	}
-
-	public Manifest getManifest(final String pShortId) throws IOException {
         GetRequest tRequest = new GetRequest(_index, pShortId);
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
         if (tResponse != null && tResponse.isExists()) {
-            return json2Manifest(tResponse.getSourceAsMap());
+            Manifest tManifest = json2Manifest(tResponse.getSourceAsMap());
+            return tManifest.getURI();
+        } else {
+            return null;
+        }
+	}
+
+	public Manifest getManifest(final String pId) throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.termQuery("id", pId));
+        searchSourceBuilder.size(1);
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        if (searchHits != null && searchHits.length > 0) {
+            Manifest tManifest = null;
+            for (SearchHit hit : searchHits) {
+                tManifest = json2Manifest(hit.getSourceAsMap());
+            }
+            return tManifest;
         } else {
             return null;
         }
@@ -530,6 +559,20 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 		if (pQuery.getMotivations() != null && !pQuery.getMotivations().isEmpty()) {
             tBuilder.must(QueryBuilders.termsQuery("motivation", pQuery.getMotivations()));
         }    
+		if (pQuery.getUsers() != null && !pQuery.getUsers().isEmpty()) {
+            List<String> tUserIds = new ArrayList<String>();
+            boolean tFoundAdmin = false;
+            for (User tUser : pQuery.getUsers()) {
+                tUserIds.add(tUser.getId());
+                if (tUser.isAdmin()) {
+                    tFoundAdmin = true;
+                }
+            }
+            if (!tFoundAdmin) {
+                tBuilder.must(QueryBuilders.termsQuery("creator", tUserIds));
+                // if we found an admin then they can access all results
+            }
+        }    
         tBuilder.must(QueryBuilders.termQuery("target.within.id", pQuery.getScope()));
         if (pQuery.getQuery() != null && !pQuery.getQuery().isEmpty()) {
             tBuilder.must(QueryBuilders.matchQuery("body", pQuery.getQuery()).operator(Operator.AND));
@@ -620,27 +663,14 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }    
 
     public User getUser(final User pUser) throws IOException {
-        User tSavedUser = new User();
-        tSavedUser.setToken(pUser.getToken());
+        GetRequest tRequest = new GetRequest(_index, pUser.getId());
+        GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
-        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
-        tBuilder.must(QueryBuilders.termQuery("type", "User"));
-        tBuilder.must(QueryBuilders.matchQuery("short_id", pUser.getShortId()));
+        if (tResponse != null && tResponse.getSource() != null) {
+            User tSavedUser = new User();
+            tSavedUser.setToken(pUser.getToken());
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(tBuilder);
-        searchSourceBuilder.size(1);
-        SearchRequest searchRequest = new SearchRequest(_index);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
-        SearchHits hits = searchResponse.getHits();
-        SearchHit[] searchHits = hits.getHits();
-        if (searchHits.length == 0) {
-            return null; // No user saved
-        } else if (searchHits.length > 1) {
-            throw new IOException("Found " + searchHits.length + " with id " + pUser.getShortId());
-        } else {
-            Map<String, Object> tJson = searchHits[0].getSourceAsMap();
+            Map<String, Object> tJson = (Map<String,Object>)tResponse.getSourceAsMap();
             try {
                 tSavedUser.setId((String)tJson.get("id"));
             } catch (URISyntaxException tExcpt) {
@@ -649,6 +679,13 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
             tSavedUser.setShortId((String)tJson.get("short_id"));
             tSavedUser.setName((String)tJson.get("name"));
             tSavedUser.setEmail((String)tJson.get("email"));
+            if (tJson.get("created") != null) {
+                tSavedUser.setCreated(super.parseDate((String)tJson.get("created")));
+            }
+            tSavedUser.setLastModified(super.parseDate((String)tJson.get("modified")));
+            if (tJson.get("created") == null && tJson.get("modified") != null) {
+                tSavedUser.setCreated(tSavedUser.getLastModified());
+            }
             if (tJson.get("picture") != null) {
                 tSavedUser.setPicture((String)tJson.get("picture"));
             }
@@ -656,13 +693,21 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                 tSavedUser.setAdmin(true);
             }
             tSavedUser.setAuthenticationMethod((String)tJson.get("authenticationMethod"));
-        }
              
-        return tSavedUser;         
+            return tSavedUser;         
+        } else {
+            return null;
+        }
     }
     public User saveUser(final User pUser) throws IOException {
+        User tSavedUser = getUser(pUser);
+        if (tSavedUser != null) {
+            // This is an update
+            pUser.setCreated(tSavedUser.getCreated());
+            pUser.updateLastModified();
+        }
         IndexRequest tIndex = new IndexRequest(_index);
-        tIndex.id(pUser.getShortId());
+        tIndex.id(pUser.getId());
         Map<String, Object> tJson = this.user2json(pUser);
         tIndex.source(tJson);
 	
@@ -679,6 +724,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         tJson.put("short_id", pUser.getShortId());
         tJson.put("name", pUser.getName());
         tJson.put("email", pUser.getEmail());
+        // Elastic search could handle this but better to be explicit on the format
+        tJson.put("created", super.formatDate(pUser.getCreated())); 
+        tJson.put("modified", super.formatDate(pUser.getLastModified()));
         if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tJson.put("picture", pUser.getPicture());
         }
@@ -690,17 +738,119 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         return tJson;
     }
 
+    protected Map<String, Object> object2json(final Collection pCollection) {
+        Map<String,Object> tJson = new HashMap<String,Object>();
+        tJson.put("id", pCollection.getId());
+        tJson.put("type", "Collection");
+        tJson.put("short_id", pCollection.getShortId());
+        tJson.put("label", pCollection.getLabel());
+        tJson.put("creator", pCollection.getUser().getId());
+
+        List<Map<String,Object>> tMembers = new ArrayList<Map<String, Object>>();
+        for (Manifest tManifest : pCollection.getManifests()) {
+            Map<String, Object> tManifestJson = new HashMap<String, Object>();
+            tManifestJson.put("id", tManifest.getURI());
+            tManifestJson.put("type", "Manifest");
+            tManifestJson.put("label", tManifest.getLabel());
+
+            tMembers.add(tManifestJson);
+        }
+        tJson.put("members", tMembers);
+        return tJson;
+    }
+
+    protected Collection collectionFromMap(final Map<String, Object> pJson) throws IOException {
+        Collection tCollection = new Collection();
+
+        tCollection.setId((String)pJson.get("id"));
+        tCollection.setShortId((String)pJson.get("short_id"));
+        tCollection.setLabel((String)pJson.get("label"));
+
+        User tUser = new User();
+        try {
+            tUser.setId((String)pJson.get("creator"));
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Unable to create user as the ID is not a valid URI: " + pJson.get("creator"));
+        }
+        tCollection.setUser(tUser);
+        List<Map<String,Object>> tManifests = (List<Map<String,Object>>)pJson.get("members");
+        for (Map<String,Object> tManifestJson : tManifests) {
+            Manifest tManifest = new Manifest();
+            tManifest.setURI((String)tManifestJson.get("id"));
+            tManifest.setLabel((String)tManifestJson.get("label"));
+            tCollection.add(tManifest);
+        }
+
+        return tCollection;
+    }
 
     public Collection createCollection(final Collection pCollection) throws IOException {
-        return null;
+        IndexRequest tIndex = new IndexRequest(_index);
+        tIndex.id(pCollection.getId());
+        Map<String, Object> tJson = this.object2json(pCollection);
+        tIndex.source(tJson);
+	
+        tIndex.setRefreshPolicy(_policy);
+        _client.index(tIndex, RequestOptions.DEFAULT);
+
+        return pCollection;
     }
 
     public List<Collection> getCollections(final User pUser) throws IOException {
-        return null;
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("type", "Collection"));
+        tBuilder.must(QueryBuilders.matchQuery("creator", pUser.getId()));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(tBuilder);
+        searchSourceBuilder.size(10000);
+
+        List<Collection> tCollections = this.getCollections(searchSourceBuilder);
+        if (tCollections == null) {
+            tCollections = new ArrayList<Collection>();
+        } else {
+            // Make sure the fully populated user is added rather than just the ID
+            for (Collection tCollection : tCollections) {
+                tCollection.setUser(pUser);
+            }
+        }
+        return tCollections;
     }
+        
+    public List<Collection> getCollections(final SearchSourceBuilder tQuery) throws IOException { 
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(tQuery);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        List<Collection> tCollections = new ArrayList<Collection>();
+        if (searchHits.length == 0) {
+            return null; // No user saved
+        } else {
+            for (int i = 0; i < searchHits.length; i++) {
+                tCollections.add(this.collectionFromMap(searchHits[i].getSourceAsMap()));
+            }
+        }
+             
+        return tCollections;         
+    }
+
     public Collection getCollection(final String pId) throws IOException {
-        return null;
+        GetRequest tRequest = new GetRequest(_index, pId);
+        GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
+
+        if (tResponse != null && tResponse.getSource() != null && tResponse.getSourceAsMap() != null && tResponse.getSourceAsMap() != null) {
+            return this.collectionFromMap((Map<String,Object>)tResponse.getSourceAsMap());
+        } else {    
+            return null;
+        }
     }
+
     public void deleteCollection(final Collection pCollection) throws IOException {
+        DeleteRequest tDelete = new DeleteRequest(_index);
+        tDelete.id(pCollection.getId());
+
+        tDelete.setRefreshPolicy(_policy);
+        _client.delete(tDelete, RequestOptions.DEFAULT);
     }
 }

@@ -17,6 +17,9 @@ import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+
 import com.github.jsonldjava.utils.JsonUtils;
 
 import org.apache.jena.query.ReadWrite;
@@ -25,6 +28,7 @@ import java.io.IOException;
 
 import java.util.Map;
 import java.util.List;
+import java.util.Date;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
     protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName());
@@ -83,6 +87,23 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 		return addAnnotationSafe(pAnno);
 	}
+
+    protected String formatDate(final Date pDate) {
+        SimpleDateFormat tDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        return tDateFormatter.format(pDate);
+    }
+
+    protected Date parseDate(final String pDate) {
+        try {
+            SimpleDateFormat tDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            return tDateFormatter.parse(pDate);
+        } catch (ParseException tExcpt) {
+            tExcpt.printStackTrace();
+            System.err.println("Failed to parse date " + pDate);
+            return null;
+        }
+    }
+
 
     protected void addWithins(final Annotation pAnno) throws IOException {
         List<Target> tMissingWithins = pAnno.getMissingWithin();

@@ -76,7 +76,28 @@ public class User {
     }
 
     public String toString() {
-        return "Id: " + _id + "\nShortid: " + _shortId +  "\nName: " + _name + "\nEmail: " + _email + "\nPic: " + _pic + "\nCreated: " + _created.getTime() + "\nAdmin: " + _isAdmin + "\nAuth method: " + _authenticationMethod;
+        StringBuffer tBuffer = new StringBuffer("Id: ");
+        tBuffer.append(_id);
+        tBuffer.append("\nShortid: ");
+        tBuffer.append(_shortId);
+        tBuffer.append("\nName: ");
+        tBuffer.append(_name);
+        tBuffer.append("\nEmail: ");
+        tBuffer.append(_email);
+        tBuffer.append("\nPic: ");
+        tBuffer.append(_pic);
+        tBuffer.append("\nCreated: ");
+        if (_created != null) {
+            tBuffer.append(_created.getTime());
+        } else {
+            tBuffer.append(" is null");
+        }
+        tBuffer.append("\nAdmin: ");
+        tBuffer.append(_isAdmin);
+        tBuffer.append("\nAuth method: ");
+        tBuffer.append(_authenticationMethod);
+
+        return tBuffer.toString();
     }
 
     /**

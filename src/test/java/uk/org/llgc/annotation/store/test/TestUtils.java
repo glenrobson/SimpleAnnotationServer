@@ -59,6 +59,7 @@ import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.ElasticsearchStatusException;
 
 import java.util.Properties;
 
@@ -151,6 +152,20 @@ public class TestUtils {
                         System.err.println("Failed to delete test dir " + tDataDir.getPath() + " due to " + tExcpt);
                     }
                 }
+            } else if (tStore.equals("elastic")) {
+                try {
+                    URI tConectionString = new URI((String)_props.get("elastic_connection"));
+                    RestHighLevelClient tClient = ElasticStore.buildClient(tConectionString);
+                    String tIndex = tConectionString.getPath().replace("/","");
+                    
+                    tClient.indices().delete(new DeleteIndexRequest(tIndex), RequestOptions.DEFAULT);
+                } catch (IOException tExcpt) {    
+                    System.err.println("Failed to delete elastic search due to " + tExcpt);
+                } catch (URISyntaxException tExcpt) {
+                    System.err.println("Failed to delete elastic search due to " + tExcpt);
+                } catch (ElasticsearchStatusException tExcpt) {
+                    // silently catch this as it means there was no index to delete
+                }
             }
         }
     };
@@ -166,7 +181,7 @@ public class TestUtils {
 				tException.printStackTrace();
 				throw new IOException("Failed to remove annotations due to " + tException);
 			}
-		} else if (tStore.equals("elastic")) {
+		/*} else if (tStore.equals("elastic")) {
             try {
                 URI tConectionString = new URI((String)_props.get("elastic_connection"));
                 RestHighLevelClient tClient = ElasticStore.buildClient(tConectionString);
@@ -176,7 +191,7 @@ public class TestUtils {
             } catch (URISyntaxException tExcpt) {
 				tExcpt.printStackTrace();
 				throw new IOException("Failed to remove annotations due to " + tExcpt);
-            }
+            }*/
 		} else if (tStore.equals("sesame")) {
 			try {
 				HTTPRepository tRepo = new HTTPRepository(_props.getProperty("repo_url"));

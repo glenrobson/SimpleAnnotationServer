@@ -76,10 +76,10 @@ public class UserServlet extends HttpServlet {
         User tSkeletonUser = new User();
         try {
             tSkeletonUser.setId(tPersonURI);
+            tSkeletonUser.setShortId(relativeId.substring("/user/".length()));
         } catch (URISyntaxException tExcpt) {
             throw new IOException("Unable to add user because " + tPersonURI + " is not a valid URI");
         }
-
         User tFullUser = _store.getUser(tSkeletonUser);
         return tFullUser;
     }
