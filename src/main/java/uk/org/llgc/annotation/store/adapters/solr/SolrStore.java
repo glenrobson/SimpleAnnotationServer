@@ -97,6 +97,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		_utils.addMultiple(tDoc, "motivation", pAnno.getMotivations());
 		tDoc.addField("created", pAnno.getCreated());
 		tDoc.addField("modified", pAnno.getModified());
+        if (pAnno.getCreator() != null) {
+            tDoc.addField("creator", pAnno.getCreator().getId());
+        }
 
         for (Body tBody : pAnno.getBodies()) {
             tDoc.addField("body", tBody.getIndexableContent());
@@ -208,8 +211,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		return _manifestStore.getManifestId(pShortId);
 	}
 
-	public Manifest getManifest(final String pShortId) throws IOException {
-		return _manifestStore.getManifest(pShortId);
+	public Manifest getManifest(final String pId) throws IOException {
+		return _manifestStore.getManifest(pId);
 	}
 
     public Canvas resolveCanvas(final String pShortId) throws IOException {
@@ -286,6 +289,30 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 				tSolrQuery.append(")");
 			}
 		}
+        if (pQuery.getUsers() != null && !pQuery.getUsers().isEmpty()) {
+            StringBuffer tUserQuery = new StringBuffer();
+            tUserQuery.append(" AND creator:");
+            boolean tFoundAdmin = false;
+			if (pQuery.getUsers().size() == 1) {
+				tUserQuery.append("\"");
+				tUserQuery.append(pQuery.getUsers().get(0).getId());
+				tUserQuery.append("\"");
+                tFoundAdmin = pQuery.getUsers().get(0).isAdmin();
+			} else {
+				tUserQuery.append("(");
+				for (User tUser : pQuery.getUsers()) {
+					tUserQuery.append(" ");
+					tUserQuery.append(tUser.getId());
+                    if (tUser.isAdmin()) {
+                        tFoundAdmin = true;
+                    }
+				}
+				tUserQuery.append(")");
+			}
+            if (!tFoundAdmin) {
+                tSolrQuery.append(tUserQuery);
+            }
+        }
 
 		tSolrQuery.append(" AND within:\"");
 		tSolrQuery.append(pQuery.getScope());
@@ -448,10 +475,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         tUser.setToken(pUser.getToken());
 
         SolrQuery tQuery = new SolrQuery();
-		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod");
+		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod", "created", "modified");
 		tQuery.setRows(1000);
 
-		tQuery.set("q", "type:\"User\" AND short_id:\"" + pUser.getShortId() + "\"");
+		tQuery.set("q", "type:\"User\" AND id:\"" + pUser.getId() + "\"");
 
 		try {
 			QueryResponse tResponse  = _solrClient.query(tQuery);
@@ -468,6 +495,8 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
                 tUser.setShortId((String)pDoc.get("short_id"));
                 tUser.setName((String)pDoc.get("name"));
                 tUser.setEmail(((List<String>)pDoc.get("email")).get(0));
+                tUser.setCreated((Date)pDoc.get("created"));
+                tUser.setLastModified((Date)pDoc.get("modified"));
                 if (pDoc.get("picture") != null && !((List<String>)pDoc.get("picture")).isEmpty()) {
                     tUser.setPicture(((List<String>)pDoc.get("picture")).get(0));
                 }
@@ -491,12 +520,20 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public User saveUser(final User pUser) throws IOException {
+        User tSavedUser = this.getUser(pUser);
+        if (tSavedUser != null) {
+            // this is an update
+            pUser.setCreated(tSavedUser.getCreated());
+            pUser.updateLastModified();
+        }
 		SolrInputDocument tDoc = new SolrInputDocument();
 		tDoc.addField("id", pUser.getId());
 		tDoc.addField("short_id", pUser.getShortId());
 		tDoc.addField("name", pUser.getName());
 		tDoc.addField("type", "User");
 		tDoc.addField("email", pUser.getEmail());
+		tDoc.addField("created", pUser.getCreated());
+		tDoc.addField("modified", pUser.getLastModified());
         if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tDoc.addField("picture", pUser.getPicture());
         }
@@ -511,15 +548,102 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 
     public Collection createCollection(final Collection pCollection) throws IOException {
-        return null;
+        SolrInputDocument tDoc = new SolrInputDocument();
+		tDoc.addField("id", pCollection.getId());
+		tDoc.addField("short_id", pCollection.getShortId());
+		tDoc.addField("label", pCollection.getLabel());
+		tDoc.addField("type", "Collection");
+		tDoc.addField("creator", pCollection.getUser().getId());
+
+        for (Manifest tManifest: pCollection.getManifests()) { 
+            tDoc.addField("members", tManifest.getURI());
+            tDoc.addField("members", tManifest.getLabel());
+        }
+
+		_utils.addDoc(tDoc, true);
+        return pCollection;
     }
+
     public List<Collection> getCollections(final User pUser) throws IOException {
-        return null;
+        SolrQuery tQuery = new SolrQuery();
+		tQuery.setFields("id", "type", "short_id", "label", "creator", "members");
+		tQuery.setRows(1000);
+
+		tQuery.set("q", "type:\"Collection\" AND creator:\"" + pUser.getId() + "\"");
+
+        List<Collection> tCollections = new ArrayList<Collection>();
+		try {
+			QueryResponse tResponse  = _solrClient.query(tQuery);
+
+            for (SolrDocument pDoc : tResponse.getResults()) {
+                Collection tCollection = buildCollection(pDoc);
+                tCollection.setUser(pUser);
+                tCollections.add(tCollection);
+            }
+		} catch (SolrServerException tException) {
+			throw new IOException("Failed to run create collections query due to " + tException.toString());
+		}
+
+        return tCollections;
     }
+    
+    protected Collection buildCollection(final SolrDocument pCollectionData) throws IOException {
+        Collection tCollection = new Collection();
+        tCollection.setId((String)pCollectionData.get("id"));
+        tCollection.setShortId((String)pCollectionData.get("short_id"));
+		tCollection.setLabel(((List<String>)pCollectionData.get("label")).get(0));
+
+        User tUser = new User();
+        try {
+            tUser.setId(((List<String>)pCollectionData.get("creator")).get(0));
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Failed to create user because id wasn't a URI: " + pCollectionData.get("creator"));
+        }
+        tCollection.setUser(tUser);
+
+        List<String> tManifestList = ((List<String>)pCollectionData.get("members"));
+        if (tManifestList != null) {
+            for (int i = 0; i < tManifestList.size(); i +=2) {
+                Manifest tManifest = new Manifest();
+                tManifest.setURI(tManifestList.get(i));
+                tManifest.setLabel(tManifestList.get(i + 1));
+
+                tCollection.add(tManifest);
+            }
+        }
+
+        return tCollection;
+    }
+
     public Collection getCollection(final String pId) throws IOException {
+        SolrQuery tQuery = new SolrQuery();
+		tQuery.setFields("id", "type", "short_id", "label", "creator", "members");
+		tQuery.setRows(1000);
+
+		tQuery.set("q", "type:\"Collection\" AND id:\"" + pId + "\"");
+
+        try {
+			QueryResponse tResponse  = _solrClient.query(tQuery);
+
+			if (tResponse.getResults().size() == 1) {
+                return buildCollection(tResponse.getResults().get(0));
+            }
+		} catch (SolrServerException tException) {
+			throw new IOException("Failed to run create collections query due to " + tException.toString());
+		}
+
         return null;
     }
 
     public void deleteCollection(final Collection pCollection) throws IOException {
+        List<String> tOldIds = new ArrayList<String>();
+		tOldIds.add(pCollection.getId());
+		try {
+			_solrClient.deleteById(tOldIds);
+			_solrClient.commit();
+		} catch(SolrServerException tException) {
+			tException.printStackTrace();
+			throw new IOException("Failed to remove collection due to " + tException);
+		}
     }
 }

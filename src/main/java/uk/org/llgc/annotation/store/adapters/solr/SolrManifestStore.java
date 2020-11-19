@@ -40,10 +40,10 @@ public class SolrManifestStore {
 		return tQuery;
 	}
 
-	public Manifest getManifest(final String pShortId) throws IOException {
+	public Manifest getManifest(final String pId) throws IOException {
         SolrQuery tQuery = this.getManifestQuery();
 
-		tQuery.set("q", "short_id:\"" + pShortId + "\"");
+		tQuery.set("q", "id:" + _utils.escapeChars(pId));
 
 		try {
 			QueryResponse tResponse  = _solrClient.query(tQuery);
@@ -65,7 +65,7 @@ public class SolrManifestStore {
 			} else if (tResponse.getResults().size() == 0) {
 				return null; // no annotation found with supplied id
 			} else {
-				throw new IOException("Found " + tResponse.getResults().size() + " manifests with ID " + pShortId);
+				throw new IOException("Found " + tResponse.getResults().size() + " manifests with ID " + pId);
 			}
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
@@ -132,9 +132,11 @@ public class SolrManifestStore {
 			QueryResponse tResponse = _solrClient.query(tQuery);
             FacetField tFacetCounts = tResponse.getFacetField("within");
             for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-                Manifest tManifest = new Manifest();
-                tManifest.setURI(tFacetValue.getName());
-                tManifests.add(tManifest);
+                if (tFacetValue.getCount() > 0) {
+                    Manifest tManifest = new Manifest();
+                    tManifest.setURI(tFacetValue.getName());
+                    tManifests.add(tManifest);
+                }
             }
 		} catch (SolrServerException tExcpt) {
 			tExcpt.printStackTrace();
