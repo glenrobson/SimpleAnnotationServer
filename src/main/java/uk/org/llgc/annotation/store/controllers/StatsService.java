@@ -47,7 +47,7 @@ public class StatsService {
     }
 
 
-    protected Manifest getManifest(final String pId) throws IOException {
+    public Manifest getManifest(final String pId) throws IOException {
         if (_manifests.containsKey(pId)) {
             return _manifests.get(pId);
         } else {
@@ -58,7 +58,7 @@ public class StatsService {
         }
     }
 
-    public List<PageAnnoCount> getManifestAnnoCount(final Manifest pManifest) throws IOException {
+    public List<PageAnnoCount> getAnnoCountData(final Manifest pManifest) throws IOException {
         if (_manifestAnnoCount.containsKey(pManifest.getShortId())) {
             return _manifestAnnoCount.get(pManifest.getShortId());
         } else {
@@ -68,13 +68,16 @@ public class StatsService {
         }
     }
 
-    public PieChartModel getPercentAnnotated(final String pId) {
+    public PieChartModel getPercentAnnotated(final String pId) throws IOException {
+        Manifest tManifest = this.getManifest(pId);
+        return getPercentAnnotated(tManifest);
+    }
+
+    public PieChartModel getPercentAnnotated(final Manifest pManifest) {
         PieChartModel tModel = new PieChartModel();
         try {
-            Manifest tManifest = this.getManifest(pId);
-     
-            int tTranscribedTotal = this.getManifestAnnoCount(tManifest).size();
-            int tCanvasTotal = tManifest.getCanvases().size();
+            int tTranscribedTotal = this.getAnnoCountData(pManifest).size();
+            int tCanvasTotal = pManifest.getCanvases().size();
             int tToDoTotal = tCanvasTotal - tTranscribedTotal;
             tModel.set("Canvases with annotations: " + (int)(((double)tTranscribedTotal / tCanvasTotal) * 100) + "%", tTranscribedTotal);
             tModel.set("Canvases without annotations: " + (int)(((double)tToDoTotal / tCanvasTotal) * 100) + "%", tToDoTotal);
@@ -88,13 +91,17 @@ public class StatsService {
         return tModel;
     }
 
-    public BarChartModel getManifestAnnoCount(final String pURI) {
+    public BarChartModel getManifestAnnoCount(final String pURI) throws IOException {
+        Manifest tManifest = this.getManifest(pURI);
+        return getManifestAnnoCount(tManifest);
+    }
+
+    public BarChartModel getManifestAnnoCount(final Manifest pManifest) {
         BarChartModel model = new BarChartModel();
         try {
-            Manifest tManifest = this.getManifest(pURI);
 
             // Get list of all annotations
-            List<PageAnnoCount> tPageCounts = this.getManifestAnnoCount(tManifest);
+            List<PageAnnoCount> tPageCounts = this.getAnnoCountData(pManifest);
      
             ChartSeries annoCounts = new ChartSeries();
             annoCounts.setLabel("Number of annotations");
@@ -122,7 +129,7 @@ public class StatsService {
             model.setDataRenderMode("value");
             model.setDatatipEditor("tooltip");
 
-            model.setTitle("Annotations per Canvas for " + tManifest.getLabel());
+            model.setTitle("Annotations per Canvas for " + pManifest.getLabel());
             model.setLegendPosition("n");
             model.setLegendPlacement(LegendPlacement.OUTSIDEGRID);
             model.setShowPointLabels(true);

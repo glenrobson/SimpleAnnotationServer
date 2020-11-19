@@ -89,7 +89,7 @@ public class TestStats extends TestUtils {
         StatsService tStats = new StatsService();
         tStats.init(_annotationUtils);
 
-        List<PageAnnoCount> tPageCounts = tStats.getManifestAnnoCount(tManifest);
+        List<PageAnnoCount> tPageCounts = tStats.getAnnoCountData(tManifest);
         assertEquals("Expected size of 1.", 1, tPageCounts.size());
         assertEquals("Expected 8 annotations for the first page.", 8, tPageCounts.get(0).getCount());
 
