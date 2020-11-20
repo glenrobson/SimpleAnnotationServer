@@ -352,6 +352,7 @@ function createCollection() {
 }
 
 function addManifest() {
+    setLoading("add_manifest", "Adding");
     var manifestUri = document.getElementById("manifest_uri").value;
     $.ajax({
         url: manifestUri,
@@ -366,6 +367,8 @@ function addManifest() {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function(data) {
+                    showMessage("info", "Manifest added succesfully to collection.");
+                    clearLoading("add_manifest", "Add");
                     if ('manifests' in activeCollection) { 
                         activeCollection.manifests.push(manifest);
                     } else {
@@ -374,14 +377,26 @@ function addManifest() {
                     updateCollectionView();
 
                     $('#addManifest').modal('toggle');
+                    hideMessage();
                 },
                 error: function(data) {
+                    clearLoading("add_manifest", "Add");
+                    if ("reason" in data.responseJSON) {
+                        message = "Failed to add manifest due to: " + data.responseJSON.reason;
+                    } else if ("message" in data.responseJSON) {
+                        message = "Failed to add manifest due to: " + data.responseJSON.message;
+                    } else {
+                        message = "Failed to add manifest. SAS only currently supports IIIF version 2 manifests.";
+                    }
+                    showMessage("error", message);
                     console.log('Failed to add manifest: ' + data);
                 }
             });
 
         },
         error: function(data) {
+            clearLoading("add_manifest", "Add");
+            showMessage("error", "Failed to retrieve Manifest. If it's accessible than it could be a CORS issue.");
             console.log('Failed to delete collection: ' + data);
         }
     });

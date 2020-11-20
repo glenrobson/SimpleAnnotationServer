@@ -88,6 +88,11 @@ public class AuthorisationController {
         return (pCollection.getUser() != null && pCollection.getUser().getId().equals(tLoggedInUser.getId())) || tLoggedInUser.isAdmin();
     }
 
+    public boolean allowViewCollection(final Collection pCollection) {
+        User tLoggedInUser = this.getUser();
+        return (pCollection.getUser() != null && pCollection.getUser().getId().equals(tLoggedInUser.getId())) || tLoggedInUser.isAdmin();
+    }
+
     public boolean allowExportAllAnnotations() {
         User tLoggedInUser = this.getUser();
         return tLoggedInUser.isAdmin(); // Only admin can do this

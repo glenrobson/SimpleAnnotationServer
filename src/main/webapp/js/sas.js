@@ -35,6 +35,12 @@ function ajaxForm(config) {
     });
     return false;
 }
+
+function hideMessage() {
+    var messages = document.getElementById('messages');
+    messages.textContent = '';
+    messages.style.display = 'none';
+}
 function showMessage(messageType, message) {
     var messages = document.getElementById('messages');
     messages.textContent = message;
