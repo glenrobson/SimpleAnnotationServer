@@ -124,7 +124,7 @@
         <servlet-class>uk.org.llgc.annotation.store.servlets.login.Logout</servlet-class>
         <init-param>
             <param-name>post_logout_url</param-name>
-            <param-value>/auth.xhtml</param-value>
+            <param-value>/index.xhtml</param-value>
         </init-param>
     </servlet>
     <servlet>
