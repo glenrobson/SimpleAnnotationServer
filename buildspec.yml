@@ -6,6 +6,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - echo Logging in to Docker Hub...
+      - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
       - IMAGE_NAME="sas"
       - REPOSITORY_URI=082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas
       - IMAGE_TAG=prod_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
