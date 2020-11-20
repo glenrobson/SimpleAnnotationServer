@@ -22,4 +22,6 @@ COPY docker/sas-auth/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 RUN apt-get update && \
         apt-get -y install awscli 
 RUN aws --region eu-west-2 s3 cp s3://sasconfig/auth.json /usr/local/tomcat/webapps/ROOT/WEB-INF/
+# For testing locally:
+#COPY docker/sas-auth/auth.json /usr/local/tomcat/webapps/ROOT/WEB-INF/
 # use default port and entrypoint
