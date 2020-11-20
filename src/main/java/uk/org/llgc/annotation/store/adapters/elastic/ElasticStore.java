@@ -373,7 +373,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         for (Canvas tCanvas : pManifest.getCanvases()) {
             BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
             tBuilder.mustNot(QueryBuilders.existsQuery("target.within.id"));
-            tBuilder.must(QueryBuilders.matchQuery("target.id", tCanvas.getId()));
+            tBuilder.must(QueryBuilders.termQuery("target.id", tCanvas.getId()));
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.query(tBuilder);
@@ -799,7 +799,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     public List<Collection> getCollections(final User pUser) throws IOException {
         BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
         tBuilder.must(QueryBuilders.termQuery("type", "Collection"));
-        tBuilder.must(QueryBuilders.matchQuery("creator", pUser.getId()));
+        tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(tBuilder);
