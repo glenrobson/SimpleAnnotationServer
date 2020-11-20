@@ -40,9 +40,10 @@ public class CollectionServlet extends HttpServlet {
    	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         User tUser = new UserService(pReq.getSession()).getUser();
         if (pReq.getRequestURI().endsWith("collection/all.json")) {
-
             // get list of Collections
             List<Collection> tCollections = _store.getCollections(tUser);
+            System.out.println("Found collections " + tCollections);
+            System.out.println("For user " + tUser);
             // if empty create the default collection
             if (tCollections.isEmpty()) {
                 Collection tDefaultCollection = new Collection();
@@ -78,10 +79,19 @@ public class CollectionServlet extends HttpServlet {
             System.out.println("Looking for collection: " + tCollectionId);
 
             Collection tCollection = _store.getCollection(tCollectionId);
-            pRes.setStatus(HttpServletResponse.SC_OK);
-            pRes.setContentType("application/ld+json; charset=UTF-8");
-            pRes.setCharacterEncoding("UTF-8");
-            JsonUtils.write(pRes.getWriter(), tCollection.toJson());
+            System.out.println("Found collection: " + tCollection);
+            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+            if (tAuth.allowViewCollection(tCollection)) {
+                pRes.setStatus(HttpServletResponse.SC_OK);
+                pRes.setContentType("application/ld+json; charset=UTF-8");
+                pRes.setCharacterEncoding("UTF-8");
+                JsonUtils.write(pRes.getWriter(), tCollection.toJson());
+            } else {
+                Map<String,Object> tResponse = new HashMap<String,Object>();
+                tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                tResponse.put("message", "You can only view your own collections");
+                this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+            }
         }
     }
 
