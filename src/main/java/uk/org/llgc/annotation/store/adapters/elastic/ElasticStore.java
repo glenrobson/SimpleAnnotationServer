@@ -811,7 +811,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         } else {
             // Make sure the fully populated user is added rather than just the ID
             for (Collection tCollection : tCollections) {
-                System.out.println("Collection user was " + tCollection.getUser().getId() + " and will not be: " + pUser.getId() + " for collection " + tCollection.getId());
+                if (!tCollection.getUser().getId().equals(pUser.getId())) {
+                    throw new IOException("The collections search returned collections not owned by this user. You may need to recreate your index");
+                }
                 tCollection.setUser(pUser);
             }
         }
