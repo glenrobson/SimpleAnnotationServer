@@ -145,8 +145,9 @@ ul.nav a.vote {
     transition: all 0.3s;
 }
 #main_panel {
-    left: 250px;
     position: absolute;
+    left: 265px;
+    right: 10px;
 }
 
 #sidebar {
@@ -185,10 +186,11 @@ ul.nav a.vote {
     background: #6d6d6f;/*#6d7fcc;*/
 }
 
-#sidebar_actions {
+#addCollectionButton {
     position: absolute;
-    bottom: 60px;
-    left: 50px;
+    top: 17px;
+    right: 12px;
+    color: #403c3c;
 }
 
 #manifests {
@@ -258,3 +260,50 @@ ul.nav a.vote {
     transition: all 0.2s ease-in-out;
 }
 
+#scroll {
+    width: 250px;
+    position: fixed;
+    left: 0;
+    height: 100vh;
+    z-index: 999;
+    padding-bottom: 50px;
+}
+
+#deleteCollection {
+    position: absolute;
+    right: 10px;
+    top: 10px
+}
+
+.media-header-div {
+    width: 100%;
+}
+
+.media-header-div img {
+    position:relative;
+    float:right;
+}
+
+.media-header-div button {
+    position:relative;
+    right:0px;
+    float:none;
+}
+
+.manifestSummary h5 {
+    border-bottom: 1px dotted #ddd;
+    padding: 12px 40px 12px 40px;
+}
+
+.media-header-div h5 {
+    display:inline-block;
+    left: 115px;
+    position: relative;
+    right: 100px;
+    width: 80%;
+}
+
+.media a {
+    margin-bottom: 10px;
+    margin-top: 5px;
+}

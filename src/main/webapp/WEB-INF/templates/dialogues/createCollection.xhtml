@@ -4,10 +4,11 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Create new Collection</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">X</span>
+          <span aria-hidden="true"><i class='far fa-window-close'></i></span>
         </button>
       </div>
       <div class="modal-body">
+        <div id="createCollectionMessage"></div>
         <form id="collection_form">
           <div class="form-group">
             <label for="recipient-name" class="col-form-label">Collection name:</label>
@@ -17,7 +18,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="createCollection()">Create</button>
+        <button type="button" class="btn btn-primary" id="createCollectionbutton" onclick="createCollection()">Create</button>
       </div>
     </div>
   </div>

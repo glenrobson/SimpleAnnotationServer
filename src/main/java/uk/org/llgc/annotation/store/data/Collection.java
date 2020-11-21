@@ -17,7 +17,7 @@ import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.AnnotationUtils;
        
-public class Collection {
+public class Collection implements Comparable {
 	protected String _id = "";
 	protected String _shortId = "";
 	protected String _label = "";
@@ -140,6 +140,10 @@ public class Collection {
         return this.getManifest(pManifest.getURI()) != null; 
     }
 
+    public String createDefaultId(final String pBaseURL) {
+        _id = pBaseURL + "/collection/" +  _user.getShortId() + "/inbox.json";
+        return _id;
+    }
 
     public String createId(final String pBaseURL) {
         _id = pBaseURL + _user.getShortId() + "/" + new Date().getTime() + ".json";
@@ -225,6 +229,27 @@ public class Collection {
         } else {
             return false;
         }
+    }
+
+    public int compareTo(final Object pOther) {
+        Collection tOther = (Collection)pOther;
+        if (_id.equals(tOther.getId())) {
+            return 0; // objects are equal
+        }
+        if (_id.endsWith("inbox.json")) {
+            return -1;
+        }
+        if (tOther.getId().endsWith("inbox.json")) {
+            return 1;
+        }
+        long tTime1 = this.getTimestamp(_id);
+        long tTime2 = this.getTimestamp(tOther.getId());
+
+        return (int)(tTime1 - tTime2);
+    }
+
+    protected long getTimestamp(final String pID) {
+        return Long.parseLong(pID.substring(pID.lastIndexOf("/")+ 1).split("\\.")[0]);
     }
 
     public String toString() {

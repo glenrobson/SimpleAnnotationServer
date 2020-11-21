@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
-
+import java.util.Collections;
 import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
@@ -42,17 +42,17 @@ public class CollectionServlet extends HttpServlet {
         if (pReq.getRequestURI().endsWith("collection/all.json")) {
             // get list of Collections
             List<Collection> tCollections = _store.getCollections(tUser);
-            System.out.println("Found collections " + tCollections);
-            System.out.println("For user " + tUser);
             // if empty create the default collection
             if (tCollections.isEmpty()) {
                 Collection tDefaultCollection = new Collection();
                 tDefaultCollection.setUser(tUser);
                 tDefaultCollection.setLabel("Inbox");
-                tDefaultCollection.createId(StoreConfig.getConfig().getBaseURI(pReq) + "/collection/");
+                tDefaultCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pReq));
                 tDefaultCollection = _store.createCollection(tDefaultCollection);
                 tCollections.add(tDefaultCollection);
             }
+
+            Collections.sort(tCollections);
                 
             Map<String,Object> tCollection = new HashMap<String,Object>();
 
@@ -76,10 +76,8 @@ public class CollectionServlet extends HttpServlet {
         } else {
             String relativeId = pReq.getRequestURI().substring(pReq.getRequestURI().lastIndexOf("/collection/"));
             String tCollectionId = StoreConfig.getConfig().getBaseURI(pReq) + relativeId;
-            System.out.println("Looking for collection: " + tCollectionId);
 
             Collection tCollection = _store.getCollection(tCollectionId);
-            System.out.println("Found collection: " + tCollection);
             AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
             if (tAuth.allowViewCollection(tCollection)) {
                 pRes.setStatus(HttpServletResponse.SC_OK);
@@ -99,26 +97,33 @@ public class CollectionServlet extends HttpServlet {
         User tUser = new UserService(pReq.getSession()).getUser();
        
         String relativeId = pReq.getRequestURI().substring(pReq.getRequestURI().lastIndexOf("/collection/"));
-        String tCollectionId = StoreConfig.getConfig().getBaseURI(pReq) + relativeId;
-        Collection tExistingCollection = _store.getCollection(tCollectionId);
-        if (tExistingCollection == null) {
+        if (relativeId.endsWith("inbox.json")) {
             Map<String,Object> tResponse = new HashMap<String,Object>();
-            tResponse.put("code", pRes.SC_NOT_FOUND);
-            tResponse.put("message", "Collection with URI " + tCollectionId + " not found");
-            this.sendJson(pRes, pRes.SC_NOT_FOUND, tResponse);
+            tResponse.put("code", pRes.SC_FORBIDDEN);
+            tResponse.put("message", "You can't remove your default collection.");
+            this.sendJson(pRes, pRes.SC_FORBIDDEN, tResponse);
         } else {
-            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-            if (tAuth.allowDeleteCollection(tExistingCollection)) {
-                _store.deleteCollection(tExistingCollection);
-                pRes.setStatus(HttpServletResponse.SC_OK);
-                pRes.setContentType("application/ld+json; charset=UTF-8");
-                pRes.setCharacterEncoding("UTF-8");
-                JsonUtils.write(pRes.getWriter(), tExistingCollection.toJson());
-            } else {
+            String tCollectionId = StoreConfig.getConfig().getBaseURI(pReq) + relativeId;
+            Collection tExistingCollection = _store.getCollection(tCollectionId);
+            if (tExistingCollection == null) {
                 Map<String,Object> tResponse = new HashMap<String,Object>();
-                tResponse.put("code", pRes.SC_UNAUTHORIZED);
-                tResponse.put("message", "You can only edit your own collections unless you are Admin");
-                this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                tResponse.put("code", pRes.SC_NOT_FOUND);
+                tResponse.put("message", "Collection with URI " + tCollectionId + " not found");
+                this.sendJson(pRes, pRes.SC_NOT_FOUND, tResponse);
+            } else {
+                AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+                if (tAuth.allowDeleteCollection(tExistingCollection)) {
+                    _store.deleteCollection(tExistingCollection);
+                    pRes.setStatus(HttpServletResponse.SC_OK);
+                    pRes.setContentType("application/ld+json; charset=UTF-8");
+                    pRes.setCharacterEncoding("UTF-8");
+                    JsonUtils.write(pRes.getWriter(), tExistingCollection.toJson());
+                } else {
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                    tResponse.put("message", "You can only edit your own collections unless you are Admin");
+                    this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                }
             }
         }
     }

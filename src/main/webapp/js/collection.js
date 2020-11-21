@@ -1,6 +1,6 @@
 var userCollections = null;
 var activeCollection = null;
-function initCollections(active) {
+function initCollections(active, callback=null) {
     // Get collections list store it and generate menu
     var collectionsUL = document.getElementById('collections'); 
 
@@ -16,6 +16,7 @@ function initCollections(active) {
                 var id = tCollection["@id"];
                 userCollections[id] = tCollection;
                 var li = document.createElement("li");
+                li.dataset.id = id;
                 if (id.endsWith(active)) {
                     activeCollection = tCollection;
                     li.className = "active";
@@ -27,10 +28,14 @@ function initCollections(active) {
                 li.appendChild(anchor);
                 collectionsUL.appendChild(li);
             }
+            $("#scroll").mCustomScrollbar('update');
             if (activeCollection == null) {
                 activeCollection = data.collections[0];
             }
             updateCollectionView();
+            if (callback != null) {
+                callback();
+            }
         },
         error: function(data) {
             console.log('Failed to load collection: ' + data);
@@ -39,15 +44,76 @@ function initCollections(active) {
 }
 
 function deleteCollection() {
+    setLoading("confirmButton", "Deleting");
+
+    console.log('Deleting: ' + activeCollection["@id"]);
     $.ajax({
         url: activeCollection["@id"],
         type: 'DELETE',
         success: function(data) {
+            showMessage("confirmInfoMessage", "info", "Deleted Collection succesfully.");
+            deleteId = activeCollection["@id"];
+            activeCollection = null;
+            var firstEntry = '';
+            delete userCollections[deleteId];
+            for (const [key, value] of Object.entries(userCollections)) {
+                if (!firstEntry) {
+                    firstEntry = key;
+                }
+                if (key.endsWith('inbox.json')) {
+                    activeCollection = userCollections[key];
+                    break;
+                }
+            }
+            if (Object.keys(userCollections).length > 0) {
+                if (activeCollection == null) {
+                    activeCollection = userCollections[firstEntry];
+                }
+                var collectionsUL = document.getElementById('collections'); 
+                var existingLis = collectionsUL.getElementsByTagName("li");
+                var liToDelete = null;
+                for (var i = 0; i < existingLis.length; i++) {
+                    var li = existingLis[i];
+                    if (li.className === "active") {
+                        li.className = "";
+                    }
+                    if (li.dataset.id === deleteId) {
+                        liToDelete = li;
+                    }
+                    if (activeCollection) {
+                        if (li.dataset.id === activeCollection["@id"]) {
+                            li.className = "active";
+                        }
+                    }
+                }
+                if (liToDelete) {
+                    collectionsUL.removeChild(liToDelete);
+                }
+                updateCollectionView();
+            } else {
+                // All collections have been removed 
+                initCollections('/inbox.json');
+            }
+
+            clearLoading("confirmButton", "Confirm");
             $('#confirm').modal('toggle');
-            initCollections("inbox.json");
         },
         error: function(data) {
-            console.log('Failed to delete collection: ' + data);
+            clearLoading("confirmButton", "Confirm");
+            if (data.responseJSON) {
+                if ("reason" in data.responseJSON) {
+                    message = "Failed to delete collection due to: " + data.responseJSON.reason;
+                } else if ("message" in data.responseJSON) {
+                    message = data.responseJSON.message;
+                } else {
+                    message = "Failed to delete collection.";
+                }
+            } else if ("statusText" in data) {    
+                message = "Failed to delete collection due to: " + data.statusText;
+            } else {
+                message = "Failed to delete collection.";
+            }
+            showMessage("confirmInfoMessage", "error", message);
         }
     });
 }
@@ -70,7 +136,7 @@ function showCollection(event) {
     for (var i = 0; i < items.length; ++i) {
         items[i].className = '';
     }
-    event.srcElement.className = 'active';
+    event.srcElement.parentNode.className = 'active';
     activeCollection =  userCollections[event.srcElement.href];
     updateCollectionView();
     return false;
@@ -78,8 +144,15 @@ function showCollection(event) {
 function updateCollectionView() {
     var heading = document.getElementById("collectionName");
     heading.innerHTML = activeCollection.label;
-    var openAll = document.getElementById("openAll");
+    /*var openAll = document.getElementById("openAll");
     openAll.href = "view.xhtml?collection=" + activeCollection["@id"];
+*/
+    var deleteCollection = document.getElementById("deleteCollection");
+    if (activeCollection["@id"].endsWith("inbox.json")) {
+        deleteCollection.style.display = "none";
+    } else {
+        deleteCollection.style.display = "inline-block";
+    }
 
     var manifestsUl = document.getElementById("manifests");
     manifestsUl.innerHTML ='';
@@ -112,6 +185,7 @@ function updateCollectionView() {
 }
 
 function moveManifest() {
+    setLoading("movebutton", "Moving");
     var select = document.getElementById("collectionSelect");
     var collectionId = select.options[select.selectedIndex].value;
     
@@ -127,6 +201,7 @@ function moveManifest() {
         },
         type: 'PUT',
         success: function(data) {
+            showMessage("moveMessage", "info", "Succesfully moved manifest.");
             for (var index in activeCollection.manifests) {
                 var manifest = activeCollection.manifests[index];
                 if (manifest["@id"] === manifestURL) {
@@ -140,15 +215,32 @@ function moveManifest() {
             }
             updateCollectionView();
             $('#moveManifest').modal('toggle');
+            clearLoading("movebutton", "Move");
+            hideMessage("moveMessage");
         },
         error: function(data) {
-            console.log('Failed to load collection: ' + data);
+            clearLoading("movebutton", "Move");
+            if (data.responseJSON) {
+                if ("reason" in data.responseJSON) {
+                    message = "Failed to move collection due to: " + data.responseJSON.reason;
+                } else if ("message" in data.responseJSON) {
+                    message = data.responseJSON.message;
+                } else {
+                    message = "Failed to move collection.";
+                }
+            } else if ("statusText" in data) {    
+                message = "Failed to move collection due to: " + data.statusText;
+            } else {
+                message = "Failed to move collection.";
+            }
+            showMessage("moveMessage", "error", message);
         }
     });
 
 }
 
 function deleteManifest() {
+    setLoading("confirmButton", "Deleting");
     var manifestURL = document.getElementById("confirmId").value;
     var collection = activeCollection["@id"];
     
@@ -160,6 +252,7 @@ function deleteManifest() {
         },
         type: 'PUT',
         success: function(data) {
+            showMessage("confirmInfoMessage", "info", "Removed manifest from collection succesfully.");
             for (var index in activeCollection.manifests) {
                 var manifest = activeCollection.manifests[index];
                 if (manifest["@id"] === manifestURL) {
@@ -168,10 +261,26 @@ function deleteManifest() {
                 }
             }
             updateCollectionView();
+            $("#scroll").mCustomScrollbar('update');
+            clearLoading("confirmButton", "Confirm");
             $('#confirm').modal('toggle');
         },
         error: function(data) {
-            console.log('Failed to load collection: ' + data);
+            clearLoading("confirmButton", "Confirm");
+            if (data.responseJSON) {
+                if ("reason" in data.responseJSON) {
+                    message = "Failed to delete collection due to: " + data.responseJSON.reason;
+                } else if ("message" in data.responseJSON) {
+                    message = data.responseJSON.message;
+                } else {
+                    message = "Failed to delete collection.";
+                }
+            } else if ("statusText" in data) {    
+                message = "Failed to delete collection due to: " + data.statusText;
+            } else {
+                message = "Failed to delete collection.";
+            }
+            showMessage("confirmInfoMessage", "error", message);
         }
     });
 
@@ -179,12 +288,16 @@ function deleteManifest() {
 
 
 function showConfirm(event) {
+    hideMessage("confirmInfoMessage", "Confirm");
     var header = document.getElementById("confirmTitle");
     var text = document.getElementById("confirmText");
     var id = document.getElementById("confirmId");
     var confirmButton = document.getElementById("confirmButton");
 
     mode = event.srcElement.dataset.mode;
+    if (!mode) {
+        mode = event.srcElement.parentElement.dataset.mode;
+    }
 
     if (mode === 'delete_collection') {
         header.innerHTML = 'Delete collection';
@@ -195,7 +308,7 @@ function showConfirm(event) {
     } else if (mode === 'remove_manifest') {
         header.innerHTML = 'Remove manifest';
         text.innerHTML = 'Are you sure you want to remove this manifest from this collection?';
-        id.value = event.srcElement.dataset.manifest;
+        id.value = event.srcElement.parentElement.dataset.manifest;
 
         confirmButton.onclick = deleteManifest;
     }
@@ -204,7 +317,12 @@ function showConfirm(event) {
 }
 
 function showMoveManifest(event) {
-    var manifestId = event.srcElement.dataset.manifest;
+    hideMessage("moveMessage");
+    if (event.srcElement.dataset.manifest) {
+        var manifestId = event.srcElement.dataset.manifest;
+    } else {
+        var manifestId = event.srcElement.parentElement.dataset.manifest;
+    }
     var manifestEl = document.getElementById("manifestURI");
     var manifestLabel = '';
     for (var index in activeCollection.manifests) {
@@ -235,10 +353,7 @@ function showMoveManifest(event) {
 
 function showManifestDiv(ul, manifest) {
     var li = document.createElement("li");
-    li.className = "media manifestSummary";
-    var anchor = document.createElement("a");
-    anchor.className = "pull-left";
-    anchor.href= "manifest.xhtml?manifest=" + manifest["@id"];
+    li.className = "manifestSummary";
 
     var thumbnail_img = "";
     if ('thumbnail' in manifest) {
@@ -255,7 +370,16 @@ function showManifestDiv(ul, manifest) {
     
     var img = document.createElement("img");
     img.className = "align-self-center mr-3 media-img";
-    img.src= thumbnail_img;
+    img.src = thumbnail_img;
+
+    openImg = document.createElement("a");
+    openImg.href = "view.xhtml?collection=" + activeCollection["@id"] + "&manifest=" + manifest["@id"];
+    openImg.className = "align-self-center";
+    openImg.appendChild(img);
+
+
+    mediaHeaderDiv= document.createElement("div");
+    mediaHeaderDiv.className = "media-header-div";
 
     mediaBody = document.createElement("div");
     mediaBody.className = "media-body";
@@ -263,17 +387,17 @@ function showManifestDiv(ul, manifest) {
     remove = document.createElement("button");
     remove.type = "button";
     remove.className = "close";
-    remove.innerHTML = "x";
+    remove.innerHTML = "<i class='far fa-window-close'></i>";
     remove.setAttribute('aria-hidden', 'true');
     remove.dataset.mode = 'remove_manifest';
     remove.dataset.manifest = manifest["@id"];
     remove.onclick = showConfirm;
-    mediaBody.appendChild(remove);
+   // mediaBody.appendChild(remove);
 
     mediaHeader = document.createElement("h5");
     mediaHeader.className = "media-heading";
     mediaHeader.innerHTML = manifest.label;
-    mediaBody.appendChild(mediaHeader);
+    //mediaBody.appendChild(mediaHeader);
 
     if ('description' in manifest) {
         mediaContent = document.createElement("p");
@@ -299,56 +423,111 @@ function showManifestDiv(ul, manifest) {
 
     open = document.createElement("a");
     open.href = "view.xhtml?collection=" + activeCollection["@id"] + "&manifest=" + manifest["@id"];
-    open.className = "btn btn-primary mb-2";
-    open.innerHTML = "Open";
+    open.className = "btn  btn-secondary mb-2";
+    open.innerHTML = '<i class="far fa-edit"></i>';//"Open";
+    open.title = "Open manifest for editing";
     actionsBar.appendChild(open);
 
     move = document.createElement("button");
     move.type = "button";
-    move.className = "btn btn-primary mb-2";
-    move.innerHTML = "Move";
+    move.className = "btn btn-secondary mb-2";
+    move.innerHTML = '<i class="far fa-folder-open"></i>';
+    move.title = "Move manifest to another collection.";
     move.onclick = showMoveManifest;
     move.dataset.manifest = manifest["@id"];
     actionsBar.appendChild(move);
 
     download = document.createElement("a");
     download.href = "manifest.xhtml?iiif-content=" + manifest["@id"];
-    download.className = "btn btn-primary mb-2";
-    download.innerHTML = "Export";
+    download.className = "btn btn-secondary mb-2";
+    download.innerHTML = '<i class="fas fa-cloud-download-alt"></i>';
+    download.title = "Export";
     actionsBar.appendChild(download);
 
     analytics = document.createElement("a");
     analytics.href = "stats/manifest.xhtml?iiif-content=" + manifest["@id"];
-    analytics.className = "btn btn-primary mb-2";
-    analytics.innerHTML = "Analytics";
+    analytics.className = "btn btn-secondary mb-2";
+    analytics.innerHTML = '<i class="fas fa-chart-line"></i>';
+    analytics.title = "Analytics";
     actionsBar.appendChild(analytics);
 
+    mediaHeaderDiv.appendChild(remove)
     if ('logo' in manifest && '@id' in manifest.logo) {
         var logo = document.createElement("img");
         logo.className = "logo";
         logo.src= manifest.logo['@id'];
         actionsBar.appendChild(logo);
+        mediaHeaderDiv.appendChild(logo)
     }
 
-    li.appendChild(img);
-    li.appendChild(mediaBody);
+   // mediaBody.appendChild(remove);
+    //mediaBody.appendChild(mediaHeader);
+
+    cardDiv = document.createElement("div");
+    cardDiv.className = "media";
+    cardDiv.appendChild(openImg);
+    cardDiv.appendChild(mediaBody);
+
+    li.appendChild(mediaHeaderDiv);
+    li.appendChild(mediaHeader)
+    li.appendChild(cardDiv);
     ul.appendChild(li);
 }
 
 function createCollection() {
-    $('#createCollection').modal('toggle');
+    setLoading("createCollectionbutton", "Creating");
     $.ajax({
         url: '/collection/',
         data: $("#collection_form").serialize(),
         type: 'POST',
         success: function(data) {
-            initCollections(data['@id'])
+            showMessage("createCollectionMessage", "info", "Created collection succesfully.");
+
+            var collectionsUL = document.getElementById('collections'); 
+            var existingLis = collectionsUL.getElementsByTagName("li");
+            for (var i = 0; i < existingLis.length; i++) {
+                var li = existingLis[i];
+                if (li.className === "active") {
+                    li.className = "";
+                }
+            }
+
+            activeCollection = data;
+            userCollections[data['@id']] = data
+            var li = document.createElement("li");
+            li.className = "active";
+            li.dataset.id = data["@id"];
+            var anchor = document.createElement("a")
+            anchor.innerHTML = data.label;
+            anchor.href= data['@id'];
+            anchor.onclick = showCollection;
+            li.appendChild(anchor);
+            collectionsUL.appendChild(li);
+
+            updateCollectionView();
+            $("#scroll").mCustomScrollbar('update');
+            clearLoading("createCollectionbutton", "Create");
+            $('#createCollection').modal('toggle');
         },
         error: function(data) {
+            clearLoading("createCollectionbutton", "Create");
+            if (data.responseJSON) {
+                if ("reason" in data.responseJSON) {
+                    message = "Failed to add collection due to: " + data.responseJSON.reason;
+                } else if ("message" in data.responseJSON) {
+                    message = "Failed to add collection due to: " + data.responseJSON.message;
+                } else {
+                    message = "Failed to add collection.";
+                }
+            } else if ("statusText" in data) {    
+                message = "Failed to add collection due to: " + data.statusText;
+            } else {
+                message = "Failed to add collection.";
+            }
+            showMessage("createCollectionMessage", "error", message);
             console.log('Failed to load collection: ' + data);
         }
     });
-
 }
 
 function addManifest() {
@@ -367,7 +546,7 @@ function addManifest() {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function(data) {
-                    showMessage("info", "Manifest added succesfully to collection.");
+                    showMessage("addManifestMessages", "info", "Manifest added succesfully to collection.");
                     clearLoading("add_manifest", "Add");
                     if ('manifests' in activeCollection) { 
                         activeCollection.manifests.push(manifest);
@@ -377,18 +556,24 @@ function addManifest() {
                     updateCollectionView();
 
                     $('#addManifest').modal('toggle');
-                    hideMessage();
+                    hideMessage("addManifestMessages");
                 },
                 error: function(data) {
                     clearLoading("add_manifest", "Add");
-                    if ("reason" in data.responseJSON) {
-                        message = "Failed to add manifest due to: " + data.responseJSON.reason;
-                    } else if ("message" in data.responseJSON) {
-                        message = "Failed to add manifest due to: " + data.responseJSON.message;
+                    if (data.responseJSON) {
+                        if ("reason" in data.responseJSON) {
+                            message = "Failed to add manifest due to: " + data.responseJSON.reason;
+                        } else if ("message" in data.responseJSON) {
+                            message = "Failed to add manifest due to: " + data.responseJSON.message;
+                        } else {
+                            message = "Failed to add manifest. SAS only currently supports IIIF version 2 manifests.";
+                        }
+                    } else if ("statusText" in data) {
+                            message = "Failed to add manifest due to: " + data.statusText;
                     } else {
                         message = "Failed to add manifest. SAS only currently supports IIIF version 2 manifests.";
                     }
-                    showMessage("error", message);
+                    showMessage("addManifestMessages", "error", message);
                     console.log('Failed to add manifest: ' + data);
                 }
             });
@@ -396,7 +581,7 @@ function addManifest() {
         },
         error: function(data) {
             clearLoading("add_manifest", "Add");
-            showMessage("error", "Failed to retrieve Manifest. If it's accessible than it could be a CORS issue.");
+            showMessage("addManifestMessages", "error", "Failed to retrieve Manifest. If it's accessible than it could be a CORS issue.");
             console.log('Failed to delete collection: ' + data);
         }
     });

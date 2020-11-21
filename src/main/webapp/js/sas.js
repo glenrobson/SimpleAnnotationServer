@@ -37,12 +37,21 @@ function ajaxForm(config) {
 }
 
 function hideMessage() {
-    var messages = document.getElementById('messages');
+    hideMessage('messages');
+}
+
+function hideMessage(messageId) {
+    var messages = document.getElementById(messageId);
     messages.textContent = '';
     messages.style.display = 'none';
 }
+
 function showMessage(messageType, message) {
-    var messages = document.getElementById('messages');
+    showMessage("messages", messageType, message);
+}
+
+function showMessage(messageId, messageType, message) {
+    var messages = document.getElementById(messageId);
     messages.textContent = message;
     if (messageType === "info") {
         messages.className = "alert alert-info";

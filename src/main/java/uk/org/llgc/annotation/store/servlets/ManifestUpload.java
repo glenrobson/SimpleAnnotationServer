@@ -84,6 +84,11 @@ public class ManifestUpload extends HttpServlet {
                 tManifestJson.remove("within");
             }
 		}
+        if (tCollectionId.isEmpty()) {
+            Collection tTmpCollection = new Collection();
+            tTmpCollection.setUser(tUser);
+            tCollectionId = tTmpCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pReq));
+        }
 
         Collection tCollection = _store.getCollection(tCollectionId);
         if (tCollection == null) {
