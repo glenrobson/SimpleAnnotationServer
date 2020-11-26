@@ -32,10 +32,18 @@ public class Manifest {
     }
 
     public Manifest(final Map<String, Object> pJson, final String pShortId) throws IOException {
-        this.setJson(pJson);
-        if (!this.getType().equals("sc:Manifest")) {
-            throw new IOException("Can't create manifest as type was incorrect. Expected sc:Manifest but got: " + this.getType());
+        if (pJson.get("@type") == null) {
+            if (pJson.get("type") != null) {
+                throw new IOException("SAS Currently only works with IIIF version 2.0 manifests");
+            } else {
+                throw new IOException("Failed to process manifest as it has no @type property.");
+            }
+        } else {
+            if (!pJson.get("@type").equals("sc:Manifest")) {
+                throw new IOException("Can't create manifest as type was incorrect. Expected sc:Manifest but got: " + this.getType());
+            }
         }
+        this.setJson(pJson);
         this.setShortId(pShortId);
         this.setURI((String)pJson.get("@id"));
     }
@@ -47,7 +55,37 @@ public class Manifest {
     public void setJson(final Map<String, Object> pJson) {
         _json = pJson;
         this.setURI((String)_json.get("@id"));
-        this.setLabel((String)_json.get("label")); // will fail if there is a multilingual string
+        if (_json.get("label") != null) {
+            String tLabel = "";
+            if (_json.get("label") instanceof String) {
+                tLabel = (String)_json.get("label");
+            } else if (_json.get("label") instanceof Map) {
+                Map<String,Object> tLabelMap = (Map<String,Object>)_json.get("label");
+                if (tLabelMap.get("@value") != null && tLabelMap.get("@value") instanceof String) {
+                    tLabel = (String)tLabelMap.get("@value");
+                }
+            } else {
+                // Label is an array of one or more language strings or an array of strings
+                List<Object> tLabels = (List)_json.get("label");
+                if (!tLabels.isEmpty()) {
+                    if (tLabels.get(0) instanceof String) {
+                        tLabel = (String)tLabels.get(0);
+                    } else if (tLabels.get(0) instanceof Map){
+                        // Lang map just select first
+                        Map<String,Object> tLabelMap = (Map<String,Object>)tLabels.get(0);
+                        if (tLabelMap.get("@value") != null && tLabelMap.get("@value") instanceof String) {
+                            tLabel = (String)tLabelMap.get("@value");
+                        }
+                        
+                    }
+                }
+            }
+
+            this.setLabel(tLabel);
+        }
+        if (this.getLabel().isEmpty()) {
+            this.setLabel("Missing Manifest label");
+        }
 
         Map<String,Object> tSequence = null;
         if (_json.get("sequences") instanceof List ) {

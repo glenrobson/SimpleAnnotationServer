@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import java.net.URL;
 
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 import com.github.jsonldjava.utils.JsonUtils;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import org.apache.jena.rdf.model.Model;
 
@@ -63,61 +65,101 @@ public class ManifestUpload extends HttpServlet {
 	}
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        User tUser = new UserService(pReq.getSession()).getUser();
-		String tID = "";
-		Map<String, Object> tManifestJson = null;
-        String tCollectionId = "";
-		if (pReq.getParameter("uri") != null) {
-			tID = pReq.getParameter("uri");
-			tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tID).openStream());
+        try {
+            User tUser = new UserService(pReq.getSession()).getUser();
+            String tID = "";
+            Map<String, Object> tManifestJson = null;
+            String tCollectionId = "";
+            if (pReq.getParameter("uri") != null) {
+                tID = pReq.getParameter("uri");
+                tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new URL(tID).openStream());
 
-            if (pReq.getParameter("collection") != null) {
-                tCollectionId = pReq.getParameter("collection");
+                if (pReq.getParameter("collection") != null) {
+                    tCollectionId = pReq.getParameter("collection");
+                }
+            } else {
+                StringBuffer tBuff = new StringBuffer();
+                BufferedReader tReader = null;
+                if (pReq.getCharacterEncoding() != null) {
+                    tReader = new BufferedReader(new InputStreamReader(pReq.getInputStream(), pReq.getCharacterEncoding()));
+                } else {
+                    tReader = new BufferedReader(new InputStreamReader(pReq.getInputStream(), "UTF-8"));
+                }
+                String tLine = "";
+                while ((tLine = tReader.readLine()) != null) {
+                    tBuff.append(tLine);
+                }
+
+                String tManifestStr = tBuff.toString();
+                  
+                if (tManifestStr.isEmpty()) {
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_NOT_FOUND);
+                    tResponse.put("message", "Manifest not found POST was empty");
+                    sendJson(pRes, HttpServletResponse.SC_NOT_FOUND, tResponse);
+                    return;
+                }
+                
+                try {
+                    tManifestJson = (Map<String,Object>)JsonUtils.fromString(tManifestStr);
+                } catch (JsonParseException tExcpt) {
+                    System.out.println("Failed to load the following manifest: ");
+                    System.out.println(tManifestStr);
+                    throw tExcpt;
+                }
+
+                if (tManifestJson.get("within") != null) {
+                    tCollectionId = (String)tManifestJson.get("within");
+                    tManifestJson.remove("within");
+                }
             }
-		} else {
-			InputStream tManifestStream = pReq.getInputStream();
-            
-			tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(tManifestStream);
-
-            if (tManifestJson.get("within") != null) {
-                tCollectionId = (String)tManifestJson.get("within");
-                tManifestJson.remove("within");
-            }
-		}
-        if (tCollectionId.isEmpty()) {
-            Collection tTmpCollection = new Collection();
-            tTmpCollection.setUser(tUser);
-            tCollectionId = tTmpCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pReq));
-        }
-
-        Collection tCollection = _store.getCollection(tCollectionId);
-        if (tCollection == null) {
-            tCollection = _store.getCollection(StoreConfig.getConfig().getBaseURI(pReq) + "/collection/" + tUser.getShortId() + "/inbox.json");
-        }
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-        if (tAuth.allowCollectionEdit(tCollection)) {
-            Manifest tManifest = new Manifest(tManifestJson, null);
-            if (!tCollection.getManifests().contains(tManifest)) {
-                System.out.println("Adding Manifest " + tManifest);
-                String tShortId = _store.indexManifest(tManifest);
-
-                System.out.println("To collection " + tCollection);
-                tCollection.getManifests().add(tManifest);
-                _store.updateCollection(tCollection);
+            if (tCollectionId.isEmpty()) {
+                Collection tTmpCollection = new Collection();
+                tTmpCollection.setUser(tUser);
+                tCollectionId = tTmpCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pReq));
             }
 
-            Map<String,Object> tJson = new HashMap<String,Object>();
-            Map<String,String> tLinks = new HashMap<String,String>();
-            tJson.put("loaded", tLinks);
-            tLinks.put("uri", tManifest.getURI());
-            tLinks.put("short_id", tManifest.getShortId());
+            Collection tCollection = _store.getCollection(tCollectionId);
+            if (tCollection == null) {
+                tCollection = _store.getCollection(StoreConfig.getConfig().getBaseURI(pReq) + "/collection/" + tUser.getShortId() + "/inbox.json");
+            }
+            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+            if (tAuth.allowCollectionEdit(tCollection)) {
+                Manifest tManifest = new Manifest(tManifestJson, null);
+                if (!tCollection.getManifests().contains(tManifest)) {
+                    System.out.println("Adding Manifest " + tManifest);
+                    String tShortId = _store.indexManifest(tManifest);
 
-            this.sendJson(pRes, pRes.SC_OK, tJson);
-        } else {
+                    System.out.println("To collection " + tCollection);
+                    tCollection.getManifests().add(tManifest);
+                    _store.updateCollection(tCollection);
+                }
+
+                Map<String,Object> tJson = new HashMap<String,Object>();
+                Map<String,String> tLinks = new HashMap<String,String>();
+                tJson.put("loaded", tLinks);
+                tLinks.put("uri", tManifest.getURI());
+                tLinks.put("short_id", tManifest.getShortId());
+
+                this.sendJson(pRes, pRes.SC_OK, tJson);
+            } else {
+                Map<String,Object> tResponse = new HashMap<String,Object>();
+                tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                tResponse.put("message", "You can only edit your own collections unless you are Admin");
+                this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+            }
+        } catch (IOException tExcpt) {
+            tExcpt.printStackTrace();
             Map<String,Object> tResponse = new HashMap<String,Object>();
-            tResponse.put("code", pRes.SC_UNAUTHORIZED);
-            tResponse.put("message", "You can only edit your own collections unless you are Admin");
-            this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+            tResponse.put("code", pRes.SC_INTERNAL_SERVER_ERROR);
+            tResponse.put("message", "Failed to process manifest due to: " + tExcpt.getMessage());
+            this.sendJson(pRes, pRes.SC_INTERNAL_SERVER_ERROR, tResponse);
+        } catch (Exception tExcpt) {
+            tExcpt.printStackTrace();
+            Map<String,Object> tResponse = new HashMap<String,Object>();
+            tResponse.put("code", pRes.SC_INTERNAL_SERVER_ERROR);
+            tResponse.put("message", "Failed to process manifest due to: " + tExcpt.getMessage());
+            this.sendJson(pRes, pRes.SC_INTERNAL_SERVER_ERROR, tResponse);
         }
 	}
 

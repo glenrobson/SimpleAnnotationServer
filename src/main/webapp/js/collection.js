@@ -351,21 +351,46 @@ function showMoveManifest(event) {
     $('#moveManifest').modal('toggle');
 }
 
+function findValue(parentnode, key) {
+    var response = '';
+    if (typeof parentnode[key] === 'object' && !Array.isArray(parentnode[key]) && parentnode[key]["@value"]) {
+        response = parentnode[key]["@value"];
+    } else if (Array.isArray(parentnode[key]) && parentnode[key].length > 0) {
+        if (typeof parentnode[key][0] === 'string') {
+            response = parentnode[key][0];
+        } else {
+            // attribution is a list of objects
+            if (parentnode[key][0]["@value"]) {
+                response = parentnode[key][0]["@value"];
+            }
+        }
+    } else if (typeof parentnode[key] === 'string') {
+        response = parentnode[key];
+    }
+    return response;
+}
+
 function showManifestDiv(ul, manifest) {
     var li = document.createElement("li");
     li.className = "manifestSummary";
 
     var thumbnail_img = "";
-    if ('thumbnail' in manifest) {
+    if ('thumbnail' in manifest && manifest.thumbnail) {
         if (typeof manifest.thumbnail === 'string' || manifest.thumbnail instanceof String) {
             thumbnail_img = manifest.thumbnail;
-        } else {
+        } else if (typeof manifest.thumbnail === 'object' && !Array.isArray(manifest.thumbnail)){
             thumbnail_img = manifest.thumbnail['@id'];
         }
     } else {
         // Get image service from first canvas
-        var imageId = manifest.sequences[0].canvases[0].images[0].resource.service["@id"];
-        thumbnail_img = imageId + '/full/,100/0/default.jpg';
+        if (manifest.sequences && Array.isArray(manifest.sequences) && manifest.sequences[0].canvases && Array.isArray(manifest.sequences[0].canvases)
+                && manifest.sequences[0].canvases[0].images && Array.isArray(manifest.sequences[0].canvases[0].images)
+                 && manifest.sequences[0].canvases[0].images[0].resource && typeof manifest.sequences[0].canvases[0].images[0].resource === 'object'
+                    && manifest.sequences[0].canvases[0].images[0].resource.service && typeof manifest.sequences[0].canvases[0].images[0].resource.service === 'object'
+                        && manifest.sequences[0].canvases[0].images[0].resource.service["@id"] && typeof manifest.sequences[0].canvases[0].images[0].resource.service["@id"] === 'string') {
+            var imageId = manifest.sequences[0].canvases[0].images[0].resource.service["@id"];
+            thumbnail_img = imageId + '/full/,100/0/default.jpg';
+        }
     }
     
     var img = document.createElement("img");
@@ -396,21 +421,23 @@ function showManifestDiv(ul, manifest) {
 
     mediaHeader = document.createElement("h5");
     mediaHeader.className = "media-heading";
-    mediaHeader.innerHTML = manifest.label;
+    if ('label' in manifest && manifest.label) {
+        mediaHeader.innerHTML = findValue(manifest, "label");
+    } else {
+        mediaHeader.innerHTML = "Missing Manifest label";
+    }
     //mediaBody.appendChild(mediaHeader);
 
-    if ('description' in manifest) {
+    if ('description' in manifest && manifest.description) {
         mediaContent = document.createElement("p");
         mediaContent.className = "";
-        mediaContent.innerHTML = manifest.description;
+        mediaContent.innerHTML = findValue(manifest, "description");
         mediaBody.appendChild(mediaContent);
     }
 
-    if ('attribution' in manifest) {
-        var attribution = manifest.attribution;
-        if (typeof attribution === 'object' && attribution!== null) {
-            attribution = manifest.attribution["@value"];
-        }
+    if ('attribution' in manifest && manifest.attribution) {
+        var attribution = findValue(manifest, "attribution");
+
         mediaContent = document.createElement("p");
         mediaContent.className = "";
         mediaContent.innerHTML = attribution;
@@ -452,12 +479,20 @@ function showManifestDiv(ul, manifest) {
     actionsBar.appendChild(analytics);
 
     mediaHeaderDiv.appendChild(remove)
-    if ('logo' in manifest && '@id' in manifest.logo) {
-        var logo = document.createElement("img");
-        logo.className = "logo";
-        logo.src= manifest.logo['@id'];
-        actionsBar.appendChild(logo);
-        mediaHeaderDiv.appendChild(logo)
+    if ('logo' in manifest) {
+        var tURL = "";
+        if (typeof manifest.logo === 'object' && '@id' in manifest.logo) {
+            tURL = manifest.logo['@id'];
+        } else if (typeof manifest.logo === 'string') {
+            tURL = manifest.logo;
+        }
+        if (tURL) {
+            var logo = document.createElement("img");
+            logo.className = "logo";
+            logo.src= tURL;
+            actionsBar.appendChild(logo);
+            mediaHeaderDiv.appendChild(logo)
+        }
     }
 
    // mediaBody.appendChild(remove);

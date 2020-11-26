@@ -108,6 +108,40 @@ public class TestModel extends TestUtils {
     } 
 
     @Test
+	public void testManifestLabels() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/list_label.json").getFile()));
+
+        String tShortId = "short_id";
+        Manifest tManifest = new Manifest(tManifestJson, tShortId);
+
+        assertEquals("Manifest wasn't able to parse label", "Carex blepharicarpa Franch.", tManifest.getLabel());
+    } 
+    @Test
+	public void testWorkshopManifest() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/workshop.json").getFile()));
+
+        String tShortId = "short_id";
+        Manifest tManifest = new Manifest(tManifestJson, tShortId);
+
+        assertEquals("Manifest wasn't able to parse label", "Glen's fantastic October Manifest", tManifest.getLabel());
+    } 
+
+
+    @Test
+	public void test30Manifest() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/3.0manifest.json").getFile()));
+
+        String tShortId = "short_id";
+        try {
+            Manifest tManifest = new Manifest(tManifestJson, tShortId);
+            assertFalse("Manifest should have thrown an IOException when supplied with a 3.0 mainfest",true);
+        } catch (IOException tExcpt) {
+            assertEquals("Exception should mention 3.0 error.", "SAS Currently only works with IIIF version 2.0 manifests",  tExcpt.getMessage());
+        }
+    } 
+
+
+    @Test
     public void testSkeletonManifests() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
 
