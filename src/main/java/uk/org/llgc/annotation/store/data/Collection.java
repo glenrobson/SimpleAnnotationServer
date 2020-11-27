@@ -141,7 +141,14 @@ public class Collection implements Comparable {
     }
 
     public String createDefaultId(final String pBaseURL) {
-        _id = pBaseURL + "/collection/" +  _user.getShortId() + "/inbox.json";
+        StringBuffer tIdentifier = new StringBuffer(pBaseURL);
+        if (!pBaseURL.endsWith("/")) {
+            tIdentifier.append("/");
+        }
+        tIdentifier.append("collection/");
+        tIdentifier.append(_user.getShortId());
+        tIdentifier.append("/inbox.json");
+        _id = tIdentifier.toString();
         return _id;
     }
 
