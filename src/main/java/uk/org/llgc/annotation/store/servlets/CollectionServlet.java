@@ -78,17 +78,24 @@ public class CollectionServlet extends HttpServlet {
             String tCollectionId = StoreConfig.getConfig().getBaseURI(pReq) + relativeId;
 
             Collection tCollection = _store.getCollection(tCollectionId);
-            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-            if (tAuth.allowViewCollection(tCollection)) {
-                pRes.setStatus(HttpServletResponse.SC_OK);
-                pRes.setContentType("application/ld+json; charset=UTF-8");
-                pRes.setCharacterEncoding("UTF-8");
-                JsonUtils.write(pRes.getWriter(), tCollection.toJson());
+            if (tCollection != null) {
+                AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+                if (tAuth.allowViewCollection(tCollection)) {
+                    pRes.setStatus(HttpServletResponse.SC_OK);
+                    pRes.setContentType("application/ld+json; charset=UTF-8");
+                    pRes.setCharacterEncoding("UTF-8");
+                    JsonUtils.write(pRes.getWriter(), tCollection.toJson());
+                } else {
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                    tResponse.put("message", "You can only view your own collections");
+                    this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                }
             } else {
                 Map<String,Object> tResponse = new HashMap<String,Object>();
-                tResponse.put("code", pRes.SC_UNAUTHORIZED);
-                tResponse.put("message", "You can only view your own collections");
-                this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                tResponse.put("code", pRes.SC_NOT_FOUND);
+                tResponse.put("message", "Collection not found.");
+                this.sendJson(pRes, pRes.SC_NOT_FOUND, tResponse);
             }
         }
     }
@@ -147,6 +154,7 @@ public class CollectionServlet extends HttpServlet {
 
 
 	public void doPut(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        System.out.println("From: '" + pReq.getParameter("from") + "' To: '" + pReq.getParameter("to") + "' Manifest: '" + pReq.getParameter("manifest") + "'");
         // Update collection typically moving manifests
         User tUser = new UserService(pReq.getSession()).getUser();
         Collection tFrom = _store.getCollection(pReq.getParameter("from"));
