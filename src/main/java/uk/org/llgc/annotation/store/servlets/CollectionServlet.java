@@ -9,6 +9,10 @@ import javax.servlet.ServletException;
 import com.github.jsonldjava.utils.JsonUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.UnsupportedEncodingException;
+import java.io.InputStreamReader;
 
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -24,6 +28,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Scanner;
+
+import java.net.URLDecoder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -152,20 +159,54 @@ public class CollectionServlet extends HttpServlet {
         JsonUtils.write(pRes.getWriter(), tCollection.toJson());
     }
 
+    protected Map<String, String> getParamsFromInput(final InputStream pStream) throws IOException {
+        BufferedReader tReader = new BufferedReader(new InputStreamReader(pStream));
+        StringBuffer tBuff = new StringBuffer();
+        String tLine = "";
+        while ((tLine = tReader.readLine()) != null) {
+            tBuff.append(tLine);
+        }
+        System.out.println("Body " + tBuff.toString());
+        Map<String, String> tParams = new HashMap<String,String>();
+        Scanner tScanner = new Scanner(tBuff.toString());
+        tScanner.useDelimiter("\\&");
+        System.out.println("Scanner " + tScanner);
+        while (tScanner.hasNext()) {
+            String[] tLineSplit = tScanner.next().split("=");
+            System.out.println(tLineSplit);
+            
+            tParams.put(tLineSplit[0], URLDecoder.decode(tLineSplit[1], "UTF-8"));
+        }
+
+        return tParams;
+    }
 
 	public void doPut(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         System.out.println("From: '" + pReq.getParameter("from") + "' To: '" + pReq.getParameter("to") + "' Manifest: '" + pReq.getParameter("manifest") + "'");
+        Map<String, String> tParams = new HashMap<String,String>();
+        if (pReq.getParameter("from") == null) {
+            tParams = this.getParamsFromInput(pReq.getInputStream());
+        } else {
+            tParams.put("from", pReq.getParameter("from"));
+            if (pReq.getParameter("to") != null) {
+                tParams.put("to", pReq.getParameter("to"));
+            }
+            if (pReq.getParameter("manifest") != null) {
+                tParams.put("manifest", pReq.getParameter("manifest"));
+            }
+        }
+        System.out.println("From: '" + tParams.get("from") + "' To: '" + tParams.get("to") + "' Manifest: '" + tParams.get("manifest") + "'");
         // Update collection typically moving manifests
         User tUser = new UserService(pReq.getSession()).getUser();
-        Collection tFrom = _store.getCollection(pReq.getParameter("from"));
-        if (pReq.getParameter("to") != null) {
+        Collection tFrom = _store.getCollection(tParams.get("from"));
+        if (tParams.get("to") != null) {
             // this is a move request
-            Collection tTo = _store.getCollection(pReq.getParameter("to"));
+            Collection tTo = _store.getCollection(tParams.get("to"));
 
             AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
             if (tAuth.allowCollectionEdit(tFrom) && tAuth.allowCollectionEdit(tTo)) {
                 Manifest tManifest = new Manifest();
-                tManifest.setURI(pReq.getParameter("manifest"));
+                tManifest.setURI(tParams.get("manifest"));
                 Manifest tFullManifest = _store.getManifest(tManifest.getURI());
                 if (tFullManifest != null) {
                     tManifest = tFullManifest;
@@ -192,7 +233,7 @@ public class CollectionServlet extends HttpServlet {
             AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
             if (tAuth.allowCollectionEdit(tFrom)) {
                 Manifest tManifest = new Manifest();
-                tManifest.setURI(pReq.getParameter("manifest"));
+                tManifest.setURI(tParams.get("manifest"));
                 Manifest tFullManifest = _store.getManifest(tManifest.getURI());
                 if (tFullManifest != null) {
                     tManifest = tFullManifest;
