@@ -194,12 +194,14 @@ function moveManifest() {
 
     $.ajax({
         url: '/collection/',
-        data: {
+        data: JSON.stringify({
             "from": activeCollection["@id"],
             "to": collectionId,
             "manifest": manifestURL
-        },
+        }),
         type: 'PUT',
+        contentType: "application/json",
+        processData: false,
         success: function(data) {
             showMessage("moveMessage", "info", "Succesfully moved manifest.");
             for (var index in activeCollection.manifests) {
@@ -246,11 +248,13 @@ function deleteManifest() {
     
     $.ajax({
         url: '/collection/',
-        data: {
+        data: JSON.stringify({
             "from": collection,
             "manifest": manifestURL
-        },
+        }),
         type: 'PUT',
+        contentType: "application/json",
+        processData: false,
         success: function(data) {
             showMessage("confirmInfoMessage", "info", "Removed manifest from collection succesfully.");
             for (var index in activeCollection.manifests) {

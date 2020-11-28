@@ -159,42 +159,9 @@ public class CollectionServlet extends HttpServlet {
         JsonUtils.write(pRes.getWriter(), tCollection.toJson());
     }
 
-    protected Map<String, String> getParamsFromInput(final InputStream pStream) throws IOException {
-        BufferedReader tReader = new BufferedReader(new InputStreamReader(pStream));
-        StringBuffer tBuff = new StringBuffer();
-        String tLine = "";
-        while ((tLine = tReader.readLine()) != null) {
-            tBuff.append(tLine);
-        }
-        System.out.println("Body " + tBuff.toString());
-        Map<String, String> tParams = new HashMap<String,String>();
-        Scanner tScanner = new Scanner(tBuff.toString());
-        tScanner.useDelimiter("\\&");
-        System.out.println("Scanner " + tScanner);
-        while (tScanner.hasNext()) {
-            String[] tLineSplit = tScanner.next().split("=");
-            System.out.println(tLineSplit);
-            
-            tParams.put(tLineSplit[0], URLDecoder.decode(tLineSplit[1], "UTF-8"));
-        }
-
-        return tParams;
-    }
-
 	public void doPut(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         System.out.println("From: '" + pReq.getParameter("from") + "' To: '" + pReq.getParameter("to") + "' Manifest: '" + pReq.getParameter("manifest") + "'");
-        Map<String, String> tParams = new HashMap<String,String>();
-        if (pReq.getParameter("from") == null) {
-            tParams = this.getParamsFromInput(pReq.getInputStream());
-        } else {
-            tParams.put("from", pReq.getParameter("from"));
-            if (pReq.getParameter("to") != null) {
-                tParams.put("to", pReq.getParameter("to"));
-            }
-            if (pReq.getParameter("manifest") != null) {
-                tParams.put("manifest", pReq.getParameter("manifest"));
-            }
-        }
+        Map<String, String> tParams = (Map<String, String>)JsonUtils.fromInputStream(pReq.getInputStream());
         System.out.println("From: '" + tParams.get("from") + "' To: '" + tParams.get("to") + "' Manifest: '" + tParams.get("manifest") + "'");
         // Update collection typically moving manifests
         User tUser = new UserService(pReq.getSession()).getUser();
