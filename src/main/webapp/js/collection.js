@@ -153,6 +153,9 @@ function updateCollectionView() {
     } else {
         deleteCollection.style.display = "inline-block";
     }
+    var collectionLink = document.getElementById("collection_link");
+    collection_link.innerHTML = "";
+    collection_link.appendChild(setupContentState(activeCollection["@id"], "Link to collection. Also draggable using IIIF Content State."));
 
     var manifestsUl = document.getElementById("manifests");
     manifestsUl.innerHTML ='';
@@ -452,6 +455,8 @@ function showManifestDiv(ul, manifest) {
     actionsBar.id = "actionBar";
     mediaBody.appendChild(actionsBar);
 
+    actionsBar.appendChild(setupContentState(manifest["@id"], "Link to manifest. Also draggable using IIIF Content State."));
+
     open = document.createElement("a");
     open.href = "view.xhtml?collection=" + activeCollection["@id"] + "&manifest=" + manifest["@id"];
     open.className = "btn  btn-secondary mb-2";
@@ -481,6 +486,7 @@ function showManifestDiv(ul, manifest) {
     analytics.innerHTML = '<i class="fas fa-chart-line"></i>';
     analytics.title = "Analytics";
     actionsBar.appendChild(analytics);
+
 
     mediaHeaderDiv.appendChild(remove)
     if ('logo' in manifest) {
@@ -624,4 +630,46 @@ function addManifest() {
             console.log('Failed to delete collection: ' + data);
         }
     });
+}
+
+function setupContentState(uri, description) {
+    var a = document.createElement("a");
+    a.href = uri;
+    a.title = description;
+
+    var img = document.createElement("img");
+    img.src = "https://iiif.io/img/logo-iiif-34x30.png";
+    img.draggable = true;
+    img.ondragstart = drag;
+    img.dataset.link = uri;
+
+    a.appendChild(img);
+    a.onclick = copyClipboard;
+
+    return a;
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text/plain", ev.srcElement.dataset.link);
+} 
+
+function copyClipboard(event) {
+    var data = document.createElement("input");
+    data.style = "position: absolute; left: -1000px; top: -1000px";
+    document.body.appendChild(data);
+    data.value = event.srcElement.dataset.link;
+    data.select();
+    try {
+        document.execCommand("copy");
+        event.preventDefault();
+        document.body.removeChild(data);
+        document.getElementById("copyTitle").innerHTML = "Copied to Clipboard!";
+        document.getElementById("copyURI").innerHTML = event.srcElement.dataset.link;
+        $('#copy').modal('toggle');
+        return true;
+    } catch (error) {
+        console.log("Failed to copy url due to: " + error);
+    }
+    document.body.removeChild(data);
+    return true;
 }

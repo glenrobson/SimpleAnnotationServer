@@ -24,6 +24,7 @@
                 <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="main_panel" class="bs-docs-masthead">
                         <button type="button" id="deleteCollection" class="close" data-mode="delete_collection" onclick="showConfirm(event);"><i class='far fa-window-close fa-lg'></i></button>
                         <h1 id="collectionName"></h1>
+                        <p id="collection_link"></p>
                         <!--<p>Collection level actions:</p>
                         <a id="openAll" class="btn btn-primary mb-2">Open all</a>-->
                         <button type="button" id="indexButton" class="btn btn-secondary mb-2" data-toggle="modal" data-target="#addManifest" onclick="hideMessage('addManifestMessages');">Add Item</button>
@@ -62,6 +63,7 @@
         <ui:include src="WEB-INF/templates/dialogues/addManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/moveManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
+        <ui:include src="WEB-INF/templates/dialogues/copy.xhtml"/>
         </ui:define>
     </ui:composition>
 </html>
