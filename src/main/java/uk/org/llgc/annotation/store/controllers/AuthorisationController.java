@@ -16,6 +16,9 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.Collection;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import java.util.List;
 
 import java.io.IOException;
@@ -89,12 +92,25 @@ public class AuthorisationController {
     }
 
     public boolean allowViewCollection(final Collection pCollection) {
-        User tLoggedInUser = this.getUser();
-        return (pCollection.getUser() != null && pCollection.getUser().getId().equals(tLoggedInUser.getId())) || tLoggedInUser.isAdmin();
+        if (StoreConfig.getConfig().isPublicCollections() && !pCollection.getId().endsWith("all.json")) {
+            return true;
+        } else {    
+            User tLoggedInUser = this.getUser();
+            return (pCollection.getUser() != null && pCollection.getUser().getId().equals(tLoggedInUser.getId())) || tLoggedInUser.isAdmin();
+        }
     }
 
     public boolean allowExportAllAnnotations() {
         User tLoggedInUser = this.getUser();
         return tLoggedInUser.isAdmin(); // Only admin can do this
+    }
+
+    public boolean allowThrough(final HttpServletRequest pRequest) {
+        if (pRequest.getRequestURI().contains("/collection/")) {
+            if (StoreConfig.getConfig().isPublicCollections()) {
+                return pRequest.getMethod().equals("GET") && !pRequest.getRequestURI().endsWith("all.json");
+            }
+        }
+        return false;
     }
 }

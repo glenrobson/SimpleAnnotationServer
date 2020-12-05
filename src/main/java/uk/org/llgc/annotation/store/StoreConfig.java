@@ -40,7 +40,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections"};
     protected AnnotationUtils _annotationUtils = null;
     protected List<OAuthTarget> _authTargets = null;
 
@@ -129,6 +129,17 @@ public class StoreConfig extends HttpServlet {
 
     public void setAnnotationUtils(final AnnotationUtils pAnnoUtils) {
         _annotationUtils = pAnnoUtils;
+    }
+
+    /**
+     * Default to true if config not present
+     */
+    public boolean isPublicCollections() {
+        if (_props.get("public_collections") == null) {
+            return true;
+        } else {
+            return _props.get("public_collections").equals("true");
+        }
     }
 
     public File getRealPath(final String pPath) {

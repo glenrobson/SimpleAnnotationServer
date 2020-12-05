@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 import uk.org.llgc.annotation.store.servlets.login.LoginCallback;
 import uk.org.llgc.annotation.store.controllers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 import uk.org.llgc.annotation.store.StoreConfig;
 
 public class OAuthFilter implements Filter {
@@ -43,7 +44,8 @@ public class OAuthFilter implements Filter {
         if (StoreConfig.getConfig().isAuth()) {
             HttpSession tSession = pReq.getSession();
             UserService tUsers = new UserService(tSession);
-            if (!tUsers.isAuthenticated()) {
+            AuthorisationController tAuth = new AuthorisationController(tUsers);
+            if (!tUsers.isAuthenticated() && !tAuth.allowThrough((HttpServletRequest)pRequest)) {
                 String tCallingURL = pReq.getRequestURI();
                 if (pReq.getQueryString() != null) {
                     tCallingURL += "?" + pReq.getQueryString();
