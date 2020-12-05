@@ -53,7 +53,7 @@ public class CollectionServlet extends HttpServlet {
             if (tCollections.isEmpty()) {
                 Collection tDefaultCollection = new Collection();
                 tDefaultCollection.setUser(tUser);
-                tDefaultCollection.setLabel("Inbox");
+                tDefaultCollection.setLabel(StoreConfig.getConfig().getDefaultCollectionName());
                 tDefaultCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pReq));
                 tDefaultCollection = _store.createCollection(tDefaultCollection);
                 tCollections.add(tDefaultCollection);

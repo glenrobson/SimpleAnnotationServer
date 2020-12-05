@@ -40,7 +40,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name"};
     protected AnnotationUtils _annotationUtils = null;
     protected List<OAuthTarget> _authTargets = null;
 
@@ -139,6 +139,14 @@ public class StoreConfig extends HttpServlet {
             return true;
         } else {
             return _props.get("public_collections").equals("true");
+        }
+    }
+
+    public String getDefaultCollectionName() {
+        if (_props.get("default_collection_name") == null) {
+            return "Inbox";
+        } else {
+            return _props.get("default_collection_name");
         }
     }
 
