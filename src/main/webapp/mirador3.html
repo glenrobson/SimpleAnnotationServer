@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link rel="stylesheet" type="text/css" href="mirador-2.6.1/css/mirador-combined.css">
+  <title>Mirador Viewer</title>
+  </head>
+<body>
+  <script type='text/javascript' src='https://unpkg.com/mirador@latest/dist/mirador.min.js'></script>
+  <script type='text/javascript' src="https://unpkg.com/mirador-annotations@latest/umd/mirador-annotations.js"></script>
+
+  <div id="viewer"></div>
+  <script type="text/javascript">
+    var params = new URL(document.location).searchParams;
+    var manifest = params.get('iiif-content') || params.get('manifest');
+    // Need to iterate through this to get the manifests and add them individually 
+    var collection = params.get('collection');
+
+    var miradorInstance = Mirador.viewer({
+        id: 'viewer',
+        annotation: {
+            adapter: (canvasId) => new SimpleAnnotationServerV2Adapter(canvasId, 'annotation'),
+        },
+
+        window: {
+            defaultSideBarPanel: 'annotations',
+            sideBarOpenByDefault: true,
+          },
+          windows: [{
+            loadedManifest: manifest,
+          }],
+          catalog: [
+            { collectionPath: collection }
+          ]
+        });
+  </script>
+</body>
+</html>
+
