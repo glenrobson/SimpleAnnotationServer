@@ -143,7 +143,7 @@ function showCollection(event) {
 }
 function updateCollectionView() {
     var heading = document.getElementById("collectionName");
-    heading.innerHTML = activeCollection.label;
+    heading.innerHTML = "Collection";//activeCollection.label;
     /*var openAll = document.getElementById("openAll");
     openAll.href = "view.xhtml?collection=" + activeCollection["@id"];
 */
@@ -154,7 +154,7 @@ function updateCollectionView() {
         deleteCollection.style.display = "inline-block";
     }
     var collectionLink = document.getElementById("collection_link");
-    collection_link.innerHTML = "";
+    collection_link.innerHTML = "<b>Name: </b>" + activeCollection.label + "<br/><b>Collection link: </b> <span class=\"form-control\" type=\"text\" placeholder=\"" + activeCollection["@id"] + "\" readonly> " + activeCollection["@id"] + "</span>";
     collection_link.appendChild(setupContentState(activeCollection["@id"], "Link to collection. Also draggable using IIIF Content State."));
 
     var manifestsUl = document.getElementById("manifests");
