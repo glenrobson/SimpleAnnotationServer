@@ -488,7 +488,6 @@ function showManifestDiv(ul, manifest) {
     actionsBar.appendChild(analytics);
 
 
-    mediaHeaderDiv.appendChild(remove)
     if ('logo' in manifest) {
         var tURL = "";
         if (typeof manifest.logo === 'object' && '@id' in manifest.logo) {
@@ -504,6 +503,7 @@ function showManifestDiv(ul, manifest) {
             mediaHeaderDiv.appendChild(logo)
         }
     }
+    mediaHeaderDiv.appendChild(remove)
 
    // mediaBody.appendChild(remove);
     //mediaBody.appendChild(mediaHeader);

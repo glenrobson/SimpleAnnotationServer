@@ -312,14 +312,13 @@ ul.nav a.vote {
 }
 
 .media-header-div img {
-    position:relative;
-    float:right;
+    margin-left: 15px;
 }
 
 .media-header-div button {
     position:relative;
     right:0px;
-    float:none;
+    float:right;
 }
 
 .media-header-div h5 {
