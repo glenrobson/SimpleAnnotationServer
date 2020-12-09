@@ -426,12 +426,15 @@ function showManifestDiv(ul, manifest) {
     remove.onclick = showConfirm;
    // mediaBody.appendChild(remove);
 
-    mediaHeader = document.createElement("h5");
+    mediaHeader = document.createElement("div");
     mediaHeader.className = "media-heading";
+
+    heading = document.createElement("h5");
+    mediaHeader.appendChild(heading);
     if ('label' in manifest && manifest.label) {
-        mediaHeader.innerHTML = findValue(manifest, "label");
+        heading.innerHTML = findValue(manifest, "label");
     } else {
-        mediaHeader.innerHTML = "Missing Manifest label";
+        heading.innerHTML = "Missing Manifest label";
     }
     //mediaBody.appendChild(mediaHeader);
 
@@ -499,9 +502,16 @@ function showManifestDiv(ul, manifest) {
             var logo = document.createElement("img");
             logo.className = "logo";
             logo.src= tURL;
-            actionsBar.appendChild(logo);
-            mediaHeaderDiv.appendChild(logo)
+            /*actionsBar.appendChild(logo);
+            mediaHeaderDiv.appendChild(logo)*/
+
+           /* logoBar = document.createElement("div");
+            logoBar.id = "logoBar";
+            mediaBody.appendChild(logoBar);
+            logoBar.appendChild(logo);*/
+            mediaHeader.insertBefore(logo, mediaHeader.childNodes[0]);
         }
+
     }
     mediaHeaderDiv.appendChild(remove)
 

@@ -238,11 +238,18 @@ ul.nav a.vote {
 .logo {
     height: 30px;
     box-shadow: 1px 1px 1px #888;
+    float:right;
+    margin: 5px;
 }
 
 #actionBar {
     border-top: 1px dotted #ddd;
     text-align: right;
+}
+
+#logoBar {
+    text-align: right;
+    padding: 5px;
 }
 
 #actionBar button {
@@ -284,7 +291,6 @@ ul.nav a.vote {
 }
 
 .manifestSummary h5 {
-    border-bottom: 1px dotted #ddd;
     padding: 5px 5px 5px 5px;
 }
 
@@ -306,7 +312,7 @@ ul.nav a.vote {
 
 .media-header-div {
     width: 100%;
-    height: 50px;
+    height: 35px;
     background-color: #eaebee;
     padding: 5px 5px 5px 5px;
 }
@@ -327,6 +333,10 @@ ul.nav a.vote {
     position: relative;
     right: 100px;
     width: 80%;
+}
+
+.media-heading {
+    border-bottom: 1px dotted #ddd;
 }
 
 .media a {
