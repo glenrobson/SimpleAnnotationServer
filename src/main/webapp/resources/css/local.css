@@ -287,7 +287,8 @@ ul.nav a.vote {
 #deleteCollection {
     position: absolute;
     right: 10px;
-    top: 10px
+    top: 10px;
+    color: white;
 }
 
 .manifestSummary h5 {
