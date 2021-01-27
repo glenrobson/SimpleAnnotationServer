@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            
+
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <br/>
+                    <h1>Profile</h1>
+                    <c:set var="user" value="#{userService.user}" scope="request" />
+                    <p>This is your SAS profile copied from your <h:outputText value="#{user.authenticationMethod}" /> profile.</p>
+                    <div class="alert alert-danger" role="alert" id="messages" style="display:none">
+                    </div>
+                    <form id="profileForm" name="update" action='#{userService.relativeId}' method="post" autocomplete="off">
+                        <div class="form-group">
+                            <label for="id">SAS Identifier</label>
+                            <input type="url" class="form-control" id="id" value="#{user.id}" disabled="true" />
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="#{user.name}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="#{user.email}" />
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-dark" id="save" name="save">Save</button>
+                            <button type="button" class="btn btn-dark" name="cancel" onClick="window.location.reload();">Cancel</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Profile Picture</label>
+                            <div>
+                                <img src="#{user.picture}"/>
+                            </div>
+                        </div>
+                   </form>
+                </div>
+            </main>
+            <script>     
+                var button = document.getElementById('save');
+                button.onclick = function (event) {
+                    ajaxForm({
+                        'action': {
+                            'button': 'save',
+                            'verb': 'Saving'
+                        },
+                        'form':'profileForm'
+                    });
+                }
+            </script>
+         </ui:define>
+    </ui:composition>
+</html>
+
+

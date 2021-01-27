@@ -18,11 +18,13 @@ import org.apache.http.NameValuePair;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+import uk.org.llgc.annotation.store.data.users.User;
+
 public class SearchQuery {
 	protected String _query = "";
 	protected List<String> _motivations = null;
 	protected List<DateRange> _dates = null;
-	protected List<String> _users = null;
+	protected List<User> _users = null;
 	protected int _resultsPerPage = 1000;
 	protected int _page = 0;
 	protected String _scope = "";
@@ -32,7 +34,7 @@ public class SearchQuery {
 		this.setQuery(pQuery);
 	}
 
-	public SearchQuery(final URI pURI) throws ParseException {
+	public SearchQuery(final URI pURI) throws ParseException, URISyntaxException {
 		this.setBaseURI(pURI);
 
 		List<NameValuePair> tParamsList = URLEncodedUtils.parse(pURI, Charset.forName("UTF-8"));
@@ -63,7 +65,11 @@ public class SearchQuery {
 			tBuff.append(pKey);
 			tBuff.append("=");
 			for (Object tChild: pList) {
-				tBuff.append(tChild);
+                if (tChild instanceof User) {
+                    tBuff.append(((User)tChild).getId());
+                } else {
+                    tBuff.append(tChild);
+                }
 				tBuff.append(" ");
 			}
 			return tBuff.toString().trim();
@@ -181,15 +187,23 @@ public class SearchQuery {
 		return _dates;
 	}
 
-	public void setUsers(final String pUsers) {
+	public void setUsers(final String pUsers) throws URISyntaxException {
 		StringTokenizer tTokenizer = new StringTokenizer(pUsers);
-		_users = new ArrayList<String>();
+		_users = new ArrayList<User>();
 		while (tTokenizer.hasMoreTokens()) {
-			_users.add(tTokenizer.nextToken());
+            User tUser = new User();
+            tUser.setId(tTokenizer.nextToken());
+			_users.add(tUser);
 		}
 	}
-
-	public List<String> getUsers() {
+    public void addUser(final User pUser) {
+        if (_users == null) {
+            _users = new ArrayList<User>();
+        }
+        _users.add(pUser);
+    }
+        
+	public List<User> getUsers() {
 		return _users;
 	}
 }

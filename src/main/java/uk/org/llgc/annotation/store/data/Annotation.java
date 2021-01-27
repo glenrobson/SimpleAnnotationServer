@@ -15,6 +15,7 @@ import java.text.ParseException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.jena.vocabulary.DCTerms;
 
@@ -35,6 +36,7 @@ public class Annotation {
     protected Map<String,Object> _annotation = null;
     protected List<Body> _bodies = null;
     protected List<Target> _targets = null;
+    protected User _creator = null;
 
     public Annotation(final Map<String,Object> pAnno) {
         this(pAnno, null);
@@ -56,6 +58,24 @@ public class Annotation {
 
     public void setEncoder(final Encoder pEncoder) {
         _encoder = pEncoder;
+    }
+
+    public void setCreator(final User pUser) {
+        _annotation.put("dcterms:creator", pUser.getId());
+        _creator = pUser;
+    }
+
+    public User getCreator() {
+        if (_creator == null && _annotation.get("dcterms:creator") != null) {
+            _creator = new User();
+            try {
+                _creator.setId((String)_annotation.get("dcterms:creator"));
+            } catch(URISyntaxException tExcept) {
+                System.err.println("Failed to load user to annotation as the ID was no a URI: " + _annotation.get("dcterms:creator"));
+                return null;
+            }
+        }
+        return _creator;
     }
 
     public void setJson(final Map<String, Object> pJson) {
@@ -92,6 +112,8 @@ public class Annotation {
                 _targets.add(new Target(_annotation.get("on")));
             }
         }
+        // Ensure motivation is an array
+        this.getMotivations();
     }
 
     protected void standaiseAnno() {
@@ -110,6 +132,35 @@ public class Annotation {
             tList.add(_annotation.get("resource"));
             
             _annotation.put("resource", tList);
+        }
+
+
+        // Ensure on is an array
+        if (_annotation.get("on") != null && !(_annotation.get("on") instanceof String)) {
+            List<Map<String, Object>> tOns = new ArrayList<Map<String,Object>>();
+            if (_annotation.get("on") instanceof List) {
+                tOns = (List<Map<String, Object>>)_annotation.get("on");
+            } else {
+                tOns.add((Map<String, Object>)_annotation.get("on"));
+            }
+            // Ensure selector.item is an object not an array
+            for (Map<String,Object> tOn: tOns) {
+                if (tOn.get("@type") != null && tOn.get("@type").equals("oa:SpecificResource") && tOn.get("selector") != null) {
+                    Map<String,Object> tSelector = (Map<String,Object>)tOn.get("selector");
+                    if (tSelector.get("item") != null && tSelector.get("item") instanceof List) {
+                        List<Map<String,Object>> tItems = (List<Map<String,Object>>)tSelector.get("item");
+                        if (tItems.size() > 1) {
+                            System.err.println("I think this is an invalid annotation as there are multiple items and I expected only one: " + this.getId());
+                            try { 
+                                System.out.println(JsonUtils.toPrettyString(_annotation));
+                            } catch (IOException tExcpt) {
+                                System.err.println("Failed to print annotation due to " + tExcpt);
+                            }
+                        }
+                        tSelector.put("item", tItems.get(0));
+                    }
+                }
+            }
         }
     }
 
@@ -138,6 +189,7 @@ public class Annotation {
         List<String> tMotivations = new ArrayList<String>();
         if (_annotation.get("motivation") instanceof String) {
             tMotivations.add((String)_annotation.get("motivation"));
+            _annotation.put("motivation", tMotivations);
         } else {
             tMotivations = (List<String>)_annotation.get("motivation");
         }

@@ -75,7 +75,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 
-    protected void storeCanvas(final String pGraphName, final Model pModel) throws IOException {
+    protected void storeModel(final String pGraphName, final Model pModel) throws IOException {
         // TODO
     }
 

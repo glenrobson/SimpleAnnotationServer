@@ -152,7 +152,7 @@ public class TestSearch extends TestUtils {
 
 		assertEquals("Expected 1 result for 'simple' but found different", 1, tResults.size());
 		assertEquals("Expected single result for 'simple'","http://example.com/annotation/1", tResults.get(0).get("@id"));
-		assertTrue("UV requires on to be a string with xywh in it..",tResults.get(0).get("on") instanceof String);
+		assertTrue("UV requires on to be a string with xywh in it.. Got" + tResults.get(0).get("on"),tResults.get(0).get("on") instanceof String);
 
 		// test html
 		tQuery = new SearchQuery("abold");

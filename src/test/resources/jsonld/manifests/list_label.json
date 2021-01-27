@@ -1,0 +1,74 @@
+{
+  "@type" : "sc:Manifest",
+  "@id" : "https://iiif.europeana.eu/presentation/11614/KXHERBARIUMXK000960819/manifest",
+  "@context" : "http://iiif.io/api/presentation/2/context.json",
+  "label" : [ {
+    "@value" : "Carex blepharicarpa Franch."
+  } ],
+  "description" : [ {
+    "@value" : "Herbarium of the US North Pacific Exploring Expedition under Commanders Ringgold and Rodgers, 1853-56; From Dr Gray, Dec. 3 1857; Laid in from herb. Boott; with K000960820"
+  } ],
+  "metadata" : [ {
+    "label" : "date",
+    "value" : [ {
+      "@value" : "1853-00-00"
+    }, {
+      "@value" : "1902-09-27 (Identification)"
+    } ]
+  }, {
+    "label" : "relation",
+    "value" : [ {
+      "@value" : "http://www.biodiversitylibrary.org/name/Carex_blepharicarpa_Franch%24"
+    } ]
+  }, {
+    "label" : "type",
+    "value" : [ {
+      "@language" : "en",
+      "@value" : "Preserved Specimen"
+    } ]
+  } ],
+  "thumbnail" : {
+    "@type" : "dctypes:Image",
+    "@id" : "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Fwww.kew.org%2Fherbcatimg%2F625710.jpg&type=IMAGE"
+  },
+  "attribution" : "Carex blepharicarpa Franch - https://www.europeana.eu/item/11614/KXHERBARIUMXK000960819. Royal Botanic Gardens, Kew. CC BY - http://creativecommons.org/licenses/by/4.0/",
+  "license" : "http://creativecommons.org/licenses/by/4.0/",
+  "logo" : "https://style.europeana.eu/images/europeana-logo-default.png",
+  "seeAlso" : [ {
+    "@id" : "https://www.europeana.eu/api/v2/record/11614/KXHERBARIUMXK000960819.json-ld",
+    "format" : "application/ld+json",
+    "profile" : "http://www.europeana.eu/schemas/edm/"
+  }, {
+    "@id" : "https://www.europeana.eu/api/v2/record/11614/KXHERBARIUMXK000960819.json",
+    "format" : "application/json",
+    "profile" : "http://www.europeana.eu/schemas/edm/"
+  }, {
+    "@id" : "https://www.europeana.eu/api/v2/record/11614/KXHERBARIUMXK000960819.rdf",
+    "format" : "application/rdf+xml",
+    "profile" : "http://www.europeana.eu/schemas/edm/"
+  } ],
+  "sequences" : [ {
+    "@type" : "sc:Sequence",
+    "label" : "Current Page Order",
+    "startCanvas" : "https://iiif.europeana.eu/presentation/11614/KXHERBARIUMXK000960819/canvas/p1",
+    "canvases" : [ {
+      "@type" : "sc:Canvas",
+      "@id" : "https://iiif.europeana.eu/presentation/11614/KXHERBARIUMXK000960819/canvas/p1",
+      "label" : "p. 1",
+      "height" : 2000,
+      "width" : 1502,
+      "attribution" : "Carex blepharicarpa Franch - https://www.europeana.eu/item/11614/KXHERBARIUMXK000960819. Royal Botanic Gardens, Kew. CC BY - http://creativecommons.org/licenses/by/4.0/",
+      "license" : "http://creativecommons.org/licenses/by/4.0/",
+      "images" : [ {
+        "@type" : "oa:Annotation",
+        "motivation" : "sc:painting",
+        "resource" : {
+          "@type" : "dctypes:Image",
+          "@id" : "http://www.kew.org/herbcatimg/625710.jpg",
+          "format" : "image/jpeg"
+        },
+        "on" : "https://iiif.europeana.eu/presentation/11614/KXHERBARIUMXK000960819/canvas/p1"
+      } ]
+    } ]
+  } ]
+}

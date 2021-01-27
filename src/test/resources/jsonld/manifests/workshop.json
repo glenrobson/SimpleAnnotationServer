@@ -1,0 +1,61 @@
+{
+	"@context": "http://iiif.io/api/presentation/2/context.json",
+	"@id": "http://962b3764-d27d-41ff-b833-045088bd6572",
+	"@type": "sc:Manifest",
+	"label": "Glen's fantastic October Manifest",
+    "metadata": [],
+	"description": [
+		{
+			"@value": "[Click to edit description]",
+			"@language": "en"
+		}
+	],
+	"license": "https://creativecommons.org/licenses/by/3.0/",
+	"attribution": "[Click to edit attribution]",
+	"sequences": [
+		{
+			"@id": "http://124c1daa-5983-4040-a1c7-fbb71a034c62",
+			"@type": "sc:Sequence",
+			"label": [
+				{
+					"@value": "Normal Sequence",
+					"@language": "en"
+				}
+			],
+			"canvases": [
+				{
+					"@id": "http://a292a51f-5975-497f-b9a4-8a962e380762",
+					"@type": "sc:Canvas",
+					"label": "Empty canvas",
+					"height": 3024,
+					"width": 4032,
+					"images": [
+						{
+							"@context": "http://iiif.io/api/presentation/2/context.json",
+							"@id": "http://3e071cbb-e37e-49c9-8b60-4d996885f5e8",
+							"@type": "oa:Annotation",
+							"motivation": "sc:painting",
+							"resource": {
+								"@id": "https://iiif.archivelab.org/iiif/img-8664_202009/full/full/0/default.jpg",
+								"@type": "dctypes:Image",
+								"format": "image/jpeg",
+								"service": {
+									"@context": "http://iiif.io/api/image/2/context.json",
+									"@id": "https://iiif.archivelab.org/iiif/img-8664_202009",
+									"profile": [
+										"http://iiif.io/api/image/2/level2.json"
+									]
+								},
+								"height": 3024,
+								"width": 4032
+							},
+							"on": "http://a292a51f-5975-497f-b9a4-8a962e380762"
+						}
+					],
+                    "related": ""
+				}
+			]
+		}
+	],
+	"structures": []
+}

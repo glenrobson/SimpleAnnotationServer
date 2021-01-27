@@ -32,6 +32,7 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.encoders.Encoder;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -58,6 +59,7 @@ import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.ElasticsearchStatusException;
 
 import java.util.Properties;
 
@@ -150,33 +152,41 @@ public class TestUtils {
                         System.err.println("Failed to delete test dir " + tDataDir.getPath() + " due to " + tExcpt);
                     }
                 }
+            } else if (tStore.equals("elastic")) {
+                try {
+                    URI tConectionString = new URI((String)_props.get("elastic_connection"));
+                    RestHighLevelClient tClient = ElasticStore.buildClient(tConectionString);
+                    String tIndex = tConectionString.getPath().replace("/","");
+                    
+                    tClient.indices().delete(new DeleteIndexRequest(tIndex), RequestOptions.DEFAULT);
+                } catch (IOException tExcpt) {    
+                    System.err.println("Failed to delete elastic search due to " + tExcpt);
+                } catch (URISyntaxException tExcpt) {
+                    System.err.println("Failed to delete elastic search due to " + tExcpt);
+                } catch (ElasticsearchStatusException tExcpt) {
+                    // silently catch this as it means there was no index to delete
+                }
+            } else if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
+                if (_store != null) {
+                    SolrClient _solrClient = ((SolrStore)_store).getClient();
+                    try {
+                        UpdateResponse tResponse = _solrClient.deleteByQuery("*:*");// deletes all documents
+                        _solrClient.commit();
+                    } catch(SolrServerException tException) {
+                        tException.printStackTrace();
+                        System.err.println("Failed to remove annotations from solr due to " + tException);
+                    } catch (IOException tExcpt) {    
+                        System.err.println("Failed to delete solr index due to " + tExcpt);
+                    }
+                }
             }
+
         }
     };
 
    public void tearDown() throws IOException {
 		String tStore = _props.getProperty("store");
-		if (tStore.equals("solr") || tStore.equals("solr-cloud")) {
-			SolrClient _solrClient = ((SolrStore)_store).getClient();
-			try {
-				UpdateResponse tResponse = _solrClient.deleteByQuery("*:*");// deletes all documents
-				_solrClient.commit();
-			} catch(SolrServerException tException) {
-				tException.printStackTrace();
-				throw new IOException("Failed to remove annotations due to " + tException);
-			}
-		} else if (tStore.equals("elastic")) {
-            try {
-                URI tConectionString = new URI((String)_props.get("elastic_connection"));
-                RestHighLevelClient tClient = ElasticStore.buildClient(tConectionString);
-                String tIndex = tConectionString.getPath().replace("/","");
-                
-                tClient.indices().delete(new DeleteIndexRequest(tIndex), RequestOptions.DEFAULT);
-            } catch (URISyntaxException tExcpt) {
-				tExcpt.printStackTrace();
-				throw new IOException("Failed to remove annotations due to " + tExcpt);
-            }
-		} else if (tStore.equals("sesame")) {
+        if (tStore.equals("sesame")) {
 			try {
 				HTTPRepository tRepo = new HTTPRepository(_props.getProperty("repo_url"));
 				RepositoryConnection tConn = tRepo.getConnection();
@@ -248,4 +258,14 @@ public class TestUtils {
 		return tResult;
 	}
 
+    protected User createAdminUser() {
+        User tUser = new User();
+        try {
+            tUser.setId("http://example.com/admin");
+        } catch (URISyntaxException tExcpt) {
+        }
+        tUser.setAdmin(true);
+
+        return tUser;
+    }
 }

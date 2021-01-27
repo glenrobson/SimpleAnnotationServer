@@ -35,6 +35,7 @@ import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Body;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -101,7 +102,8 @@ public class TestPublish extends TestUtils {
 
         assertNotNull("Saving annotation should have created an ID", tAfterJson.get("@id"));
         assertEquals("Type different", tBeforeJson.get("@type"), tAfterJson.get("@type"));
-        assertEquals("Motivation different lenghts", ((List)tBeforeJson.get("motivation")).size(), ((List)tAfterJson.get("motivation")).size());
+        assertTrue("Motivation should be an array", tAfterJson.get("motivation") instanceof List);
+        assertEquals("Motivation different lengths", ((List)tBeforeJson.get("motivation")).size(), ((List)tAfterJson.get("motivation")).size());
         assertEquals("Motivation different ", ((List)tBeforeJson.get("motivation")).get(0), ((List)tAfterJson.get("motivation")).get(0));
 
         assertTrue("Resource should be a Map and it was " + tAfterJson.get("resource").getClass().getName(), tAfterJson.get("resource") instanceof List);
@@ -152,7 +154,7 @@ public class TestPublish extends TestUtils {
 			_store.addAnnotation(new Annotation(tAnnotation));
 		}
 
-		AnnotationList tPageAnnos = _store.getAnnotationsFromPage(new Canvas("http://example.com/image2", ""));
+		AnnotationList tPageAnnos = _store.getAnnotationsFromPage(createAdminUser(), new Canvas("http://example.com/image2", ""));
 
         assertEquals("Different number of annotations than expected", 2, tPageAnnos.size());
         Annotation tAnno1 = tPageAnnos.get("http://example.com/annotation/2");

@@ -5,15 +5,20 @@ import org.apache.logging.log4j.Logger;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
+
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -23,6 +28,7 @@ import java.io.IOException;
 
 import java.util.Map;
 import java.util.List;
+import java.util.Date;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
     protected static Logger _logger = LogManager.getLogger(AbstractStoreAdapter.class.getName());
@@ -81,6 +87,23 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 		return addAnnotationSafe(pAnno);
 	}
+
+    protected String formatDate(final Date pDate) {
+        SimpleDateFormat tDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        return tDateFormatter.format(pDate);
+    }
+
+    protected Date parseDate(final String pDate) {
+        try {
+            SimpleDateFormat tDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            return tDateFormatter.parse(pDate);
+        } catch (ParseException tExcpt) {
+            tExcpt.printStackTrace();
+            System.err.println("Failed to parse date " + pDate);
+            return null;
+        }
+    }
+
 
     protected void addWithins(final Annotation pAnno) throws IOException {
         List<Target> tMissingWithins = pAnno.getMissingWithin();
@@ -149,7 +172,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	protected String indexManifest(final String pShortId, final Manifest pManifest) throws IOException {
-		Manifest tExisting = this.getManifest(pShortId);
+		Manifest tExisting = this.getManifest(pManifest.getURI());
 		if (tExisting != null) {
 			if (tExisting.getURI().equals(pManifest.getURI())) {
 				return tExisting.getShortId(); // manifest already indexed
@@ -172,21 +195,40 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
 			pManifest.put("@context", tListContext);
 		}*/
-
+        if (pManifest.getCanvases().isEmpty()) {
+            throw new IOException("Failed to load manifest " + pManifest.getURI() + " because it had no pages");
+        }
 		return this.indexManifestNoCheck(pShortId, pManifest);
 	}
+
+    public User retrieveUser(final User pUser) throws IOException {
+        User tSavedUser = this.getUser(pUser);
+        if (tSavedUser == null) {
+            return this.saveUser(pUser);
+        } else {
+            return tSavedUser;
+        }
+    }
+
+    public void updateCollection(final Collection pCollection) throws IOException {
+        this.deleteCollection(pCollection);
+        this.createCollection(pCollection);
+    }
 
 	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;
 	public abstract Annotation addAnnotationSafe(final Annotation pJson) throws IOException;
 	public abstract IIIFSearchResults search(final SearchQuery pQuery) throws IOException;
 	protected abstract String indexManifestNoCheck(final String pShortID, final Manifest pManifest) throws IOException;
 	public abstract List<Manifest> getManifests() throws IOException;
-	public abstract List<Manifest> getSkeletonManifests() throws IOException;
+	public abstract List<Manifest> getSkeletonManifests(final User pUser) throws IOException;
 	public abstract String getManifestId(final String pShortId) throws IOException;
-	public abstract Manifest getManifest(final String pShortId) throws IOException;
+	public abstract Manifest getManifest(final String pId) throws IOException;
 
     public abstract Canvas resolveCanvas(final String pShortId) throws IOException;
     public abstract void storeCanvas(final Canvas pCanvas) throws IOException;
+
+    public abstract User getUser(final User pUser) throws IOException;
+    public abstract User saveUser(final User pUser) throws IOException;
 
 	public abstract Annotation getAnnotation(final String pId) throws IOException;
 

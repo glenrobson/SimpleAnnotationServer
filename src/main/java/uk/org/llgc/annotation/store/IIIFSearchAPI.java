@@ -27,7 +27,9 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.DateRange;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.controllers.UserService;
 
 public class IIIFSearchAPI extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(IIIFSearchAPI.class.getName()); 
@@ -46,6 +48,7 @@ public class IIIFSearchAPI extends HttpServlet {
 
 	// http://universalviewer.io/examples/?manifest=http://193.61.220.59:8888/manifests/4642022.json&locale=en-GB#?c=0&m=0&s=0&cv=6&z=-37.9666%2C0%2C9949.9332%2C7360
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        User tUser = new UserService(pReq.getSession()).getUser();
 		String[] tRequestURI = pReq.getRequestURI().split("/");
 		String tManifestShortId = tRequestURI[tRequestURI.length - 2]; 
 		String tBaseURI = pReq.getParameter("base");
@@ -67,6 +70,7 @@ public class IIIFSearchAPI extends HttpServlet {
 			tQuery = new SearchQuery(new URI(tURI.toString()));
 			tQuery.setResultsPerPage(_resultsPerPage);
 			tQuery.setScope(_store.getManifestId(tManifestShortId));
+            tQuery.addUser(tUser);
 		} catch (ParseException tExcpt) {
 			pRes.sendError(pRes.SC_BAD_REQUEST,"Failed to parse date paratmeters " + tExcpt);
 			return;

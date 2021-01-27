@@ -1,0 +1,20 @@
+version: '3'
+services:
+  web:
+    container_name: sas 
+    build: 
+        context: .
+        dockerfile: docker/sas-auth/Dockerfile
+    ports:
+      - "8888:8080"
+  elastic:
+    image: "elasticsearch:7.8.1"
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200

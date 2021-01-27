@@ -26,7 +26,7 @@ import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
-import uk.org.llgc.annotation.store.contollers.StatsService;
+import uk.org.llgc.annotation.store.controllers.StatsService;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -89,12 +89,12 @@ public class TestStats extends TestUtils {
         StatsService tStats = new StatsService();
         tStats.init(_annotationUtils);
 
-        List<PageAnnoCount> tPageCounts = tStats.getManifestAnnoCount(tManifest);
+        List<PageAnnoCount> tPageCounts = tStats.getAnnoCountData(tManifest);
         assertEquals("Expected size of 1.", 1, tPageCounts.size());
         assertEquals("Expected 8 annotations for the first page.", 8, tPageCounts.get(0).getCount());
 
         // Now test how many images are left to do.
-        PieChartModel tModel = tStats.getPercentAnnotated(tManifest.getShortId());
+        PieChartModel tModel = tStats.getPercentAnnotated(tManifest.getURI());
         assertEquals("Expected a pie chart of size 2",tModel.getData().size(), 2);
         Set<String> tKeys = tModel.getData().keySet();
         int tDone = 0;

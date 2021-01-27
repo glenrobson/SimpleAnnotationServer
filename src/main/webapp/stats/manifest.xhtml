@@ -8,26 +8,31 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-
-   
-
     <ui:composition template="../WEB-INF/templates/layout.xhtml">
-        <ui:param name="title" value="List all the annotations in this store"></ui:param>
+        <ui:param name="title" value="Annotations Analytics"></ui:param>
         <ui:param name="path" value="/"></ui:param>
-        <ui:param name="selected-menu" value="listAnnost.xhtml"></ui:param>
+        <ui:param name="includeJQuery" value="false"></ui:param>
         <ui:define name = "content">
             <script type="text/javascript">
                 function tooltip(str, seriesIndex, pointIndex, plot) {
                     return plot.options.axes.xaxis.ticks[pointIndex] + ": " + plot.data[seriesIndex][pointIndex];
                 }
             </script>
-
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <br/>
+                    <c:set var="tManifest" value="#{statsService.getManifest(param['iiif-content'])}" scope="request" />
+                    <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
+                    <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
+                    <p>Annotation statistics for this manifest.</p>
+                </div>
+            </main>
+            <p:panel header="Percentage of items transcribed">
+                <p:chart type="pie" model="#{statsService.getPercentAnnotated(tManifest)}" style="height:300px; width:500px;"/>
+            </p:panel>
 
             <p:panel header="Annotations per Canvas">
-                <p:chart type="bar" model="#{statsService.getManifestAnnoCount(param['manifest'])}" style="height500px;"/>
-            </p:panel>
-            <p:panel header="Percentage of items transcribed">
-                <p:chart type="pie" model="#{statsService.getPercentAnnotated(param['manifest'])}" style="height:300px; width:500px;"/>
+                <p:chart type="bar" model="#{statsService.getManifestAnnoCount(tManifest)}" style="height500px;"/>
             </p:panel>
         </ui:define>
     </ui:composition>
