@@ -25,18 +25,18 @@ public class GenericOAuth extends DefaultApi20 {
 
     @Override
     public Verb getAccessTokenVerb() {
-        return Verb.POST;
+        return _accessTokenVerb;
     }
 
     // From: https://wp-oauth.com/docs/general/main-concepts/
     @Override
     public String getAccessTokenEndpoint() {
-        return "https://catalog.metascripta.org/oauth/token";
+        return _accessTokenEndpoint;
     }
 
     @Override
     protected String getAuthorizationBaseUrl() {
-        return "https://catalog.metascripta.org/oauth/authorize";
+        return _authBaseUrl;
     }
 
     @Override
