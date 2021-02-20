@@ -63,7 +63,7 @@ public class LoginCallback extends HttpServlet {
             if (tSession.getAttribute("oauth_url") != null) {
                 pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
             } else {
-                pRes.sendRedirect("index.html");
+                pRes.sendRedirect("collections.xhtml");
             }
         } catch (InterruptedException tExcpt) {
             tExcpt.printStackTrace();
