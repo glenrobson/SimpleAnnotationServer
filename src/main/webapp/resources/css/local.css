@@ -180,8 +180,8 @@ ul.nav a.vote {
 }
 
 #sidebar .sidebar-header {
-    padding: 10px 20px 2px 10px;
-    background: #a9aaaf; /*#6d7fcc;*/
+    padding: 20px;
+    background: #fff;
 }
 
 #sidebar ul.components {
