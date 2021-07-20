@@ -143,7 +143,7 @@ function showCollection(event) {
 }
 function updateCollectionView() {
     var heading = document.getElementById("collectionName");
-    heading.innerHTML = "Collection";//activeCollection.label;
+    heading.innerHTML = activeCollection.label; //"Collection"
     /*var openAll = document.getElementById("openAll");
     openAll.href = "view.xhtml?collection=" + activeCollection["@id"];
 */
