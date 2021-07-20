@@ -13,3 +13,6 @@
     font-weight: 600;
     font-size: 1.2em;
 }
+.bg-dark {
+    background-color: #003DA5 !important; 
+}
