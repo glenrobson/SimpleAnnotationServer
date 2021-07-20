@@ -154,9 +154,9 @@ ul.nav a.vote {
 }
 
 #main_panel h1 {
-    background-color: #6d6d6f;
-    padding: 2px 2px 2px 15px;
-    color: #dbdbdc;
+    background-color: #ddd;
+    padding: 15px;
+    color: #6d6d6f;
     border: 1px solid #ddd;
     -webkit-border-radius: 7px 10px 0px 0px;
 }
