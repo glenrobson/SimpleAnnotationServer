@@ -6,13 +6,14 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
     <ui:composition template="WEB-INF/templates/layout.xhtml">
-        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="title" value="METAscripta Scholar's Workbench"></ui:param>
         <ui:param name="path" value="/"></ui:param>
         <ui:define name = "content">
             <div class="wrapper">
                 <nav id="sidebar">
                     <div class="sidebar-header">
-                        <h3>Collections</h3>
+                        <!--<h3>Collections</h3>-->
+                        <img src="https://metascripta-omekas.s3.amazonaws.com/uploads/metascripta-logo.png" style="width:100%;">
                         <a id="addCollectionButton" class="sidebar_actions" data-toggle="modal" data-target="#createCollection" onclick="hideMessage('createCollectionMessage');"><i class="far fa-plus-square fa-lg"></i></a>
                     </div>
 
