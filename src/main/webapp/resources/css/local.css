@@ -350,6 +350,6 @@ ul.nav a.vote {
     display: inline;
     margin-right: 10px;
 }
-.bg-dark {
+.bg-dark, .fixed-top {
     background-color: #003DA5 !important;
 }
