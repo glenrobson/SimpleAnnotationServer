@@ -156,7 +156,7 @@ function updateCollectionView() {
     var collectionLink = document.getElementById("collection_link");
     //collection_link.innerHTML = "<b>Name: </b>" + activeCollection.label + "<br/><b>Collection link: </b> <span class=\"form-control\" type=\"text\" placeholder=\"" + activeCollection["@id"] + "\" readonly> " + activeCollection["@id"] + "</span>";
     //collection_link.innerHTML = "<span class=\"form-control\" type=\"text\" placeholder=\"" + activeCollection["@id"] + "\" readonly> " + activeCollection["@id"] + "</span>";
-    collection_link.innerHTML = setupContentState(activeCollection["@id"], "Link to collection. Also draggable using IIIF Content State.");
+    collection_link.appendChild = setupContentState(activeCollection["@id"], "Link to collection. Also draggable using IIIF Content State.");
 
     var manifestsUl = document.getElementById("manifests");
     manifestsUl.innerHTML ='';
