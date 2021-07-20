@@ -6,12 +6,12 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
     <ui:composition template="WEB-INF/templates/layout.xhtml">
-        <ui:param name="title" value="Login"></ui:param>
+        <ui:param name="title" value="METAscripta Scholar's Workbench"></ui:param>
         <ui:param name="path" value="login"></ui:param>
         <ui:define name = "content">
             <form class="mainbox" style="text-align: center !important;">
-                <img class="mb-4" src="/images/sas-gdmr-logo.png" alt="" width="200"/>
-                <h3>Sign in to SimpleAnnotationServer</h3>
+                <img class="mb-4" src="https://workbench.metascripta.org/wp-content/uploads/2021/07/meta-workbench-logo.png" alt="" width="200"/>
+                <h3>Sign in to Scholar's Workbench</h3>
                 <br/>
                 <div class="oauth_option">
                     <c:forEach var="config" items="#{userService.config}">
