@@ -52,7 +52,8 @@
                                 </c:if>
                                 <c:if test="#{empty userService.user.picture}">
                                     <button class="user_info btn btn btn-secondary" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <h:outputText value="#{userService.user.avatar}" />
+                                        <i class="far fa-user"></i>
+                                        <!--<h:outputText value="#{userService.user.avatar}" />-->
                                     </button>
                                 </c:if>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu2">
