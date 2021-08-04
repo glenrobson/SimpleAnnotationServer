@@ -198,6 +198,37 @@ public class Manifest {
 	     _label = pLabel;
 	}
 
+    public String getLogo() {
+        String tLogo = null;
+        
+        if (_json != null && _json.containsKey("logo")) {
+            if (_json.get("logo") instanceof Map && ((Map)_json.get("logo")).containsKey("@id")) {
+                tLogo = (String)((Map<String,Object>)_json.get("logo")).get("@id");
+            } else if (_json.get("logo") instanceof String) {
+                tLogo = (String)_json.get("logo");
+            }
+        }
+
+        return tLogo;
+    }
+
+    public String getDescription(){
+        String tDesc = null;
+        if (_json != null && _json.containsKey("description")) {
+            tDesc = (String)_json.get("description");
+        }
+
+        return tDesc;
+    }
+    
+    public String getAttribution() {
+        String tAtt = null;
+        if (_json != null && _json.containsKey("attribution")) {
+            tAtt = (String)_json.get("attribution");
+        }
+
+        return tAtt;
+    }
     
     public List<Canvas> getCanvases() {
         return _canvases;

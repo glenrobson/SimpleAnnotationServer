@@ -48,6 +48,7 @@ public class CollectionServlet extends HttpServlet {
         User tUser = new UserService(pReq.getSession()).getUser();
         if (pReq.getRequestURI().endsWith("collection/all.json")) {
             // get list of Collections
+            // TODO get from helper!!!
             List<Collection> tCollections = _store.getCollections(tUser);
             // if empty create the default collection
             if (tCollections.isEmpty()) {
