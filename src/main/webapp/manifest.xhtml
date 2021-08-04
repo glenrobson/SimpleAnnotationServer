@@ -8,25 +8,68 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <ui:composition template="WEB-INF/templates/layout.xhtml">
+    <ui:composition template="WEB-INF/templates/collectionBarLayout.xhtml">
         <ui:param name="title" value="Manifest Details"></ui:param>
         <ui:param name="path" value="/"></ui:param>
-        <ui:define name = "content">
-            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
-                <div class="container">
+        <ui:define name="main">
+            <div class="container">
 
-                    <c:set var="tManifest" value="#{storeService.getManifestId(param['iiif-content'])}" scope="request" />
+                <c:set var="tManifest" value="#{storeService.getManifestId(param['iiif-content'])}" scope="request" />
 
-                    <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
-                    <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
-                    <p>This manifest has been loaded to the SimpleAnnotationServer and has the following options are available:</p>
-                    <ul>
-                        <li><a href="annotations.xhtml?iiif-content=#{tManifest.URI}">Download annotations</a></li>
-                        <li><a href="search.xhtml?iiif-content=#{tManifest.URI}">Setup IIIF search service</a></li>
-                        <li><a href="stats/manifest.xhtml?iiif-content=#{tManifest.URI}">View annotation statistics</a></li>
-                    </ul>
-                </div> 
-            </main>
+                <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
+                <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
+                <p>This manifest has been loaded to the SimpleAnnotationServer and has the following options are available:</p>
+                <ul>
+                    <li><a href="search.xhtml?iiif-content=#{tManifest.URI}">Setup IIIF search service</a></li>
+                    <li><a href="stats/manifest.xhtml?iiif-content=#{tManifest.URI}">View annotation statistics</a></li>
+                </ul>
+
+                <h2>Pages</h2>
+
+                <ul id="manifests" class="media-list">
+                    <c:set var="tCanvases" value="#{storeService.listAnnoPages(tManifest)}" scope="request" />
+                    <c:forEach items="#{tCanvases}" var="annoPage" varStatus="iterMetadata">
+                        <li class="manifestSummary">
+                            <c:if test="#{not empty annoPage.canvas.label}">
+                                <c:set var="tLabel" value="#{annoPage.canvas.label}"/>
+                            </c:if>
+                            <c:if test="#{empty annoPage.canvas.label}">
+                                <c:set var="tLabel" value="#{annoPage.canvas.id}" />
+                            </c:if>
+                            <c:set var="short_id" value="#{annoPage.canvas.shortId}" />
+                            <div class="media-header-div">
+                            </div>
+                            <div class="media-heading">
+                                <h5>Page: <h:outputText value="#{tLabel}"/></h5>
+                            </div>    
+                            <div class="media">
+                                <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
+                                    <img class="align-self-center mr-3 media-img canvas_thum" data-canvas-id="#{annoPage.canvas.id}" src=""/>
+                                </a>
+                                <div class="media-body">
+                                    <p><a href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}&amp;collection=#{request.getParameter('collection')}">View <h:outputText value="#{annoPage.count}"/> annotations</a></p>
+                                    <p><a href="annotation/list/#{short_id}.json">Download annotations</a></p>
+                                </div>
+                            </div>
+                        </li>
+                    </c:forEach>
+                </ul>
+
+            </div> 
+
+            <script src="js/collection.js"></script>
+            <script>
+                let canvas_ids = document.getElementsByClassName("canvas_thum");
+                fetch('#{tManifest.URI}')
+                    .then(response => response.json())
+                        .then(function(manifest) {
+                            for (let thumb of canvas_ids) {
+                                let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 100);
+                                thumb.src = url;
+                            };
+                        });
+                
+            </script>
         </ui:define>
     </ui:composition>
 </html>

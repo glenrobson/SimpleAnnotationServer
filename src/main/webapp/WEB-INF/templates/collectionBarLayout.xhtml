@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:insert name="head">
+        <ui:include src="head.xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+            <ui:param name="title" value="#{title}"></ui:param>
+            <ui:param name="includeJQuery" value="#{includeJQuery}"></ui:param>
+        </ui:include>    
+    </ui:insert>    
+    <h:body>
+        <ui:insert name="menu">
+            <ui:include src="menu.xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+                <ui:param name="selected" value="#{selected-menu}"></ui:param>
+                <ui:param name="path" value="#{path}"></ui:param>
+            </ui:include>    
+        </ui:insert>    
+        
+        <div class="wrapper">
+            <nav id="sidebar">
+                <div class="site_logo">
+                    <img src="/images/sas-gdmr-logo.png"/>
+                </div>    
+                <div class="sidebar-header">
+                    <h3>Collections</h3>
+                </div>
+
+                <c:set var="tCollections" value="#{storeService.getCollections(request)}" scope="request" />
+                <div id="scroll" >
+                    <ul id="collections" class="list-unstyled components">
+                        <c:set var="activeClass" value="test" scope="request" />
+                        <c:forEach items="#{tCollections}" var="tCollection" varStatus="collectionMetadata">
+                            <c:set var="activeClass" value="" />
+                            <c:if test="#{tCollection.id eq request.getParameter('collection')}">
+                                <c:set var="activeClass" value="active" />
+                            </c:if>
+                            <li data-id="#{tCollection.id}" class="#{activeClass}" data-param="#{request.getParameter('collection')}">
+                              <!-- classname = active-->
+                                <a href="collections.xhtml?collection=#{tCollection.id}"><h:outputText value="#{tCollection.label}" escape="false" /></a>
+                            </li>
+                        </c:forEach>
+
+                        <li><a id="addCollectionButton" data-toggle="modal" data-target="#createCollection" onclick="hideMessage('createCollectionMessage');"> <i class="fas fa-plus-circle"></i> Create new collection</a></li>
+                    </ul>
+                </div>
+            </nav>  
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="main_panel" class="bs-docs-masthead">
+                <ui:insert name="main" />
+            </main>
+            <script>
+                $("#scroll").mCustomScrollbar({
+                    alwaysShowScrollbar: 1,
+                    theme: "minimal",
+                    scrollInertia: 0,
+                    mouseWheel:{ preventDefault: true },
+                    setHeight: "90%",
+                });
+            </script>
+            <ui:include src="dialogues/createCollection.xhtml"/>
+
+        </div>
+    </h:body>
+</html>

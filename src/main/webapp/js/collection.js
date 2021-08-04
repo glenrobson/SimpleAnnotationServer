@@ -187,6 +187,57 @@ function updateCollectionView() {
     }
 }
 
+function populateManifest(url, shortId) {
+    fetch(url, {
+        method: 'GET', // or 'PUT'
+    })
+    .then(response => response.json())
+    .then(manifest => {
+        let thumbnail_img = "";
+        if ('thumbnail' in manifest && manifest.thumbnail) {
+            if (typeof manifest.thumbnail === 'string' || manifest.thumbnail instanceof String) {
+                thumbnail_img = manifest.thumbnail;
+            } else if (typeof manifest.thumbnail === 'object' && !Array.isArray(manifest.thumbnail)){
+                thumbnail_img = manifest.thumbnail['@id'];
+            }
+        } else {
+            // Get image service from first canvas
+            if (manifest.sequences && Array.isArray(manifest.sequences) && manifest.sequences[0].canvases && Array.isArray(manifest.sequences[0].canvases)) {
+                var imageId = manifest.sequences[0].canvases[0]["@id"];
+                thumbnail_img = getCanvasThumbnail(manifest, imageId, 0, 100);
+            }
+        }
+        let thumb = document.getElementById("thum-" + shortId);
+        thumb.src = thumbnail_img;
+
+        if ('logo' in manifest) {
+            let tURL = "";
+            if (typeof manifest.logo === 'object' && '@id' in manifest.logo) {
+                tURL = manifest.logo['@id'];
+            } else if (typeof manifest.logo === 'string') {
+                tURL = manifest.logo;
+            }
+            if (tURL) {
+                let logo = document.getElementById("logo-" + shortId);
+                logo.src = tURL;
+            }
+        }
+        if ('description' in manifest && manifest.description) {
+            let desc = document.getElementById("desc-" + shortId);
+            desc.innerHTML = manifest.description;
+        }
+
+        if ('attribution' in manifest && manifest.attribution) {
+            let attr = document.getElementById("attr-" + shortId);
+            attr.innerHTML = manifest.attribution;
+        }
+
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 function moveManifest() {
     setLoading("movebutton", "Moving");
     var select = document.getElementById("collectionSelect");
@@ -377,6 +428,108 @@ function findValue(parentnode, key) {
     return response;
 }
 
+function isObject(object) {
+    return typeof object === 'object' && !Array.isArray(object);
+}
+
+function hasCanvases(manifest) {
+    return manifest.sequences && Array.isArray(manifest.sequences) && manifest.sequences[0].canvases && Array.isArray(manifest.sequences[0].canvases);
+}
+
+/* 
+ * Get thumbnail URL from canvas with canvas_id
+ * canvas_id can contain a fragement
+ * image returned will be the same size as desired_width and height or bigger
+ * zero means discount axis. 
+ */
+function getCanvasThumbnail(manifest, canvas_id, desired_width, desired_height) {
+    let canvasId = canvas_id;
+    let hasFragment = false;
+    let fragment = '';
+    if (canvasId.includes("#xywh")) {
+        canvasId = canvas_id.split("#")[0]
+        fragment = canvas_id.split("#")[1]
+        hasFragment = true;
+    }
+    if (hasCanvases(manifest)) {
+        let canvas = manifest.sequences[0].canvases.find(canvas => canvas["@id"] === canvasId);
+
+        // First try canvas thumbnail
+        if (!hasFragment && 'thumbnail' in canvas && isObject(canvas.thumbnail)) {
+            if ('width' in canvas.thumbnail && 'height' in canvas.thumbnail) {
+                if (canvas.thumbnail.width > desired_width && canvas.thumbnail.height > desired_height) {
+                    return canvas.thumbnail["@id"];
+                }
+            }
+        }
+
+        // Next try first image
+        if ('images' in canvas && Array.isArray(canvas.images)
+                 && 'resource' in canvas.images[0] && typeof canvas.images[0].resource === 'object') {
+            if ('service' in canvas.images[0].resource && typeof canvas.images[0].resource.service === 'object'
+                        && '@id' in canvas.images[0].resource.service && typeof canvas.images[0].resource.service["@id"] === 'string') {
+
+                let imageService = canvas.images[0].resource.service;
+                let isLevel0 = false;
+                if ('profile' in imageService && Array.isArray(imageService.profile)) {
+                    imageService.profile.forEach(function(value) {
+                        if (typeof key === 'string' && key === "http://iiif.io/api/image/2/level0.json") {
+                            isLevel0 = true;
+                        }
+                    });
+                }
+
+                let imageId = imageService["@id"];
+
+                var region = "full";
+                // Return fragment region but not for level0 as this isn't supported.
+                if (hasFragment && !isLevel0) {
+                    //xywh=100,100,100,100
+                    region = fragment.split("=")[1]; 
+                }
+
+                let size = "";
+                if (!isLevel0) {
+                    let widthStr = "";
+                    let heightStr = "";
+                    if (desired_width != 0) {
+                        widthStr = "" + desired_width;
+                    }
+                    if (desired_height != 0) {
+                        heightStr = "" + desired_height;
+                    }
+                    size = widthStr + "," + heightStr;
+                } else {
+                    // Find size that is bigger than the one we want. 
+                    if ('sizes' in imageService && Array.isArray(imageService.sizes)) {
+                        smallest_width = imageService.width;
+                        smallest_height = imageService.height;
+
+                        imageService.sizes.foreach(function(sizeOption) {
+                            if ('width' in sizeOption && 'height' in sizeOption) {
+                                if (sizeOption.width < smallest_width && sizeOption.height < smallest_height) {
+                                    smallest_width = sizeOption.width;
+                                    smallest_height = sizeOption.height;
+                                }
+                            }
+                        });
+
+                        size = "" + smallest_width + "," + smallest_height;
+                    } else {
+                        // No sizes so just have to use full 
+                        size = "full";
+                    }
+                }
+
+                return imageId + '/' + region + '/' + size + '/0/default.jpg';
+            } else {
+                // No image service so just return image. Really this should have a thumbnail
+                return canvas.images[0].resource["@id"];
+            }
+        }
+    }
+}
+
 function showManifestDiv(ul, manifest) {
     var li = document.createElement("li");
     li.className = "manifestSummary";
@@ -390,13 +543,9 @@ function showManifestDiv(ul, manifest) {
         }
     } else {
         // Get image service from first canvas
-        if (manifest.sequences && Array.isArray(manifest.sequences) && manifest.sequences[0].canvases && Array.isArray(manifest.sequences[0].canvases)
-                && manifest.sequences[0].canvases[0].images && Array.isArray(manifest.sequences[0].canvases[0].images)
-                 && manifest.sequences[0].canvases[0].images[0].resource && typeof manifest.sequences[0].canvases[0].images[0].resource === 'object'
-                    && manifest.sequences[0].canvases[0].images[0].resource.service && typeof manifest.sequences[0].canvases[0].images[0].resource.service === 'object'
-                        && manifest.sequences[0].canvases[0].images[0].resource.service["@id"] && typeof manifest.sequences[0].canvases[0].images[0].resource.service["@id"] === 'string') {
-            var imageId = manifest.sequences[0].canvases[0].images[0].resource.service["@id"];
-            thumbnail_img = imageId + '/full/,100/0/default.jpg';
+        if (manifest.sequences && Array.isArray(manifest.sequences) && manifest.sequences[0].canvases && Array.isArray(manifest.sequences[0].canvases)) {
+            var imageId = manifest.sequences[0].canvases[0]["@id"];
+            thumbnail_img = getCanvasThumbnail(manifest, imageId, 0, 100);
         }
     }
     
@@ -477,7 +626,7 @@ function showManifestDiv(ul, manifest) {
     actionsBar.appendChild(move);
 
     download = document.createElement("a");
-    download.href = "manifest.xhtml?iiif-content=" + manifest["@id"];
+    download.href = "manifest.xhtml?iiif-content=" + manifest["@id"] + "&collection=" + activeCollection["@id"];
     download.className = "btn btn-secondary mb-2";
     download.innerHTML = '<i class="fas fa-cloud-download-alt"></i>';
     download.title = "Export";

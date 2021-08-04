@@ -44,7 +44,11 @@ public class Target {
             if (tSelector.get("@type") != null && tSelector.get("@type").equals("oa:FragmentSelector") && tSelector.get("value") != null) {
                 tRegion = (String)tSelector.get("value");
             }
+            if (tSelector.get("@type") != null && tSelector.get("@type").equals("oa:Choice") && tSelector.get("default") != null && ((Map<String,String>)tSelector.get("default")).get("@type").equals("oa:FragmentSelector")) {
+                tRegion = ((Map<String,String>)tSelector.get("default")).get("value");
+            }
         }
+        System.out.println("Returning " + tRegion);
         return tRegion;
     }
 

@@ -33,6 +33,7 @@
         <url-pattern>/manifest.xhtml</url-pattern>
         <url-pattern>/view.xhtml</url-pattern>
         <url-pattern>/populate.xhtml</url-pattern>
+        <url-pattern>/annotations.xhtml</url-pattern>
     </filter-mapping>
 
     <filter>
