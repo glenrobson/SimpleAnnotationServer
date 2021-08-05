@@ -45,58 +45,18 @@ function initCollections(active, callback=null) {
 
 function deleteCollection() {
     setLoading("confirmButton", "Deleting");
-
-    console.log('Deleting: ' + activeCollection["@id"]);
+    
+    let confirmId = document.getElementById('confirmId');
+    console.log('Deleting: ' + confirmId.value);
     $.ajax({
-        url: activeCollection["@id"],
+        url: confirmId.value,
         type: 'DELETE',
         success: function(data) {
             showMessage("confirmInfoMessage", "info", "Deleted Collection succesfully.");
-            deleteId = activeCollection["@id"];
-            activeCollection = null;
-            var firstEntry = '';
-            delete userCollections[deleteId];
-            for (const [key, value] of Object.entries(userCollections)) {
-                if (!firstEntry) {
-                    firstEntry = key;
-                }
-                if (key.endsWith('inbox.json')) {
-                    activeCollection = userCollections[key];
-                    break;
-                }
-            }
-            if (Object.keys(userCollections).length > 0) {
-                if (activeCollection == null) {
-                    activeCollection = userCollections[firstEntry];
-                }
-                var collectionsUL = document.getElementById('collections'); 
-                var existingLis = collectionsUL.getElementsByTagName("li");
-                var liToDelete = null;
-                for (var i = 0; i < existingLis.length; i++) {
-                    var li = existingLis[i];
-                    if (li.className === "active") {
-                        li.className = "";
-                    }
-                    if (li.dataset.id === deleteId) {
-                        liToDelete = li;
-                    }
-                    if (activeCollection) {
-                        if (li.dataset.id === activeCollection["@id"]) {
-                            li.className = "active";
-                        }
-                    }
-                }
-                if (liToDelete) {
-                    collectionsUL.removeChild(liToDelete);
-                }
-                updateCollectionView();
-            } else {
-                // All collections have been removed 
-                initCollections('/inbox.json');
-            }
-
+            
             clearLoading("confirmButton", "Confirm");
             $('#confirm').modal('toggle');
+            window.location.href = 'collections.xhtml';
         },
         error: function(data) {
             clearLoading("confirmButton", "Confirm");
@@ -241,16 +201,18 @@ function populateManifest(url, shortId) {
 function moveManifest() {
     setLoading("movebutton", "Moving");
     var select = document.getElementById("collectionSelect");
-    var collectionId = select.options[select.selectedIndex].value;
+    var newCollectionId = select.options[select.selectedIndex].value;
     
     var manifestEl = document.getElementById("manifestURI");
     var manifestURL = manifestEl.value;
 
+    let fromCollection = document.getElementById("fromCollection");
+
     $.ajax({
         url: '/collection/',
         data: JSON.stringify({
-            "from": activeCollection["@id"],
-            "to": collectionId,
+            "from": fromCollection.value,
+            "to": newCollectionId,
             "manifest": manifestURL
         }),
         type: 'PUT',
@@ -258,21 +220,10 @@ function moveManifest() {
         processData: false,
         success: function(data) {
             showMessage("moveMessage", "info", "Succesfully moved manifest.");
-            for (var index in activeCollection.manifests) {
-                var manifest = activeCollection.manifests[index];
-                if (manifest["@id"] === manifestURL) {
-                    if (!('manifests' in userCollections[collectionId])) {
-                        userCollections[collectionId].manifests = [];
-                    }
-                    userCollections[collectionId].manifests.push(manifest);
-                    activeCollection.manifests.splice(index,1);
-                    break;
-                }
-            }
-            updateCollectionView();
             $('#moveManifest').modal('toggle');
             clearLoading("movebutton", "Move");
             hideMessage("moveMessage");
+            window.location.href = 'collections.xhtml?collection=' + fromCollection.value;
         },
         error: function(data) {
             clearLoading("movebutton", "Move");
@@ -298,7 +249,7 @@ function moveManifest() {
 function deleteManifest() {
     setLoading("confirmButton", "Deleting");
     var manifestURL = document.getElementById("confirmId").value;
-    var collection = activeCollection["@id"];
+    var collection = document.getElementById('from-collection').value;
     
     $.ajax({
         url: '/collection/',
@@ -311,17 +262,11 @@ function deleteManifest() {
         processData: false,
         success: function(data) {
             showMessage("confirmInfoMessage", "info", "Removed manifest from collection succesfully.");
-            for (var index in activeCollection.manifests) {
-                var manifest = activeCollection.manifests[index];
-                if (manifest["@id"] === manifestURL) {
-                    activeCollection.manifests.splice(index,1);
-                    break;
-                }
-            }
-            updateCollectionView();
             $("#scroll").mCustomScrollbar('update');
             clearLoading("confirmButton", "Confirm");
             $('#confirm').modal('toggle');
+
+            window.location.href = 'collections.xhtml?collection=' + collection;
         },
         error: function(data) {
             clearLoading("confirmButton", "Confirm");
@@ -353,20 +298,34 @@ function showConfirm(event) {
     var confirmButton = document.getElementById("confirmButton");
 
     mode = event.srcElement.dataset.mode;
+    let dataEl = event.srcElement;
     if (!mode) {
         mode = event.srcElement.parentElement.dataset.mode;
+        dataEl = event.srcElement.parentElement;
     }
 
     if (mode === 'delete_collection') {
-        header.innerHTML = 'Delete collection';
+        header.innerHTML = 'Delete "' + dataEl.dataset.label + '"';
         text.innerHTML = 'Are you sure you want to delete this collection?';
-        id.value = activeCollection['@id'];
+        id.value = dataEl.dataset.url;
 
         confirmButton.onclick = deleteCollection;
     } else if (mode === 'remove_manifest') {
         header.innerHTML = 'Remove manifest';
-        text.innerHTML = 'Are you sure you want to remove this manifest from this collection?';
-        id.value = event.srcElement.parentElement.dataset.manifest;
+        text.innerHTML = 'Are you sure you want to remove the manifest: <p><i>"' + dataEl.dataset.label + '"</i></p> from the collection "' + dataEl.dataset.collectionLabel + '"?';
+        id.value = dataEl.dataset.manifest;
+
+        let input = null;
+        if (document.getElementById('from-collection') != null) {
+            input = document.getElementById('from-collection');
+        } else {
+            input = document.createElement("input");
+            input.type = "hidden";
+            input.id = "from-collection";
+            let form = document.getElementById("collection_form");
+            form.appendChild(input);
+        }
+        input.value = dataEl.dataset.collectionId;
 
         confirmButton.onclick = deleteManifest;
     }
@@ -376,35 +335,21 @@ function showConfirm(event) {
 
 function showMoveManifest(event) {
     hideMessage("moveMessage");
-    if (event.srcElement.dataset.manifest) {
-        var manifestId = event.srcElement.dataset.manifest;
+    let dataEl = null;
+    if (event.srcElement.dataset.manifestId) {
+        dataEl = event.srcElement;
     } else {
-        var manifestId = event.srcElement.parentElement.dataset.manifest;
+        dataEl = event.srcElement.parentElement;
     }
-    var manifestEl = document.getElementById("manifestURI");
-    var manifestLabel = '';
-    for (var index in activeCollection.manifests) {
-        var manifest = activeCollection.manifests[index];
-        if (manifest["@id"] === manifestId) {
-            manifestLabel = manifest.label;
-            manifestEl.value = manifestId;
-            break;
-        }
-    }
-    var tLabelEl = document.getElementById("manifestLabel");
-    tLabelEl.innerHTML = manifestLabel;
 
-    var collectionSelect = document.getElementById("collectionSelect");
-    collectionSelect.innerHTML = '';
-    for (var key in userCollections) { 
-        var collection = userCollections[key];
-        if (collection["@id"] !== activeCollection["@id"]) {
-            var option = document.createElement("option");
-            option.text = collection.label;
-            option.value= collection["@id"];
-            collectionSelect.add(option);
-        }
-    }
+    let manifestEl = document.getElementById("manifestURI");
+    manifestEl.value = dataEl.dataset.manifestId;
+
+    let tLabelEl = document.getElementById("manifestLabel");
+    tLabelEl.innerHTML = dataEl.dataset.manifestLabel;
+
+    let tCollectionEl = document.getElementById("fromCollection");
+    tCollectionEl.value = dataEl.dataset.collectionId;
 
     $('#moveManifest').modal('toggle');
 }
@@ -687,31 +632,9 @@ function createCollection() {
         success: function(data) {
             showMessage("createCollectionMessage", "info", "Created collection succesfully.");
 
-            var collectionsUL = document.getElementById('collections'); 
-            var existingLis = collectionsUL.getElementsByTagName("li");
-            for (var i = 0; i < existingLis.length; i++) {
-                var li = existingLis[i];
-                if (li.className === "active") {
-                    li.className = "";
-                }
-            }
-
-            activeCollection = data;
-            userCollections[data['@id']] = data
-            var li = document.createElement("li");
-            li.className = "active";
-            li.dataset.id = data["@id"];
-            var anchor = document.createElement("a")
-            anchor.innerHTML = data.label;
-            anchor.href= data['@id'];
-            anchor.onclick = showCollection;
-            li.appendChild(anchor);
-            collectionsUL.appendChild(li);
-
-            updateCollectionView();
-            $("#scroll").mCustomScrollbar('update');
             clearLoading("createCollectionbutton", "Create");
             $('#createCollection').modal('toggle');
+            window.location.href = 'collections.xhtml?collection=' + data['@id'];
         },
         error: function(data) {
             clearLoading("createCollectionbutton", "Create");
@@ -734,15 +657,51 @@ function createCollection() {
     });
 }
 
+function renameCollection() {
+    setLoading("renameCollectionMessage", "Renaming");
+    $.ajax({
+        url: '/collection/',
+        data: $("#rename_form").serialize(),
+        type: 'PUT',
+        success: function(data) {
+            showMessage("renameCollectionMessage", "info", "Renamed collection succesfully.");
+
+            clearLoading("renameCollectionbutton", "Rename");
+            $('#renameCollection').modal('toggle');
+            window.location.href = 'collections.xhtml?collection=' + data['@id'];
+        },
+        error: function(data) {
+            clearLoading("createCollectionbutton", "Create");
+            if (data.responseJSON) {
+                if ("reason" in data.responseJSON) {
+                    message = "Failed to add collection due to: " + data.responseJSON.reason;
+                } else if ("message" in data.responseJSON) {
+                    message = "Failed to add collection due to: " + data.responseJSON.message;
+                } else {
+                    message = "Failed to add collection.";
+                }
+            } else if ("statusText" in data) {    
+                message = "Failed to add collection due to: " + data.statusText;
+            } else {
+                message = "Failed to add collection.";
+            }
+            showMessage("createCollectionMessage", "error", message);
+            console.log('Failed to load collection: ' + data);
+        }
+    });
+}
+
+
 function addManifest() {
     setLoading("add_manifest", "Adding");
     var manifestUri = document.getElementById("manifest_uri").value;
+    var collectionURI = document.getElementById("collection_uri").value;
     $.ajax({
         url: manifestUri,
         type: 'GET',
         success: function(manifest) {
             delete manifest.within;
-            manifest.within = activeCollection["@id"];
+            manifest.within = collectionURI;
             $.ajax({
                 url: 'manifests',
                 type: 'POST',
@@ -752,15 +711,10 @@ function addManifest() {
                 success: function(data) {
                     showMessage("addManifestMessages", "info", "Manifest added succesfully to collection.");
                     clearLoading("add_manifest", "Add");
-                    if ('manifests' in activeCollection) { 
-                        activeCollection.manifests.push(manifest);
-                    } else {
-                        activeCollection.manifests = [manifest];
-                    }
-                    updateCollectionView();
 
                     $('#addManifest').modal('toggle');
                     hideMessage("addManifestMessages");
+                    window.location.href = 'collections.xhtml?collection=' + collectionURI;
                 },
                 error: function(data) {
                     clearLoading("add_manifest", "Add");

@@ -74,3 +74,20 @@ function clearLoading(buttonName, content) {
     button.innerHTML = content;
     button.disabled = false;
 }
+
+function showURLBar(source) {
+    source.childNodes.forEach(function (element) {
+        if (element.nodeType === Node.ELEMENT_NODE && element.className != 'contentStateLogo') {
+            element.style.display = "inline-block";
+        }
+    });
+}
+
+function hideURLBar(source) {
+    source.childNodes.forEach(function (element) {
+        if (element.nodeType === Node.ELEMENT_NODE && element.className != 'contentStateLogo') {
+            element.style.display = "none";
+        }
+    });
+
+}

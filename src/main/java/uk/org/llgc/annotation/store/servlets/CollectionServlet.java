@@ -161,34 +161,20 @@ public class CollectionServlet extends HttpServlet {
     }
 
 	public void doPut(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        System.out.println("From: '" + pReq.getParameter("from") + "' To: '" + pReq.getParameter("to") + "' Manifest: '" + pReq.getParameter("manifest") + "'");
-        Map<String, String> tParams = (Map<String, String>)JsonUtils.fromInputStream(pReq.getInputStream());
-        System.out.println("From: '" + tParams.get("from") + "' To: '" + tParams.get("to") + "' Manifest: '" + tParams.get("manifest") + "'");
-        // Update collection typically moving manifests
-        User tUser = new UserService(pReq.getSession()).getUser();
-        Collection tFrom = _store.getCollection(tParams.get("from"));
-        if (tParams.get("to") != null) {
-            // this is a move request
-            Collection tTo = _store.getCollection(tParams.get("to"));
+        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
 
-            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-            if (tAuth.allowCollectionEdit(tFrom) && tAuth.allowCollectionEdit(tTo)) {
-                Manifest tManifest = new Manifest();
-                tManifest.setURI(tParams.get("manifest"));
-                Manifest tFullManifest = _store.getManifest(tManifest.getURI());
-                if (tFullManifest != null) {
-                    tManifest = tFullManifest;
-                }
+        if (pReq.getParameter("name") != null && pReq.getParameter("rename_id") != null) {
+            // This is a rename collection request
+            Collection tCollection = _store.getCollection(pReq.getParameter("rename_id"));
+            if (tAuth.allowCollectionEdit(tCollection)) {
+                tCollection.setLabel(pReq.getParameter("name"));
 
-                tFrom.remove(tManifest);
-                _store.updateCollection(tFrom);
-
-                tTo.add(tManifest);
-                _store.updateCollection(tTo);
+                _store.updateCollection(tCollection);
 
                 Map<String,Object> tResponse = new HashMap<String,Object>();
                 tResponse.put("code", pRes.SC_OK);
-                tResponse.put("message", "Succesfully moved manifest to new collection");
+                tResponse.put("message", "Succesfully renamed collection");
+                tResponse.put("@id", tCollection.getId());
                 this.sendJson(pRes, pRes.SC_OK, tResponse);
             } else {
                 Map<String,Object> tResponse = new HashMap<String,Object>();
@@ -197,33 +183,67 @@ public class CollectionServlet extends HttpServlet {
                 this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
             }
         } else {
-            // This is a remove manifest from collection request
-            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-            if (tAuth.allowCollectionEdit(tFrom)) {
-                Manifest tManifest = new Manifest();
-                tManifest.setURI(tParams.get("manifest"));
-                Manifest tFullManifest = _store.getManifest(tManifest.getURI());
-                if (tFullManifest != null) {
-                    tManifest = tFullManifest;
+            System.out.println("From: '" + pReq.getParameter("from") + "' To: '" + pReq.getParameter("to") + "' Manifest: '" + pReq.getParameter("manifest") + "'");
+            Map<String, String> tParams = (Map<String, String>)JsonUtils.fromInputStream(pReq.getInputStream());
+            System.out.println("From: '" + tParams.get("from") + "' To: '" + tParams.get("to") + "' Manifest: '" + tParams.get("manifest") + "'");
+            // Update collection typically moving manifests
+            User tUser = new UserService(pReq.getSession()).getUser();
+            Collection tFrom = _store.getCollection(tParams.get("from"));
+            if (tParams.get("to") != null) {
+                // this is a move request
+                Collection tTo = _store.getCollection(tParams.get("to"));
+
+                if (tAuth.allowCollectionEdit(tFrom) && tAuth.allowCollectionEdit(tTo)) {
+                    Manifest tManifest = new Manifest();
+                    tManifest.setURI(tParams.get("manifest"));
+                    Manifest tFullManifest = _store.getManifest(tManifest.getURI());
+                    if (tFullManifest != null) {
+                        tManifest = tFullManifest;
+                    }
+
+                    tFrom.remove(tManifest);
+                    _store.updateCollection(tFrom);
+
+                    tTo.add(tManifest);
+                    _store.updateCollection(tTo);
+
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_OK);
+                    tResponse.put("message", "Succesfully moved manifest to new collection");
+                    this.sendJson(pRes, pRes.SC_OK, tResponse);
+                } else {
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                    tResponse.put("message", "You can only edit your own collections unless you are Admin");
+                    this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
                 }
-
-                tFrom.remove(tManifest);
-                _store.updateCollection(tFrom);
-
-                Map<String,Object> tResponse = new HashMap<String,Object>();
-                tResponse.put("code", pRes.SC_OK);
-                tResponse.put("message", "Succesfully removed manifest from collection");
-                this.sendJson(pRes, pRes.SC_OK, tResponse);
             } else {
-                Map<String,Object> tResponse = new HashMap<String,Object>();
-                tResponse.put("code", pRes.SC_UNAUTHORIZED);
-                tResponse.put("message", "You can only edit your own collections unless you are Admin");
-                this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                // This is a remove manifest from collection request
+                if (tAuth.allowCollectionEdit(tFrom)) {
+                    Manifest tManifest = new Manifest();
+                    tManifest.setURI(tParams.get("manifest"));
+                    Manifest tFullManifest = _store.getManifest(tManifest.getURI());
+                    if (tFullManifest != null) {
+                        tManifest = tFullManifest;
+                    }
+
+                    tFrom.remove(tManifest);
+                    _store.updateCollection(tFrom);
+
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_OK);
+                    tResponse.put("message", "Succesfully removed manifest from collection");
+                    this.sendJson(pRes, pRes.SC_OK, tResponse);
+                } else {
+                    Map<String,Object> tResponse = new HashMap<String,Object>();
+                    tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                    tResponse.put("message", "You can only edit your own collections unless you are Admin");
+                    this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                }
             }
-
         }
-
     }
+
     protected void sendJson(final HttpServletResponse pRes, final int pCode, final Map<String,Object> pPayload) throws IOException {
         pRes.setStatus(pCode);
         pRes.setContentType("application/json");

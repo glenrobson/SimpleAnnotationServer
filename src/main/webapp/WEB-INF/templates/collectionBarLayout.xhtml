@@ -22,6 +22,7 @@
         
         <div class="wrapper">
             <nav id="sidebar">
+                <script src="js/collection.js"></script>
                 <div class="site_logo">
                     <img src="/images/sas-gdmr-logo.png"/>
                 </div>    
@@ -35,6 +36,10 @@
                         <c:set var="activeClass" value="test" scope="request" />
                         <c:forEach items="#{tCollections}" var="tCollection" varStatus="collectionMetadata">
                             <c:set var="activeClass" value="" />
+                            <!-- If no collection is passed select the first one -->
+                            <c:if test="#{empty request.getParameter('collection') and collectionMetadata.index == 0}">
+                                <c:set var="activeClass" value="active" />
+                            </c:if> 
                             <c:if test="#{tCollection.id eq request.getParameter('collection')}">
                                 <c:set var="activeClass" value="active" />
                             </c:if>
@@ -43,7 +48,7 @@
                                 <a href="collections.xhtml?collection=#{tCollection.id}"><h:outputText value="#{tCollection.label}" escape="false" /></a>
                             </li>
                         </c:forEach>
-
+                        <hr/>
                         <li><a id="addCollectionButton" data-toggle="modal" data-target="#createCollection" onclick="hideMessage('createCollectionMessage');"> <i class="fas fa-plus-circle"></i> Create new collection</a></li>
                     </ul>
                 </div>

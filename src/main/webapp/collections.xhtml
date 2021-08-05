@@ -20,28 +20,37 @@
                 <ui:include src="WEB-INF/templates/content-state.xhtml">
                     <ui:param name="url" value="#{collection.id}" />
                     <ui:param name="description" value="Link to collection. Also draggable using IIIF Content State." />
-                    <ui:param name="mode" value="logo" />
+                    <ui:param name="mode" value="full" />
                 </ui:include>
             </div>
 
             <h1 id="collectionName"><h:outputText value="#{collection.label}"/></h1>
             <div id="collectionOptions">
                 Collection options:
-                <a type="button" id="indexButton" data-toggle="modal" data-target="#addManifest" onclick="hideMessage('addManifestMessages');"><i class="fas fa-plus-circle"></i> Add IIIF manifest (URL)</a>
-                <ui:include src="WEB-INF/templates/content-state.xhtml">
+                <a type="button" id="indexButton" href="#" data-toggle="modal" data-target="#addManifest"  onclick="hideMessage('addManifestMessages');"><i class="fas fa-plus-circle"></i> Add IIIF manifest (URL)</a> |
+
+                <a id="renameCollectionButton"  href="#" data-toggle="modal" data-target="#renameCollection" ><i class="fas fa-pen"></i> Rename collection</a>
+                <c:if test="#{not collection.defaultCollection}"> |
+                    <a id="removeCollectionButton" href="#" data-mode="delete_collection" data-label="#{collection.label}" data-url="#{collection.id}" onclick="showConfirm(event);"><i class="fas fa-trash"></i> Delete collection</a>
+                </c:if>
+                <!--<ui:include src="WEB-INF/templates/content-state.xhtml">
                     <ui:param name="url" value="#{collection.id}" />
                     <ui:param name="description" value="Link to collection. Also draggable using IIIF Content State." />
                     <ui:param name="mode" value="full" />
-                </ui:include>
+                </ui:include>-->
             <!--<p>These manifests have been annotated but not indexed. You can download annotations but its not possible to see stats or use the IIIF Search API. To index one of these manifests upload the manifest <a href="uploadManifest.xhtml">here</a>.</p>-->
             </div>
             <hr/>
-            <script src="js/collection.js"></script>
             <ul id="manifests" class="media-list">
                 <c:forEach items="#{collection.manifests}" var="manifest" varStatus="iterMetadata">
                     <li class="manifestSummary" id="#{manifest.shortId}">
                         <div class="media-header-div">
-                            <button type="button" class="close" aria-hidden="true" data-mode="remove_manifest" data-manifest="#{manifest.URI}" onclick="showConfirm()"><i class="far fa-trash-alt"></i></button>
+                            <ui:include src="WEB-INF/templates/content-state.xhtml">
+                                <ui:param name="url" value="#{manifest.URI}" />
+                                <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
+                                <ui:param name="mode" value="full" />
+                            </ui:include>
+
                         </div>
                         <div class="media-heading">
                             <c:set var="logo" value="#{manifest.logo}" scope="request" />
@@ -60,19 +69,17 @@
                                 <img id="thum-#{manifest.shortId}" src="" class="align-self-center mr-3 media-img" />
                             </a>
                             <div class="media-body">
-                                <a href="view.xhtml?collection=#{collection.id}&amp;manifest=#{mainfest.URI}" class="btn btn-primary mb-2" title="Open manifest for editing"><i class="far fa-edit"></i> Annotate in Mirador</a>
+                                <a href="view.xhtml?collection=#{collection.id}&amp;manifest=#{manifest.URI}" class="btn btn-primary mb-2" title="Open manifest for editing"><i class="far fa-edit"></i> Annotate in Mirador</a>
                                 <a href="manifest.xhtml?iiif-content=#{manifest.URI}&amp;collection=#{collection.id}" class="btn btn-secondary mb-2" title="Export"><i class="fas fa-eye"></i> Browse Annotations</a>
                                 <p id="desc-#{manifest.shortId}"><h:outputText value="#{manifest.description}"/></p>
                                 <p id="attr-#{manifest.shortId}"><h:outputText value="#{manifest.attribution}"/></p>
                                 <div id="actionBar">
-                                    <a href="#" title="Move manifest to another collection." data-manifest="#{manifest.URI}" onClick="showMoveManifest()">Move to different collection</a> | 
-                                    <a href="stats/manifest.xhtml?iiif-content=#{manifest.URI}" title="Analytics">See transcription progress</a> | 
-                                    <ui:include src="WEB-INF/templates/content-state.xhtml">
-                                        <ui:param name="url" value="#{manifest.URI}" />
-                                        <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
-                                        <ui:param name="mode" value="full" />
-                                    </ui:include>
-                                </div>
+                                    <span>
+                                        <a href="#" class="actionLink" title="Move manifest to another collection." data-manifest-id="#{manifest.URI}" data-manifest-label="#{manifest.label}" data-collection-id="#{collection.id}" onClick="showMoveManifest(event)">Move to different collection</a> | 
+                                        <a href="stats/manifest.xhtml?iiif-content=#{manifest.URI}" class="actionLink" title="Analytics">View progress</a> | 
+                                        <a href="#" class="actionLink" aria-hidden="true" data-mode="remove_manifest" data-manifest="#{manifest.URI}" data-label="#{manifest.label}" data-collection-label="#{collection.label}" data-collection-id="#{collection.id}" onclick="showConfirm(event)">Remove manifest</a>
+                                    </span>
+                                                                    </div>
                             </div>
                         </div>
                         
@@ -94,6 +101,7 @@
             //initCollections('/inbox.json');
         </script>
         <ui:include src="WEB-INF/templates/dialogues/createCollection.xhtml"/>
+        <ui:include src="WEB-INF/templates/dialogues/renameCollection.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/addManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/moveManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
