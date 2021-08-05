@@ -13,7 +13,7 @@
         <c:if test="#{mode eq 'full'}">
             <span id="contentStateFull" onmouseover="showURLBar(this)" onmouseout="hideURLBar(this)">
                 <input type="text" id="iiifURL" placeHolder="#{url}" value="#{url}" readonly="readonly" style="display:none"/>
-                <a class="copyToClipboard" data-link="#{url}" onClick="copyClipboard" style="display:none">
+                <a class="copyToClipboard" data-link="#{url}" onclick="copyClipboard(event)" style="display:none">
                     <i class="fas fa-paste"></i>
                 </a>
                 <a class="contentStateLogo" href="#{url}" title="#{description}" target="_blank">
