@@ -154,11 +154,7 @@ ul.nav a.vote {
 }
 
 #main_panel h1 {
-    background-color: #eaebee;
     padding: 2px 2px 2px 15px;
-    color: #676767;
-    border: 1px solid #ddd;
-    -webkit-border-radius: 7px 10px 0px 0px;
 }
 
 #main_panel p {
@@ -247,7 +243,7 @@ ul.nav a.vote {
 }
 #actionBar {
     border-top: 1px dotted #ddd;
-    height: 50px;
+    vertical-align: top;
 }
 
 #logoBar {
@@ -258,9 +254,10 @@ ul.nav a.vote {
 #actionBar button {
     margin:5px;
 }
-#actionBar a {
+
+.actionLink {
     margin:5px;
-    vertical-align: middle;
+    vertical-align: top;
     color: black;
     text-decoration: underline;
 }
@@ -291,10 +288,13 @@ ul.nav a.vote {
 }
 
 #collectionCS {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    color: white;
+    background-color: #eaebee;
+    padding: 2px 2px 2px 15px;
+    color: #676767;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 7px 10px 0px 0px;
+    width: 100%;
+    overflow: hidden;
 }
 
 .manifestSummary h5 {
@@ -319,11 +319,14 @@ ul.nav a.vote {
 
 .media-header-div {
     width: 100%;
-    height: 35px;
     background-color: #eaebee;
-    padding: 5px 5px 5px 5px;
+    overflow:hidden;
 }
 
+.media-header-div span {
+    color: #676767;
+    padding: 2px 12px 2px 15px;
+}
 .media-header-div img {
     margin-left: 15px;
 }
@@ -373,49 +376,46 @@ ul.nav a.vote {
 
 #collectionOptions {
     padding: 2px 15px 5px 15px;
+    overflow: hidden;
+}
+
+#collectionOptions a {
+    text-decoration: underline;
+    padding-left: 15px;
+    padding-right: 15px;
+    color:black;
+}
+
+
+#contentStateFull {
+    float:right;
+    background-color: #eaebee;
+    padding: 4px;
+    border-radius: .25rem;
+}
+
+.contentStateLogo {
+    margin: 5px;
+    display: inline-block;
 }
 
 .iiif_logo {
     height: 25px;
-}
-
-#contentStateFull a {
-    position: relative;
-    top: 0px;
-    margin: 5px;
     vertical-align: bottom;
-   /* display: inline;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 5px;*/
-}
-#contentStateFull span {
-    background-color: #ffffff;
-    opacity: 1;
-    color: #495057;
-    background-clip: padding-box;
-    transition: border-color .15s ease-in-out,
-    box-shadow .15s ease-in-out;
-    padding: 5px;
-    border: 1px solid #a3a8ac;
+    margin-left: 0px !important;
 }
 
-#contentStateFull {
-    height: 45px;
-    display: inline-block;
-    background-color: #eaebee;
-    padding: 9px;
-    border-radius: .25rem;
+#contentStateFull input {
+    width: 500px;
 }
 
 .copyToClipboard {
     margin-left: 0px !important;
     border: 1px solid #a3a8ac;
-    padding-left: 5px;
+    padding-left: 7px;
     padding-top: 5px;
     padding-bottom: 5px;
-    padding-right: 11px !important;
+    padding-right: 7px !important;
 }
 
 .copyToClipboard i {

@@ -1,4 +1,6 @@
-<div class="modal fade" id="moveManifest" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="moveManifest" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
+                                                    xmlns:h="http://java.sun.com/jsf/html"
+                                                    xmlns:c="http://java.sun.com/jsp/jstl/core">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -14,9 +16,15 @@
           <div class="form-group">
             <label for="collectionSelect" class="col-form-label">To collection:</label>
             <select id="collectionSelect" name="to" class="custom-select">
+                <c:forEach items="#{tCollections}" var="tCollection" varStatus="collectionMetadata">
+                    <c:if test="#{not (tCollection eq collection)}">
+                        <option value="#{tCollection.id}"><h:outputText value="#{tCollection.label}"/></option>
+                    </c:if>    
+                </c:forEach>
             </select>
           </div>
             <input type="hidden" id="manifestURI" /> 
+            <input type="hidden" id="fromCollection" value="#{collection.id}" /> 
         </form>
       </div>
       <div class="modal-footer">

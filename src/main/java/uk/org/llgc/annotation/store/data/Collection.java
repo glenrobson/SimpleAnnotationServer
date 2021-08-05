@@ -128,7 +128,7 @@ public class Collection implements Comparable {
         return null;
     }
 
-    public boolean isDefault() {
+    public boolean isDefaultCollection() {
         return _id.endsWith("inbox.json"); 
     }
 
