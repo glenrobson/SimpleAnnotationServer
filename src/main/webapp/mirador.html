@@ -48,6 +48,7 @@
 
         var manifest = getURLParameter("manifest");
         var collection = getURLParameter("collection");
+        var canvas = getURLParameter("canvas");
         console.log("Manifest " + manifest + " collection: " + collection);
         var collectionAdded = false;
         if(typeof(collection) == "string" && collection.length > 0) {
@@ -67,6 +68,9 @@
             configuration.windowObjects = [{
                 "loadedManifest": manifest
             }];
+            if (typeof(canvas) == "string" && canvas.length > 0) {
+                configuration.windowObjects[0].canvasID = canvas;
+            }
         }
 
         var mirador = Mirador(configuration);
