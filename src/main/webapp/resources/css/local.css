@@ -205,7 +205,7 @@ ul.nav a.vote {
     background: #6d6d6f;/*#6d7fcc;*/
 }
 
-#manifests {
+.media-list {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -287,15 +287,31 @@ ul.nav a.vote {
     padding-bottom: 50px;
 }
 
-#collectionCS {
+.header_bar {
     background-color: #eaebee;
-    padding: 2px 2px 2px 15px;
-    color: #676767;
     border: 1px solid #ddd;
     -webkit-border-radius: 7px 10px 0px 0px;
     width: 100%;
-    overflow: hidden;
 }
+.header_bar h1 {
+    color: #707070;
+    display:inline;
+}
+
+.header_bar a {
+    color: #8e8f91;
+    float:right;
+    font-size: 2em;
+    padding: 2px 15px 2px 2px;
+}
+
+#collectionCS {
+    padding: 2px 2px 2px 15px;
+    color: #676767;
+    overflow: hidden;
+    float:right;
+}
+
 
 .manifestSummary h5 {
     padding: 5px 5px 5px 5px;
@@ -321,14 +337,19 @@ ul.nav a.vote {
     width: 100%;
     background-color: #eaebee;
     overflow:hidden;
+    height:50px;
+    line-height:50px;
 }
 
-.media-header-div span {
+/*.media-header-div span {
     color: #676767;
     padding: 2px 12px 2px 15px;
-}
-.media-header-div img {
-    margin-left: 15px;
+}*/
+.media-header-div h3 {
+    display: inline-block;
+    padding-left: 15px;
+    color: #707070;
+    font-size: 1.35rem;
 }
 
 .media-header-div button {
@@ -374,24 +395,33 @@ ul.nav a.vote {
     display: inline-block;
 }
 
-#collectionOptions {
-    padding: 2px 15px 5px 15px;
+.options {
+    padding: 10px 15px 5px 15px;
     overflow: hidden;
+    width: 100%;
 }
 
-#collectionOptions a {
+.option_links {
+    display: inline-block;
+    padding-top: 8px;
+}
+
+.options a {
     text-decoration: underline;
-    padding-left: 15px;
     padding-right: 15px;
     color:black;
 }
 
+.content_state {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
+}
 
 #contentStateFull {
     float:right;
-    background-color: #eaebee;
-    padding: 4px;
     border-radius: .25rem;
+    height: 100%;
 }
 
 .contentStateLogo {
@@ -406,18 +436,22 @@ ul.nav a.vote {
 }
 
 #contentStateFull input {
-    width: 500px;
+    width: 300px;
 }
 
 .copyToClipboard {
     margin-left: 0px !important;
     border: 1px solid #a3a8ac;
     padding-left: 7px;
-    padding-top: 5px;
-    padding-bottom: 5px;
     padding-right: 7px !important;
 }
 
 .copyToClipboard i {
     color:#6c757d;
+}
+
+.content-state-text {
+    padding-left:5px;
+    color: #676767;
+    text-decoration: underline;
 }

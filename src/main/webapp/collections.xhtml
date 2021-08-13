@@ -16,23 +16,30 @@
             </c:if>
 
             <!--<button type="button" id="deleteCollection" class="close" data-mode="delete_collection" onclick="showConfirm(event);" style="#{deleteStyle}"><i class='far fa-window-close'></i></button>-->
-            <div id="collectionCS">
-                <ui:include src="WEB-INF/templates/content-state.xhtml">
-                    <ui:param name="url" value="#{collection.id}" />
-                    <ui:param name="description" value="Link to collection. Also draggable using IIIF Content State." />
-                    <ui:param name="mode" value="full" />
-                </ui:include>
-            </div>
+            
+            <div class="header_bar">
+                <h1 id="collectionName"><h:outputText value="#{collection.label}"/></h1>
+                <a href="#"><i class="far fa-question-circle"></i></a>
+            </div>    
+            <div class="options">
+                <div class="option_links">
+                    Collection options:
+                    <a type="button" id="indexButton" href="#" data-toggle="modal" data-target="#addManifest"  onclick="hideMessage('addManifestMessages');"><i class="fas fa-plus-circle"></i> Add IIIF manifest (URL)</a> |
 
-            <h1 id="collectionName"><h:outputText value="#{collection.label}"/></h1>
-            <div id="collectionOptions">
-                Collection options:
-                <a type="button" id="indexButton" href="#" data-toggle="modal" data-target="#addManifest"  onclick="hideMessage('addManifestMessages');"><i class="fas fa-plus-circle"></i> Add IIIF manifest (URL)</a> |
+                    <a id="renameCollectionButton"  href="#" data-toggle="modal" data-target="#renameCollection" ><i class="fas fa-pen"></i> Rename collection</a>
+                    <c:if test="#{not collection.defaultCollection}"> |
+                        <a id="removeCollectionButton" href="#" data-mode="delete_collection" data-label="#{collection.label}" data-url="#{collection.id}" onclick="showConfirm(event);"><i class="fas fa-trash"></i> Delete collection</a>
+                    </c:if>
+                </div>    
+                <div id="collectionCS">
+                    <ui:include src="WEB-INF/templates/content-state.xhtml">
+                        <ui:param name="url" value="#{collection.id}" />
+                        <ui:param name="text" value="Collection Link" />
+                        <ui:param name="description" value="Link to collection. Also draggable using IIIF Content State." />
+                        <ui:param name="mode" value="full" />
+                    </ui:include>
+                </div>
 
-                <a id="renameCollectionButton"  href="#" data-toggle="modal" data-target="#renameCollection" ><i class="fas fa-pen"></i> Rename collection</a>
-                <c:if test="#{not collection.defaultCollection}"> |
-                    <a id="removeCollectionButton" href="#" data-mode="delete_collection" data-label="#{collection.label}" data-url="#{collection.id}" onclick="showConfirm(event);"><i class="fas fa-trash"></i> Delete collection</a>
-                </c:if>
                 <!--<ui:include src="WEB-INF/templates/content-state.xhtml">
                     <ui:param name="url" value="#{collection.id}" />
                     <ui:param name="description" value="Link to collection. Also draggable using IIIF Content State." />
@@ -45,12 +52,14 @@
                 <c:forEach items="#{collection.manifests}" var="manifest" varStatus="iterMetadata">
                     <li class="manifestSummary" id="#{manifest.shortId}">
                         <div class="media-header-div">
+                            <h3 class="box_type">   
+                                Manifest
+                            </h3>
                             <ui:include src="WEB-INF/templates/content-state.xhtml">
                                 <ui:param name="url" value="#{manifest.URI}" />
                                 <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
                                 <ui:param name="mode" value="full" />
                             </ui:include>
-
                         </div>
                         <div class="media-heading">
                             <c:set var="logo" value="#{manifest.logo}" scope="request" />
@@ -75,6 +84,7 @@
                                 <p id="attr-#{manifest.shortId}"><h:outputText value="#{manifest.attribution}"/></p>
                                 <div id="actionBar">
                                     <span>
+                                        <a href="#" class="actionLink" data-manifest-id="#{manifest.URI}" data-manifest-label="#{manifest.label}" data-collection-id="#{collection.id}">Share</a> | 
                                         <a href="#" class="actionLink" title="Move manifest to another collection." data-manifest-id="#{manifest.URI}" data-manifest-label="#{manifest.label}" data-collection-id="#{collection.id}" onClick="showMoveManifest(event)">Move to different collection</a> | 
                                         <a href="stats/manifest.xhtml?iiif-content=#{manifest.URI}" class="actionLink" title="Analytics">View progress</a> | 
                                         <a href="#" class="actionLink" aria-hidden="true" data-mode="remove_manifest" data-manifest="#{manifest.URI}" data-label="#{manifest.label}" data-collection-label="#{collection.label}" data-collection-id="#{collection.id}" onclick="showConfirm(event)">Remove manifest</a>
@@ -105,7 +115,6 @@
         <ui:include src="WEB-INF/templates/dialogues/addManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/moveManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
-        <ui:include src="WEB-INF/templates/dialogues/copy.xhtml"/>
         </ui:define>
     </ui:composition>
 </html>
