@@ -95,6 +95,25 @@ function populateManifest(url, shortId) {
     });
 }
 
+function uploadAnnotation() {
+    setLoading("uploadButton", "Uploading");
+    let form = document.getElementById("populateAnnosForm");
+    var xhr = new XMLHttpRequest();
+    xhr.open(form.method, form.action); 
+    xhr.onload = function(event){ 
+        clearLoading("uploadButton", "Upload");
+        let manifest = document.getElementById('manifest');
+        let collection = document.getElementById('collection');
+        window.location.href = 'manifest.xhtml?collection=' + collection.value + "&iiif-content=" + manifest.value;
+    }; 
+    // or onerror, onabort
+    xhr.onerror = function (event) {
+        showMessage("importAnnoMessage", "error", event.target.response);
+    }
+    var formData = new FormData(form); 
+    xhr.send(formData);
+}
+
 function moveManifest() {
     setLoading("movebutton", "Moving");
     var select = document.getElementById("collectionSelect");
@@ -225,9 +244,34 @@ function showConfirm(event) {
         input.value = dataEl.dataset.collectionId;
 
         confirmButton.onclick = deleteManifest;
+    } else if (mode === 'remove_annotations') {
+        header.innerHTML = 'Remove Annotations';
+        text.innerHTML = 'Are you sure you want to remove ' + dataEl.dataset.count + ' annotations from this canvas?';
+
+        id.value = dataEl.dataset.canvasId;
+        id.dataset.manifest = dataEl.dataset.manifest;
+        id.dataset.collection = dataEl.dataset.collection;
+
+        confirmButton.onclick = deleteAnnotations;
     }
 
     $('#confirm').modal('toggle');
+}
+
+function deleteAnnotations() {
+    let canvas_id = document.getElementById("confirmId");
+    setLoading("confirmButton", "Deleting");
+
+    fetch('/annotation/search?canvas=' + canvas_id.value, {
+        method:'DELETE',
+        }).then(res => {
+            if (res.ok) {
+                setLoading("confirmButton", "Confirm")
+                window.location.href = 'manifest.xhtml?collection=' + canvas_id.dataset.collection + "&iiif-content=" + canvas_id.dataset.manifest
+            } else {
+                throw new Error('Failed to delete annotations: ' + res.status + " " + res.statusText);
+            }
+        });
 }
 
 function showMoveManifest(event) {
@@ -313,12 +357,16 @@ function getCanvasThumbnail(manifest, canvas_id, desired_width, desired_height) 
 
                 let imageService = canvas.images[0].resource.service;
                 let isLevel0 = false;
-                if ('profile' in imageService && Array.isArray(imageService.profile)) {
-                    imageService.profile.forEach(function(value) {
-                        if (typeof key === 'string' && key === "http://iiif.io/api/image/2/level0.json") {
-                            isLevel0 = true;
-                        }
-                    });
+                if ('profile' in imageService) {
+                    if (Array.isArray(imageService.profile)) {
+                        imageService.profile.forEach(function(value) {
+                            if (typeof key === 'string' && key === "http://iiif.io/api/image/2/level0.json") {
+                                isLevel0 = true;
+                            }
+                        });
+                    } else if (typeof imageService.profile === 'string' && imageService.profile === "http://iiif.io/api/image/2/level0.json") {
+                        isLevel0 = true;
+                    }
                 }
 
                 let imageId = imageService["@id"];
@@ -358,6 +406,7 @@ function getCanvasThumbnail(manifest, canvas_id, desired_width, desired_height) 
 
                         size = "" + smallest_width + "," + smallest_height;
                     } else {
+                        // At this point we should go and get the info.json
                         // No sizes so just have to use full 
                         size = "full";
                     }

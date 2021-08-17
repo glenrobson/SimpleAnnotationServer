@@ -1,0 +1,41 @@
+<div class="modal fade" id="importAnnotations" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" xmlns:h="http://java.sun.com/jsf/html"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Import Annotations</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class='far fa-window-close'></i></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="importAnnoMessage"></div>
+        <div>
+            <p>If you have created annotations outside of SAS you can upload them here so that you can edit them through Mirador. </p>
+            <p>This might be useful if you have OCR or Machine learning generated annotations. One popular output format for OCR is ALTO, and there is a transformer which will convert it into Annotations available on <a href="https://github.com/glenrobson/iiif_stuff/tree/c3c36ff208edc16a132cad3bdb71dc978c72b9cf/alto2annotations">Github</a>.</p>
+            <p>The annotations should be compatible with IIIF Version 2 and be in a JSON file.</p>
+        </div>
+        <form id="populateAnnosForm" action="annotation/populate" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" name="upfile" id="customFile"></input>
+              <label class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+            </div>
+            <input type="hidden" id="collection" value="#{param['collection']}"/>
+            <input type="hidden" id="manifest" value="#{param['iiif-content']}"/>
+        </form>    
+        <script>
+            $('.custom-file-input').on('change', function() { 
+               let fileName = $(this).val().split('\\').pop(); 
+               $(this).next('.custom-file-label').addClass("selected").html(fileName); 
+            });
+        </script>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="uploadButton" onClick="uploadAnnotation();">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -23,9 +23,11 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.controllers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 
@@ -58,4 +60,23 @@ public class CanvasAnnotations extends HttpServlet {
         /**/_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
         pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
     }
+
+	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        UserService tUserService = new UserService(pReq.getSession());
+        AuthorisationController tAuth = new AuthorisationController(tUserService);
+
+        Canvas tCanvas = new Canvas(pReq.getParameter("canvas"), "");
+        AnnotationList tList = _store.getAnnotationsFromPage(tUserService.getUser(), tCanvas);
+        for (Annotation tAnno : tList.getAnnotations()) {
+            if (tAuth.allowDelete(tAnno)) {
+                _store.deleteAnnotation(tAnno.getId());
+            } else {
+                pRes.sendError(pRes.SC_FORBIDDEN, "You must be the owner of the annotation to delete it.");
+                return;
+            }
+        }
+
+        pRes.setStatus(pRes.SC_NO_CONTENT, "Deleted all annotations from canvas " + tCanvas.getId());
+    }
+
 }

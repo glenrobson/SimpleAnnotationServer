@@ -18,6 +18,7 @@ import java.util.zip.Deflater;
 import java.util.Collections;
 
 import  javax.servlet.http.HttpServletRequest;
+import javax.faces.context.FacesContext;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -41,10 +42,33 @@ public class StoreService {
         return this.listAnnoPages(tManifest);
     }
 
+    protected HttpServletRequest getRequest() {
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        return (HttpServletRequest)facesContext.getExternalContext().getRequest();
+    }
+
     public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
+        HttpServletRequest tRequest = this.getRequest();
+        if (tRequest.getAttribute(pManifest.getURI()) != null) {
+            return (List<PageAnnoCount>)tRequest.getAttribute(pManifest.getURI());
+        }
         try {
-            List<PageAnnoCount> tAnnos =  _store.listAnnoPages(pManifest);
-            return tAnnos;
+            System.out.println("Start Anno Page");
+            //new  PageAnnoCount(final Canvas pCanvas, final int pCount, final Manifest pManifest)
+            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest);
+            List<PageAnnoCount> tFullCanvasList = new ArrayList<PageAnnoCount>();
+            for (Canvas tCanvas : pManifest.getCanvases()) {
+                PageAnnoCount tCanvasCount = new PageAnnoCount(tCanvas, 0, pManifest);
+                if (tAnnosCount.contains(tCanvasCount)) {
+                    tCanvasCount = tAnnosCount.get(tAnnosCount.indexOf(tCanvasCount));
+                }
+                tFullCanvasList.add(tCanvasCount);
+            }
+            System.out.println("End Anno Page");
+            if (tRequest.getAttribute(pManifest.getURI()) == null) {
+                tRequest.setAttribute(pManifest.getURI(), tFullCanvasList);
+            }
+            return tFullCanvasList;
         } catch (IOException tExcpt) {
             return new ArrayList<PageAnnoCount>();
         }

@@ -44,4 +44,5 @@ public class AnnotationListServlet extends HttpServlet {
         pRes.setCharacterEncoding("UTF-8");
         pRes.getWriter().println(JsonUtils.toPrettyString(tList.toJson()));
     }
+
 }
