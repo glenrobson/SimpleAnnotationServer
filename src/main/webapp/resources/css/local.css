@@ -480,3 +480,8 @@ ul.nav a.vote {
 
 .anno_canvas {
 }
+
+#editor-container p {
+    padding-top: 5px;
+    padding-left: 5px;
+}

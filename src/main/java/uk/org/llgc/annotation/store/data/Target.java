@@ -48,7 +48,6 @@ public class Target {
                 tRegion = ((Map<String,String>)tSelector.get("default")).get("value");
             }
         }
-        System.out.println("Returning " + tRegion);
         return tRegion;
     }
 

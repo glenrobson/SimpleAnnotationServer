@@ -9,6 +9,7 @@ import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Collection;
+import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.StoreConfig;
@@ -16,6 +17,7 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import java.util.Base64;
 import java.util.zip.Deflater;
 import java.util.Collections;
+import java.util.Comparator;
 
 import  javax.servlet.http.HttpServletRequest;
 import javax.faces.context.FacesContext;
@@ -92,6 +94,18 @@ public class StoreService {
         }
     }
 
+    public Canvas getCanvasId(final String pId) {
+        try {
+            System.out.println("Resolving " + pId);
+            Canvas tCanvas = new Canvas(pId, "");
+            tCanvas = _store.resolveCanvas(tCanvas.getShortId());
+            System.out.println("Found: " + tCanvas);
+            return tCanvas;
+        } catch (IOException tExcpt) {
+            return null;
+        }
+    }
+
     public List<Manifest> getManifests() {
         try {
             return _store.getManifests();
@@ -119,9 +133,37 @@ public class StoreService {
     }
 
     public AnnotationList getAnnotations(final String pCanvasURI) {
+        HttpServletRequest tRequest = this.getRequest();
+        String tStoreKey = "al_" + pCanvasURI;
+        if (tRequest.getAttribute(tStoreKey) != null) {
+            return (AnnotationList)tRequest.getAttribute(tStoreKey);
+        }
+
         try {
             UserService tUserService = new UserService();
-            return _store.getAnnotationsFromPage(tUserService.getUser(), new Canvas(pCanvasURI, ""));
+            AnnotationList tAnnos = _store.getAnnotationsFromPage(tUserService.getUser(), new Canvas(pCanvasURI, ""));
+            Collections.sort(tAnnos.getAnnotations(), new Comparator() {
+                            public int compare(Object o1, Object o2) {
+                                Annotation tAnno1 = (Annotation)o1;
+                                Annotation tAnno2 = (Annotation)o2;
+
+                                try {
+                                    return new Integer(lastPartOfID(tAnno1)).compareTo(new Integer(lastPartOfID(tAnno2)));
+                                } catch (NumberFormatException tExcpt) {
+                                    // do string compare instead
+                                    return lastPartOfID(tAnno1).compareTo(lastPartOfID(tAnno2));
+                                }
+                            }
+
+                            protected String lastPartOfID(final Annotation pAnno) {
+                                return pAnno.getId().substring(pAnno.getId().lastIndexOf("/"));
+                            }
+                       }
+                    );
+            
+            // sort and store in request
+            tRequest.setAttribute(tStoreKey, tAnnos);
+            return tAnnos;
         } catch (IOException tExcpt) {
             return new AnnotationList();
         }

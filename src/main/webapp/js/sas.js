@@ -91,3 +91,22 @@ function hideURLBar(source) {
     });
 
 }
+
+function relativeToAbsolute(el) {
+    var url = '';
+    if (el.tagName.toLowerCase() === 'a') {
+        url = el.href;
+    } else {
+        url = el.textContent.trim();
+    }
+    var link  = document.createElement("a");
+    link.href=url;
+    var fullURL = link.href;
+    if (el.tagName.toLowerCase() === 'a') {
+        el.href = fullURL;
+    } else {
+        el.textContent = fullURL;
+    }
+
+}
+

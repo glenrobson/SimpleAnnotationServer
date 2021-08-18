@@ -34,6 +34,8 @@
         <url-pattern>/view.xhtml</url-pattern>
         <url-pattern>/populate.xhtml</url-pattern>
         <url-pattern>/annotations.xhtml</url-pattern>
+        <url-pattern>/link.xhtml</url-pattern>
+        <url-pattern>/search.xhtml</url-pattern>
     </filter-mapping>
 
     <filter>

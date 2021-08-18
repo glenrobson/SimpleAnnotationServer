@@ -9,80 +9,86 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
     <ui:composition template="WEB-INF/templates/collectionBarLayout.xhtml">
-        <ui:param name="title" value="Manifest Details"></ui:param>
+        <ui:param name="title" value="Annotations"></ui:param>
         <ui:param name="path" value="/"></ui:param>
         <ui:define name = "main">
-            <div class="container">
-                <c:set var="tManifest" value="#{storeService.getManifestFromCanvas(param['iiif-content'])}" scope="request" />
-                <c:set var="tAnnotations" value="#{storeService.getAnnotations(param['iiif-content'])}" scope="request" />
-                <h1><h:outputText value="#{tManifest.label}" escape="false" /></h1>
-                <i><a href="#{tManifest.URI}"><h:outputText value="#{tManifest.URI}" escape="false" /></a></i>
-                <p>The list of canvases which have annotations are below. There is a link to the Annotation List which can be downloaded and linked to the manifest. This is done by adding a <code>otherContent</code> section to the relevant canvas in the manifest. For example:</p>
-                <c:if test="#{not empty tAnnotations.annotations}">
-<pre>
-{
-    "@id": "#{tCanvases.get(0).canvas.id}",
-    "@type": "sc:Canvas",
-    "images": [
-        ...
-    ],
-    "otherContent": [ {
-        "@id": "http://example.com/sas/annotation/list/#{tCanvases.get(0).canvas.shortId}.json",
-        "@type": "sc:AnnotationList",
-        "label": "My fantastic annotations"
-    }]
-}
-</pre>
-                <ul id="manifests" class="media-list">
-                    <c:forEach items="#{tAnnotations.annotations}" var="anno" varStatus="annoMetadata">
-                        <li class="manifestSummary">
-                            <!--<p><h:outputText value="#{anno}"/> </p>-->
-                            <div class="media-header-div">
-                            </div>
-                              
-                            <div class="media">
-                                <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
-                                    <img class="align-self-center mr-3 canvas_thum" width="400px" data-canvas-id="#{anno.targets[0].canvas.id}##{anno.targets[0].region}" src=""/>
-                                </a>
-                                <div class="media-body">
-                                    <c:forEach items="#{anno.bodies}" var="body" varStatus="bodyMetadata">
-                                        <c:if test="#{not body.type.equals('oa:Tag')}">
-                                            <p><h:outputText value="#{body.chars}" escape="false"/></p>
-                                        </c:if>
-                                    </c:forEach>
+            <c:set var="manifest" value="#{storeService.getManifestId(param['manifest'])}" scope="request" />
+            <c:set var="canvas" value="#{storeService.getCanvasId(param['iiif-content'])}" scope="request" />
+            <c:set var="tAnnotations" value="#{storeService.getAnnotations(param['iiif-content'])}" scope="request" />
 
-                                    <c:forEach items="#{anno.bodies}" var="body" varStatus="bodyMetadata">
-                                        <div id="actionBar">
-                                            <c:if test="#{body.type.equals('oa:Tag')}">
-                                                <span class="tag"> <h:outputText value="#{body.chars}" escape="false"/></span>
-                                            </c:if>
-                                        </div>
-                                    </c:forEach>
+            <div class="header_bar">
+                <a class="back_header" href="manifest.xhtml?collection=#{param['collection']}&amp;iiif-content=#{param['manifest']}">&lt; Back to Manifest</a>
+                <h1 id="collectionName"><h:outputText value="#{manifest.label}" escape="false" /></h1>
+            </div>
+
+            <div class="options">
+                <div class="option_links">
+                    Canvas options:
+                    <a href="view.xhtml?collection=#{param['collection']}&amp;manifest=#{manifest.URI}&amp;canvas=#{canvas.id}" title="Open manifest for editing"><i class="far fa-edit"></i> Annotate this page</a> |
+                    <a href="link.xhtml?iiif-content=#{param['iiif-content']}"><i class="fas fa-wrench"></i> Link Annotations to Manifest</a> |
+                    <a href="/annotation/list/#{canvas.shortId}.json" download="#{canvas.shortId}.json"><i class="fas fa-wrench"></i> Download Annotations</a>
+                </div>    
+            </div>
+
+
+            <ul id="annotations" class="media-list">
+                <c:forEach items="#{tAnnotations.annotations}" var="anno" varStatus="annoMetadata">
+                    <li class="manifestSummary">
+                        <div class="media-header-div">
+                            <h3 class="box_type">Annotation</h3>
+                        </div>
+                          
+                        <div class="media">
+                            <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
+                                <img class="align-self-center mr-3 canvas_thum" width="400px" data-canvas-id="#{anno.targets[0].canvas.id}##{anno.targets[0].region}" src=""/>
+                            </a>
+                            <div class="media-body">
+                                <c:set var="text" value="" />
+                                <c:forEach items="#{anno.bodies}" var="body" varStatus="bodyMetadata">
+                                    <c:if test="#{not body.type.equals('oa:Tag')}">
+                                        <p><h:outputText value="#{body.chars}" escape="false"/></p>
+
+                                        <c:set var="text" value="#{text}#{body.chars}" />
+                                    </c:if>
+                                </c:forEach>
+                                <c:set var="tags" value="" />
+                                <c:forEach items="#{anno.bodies}" var="body" varStatus="bodyMetadata">
+                                    <c:if test="#{body.type.equals('oa:Tag')}">
+                                        <p><span class="tag"> <h:outputText value="#{body.chars}" escape="false"/></span></p>
+                                        <c:set var="tags" value="#{tags}#{body.chars}" />
+                                    </c:if>
+                                </c:forEach>
+                                <div id="actionBar">
+                                    <a class="actionLink" href="#" data-manifest="#{param['manifest']}" data-collection="#{param['collection']}" data-canvas="#{canvas.id}" data-fragment="#{anno.targets[0].region}" data-anno="#{anno.id}" data-text="#{text}" data-tags="#{tags}" data-anno-list="/annotation/list/#{canvas.shortId}.json" onClick="showAnno(this)">Edit text</a> | 
+                                    <a class="actionLink" href="#"  data-canvas-id="#{canvas.id}" data-anno-id="#{anno.id}" data-mode="remove_annotation" data-manifest="#{param['manifest']}" data-collection="#{param['collection']}" data-text="#{anno.bodies[0].chars}" onClick="showConfirm(event); return false;">Remove annotation</a> 
+
                                 </div>
                             </div>
+                        </div>
 
-                        </li>
-                    </c:forEach>
-                </ul>
+                    </li>
+                </c:forEach>
+            </ul>
 
-                </c:if>
-                <c:if test="#{empty tAnnotations.annotations}">
-                    <p>No annotations found. Start annotating!</p>
-                </c:if>
-                <script src="js/collection.js"></script>
-                <script>
-                    let canvas_ids = document.getElementsByClassName("canvas_thum");
-                    fetch('#{tManifest.URI}')
-                        .then(response => response.json())
-                            .then(function(manifest) {
-                                // Get annotation thumbnail
-                                for (let thumb of canvas_ids) {
-                                    let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 300);
-                                    thumb.src = url;
-                                };
-                            });
-                </script>
-            </div>
+            <c:if test="#{empty tAnnotations.annotations}">
+                <p>No annotations found. Start annotating!</p>
+            </c:if>
+            <script>
+                let canvas_ids = document.getElementsByClassName("canvas_thum");
+                let manifest = null;
+                fetch('#{manifest.URI}')
+                    .then(response => response.json())
+                        .then(function(pManifest) {
+                            manifest = pManifest;
+                            // Get annotation thumbnail
+                            for (let thumb of canvas_ids) {
+                                let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 300);
+                                thumb.src = url;
+                            };
+                        });
+            </script>
+            <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
+            <ui:include src="WEB-INF/templates/dialogues/editAnnotation.xhtml"/>
         </ui:define>
     </ui:composition>
 </html>

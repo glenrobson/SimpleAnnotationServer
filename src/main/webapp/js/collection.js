@@ -114,6 +114,109 @@ function uploadAnnotation() {
     xhr.send(formData);
 }
 
+function showAnno(data) {
+
+    //<a class="actionLink" href="#" data-manifest="#{param['manifest']}" data-collection="#{param['collection']}" data-canvas="#{canvas.id}" data-fragment="#{anno.targets[0].region}" data-anno="#{anno.id}" data-text="#{text}" data-tags="#{tags}" onClick="showAnno(this)">Edit text</a> | 
+    let formData = document.getElementById('anno_data');
+    formData.dataset.collection = data.dataset.collection;
+    formData.dataset.manifest = data.dataset.manifest;
+    formData.dataset.canvas = data.dataset.canvas;
+    formData.dataset.annoList = data.dataset.annoList;
+    formData.dataset.fragment = data.dataset.fragment;
+    formData.dataset.anno = data.dataset.anno;
+
+    let url = getCanvasThumbnail(manifest, data.dataset.canvas + "#" + data.dataset.fragment, 0, 100);
+    let thumb = document.getElementById('edit_anno_image');
+    thumb.src = url;
+
+   // let textEl = document.getElementById('editor-container');
+   // textEl.innerHTML = data.dataset.text;
+
+    let tagEl = document.getElementById('tag');
+    if (data.dataset.tags != null) {
+        tagEl.value = data.dataset.tags;
+    } else {
+        tagEl.value = "";
+    }
+
+    const delta = quill.clipboard.convert(data.dataset.text)
+    quill.setContents(delta, "silent");
+    $('#editAnnotation').modal('toggle');
+}
+
+function saveAnno() {
+    /*
+    {
+        "@context": "http://iiif.io/api/presentation/2/context.json
+        "@id": "http://localhost:8888/annotation741282de4f8ec03d6b784ec4b481f506/116",
+        "@type": "oa:Annotation",
+        "motivation": [ "sc:painting" ],
+        "resource": [
+            {
+                "@type": "dctypes:Text",
+                "format": "text/html",
+                "chars": "<p>Logan-</p>"
+            },
+            {
+                 "@type": "oa:Tag",
+                 "chars": "Glen"
+              }
+        ],
+        "on": {
+            "@type": "oa:SpecificResource",
+            "selector": {
+                "@type": "oa:FragmentSelector",
+                "value": "xywh=1287,1188,136,57"
+            },
+            "full": "https://purl.stanford.edu/rd447dz7630/iiif/canvas/rd447dz7630_16"
+        }
+         */
+
+    setLoading("save_anno", "Updating");
+    let data = document.getElementById('anno_data');         
+    let tags = document.getElementById('tag');
+
+    fetch(data.dataset.annoList)
+        .then(response => response.json())
+        .then(annotations => {
+            annotations.resources.forEach(anno => {
+                if (anno['@id'] === data.dataset.anno) {
+                    anno.resource = [];
+
+                    anno.resource.push({
+                        "@type": "dctypes:Text",
+                        "format": "text/html",
+                        "chars": quill.root.innerHTML
+                    });
+
+                    if (tags.value.length != 0) {
+                        /**/
+                        tags.value.split(" ").forEach(tagName => {
+                            anno.resource.push({
+                                 "@type": "oa:Tag",
+                                 "chars": tagName
+                            });
+                        });
+                    }
+
+                    // update anno
+                    fetch ('/annotation/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(anno)
+                        }).then(response => response.json())
+                          .then(annotations => {
+                             // annotation updated
+                             
+                              clearLoading("save_anno", "Save");
+                              window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas;
+                          });
+                }
+            });
+
+        });
+}
+
 function moveManifest() {
     setLoading("movebutton", "Moving");
     var select = document.getElementById("collectionSelect");
@@ -253,6 +356,17 @@ function showConfirm(event) {
         id.dataset.collection = dataEl.dataset.collection;
 
         confirmButton.onclick = deleteAnnotations;
+    } else if (mode === 'remove_annotation') {
+        header.innerHTML = 'Remove Annotation';
+        text.innerHTML = 'Are you sure you want to remove "' + dataEl.dataset.text + '"?';
+
+        id.value = dataEl.dataset.annoId;
+        id.dataset.canvas = dataEl.dataset.canvasId;
+        id.dataset.manifest = dataEl.dataset.manifest;
+        id.dataset.collection = dataEl.dataset.collection;
+
+        confirmButton.onclick = deleteAnnotation;
+
     }
 
     $('#confirm').modal('toggle');
@@ -273,6 +387,23 @@ function deleteAnnotations() {
             }
         });
 }
+
+function deleteAnnotation() {
+    let data = document.getElementById("confirmId");
+    setLoading("confirmButton", "Deleting");
+
+    fetch('/annotation/destroy/?uri=' + data.value, {
+        method:'DELETE',
+        }).then(res => {
+            if (res.ok) {
+                setLoading("confirmButton", "Confirm");
+                window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas;
+            } else {
+                throw new Error('Failed to delete annotation: ' + res.status + " " + res.statusText);
+            }
+        });
+}
+
 
 function showMoveManifest(event) {
     hideMessage("moveMessage");
