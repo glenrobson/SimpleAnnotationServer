@@ -589,8 +589,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         SearchHits hits = tResponse.getHits();
             
         try {
-            IIIFSearchResults tAnnoList = new IIIFSearchResults();
-            tAnnoList.setId(pQuery.toURI().toString());
+            IIIFSearchResults tAnnoList = new IIIFSearchResults(pQuery.toURI());
             long tResultNo = hits.getTotalHits().value;
             int tNumberOfPages = (int)(tResultNo / pQuery.getResultsPerPage());
 

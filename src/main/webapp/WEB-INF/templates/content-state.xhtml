@@ -10,6 +10,19 @@
                 <img src="https://iiif.io/img/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/>
             </a>
         </c:if>
+        <c:if test="#{mode eq 'open'}">
+            <a href="#{url}" title="#{description}" target="_blank">
+                <img src="https://iiif.io/img/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}"/>
+            </a>
+            <span class="cs_text_wrapper">
+                <a href="#{url}" target="_blank"><h:outputText value="#{text}" /></a>
+                <a class="copyToClipboard" data-link="#{url}" onclick="copyClipboard(event)">
+                    <i class="fas fa-paste"></i>
+                </a>
+            </span>
+
+            <ui:include src="dialogues/copy.xhtml"/>
+        </c:if>
         <c:if test="#{mode eq 'full'}">
             <span id="contentStateFull" >
                 <div class="content_state" onmouseover="showURLBar(this)" onmouseout="hideURLBar(this)">

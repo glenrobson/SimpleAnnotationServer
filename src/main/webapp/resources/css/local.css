@@ -457,6 +457,15 @@ ul.nav a.vote {
     width: 300px;
 }
 
+.cs_text_wrapper {
+    padding:5px;
+}
+
+.cs_text_wrapper a {
+    color: #676767;
+    text-decoration: underline;
+}
+
 .copyToClipboard {
     margin-left: 0px !important;
     border: 1px solid #a3a8ac;
@@ -484,4 +493,22 @@ ul.nav a.vote {
 #editor-container p {
     padding-top: 5px;
     padding-left: 5px;
+}
+
+.inline_list {
+    list-style-type: none;
+    overflow: hidden;
+}
+
+.inline_list li {
+    float: left;
+    padding: 10px;
+}
+
+.center_info {
+    width: 100%;
+    padding: 0px;
+    text-align: center;
+    color: #676767;
+    text-decoration: underline;
 }

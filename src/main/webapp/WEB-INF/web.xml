@@ -36,6 +36,7 @@
         <url-pattern>/annotations.xhtml</url-pattern>
         <url-pattern>/link.xhtml</url-pattern>
         <url-pattern>/search.xhtml</url-pattern>
+        <url-pattern>/export.xhtml</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -181,6 +182,7 @@
     <servlet-mapping>
         <servlet-name>AnnotationList</servlet-name>
         <url-pattern>/annotation/list/*</url-pattern>
+        <url-pattern>/annotations/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CanvasAnnotations</servlet-name>

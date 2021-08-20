@@ -150,6 +150,10 @@ public class StoreConfig extends HttpServlet {
         }
     }
 
+    public File getDataDir() {
+        return new File(_props.get("data_dir"));
+    }
+
     public File getRealPath(final String pPath) {
         try {
             return new File(super.getServletContext().getRealPath(pPath));

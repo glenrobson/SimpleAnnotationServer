@@ -20,7 +20,7 @@
                      <p>Download the annotation list below and then you will need to link the annotation list to the correct Canvas or page. This is done by adding an <code>otherContent</code> section to the relevant canvas in the manifest.</p>
 
                     <c:set var="short_id" value="#{canvas.shortId}" />
-                    <a class="actionLink" href="annotation/list/#{short_id}.json" download="#{short_id}.json">Annotation List</a>  
+                    <a class="actionLink" href="annotations/#{user.shortId}/#{short_id}.json" download="#{short_id}.json">Annotation List</a>  
                     <br/>
                     <br/>
 
@@ -33,7 +33,7 @@
         ...
     ],
     "otherContent": [ {
-        "@id": "<span data-relative="true">/annotation/list/#{canvas.shortId}.json</span>",
+        "@id": "<span data-relative="true">/annotations/#{user.shortId}/#{canvas.shortId}.json</span>",
         "@type": "sc:AnnotationList",
         "label": "My fantastic annotations"
     }]

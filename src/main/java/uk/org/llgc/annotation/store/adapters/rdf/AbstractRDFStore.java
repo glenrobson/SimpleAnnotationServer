@@ -304,12 +304,14 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
-		IIIFSearchResults tAnnotationList = new IIIFSearchResults();
 
 		this.begin(ReadWrite.READ);
 		List<QuerySolution> tResults = ResultSetFormatter.toList(tExec.execSelect());
 		this.end();
+        IIIFSearchResults tAnnotationList = null;
 		try {
+            tAnnotationList = new IIIFSearchResults(pQuery.toURI());
+
 			if (tResults != null) {
 				int tStart = pQuery.getIndex();
 				int tEnd = tStart + pQuery.getResultsPerPage();
@@ -554,7 +556,9 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
             RDFDataMgr.write(System.out, tSavedUser, Lang.TRIG) ;
             System.out.println("**** Saved user ******" + tSavedUser.listStatements().toList());*/
             Statement tDateStatement = tSavedUser.getProperty(tSavedUser.createResource(pUser.getId()), DCTerms.created);
-            pUser.setCreated(parseDate(tDateStatement.getObject().toString()));
+            if (tDateStatement != null && tDateStatement.getObject() != null) {
+                pUser.setCreated(parseDate(tDateStatement.getObject().toString()));
+            }
             this.end();
             this.deleteAnnotation(pUser.getId());
             this.begin(ReadWrite.READ);

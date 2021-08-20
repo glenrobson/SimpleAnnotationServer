@@ -18,19 +18,36 @@ import java.util.Base64;
 import java.util.zip.Deflater;
 import java.util.Collections;
 import java.util.Comparator;
-
-import  javax.servlet.http.HttpServletRequest;
-import javax.faces.context.FacesContext;
-
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.faces.context.FacesContext;
+
+import com.github.jsonldjava.utils.JsonUtils;
+
+import java.net.URL;
 
 import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.File;
+import java.io.FileInputStream;
 
 @ApplicationScoped
 @ManagedBean
 public class StoreService {
     protected StoreAdapter _store = null;
+    protected HttpServletRequest _request = null;
+
+    public StoreService() {
+    }
+
+    public StoreService(final HttpServletRequest pRequest) {
+        _request = pRequest;
+        this.init();
+    }
 
     @PostConstruct
     public void init() {
@@ -45,8 +62,58 @@ public class StoreService {
     }
 
     protected HttpServletRequest getRequest() {
-        FacesContext facesContext = FacesContext.getCurrentInstance();
-        return (HttpServletRequest)facesContext.getExternalContext().getRequest();
+        if (_request == null) {
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            return (HttpServletRequest)facesContext.getExternalContext().getRequest();
+        } else {
+            return _request;
+        }
+    }
+
+    public Manifest getEnhancedManifest(final String pManifestURI) throws IOException {
+        Manifest tManifest = this.getManifestId(pManifestURI);
+        UserService tService = new UserService();
+        return this.getEnhancedManifest(tService.getUser(), tManifest, false);
+    }
+
+    public Manifest getEnhancedManifest(final User pUser, final Manifest pManifest, final boolean regenerate) throws IOException {
+        File tManifestPath = new File(StoreConfig.getConfig().getDataDir(),"manifests");
+        File tUserDir = new File(tManifestPath, pUser.getShortId());
+        File tManifestFile = new File(tUserDir, pManifest.getShortId() + ".json");
+
+        if (tManifestFile.exists() && !regenerate) {
+            Manifest tManifest = new Manifest();
+            tManifest.setJson((Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(tManifestFile)));
+
+            return tManifest;
+        } else {
+            tManifestFile.getParentFile().mkdirs();
+            Manifest tManifest = this.generateEnhancedManifest(pUser, pManifest);
+            StringBuffer tURL = new StringBuffer(StoreConfig.getConfig().getBaseURI(this.getRequest()));
+            if (!tURL.toString().endsWith("/")) {
+                tURL.append("/");
+            }
+            tURL.append("manifests/");
+            tURL.append(pUser.getShortId());
+            tURL.append("/");
+            tURL.append(pManifest.getShortId());
+            tURL.append(".json");
+            tManifest.setURI(tURL.toString());
+
+            JsonUtils.writePrettyPrint(new BufferedWriter(new FileWriter(tManifestFile)), tManifest.getJson());
+            return tManifest;
+        }
+    }
+
+    public Manifest generateEnhancedManifest(final User pUser, final Manifest pManifest) throws IOException {
+        Manifest tSourceManifest = new Manifest();
+        tSourceManifest.setJson((Map<String,Object>)JsonUtils.fromInputStream(new URL(pManifest.getURI()).openStream()));
+
+        tSourceManifest.addSearchService(StoreConfig.getConfig().getBaseURI(this.getRequest()), pUser);
+
+        tSourceManifest.addAnnotationLists(StoreConfig.getConfig().getBaseURI(this.getRequest()), pUser);
+
+        return tSourceManifest;
     }
 
     public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
@@ -205,7 +272,7 @@ public class StoreService {
     }
 
     public Collection getCollection(final String pID, final HttpServletRequest pRequest) throws IOException {
-        if (pID == null || pID.equals("")) {
+        if (pID == null || pID.length() == 0) {
             UserService tService = new UserService(pRequest.getSession(true));
             User tUser = tService.getUser();
             // Get default collection

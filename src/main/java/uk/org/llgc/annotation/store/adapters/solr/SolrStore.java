@@ -325,9 +325,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         tQuery.setHighlight(true);
         tQuery.addHighlightField("text");
 
-        IIIFSearchResults tAnnoList = new IIIFSearchResults();
+        IIIFSearchResults tAnnoList = null;
 		try {
-			tAnnoList.setId(pQuery.toURI().toString());
+            tAnnoList = new IIIFSearchResults(pQuery.toURI());
 			QueryResponse tResponse = _solrClient.query(tQuery);
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tNumberOfPages = (int)(tResultNo / pQuery.getResultsPerPage());

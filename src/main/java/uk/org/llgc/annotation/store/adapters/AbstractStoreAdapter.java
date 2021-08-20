@@ -203,7 +203,8 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
     public User retrieveUser(final User pUser) throws IOException {
         User tSavedUser = this.getUser(pUser);
-        if (tSavedUser == null) {
+        // overwrite saved user if short ID is out of sync
+        if (tSavedUser == null || !pUser.getShortId().equals(tSavedUser.getShortId())) {
             return this.saveUser(pUser);
         } else {
             return tSavedUser;

@@ -84,7 +84,7 @@
                                 <p id="attr-#{manifest.shortId}"><h:outputText value="#{manifest.attribution}"/></p>
                                 <div id="actionBar">
                                     <span>
-                                        <a href="#" class="actionLink" data-manifest-id="#{manifest.URI}" data-manifest-label="#{manifest.label}" data-collection-id="#{collection.id}">Share</a> | 
+                                        <a href="export.xhtml?collection=#{collection.id}&amp;manifest=#{manifest.URI}" class="actionLink">Share</a> | 
                                         <a href="#" class="actionLink" title="Move manifest to another collection." data-manifest-id="#{manifest.URI}" data-manifest-label="#{manifest.label}" data-collection-id="#{collection.id}" onClick="showMoveManifest(event)">Move to different collection</a> | 
                                         <a href="stats/manifest.xhtml?iiif-content=#{manifest.URI}" class="actionLink" title="Analytics">View progress</a> | 
                                         <a href="#" class="actionLink" aria-hidden="true" data-mode="remove_manifest" data-manifest="#{manifest.URI}" data-label="#{manifest.label}" data-collection-label="#{collection.label}" data-collection-id="#{collection.id}" onclick="showConfirm(event)">Remove manifest</a>

@@ -63,8 +63,8 @@ public class OAuthFilter implements Filter {
                 ((HttpServletResponse)pRes).sendRedirect(_loginPage);
                 //}
                 return;
-            } else {
-                System.out.println("Found logged in user: " + tSession.getAttribute("user"));
+            /*} else {
+                System.out.println("Found logged in user: " + tSession.getAttribute("user"));*/
             }
         }
         pChain.doFilter(pReq, pRes);

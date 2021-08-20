@@ -75,6 +75,13 @@ public class User {
         // }
     }
 
+    public static User createUserFromShortID(final String pBaseURI, final String pShortID) throws URISyntaxException {
+        User tUser = new User();
+        tUser.setId(pBaseURI + "/user/" + pShortID);
+        tUser.setShortId(pShortID);
+        return tUser;
+    }
+
     public String toString() {
         StringBuffer tBuffer = new StringBuffer("Id: ");
         tBuffer.append(_id);

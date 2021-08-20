@@ -59,11 +59,9 @@ public class SearchQuery {
 		} 
 	}
 
-	protected String convertListToString(final String pKey, final List pList) {
+	protected String convertListToString(final String pKey, final List pList) throws UnsupportedEncodingException {
 		if (pList != null && !pList.isEmpty()) {
-			StringBuffer tBuff = new StringBuffer("&");
-			tBuff.append(pKey);
-			tBuff.append("=");
+			StringBuffer tBuff = new StringBuffer();
 			for (Object tChild: pList) {
                 if (tChild instanceof User) {
                     tBuff.append(((User)tChild).getId());
@@ -72,7 +70,7 @@ public class SearchQuery {
                 }
 				tBuff.append(" ");
 			}
-			return tBuff.toString().trim();
+			return "&" + pKey + "=" + URLEncoder.encode(tBuff.toString().trim(), "UTF-8");
 		} else {
 			return "";
 		}
@@ -87,20 +85,17 @@ public class SearchQuery {
         try {
             tBuff.append(URLEncoder.encode(_query, "UTF-8"));
             if (_motivations != null) {
-                tBuff.append("&");
-                tBuff.append(URLEncoder.encode(this.convertListToString("motivation", _motivations), "UTF-8"));
+                tBuff.append(this.convertListToString("motivation", _motivations));
             }
             if (_dates != null) {
-                tBuff.append("&");
                 tBuff.append(this.convertListToString("date", _dates));
             }	
             if (_users != null) {
-                tBuff.append("&");
-                tBuff.append(URLEncoder.encode(this.convertListToString("user", _users), "UTF-8"));
+                tBuff.append(this.convertListToString("user", _users));
             }	
             if (_page != 0) {
-                tBuff.append("&");
-                tBuff.append("page=" + _page);
+                tBuff.append("&page=");
+                tBuff.append(_page);
             }	
         } catch (UnsupportedEncodingException tExcpt) {
             // shouldn't happen as UTF-8 should be supported.
@@ -200,7 +195,16 @@ public class SearchQuery {
         if (_users == null) {
             _users = new ArrayList<User>();
         }
-        _users.add(pUser);
+        boolean tFoundUser = false;
+        for (User tSearchUser : _users) {
+            if(tSearchUser.getId().equals(pUser.getId())) {
+                tFoundUser = true;
+                break;
+            }
+        }
+        if (!tFoundUser) {
+            _users.add(pUser);
+        }
     }
         
 	public List<User> getUsers() {
