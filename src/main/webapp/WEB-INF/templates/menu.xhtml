@@ -7,6 +7,7 @@
     <body>
         <ui:composition>
             <c:set var="isAuth" value="#{userService.authenticated}" scope="request" />
+            <c:set var="isAdmin" value="#{userService.admin}" scope="request" />
 
             <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
                 <span class="navbar-brand">SAS</span>
@@ -15,11 +16,17 @@
                 </button>
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav mr-auto">
-                        <c:if test="#{isAuth}">
+                        <c:if test="#{isAuth and not isAdmin}">
                             <li class="nav-item">
                                 <h:link styleClass="nav-link" icon="fas fa-upload" value="Home" outcome="#{path}collections" ></h:link>
                             </li>
                         </c:if>
+                        <c:if test="#{isAdmin}">
+                            <li class="nav-item">
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Admin" outcome="/admin/users" ></h:link>
+                            </li>
+                        </c:if>
+
                     </ul>
                         <c:if test="#{not isAuth and not path.equals('login')}">
                             <div class="mt-2 mt-md-0">

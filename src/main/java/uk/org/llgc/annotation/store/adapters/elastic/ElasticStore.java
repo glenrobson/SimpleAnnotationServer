@@ -661,38 +661,31 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         return tAnnoPageCount;
     }    
 
+    public List<User> getUsers() throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.termQuery("type", "user"));
+        searchSourceBuilder.size(10000);
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+
+        List<User> tUsers = new ArrayList<User>();
+        for (SearchHit tHit : searchHits) {
+            tUsers.add(this.json2user((Map<String,Object>)tHit.getSourceAsMap()));
+        }
+        return tUsers;
+    }
+
     public User getUser(final User pUser) throws IOException {
         GetRequest tRequest = new GetRequest(_index, pUser.getId());
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
         if (tResponse != null && tResponse.getSource() != null) {
-            User tSavedUser = new User();
+            User tSavedUser = this.json2user((Map<String,Object>)tResponse.getSourceAsMap());
             tSavedUser.setToken(pUser.getToken());
 
-            Map<String, Object> tJson = (Map<String,Object>)tResponse.getSourceAsMap();
-            try {
-                tSavedUser.setId((String)tJson.get("id"));
-            } catch (URISyntaxException tExcpt) {
-                throw new IOException("Unable to create user as ID was not a URI: " + tExcpt);
-            }
-            tSavedUser.setShortId((String)tJson.get("short_id"));
-            tSavedUser.setName((String)tJson.get("name"));
-            tSavedUser.setEmail((String)tJson.get("email"));
-            if (tJson.get("created") != null) {
-                tSavedUser.setCreated(super.parseDate((String)tJson.get("created")));
-            }
-            tSavedUser.setLastModified(super.parseDate((String)tJson.get("modified")));
-            if (tJson.get("created") == null && tJson.get("modified") != null) {
-                tSavedUser.setCreated(tSavedUser.getLastModified());
-            }
-            if (tJson.get("picture") != null) {
-                tSavedUser.setPicture((String)tJson.get("picture"));
-            }
-            if (tJson.get("group") != null && tJson.get("group").toString().equals("admin")) {
-                tSavedUser.setAdmin(true);
-            }
-            tSavedUser.setAuthenticationMethod((String)tJson.get("authenticationMethod"));
-             
             return tSavedUser;         
         } else {
             return null;
@@ -714,6 +707,34 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         _client.index(tIndex, RequestOptions.DEFAULT);
 
         return pUser;
+    }
+
+    protected User json2user(final Map<String,Object> tUserJson) throws IOException {
+        User tSavedUser = new User();
+        try {
+            tSavedUser.setId((String)tUserJson.get("id"));
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Unable to create user as ID was not a URI: " + tExcpt);
+        }
+        tSavedUser.setShortId((String)tUserJson.get("short_id"));
+        tSavedUser.setName((String)tUserJson.get("name"));
+        tSavedUser.setEmail((String)tUserJson.get("email"));
+        if (tUserJson.get("created") != null) {
+            tSavedUser.setCreated(super.parseDate((String)tUserJson.get("created")));
+        }
+        tSavedUser.setLastModified(super.parseDate((String)tUserJson.get("modified")));
+        if (tUserJson.get("created") == null && tUserJson.get("modified") != null) {
+            tSavedUser.setCreated(tSavedUser.getLastModified());
+        }
+        if (tUserJson.get("picture") != null) {
+            tSavedUser.setPicture((String)tUserJson.get("picture"));
+        }
+        if (tUserJson.get("group") != null && tUserJson.get("group").toString().equals("admin")) {
+            tSavedUser.setAdmin(true);
+        }
+        tSavedUser.setAuthenticationMethod((String)tUserJson.get("authenticationMethod"));
+
+        return tSavedUser;
     }
 
     protected Map<String, Object> user2json(final User pUser) {

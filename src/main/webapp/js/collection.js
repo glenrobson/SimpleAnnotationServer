@@ -81,12 +81,16 @@ function populateManifest(url, shortId) {
         }
         if ('description' in manifest && manifest.description) {
             let desc = document.getElementById("desc-" + shortId);
-            desc.innerHTML = manifest.description;
+            if (desc != null) {
+                desc.innerHTML = manifest.description;
+            }
         }
 
         if ('attribution' in manifest && manifest.attribution) {
             let attr = document.getElementById("attr-" + shortId);
-            attr.innerHTML = manifest.attribution;
+            if (attr != null) {
+                attr.innerHTML = manifest.attribution;
+            }
         }
 
     })

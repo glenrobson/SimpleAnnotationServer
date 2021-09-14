@@ -18,6 +18,8 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URISyntaxException;
+
 import java.util.concurrent.ExecutionException;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ import java.util.Map;
 
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
+import uk.org.llgc.annotation.store.data.login.LocalAuth;
 import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.StoreConfig;
 
@@ -63,13 +66,41 @@ public class LoginCallback extends HttpServlet {
             if (tSession.getAttribute("oauth_url") != null) {
                 pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
             } else {
-                pRes.sendRedirect("index.html");
+                pRes.sendRedirect("collections.xhtml");
             }
         } catch (InterruptedException tExcpt) {
             tExcpt.printStackTrace();
         } catch (ExecutionException tExcpt) {
             tExcpt.printStackTrace();
             // should redirect to login fail page
+        }
+    }
+
+    // For local login
+	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        final String tEmail = pReq.getParameter("email");
+        final String tPassword = pReq.getParameter("password");
+        HttpSession tSession = pReq.getSession();
+
+        LocalAuth tAuth = StoreConfig.getConfig().getLocalAuth();
+        if (tAuth.authenticate(tEmail, tPassword)) {
+            try {
+                UserService tUsers = new UserService(tSession);
+                tUsers.setUser(tAuth.getUser(tEmail, StoreConfig.getConfig().getBaseURI(pReq)));
+                if (tSession.getAttribute("oauth_url") != null) {
+                    pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
+                } else {
+                    pRes.sendRedirect("/admin/users.xhtml");
+                }
+            } catch (URISyntaxException tExcpt) {
+                String tMessage = "Config error in users config file. User " + tEmail + " has an invalid value for id";
+                System.err.println(tMessage);
+                tExcpt.printStackTrace();
+                pRes.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, tMessage);
+            }
+        } else {
+            //throw 401
+            pRes.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Failed to authenticate " + tEmail);
         }
     }
 }

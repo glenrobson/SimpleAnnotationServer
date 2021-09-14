@@ -20,6 +20,16 @@
 			<param-value>https://catalog.metascripta.org/</param-value>
 		</init-param>-->
     </filter>
+    <filter>
+        <filter-name>AdminFilter</filter-name>
+        <filter-class>uk.org.llgc.annotation.store.filters.AdminFilter</filter-class>
+        <!-- Uncomment this if you would like to have a custom login page which isn't login.xhtml
+            <init-param>
+			<param-name>LOGIN_PAGE</param-name>
+			<param-value>https://catalog.metascripta.org/</param-value>
+		</init-param>-->
+    </filter>
+
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/local.html</url-pattern>
@@ -37,6 +47,10 @@
         <url-pattern>/link.xhtml</url-pattern>
         <url-pattern>/search.xhtml</url-pattern>
         <url-pattern>/export.xhtml</url-pattern>
+    </filter-mapping>
+     <filter-mapping>
+        <filter-name>AdminFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -119,7 +133,7 @@
     <servlet>
         <servlet-name>LoginCallback</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.servlets.login.LoginCallback</servlet-class>
-    </servlet>src/main/java/uk/org/llgc/annotation/store/servlets/login/OAuth.java
+    </servlet>
      <servlet>
         <servlet-name>Login</servlet-name>
         <servlet-class>uk.org.llgc.annotation.store.servlets.login.OAuth</servlet-class>

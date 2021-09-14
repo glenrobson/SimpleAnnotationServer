@@ -82,6 +82,14 @@ public class User {
         return tUser;
     }
 
+    public static User createUserFromID(final String pURI) throws URISyntaxException {
+        User tUser = new User();
+        tUser.setId(pURI);
+        tUser.setShortId(pURI.substring(pURI.lastIndexOf("/user/") + 6));
+
+        return tUser;
+    }
+
     public String toString() {
         StringBuffer tBuffer = new StringBuffer("Id: ");
         tBuffer.append(_id);

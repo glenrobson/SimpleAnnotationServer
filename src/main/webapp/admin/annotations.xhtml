@@ -1,0 +1,78 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="/WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Users"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <c:set var="collUser" value="#{userService.getUser(param['user'])}" scope="request" />
+                    <c:set var="manifest" value="#{storeService.getManifestId(param['manifest'])}" scope="request" />
+                    <c:set var="canvas" value="#{storeService.getCanvasId(param['iiif-content'])}" scope="request" />
+                    <h1>Annotations for user: <h:outputText value="#{collUser.name}" escape="false"/></h1>
+
+                    <ul id="annotations" class="media-list">
+                        <c:forEach items="#{storeService.getAnnotations(param['iiif-content'], collUser).annotations}" var="anno" varStatus="iterMetadata">
+                         <div class="media-header-div">
+                            <h3 class="box_type">Annotation</h3>
+                        </div>
+                          
+                        <div class="media">
+                            <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
+                                <img class="align-self-center mr-3 canvas_thum" width="400px" data-canvas-id="#{anno.targets[0].canvas.id}##{anno.targets[0].region}" src=""/>
+                            </a>
+                            <div class="media-body">
+                                <c:set var="text" value="" />
+                                <c:forEach items="#{anno.bodies}" var="body" varStatus="bodyMetadata">
+                                    <c:if test="#{not body.type.equals('oa:Tag')}">
+                                        <p><h:outputText value="#{body.chars}" escape="false"/></p>
+
+                                        <c:set var="text" value="#{text}#{body.chars}" />
+                                    </c:if>
+                                </c:forEach>
+                                <c:set var="tags" value="" />
+                                <c:forEach items="#{anno.bodies}" var="body" varStatus="bodyMetadata">
+                                    <c:if test="#{body.type.equals('oa:Tag')}">
+                                        <p><span class="tag"> <h:outputText value="#{body.chars}" escape="false"/></span></p>
+                                        <c:set var="tags" value="#{tags}#{body.chars}" />
+                                    </c:if>
+                                </c:forEach>
+                                <div id="actionBar">
+
+                                </div>
+                            </div>
+                        </div>
+
+                        </c:forEach>
+                    </ul>
+
+                </div>
+            </main>
+
+            <script src="/js/collection.js"></script>
+            <script>
+                let canvas_ids = document.getElementsByClassName("canvas_thum");
+                let manifest = null;
+                fetch('#{manifest.URI}')
+                    .then(response => response.json())
+                        .then(function(pManifest) {
+                            manifest = pManifest;
+                            // Get annotation thumbnail
+                            for (let thumb of canvas_ids) {
+                                let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 300);
+                                thumb.src = url;
+                            };
+                        });
+            </script>
+
+
+            <ui:include src="/WEB-INF/templates/dialogues/confirm.xhtml"/>
+            <ui:include src="/WEB-INF/templates/dialogues/editAnnotation.xhtml"/>
+        </ui:define>
+    </ui:composition>
+</html>

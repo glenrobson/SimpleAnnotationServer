@@ -395,4 +395,9 @@ public class TestUsers extends TestUtils {
         assertTrue("Hoped to find user2's annos in list but it wasn't found.",tAnnoIds.contains("http://example.com/user2/anno1"));
     }
 
+
+    @Test
+    public void testGetAllUser() throws IOException, URISyntaxException {
+        assertTrue("Need to implement testGetAllUsers.",false);
+    }
 }

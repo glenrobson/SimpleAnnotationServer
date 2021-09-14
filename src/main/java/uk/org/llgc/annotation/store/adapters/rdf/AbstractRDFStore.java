@@ -480,6 +480,37 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         storeModel(pCanvas.getId(), tModel);
     }
 
+    public List<User> getUsers() throws IOException {
+        // Could optimise this to get all users and their details instead of calling getUser
+        String tQueryString =   "select ?user where {" +
+										"   GRAPH ?user { " +
+										"	 ?user_id <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + FOAF.Person + ">" + 
+										"   } " +
+										"}";
+		QueryExecution tExec = this.getQueryExe(tQueryString);
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+        List<User> tUsers = new ArrayList<User>();
+		if (results != null && results.hasNext()) {
+			while (results.hasNext()) {
+				QuerySolution soln = results.nextSolution() ;
+                Resource tUserResource = soln.getResource("user");
+
+                // Now get full details of user:
+                User tUser = new User();
+                try {
+                    tUser.setId(tUserResource.getURI());
+                } catch (URISyntaxException tExcpt) {
+                    // This shouldn't happen in here
+                    System.err.println("Failed to get user ID: " + tUserResource.getURI() + " as a URI");
+                }
+                tUsers.add(this.getUser(tUser));
+            }
+		}
+        return tUsers;
+    }
+
     public User getUser(final User pUser) throws IOException {
         Model tUserModel = getNamedModel(pUser.getId());
         if (tUserModel == null) {

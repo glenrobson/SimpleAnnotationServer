@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.faces.context.FacesContext;
@@ -55,10 +56,47 @@ public class StoreService {
     }
 
     public List<PageAnnoCount> listAnnoPages(final String pURI) {
+        System.out.println("Looking for annotations from Manifest " + pURI);
         Manifest tManifest = new Manifest();
         tManifest.setURI(pURI);
 
-        return this.listAnnoPages(tManifest);
+        try {
+            return _store.listAnnoPages(tManifest);
+        } catch (IOException tExcpt) {
+            System.err.println("Failed to retrieve stats for " + pURI);
+            tExcpt.printStackTrace();
+        }
+        return new ArrayList<PageAnnoCount>();
+    }
+
+    public Map<String,Integer> countAnnotations(final Manifest pManifest) {
+        String tKey = "stats_" + pManifest.getShortId();
+        HttpServletRequest tRequest = this.getRequest();
+        if (tRequest.getAttribute(tKey) != null) {
+            return (Map<String,Integer>)tRequest.getAttribute(tKey);
+        }
+
+        Map<String,Integer> tStats = new HashMap<String,Integer>();
+        tStats.put("canvas_count", 0);
+        tStats.put("total_annos", 0);
+        try {
+            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest);
+            tStats.put("canvas_count", tCount.size());
+
+            int tTotalAnnos = 0;
+            for (PageAnnoCount tPageCount : tCount) {
+                tTotalAnnos += tPageCount.getCount();
+            }
+            tStats.put("total_annos", tTotalAnnos);
+
+            if (tRequest.getAttribute(tKey) == null) {
+                tRequest.setAttribute(tKey, tStats);
+            }
+        } catch (IOException tExcpt) {
+            System.err.println("Failed to retrieve stats for " + pManifest.getURI());
+            tExcpt.printStackTrace();
+        }
+        return tStats;
     }
 
     protected HttpServletRequest getRequest() {
@@ -200,6 +238,11 @@ public class StoreService {
     }
 
     public AnnotationList getAnnotations(final String pCanvasURI) {
+        UserService tUserService = new UserService();
+        return this.getAnnotations(pCanvasURI, tUserService.getUser());
+    }
+
+    public AnnotationList getAnnotations(final String pCanvasURI, final User pUser) {
         HttpServletRequest tRequest = this.getRequest();
         String tStoreKey = "al_" + pCanvasURI;
         if (tRequest.getAttribute(tStoreKey) != null) {
@@ -207,8 +250,7 @@ public class StoreService {
         }
 
         try {
-            UserService tUserService = new UserService();
-            AnnotationList tAnnos = _store.getAnnotationsFromPage(tUserService.getUser(), new Canvas(pCanvasURI, ""));
+            AnnotationList tAnnos = _store.getAnnotationsFromPage(pUser, new Canvas(pCanvasURI, ""));
             Collections.sort(tAnnos.getAnnotations(), new Comparator() {
                             public int compare(Object o1, Object o2) {
                                 Annotation tAnno1 = (Annotation)o1;
@@ -267,6 +309,42 @@ public class StoreService {
         }
 
         Collections.sort(tCollections);
+
+        return tCollections;
+    }
+
+    protected void putCacheObject(final String pKey, final Object pObject) {
+        HttpServletRequest tRequest = this.getRequest();
+        tRequest.setAttribute(pKey, pObject);
+    }
+
+    protected Object getCacheObject(final String pKey) {
+        HttpServletRequest tRequest = this.getRequest();
+        return tRequest.getAttribute(pKey);
+    }
+
+    protected boolean isCached(final String pKey) {
+        HttpServletRequest tRequest = this.getRequest();
+        return tRequest.getAttribute(pKey) != null;
+    }
+
+    public List<Collection> getCollections(final User pUser) throws IOException {
+        System.out.println("Calling get collection");
+        String tKey = "collections_for_user_" + pUser.getShortId();
+
+        if (this.isCached(tKey)) {
+            return (List<Collection>)this.getCacheObject(tKey);
+        }   
+
+        List<Collection> tCollections = new ArrayList<Collection>();
+
+        UserService tService = new UserService();
+        User tUser = tService.getUser();
+        if (tUser.isAdmin()) {
+            tCollections = _store.getCollections(pUser);
+
+            this.putCacheObject(tKey, tCollections);
+        }
 
         return tCollections;
     }

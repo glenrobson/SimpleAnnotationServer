@@ -15,8 +15,10 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.StoreConfig;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 @RequestScoped
 @ManagedBean
@@ -53,6 +55,40 @@ public class UserService {
         // If not present then this method should also add the user to the database
         User tEnhancedUser = _store.retrieveUser(pUser);
         this.getSession().setAttribute("user", tEnhancedUser);
+    }
+
+    public List<User> getUsers() throws IOException {
+        List<User> tUsers = new ArrayList<User>();
+        // check if admin then return users
+        User tUser = this.getUser();
+        if (tUser.isAdmin()) {
+            tUsers = _store.getUsers();
+        } else {
+            System.out.println("User not admin so returning current user");
+            tUsers.add(tUser);
+        }
+
+        return tUsers;
+    }
+
+    public User getUser(final String pID) {
+        User tUser = this.getUser();
+        if (tUser.isAdmin()) {
+            try {
+                User tSearchUser = User.createUserFromID(pID);
+                System.out.println("Search user " + tSearchUser);
+                System.out.println("User " + _store.getUser(tSearchUser));
+                return _store.getUser(tSearchUser);
+            } catch (IOException tExcpt) {
+                System.err.println("Failed to get user due to: " + tExcpt);
+                return null;
+            } catch (URISyntaxException tExcpt) {
+                System.err.println("Failed to get user due to: " + tExcpt);
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     public User getUser() {

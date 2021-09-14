@@ -20,6 +20,7 @@ import uk.org.llgc.annotation.store.adapters.elastic.ElasticStore;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
+import uk.org.llgc.annotation.store.data.login.LocalAuth;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -43,6 +44,7 @@ public class StoreConfig extends HttpServlet {
     public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name"};
     protected AnnotationUtils _annotationUtils = null;
     protected List<OAuthTarget> _authTargets = null;
+    protected LocalAuth _localAuth = null;
 
 	public StoreConfig() {
 		_props = null;
@@ -86,7 +88,7 @@ public class StoreConfig extends HttpServlet {
 			throw new ServletException("Failed to load auth config file due to: " + tExcpt.getMessage());
         }
 		initConfig(this);
-	}
+    }
 
     protected void loadAuthConfig(final InputStream pConfigFile) throws IOException {
         if (pConfigFile == null) {
@@ -95,11 +97,21 @@ public class StoreConfig extends HttpServlet {
             Object tObject = JsonUtils.fromInputStream(pConfigFile);
             _authTargets = new ArrayList<OAuthTarget>();
             if (tObject instanceof Map) {
-                _authTargets.add(new OAuthTarget((Map<String,Object>)tObject));
+                Map<String,Object> tSingleConfig = (Map<String,Object>)tObject;
+                // Don't add local auth to list of OAuth targets
+                if (tSingleConfig.get("type") == null || !tSingleConfig.get("type").equals("local")) { 
+                    _authTargets.add(new OAuthTarget(tSingleConfig));
+                } else {
+                    _localAuth = LocalAuth.createLocal(tSingleConfig);
+                }
             } else {
                 List<Map<String,Object>> tConfigs = (List<Map<String,Object>>)tObject;
                 for (Map<String,Object> tConfig : tConfigs) {
-                    _authTargets.add(new OAuthTarget(tConfig));
+                    if (tConfig.get("type") == null || !tConfig.get("type").equals("local")) { 
+                        _authTargets.add(new OAuthTarget(tConfig));
+                    } else {
+                        _localAuth = LocalAuth.createLocal(tConfig);
+                    }
                 }
             }
         }
@@ -107,7 +119,11 @@ public class StoreConfig extends HttpServlet {
 
     // Is auth setup?
     public boolean isAuth() {
-        return _authTargets != null;
+        return _authTargets != null || _localAuth != null;
+    }
+
+    public LocalAuth getLocalAuth() {
+        return _localAuth;
     }
 
     public List<OAuthTarget> getAuthTargets() {

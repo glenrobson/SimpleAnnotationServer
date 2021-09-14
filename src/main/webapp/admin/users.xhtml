@@ -1,0 +1,61 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="/WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Users"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <h1>Admin Dashboard</h1>
+                    <h2>Analytics</h2>
+                    <ul>
+                        <li>Total annotations: x</li>
+                        <li>Total Manifests: y</li>
+                        <li>Total Annotated Canvases: z</li>
+                    </ul>
+
+                    <h2>Users</h2>
+                    <ul id="users" class="media-list">
+                        <c:forEach items="#{userService.users}" var="tUser" varStatus="iterMetadata">
+                            <li class="manifestSummary" id="shortId">
+                                <div class="media-header-div">
+                                    <h3 class="box_type">   
+                                        User
+                                    </h3>
+                                </div>
+                                <div class="media-heading">
+                                    <h5>
+                                        Name: <h:outputText value="#{tUser.name}"/>
+                                    </h5>
+                                </div>    
+                                <div class="media">
+                                    <img class="align-self-center mr-3 media-img canvas_thum" style="margin: 5px;" src="#{tUser.picture}"/>
+                                    <div class="media-body">
+                                        <a href="user-collections.xhtml?user=#{tUser.id}" class="btn btn-secondary mb-2" ><i class="fas fa-list"></i> View User</a>
+
+                                        <div id="actionBar">
+                                            <span>
+                                                <c:if test="#{not empty tUser.email}">
+                                                    <a class="actionLink" href="mailto:#{tUser.email}">Email</a>
+                                                </c:if>
+                                                <c:if test="#{empty tUser.email}">
+                                                    No email available
+                                                </c:if>
+                                            </span>    
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </div>
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>

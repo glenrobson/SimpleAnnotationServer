@@ -85,7 +85,17 @@ public class CollectionServlet extends HttpServlet {
             String relativeId = pReq.getRequestURI().substring(pReq.getRequestURI().lastIndexOf("/collection/"));
             String tCollectionId = StoreConfig.getConfig().getBaseURI(pReq) + relativeId;
 
-            Collection tCollection = _store.getCollection(tCollectionId);
+            Collection tCollection = null;
+            //try {
+                tCollection = _store.getCollection(tCollectionId);
+            /*} catch (NullPointerException tExcpt) {
+                // Failed to get collection so delete it useful during development
+                tCollection = new Collection();
+                tCollection.setId(tCollectionId);
+
+                _store.deleteCollection(tCollection);
+                tCollection = null;
+            }*/
             if (tCollection != null) {
                 AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
                 if (tAuth.allowViewCollection(tCollection)) {
