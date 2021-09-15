@@ -1,4 +1,4 @@
-name: Java CI
+name: Jena
 
 on: [push]
 
@@ -14,5 +14,9 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
+
+      - name: Selecting Jena config
+        run: export "config=Jena.properties"
+
       - name: Run Tests
         run: chmod 755 .github/bin/integration_tests.sh && .github/bin/integration_tests.sh
