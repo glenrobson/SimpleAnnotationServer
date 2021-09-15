@@ -15,4 +15,4 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Run Tests
-        run: chmod 755 ./github/bin/integration_tests.sh && ./github/bin/integration_tests.sh
+        run: chmod 755 .github/bin/integration_tests.sh && .github/bin/integration_tests.sh
