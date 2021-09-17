@@ -663,7 +663,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
     public List<User> getUsers() throws IOException {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.termQuery("type", "user"));
+        searchSourceBuilder.query(QueryBuilders.termQuery("type", "User"));
         searchSourceBuilder.size(10000);
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(searchSourceBuilder);
