@@ -470,8 +470,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
     public List<User> getUsers() throws IOException {
-        return new ArrayList<User>();
-        /*SolrQuery tQuery = new SolrQuery();
+        SolrQuery tQuery = new SolrQuery();
 		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod", "created", "modified");
 		tQuery.setRows(1000);
 
@@ -487,7 +486,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		}
-        return tUsers;*/
+        return tUsers;
     }
 
     public User getUser(final User pUser) throws IOException {
