@@ -224,7 +224,7 @@ public class Manifest {
         try {
             return (String)getJson().get("@type");
         } catch (IOException tExcpt) {
-            tExcpt.printStackTrace();
+            //tExcpt.printStackTrace();
             return null;
         }
     }

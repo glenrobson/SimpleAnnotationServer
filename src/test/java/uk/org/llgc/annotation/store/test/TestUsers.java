@@ -398,6 +398,31 @@ public class TestUsers extends TestUtils {
 
     @Test
     public void testGetAllUser() throws IOException, URISyntaxException {
-        assertTrue("Need to implement testGetAllUsers.",false);
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAuthenticationMethod("test");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        _store.saveUser(tUser1);
+
+        User tUser2 = new User();
+        tUser2.setId("http://example.com/user2");
+        tUser2.setShortId("user2");
+        tUser2.setName("name2");
+        tUser2.setEmail("name2@glen.com");
+        tUser2.setAuthenticationMethod("test");
+        tUser2.setAdmin(false);
+        tUser2.setPicture("http://picture.net");
+        _store.saveUser(tUser2);
+
+        List<User> tAllUsers = _store.getUsers();
+        assertEquals("Expected two users.", 2, tAllUsers.size());
+
+        assertTrue("Unexpected user ID for first user: " + tAllUsers.get(0).getId(), tAllUsers.get(0).getId().equals(tUser1.getId()) || tAllUsers.get(0).getId().equals(tUser2.getId()));
+        assertTrue("Unexpected user ID for second user: " + tAllUsers.get(1).getId(), tAllUsers.get(1).getId().equals(tUser1.getId()) || tAllUsers.get(1).getId().equals(tUser2.getId()));
+        assertTrue("Somehow duplicated user... " + tAllUsers.get(0).getId(), !tAllUsers.get(0).getId().equals(tAllUsers.get(1).getId()));
     }
 }
