@@ -20,8 +20,5 @@ jobs:
       - name: Wait for SOLR to start
         run:  docker exec -t sas_solr /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
 
-      - name: Selecting SOLR config
-        run: export "config=solr.properties"
-
       - name: Run Tests
-        run: mvn test
+        run: export "config=solr.properties" && mvn test

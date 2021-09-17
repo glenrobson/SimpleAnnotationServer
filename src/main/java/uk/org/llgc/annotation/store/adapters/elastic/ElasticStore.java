@@ -662,8 +662,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }    
 
     public List<User> getUsers() throws IOException {
-        return new ArrayList<User>();
-        /*SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.termQuery("type", "user"));
         searchSourceBuilder.size(10000);
         SearchRequest searchRequest = new SearchRequest(_index);
@@ -676,7 +675,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         for (SearchHit tHit : searchHits) {
             tUsers.add(this.json2user((Map<String,Object>)tHit.getSourceAsMap()));
         }
-        return tUsers;*/
+        return tUsers;
     }
 
     public User getUser(final User pUser) throws IOException {
