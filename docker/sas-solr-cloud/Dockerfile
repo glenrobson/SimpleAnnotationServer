@@ -9,7 +9,7 @@ RUN mvn $MVN_ARGS package
 # runnable container stage
 FROM tomcat:9-jre11 AS runstage
 # remove tomcat default webapps and create data directory
-RUN rm -r /usr/local/tomcat/webapps/*
+RUN [ "$(ls -A /usr/local/tomcat/webapps/)" ] && rm -r /usr/local/tomcat/webapps/*
 # copy SAS from build image
 COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/ROOT
 # copy properties
