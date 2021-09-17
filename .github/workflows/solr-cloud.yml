@@ -26,5 +26,6 @@ jobs:
 
         # Due to the way docker-compose and SOLR works we can't access the SOLR cloud
         # from this machine. Instead we have to run the test within the cluster
+        run: docker logs simpleannotationserver_web_1 
       - name: Run Tests
-        run: docker exec --workdir /usr/src/sas simpleannotationserver_web_1 /usr/bin/mvn test
+        run: docker exec --workdir /usr/src/sas simpleannotationserver_web_1 /usr/bin/mvn -q test

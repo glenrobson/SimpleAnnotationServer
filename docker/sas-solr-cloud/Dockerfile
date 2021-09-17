@@ -2,7 +2,7 @@
 FROM maven:3-jdk-11 AS buildstage
 WORKDIR /usr/src/sas
 COPY . /usr/src/sas
-ARG MVN_ARGS="-DskipTests"
+ARG MVN_ARGS="-DskipTests -q"
 # build SAS using maven
 RUN mvn $MVN_ARGS package
 
