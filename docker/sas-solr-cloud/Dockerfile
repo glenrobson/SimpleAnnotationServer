@@ -7,7 +7,7 @@ ARG MVN_ARGS="-DskipTests -q"
 RUN mvn $MVN_ARGS package
 
 # runnable container stage
-FROM tomcat:9-jre11 AS runstage
+FROM tomcat:9-jdk11-temurin AS runstage
 # remove tomcat default webapps and create data directory
 RUN rm -rf /usr/local/tomcat/webapps/*
 # copy SAS from build image
