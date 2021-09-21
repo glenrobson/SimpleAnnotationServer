@@ -36,7 +36,7 @@ public class Delete extends HttpServlet {
 	}
 
 	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        UserService tUserService = new UserService(pReq.getSession());
+        UserService tUserService = new UserService(pReq);
         AuthorisationController tAuth = new AuthorisationController(tUserService);
 		_logger.debug("uri " + pReq.getParameter("uri"));
 		String tURI = pReq.getParameter("uri");

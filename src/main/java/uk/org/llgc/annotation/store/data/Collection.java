@@ -128,6 +128,10 @@ public class Collection implements Comparable {
         return null;
     }
 
+    public boolean isDefaultCollection() {
+        return _id.endsWith("inbox.json"); 
+    }
+
     public boolean remove(final Manifest pManifest) {
         return _manifests.remove(pManifest);
     }

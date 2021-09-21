@@ -18,13 +18,13 @@
                     <h1>IIIF Search Service</h1>
                     <p>A IIIF search service is available for this manifest at the following URL:</p>
                     <ul>
-                        <li><a id="search_url" href="search-api/#{tManifest.shortId}/search" data-relative="true"><span data-relative="true">search-api/#{tManifest.shortId}/search</span></a></li>
+                        <li><a id="search_url" href="search-api/#{user.shortId}/#{tManifest.shortId}/search" data-relative="true"><span data-relative="true">search-api/#{user.shortId}/#{tManifest.shortId}/search</span></a></li>
                     </ul>    
                     <p>You can add this search service to a manifest by manually editing the JSON and adding the search service. This will allow you to search for your annotations using any compatible IIIF viewer like Mirador or the Universal Viewer. To add this search service to your manifest add the following json snippet to your manifest at the top level just after the <code>label</code>:</p>
 <pre>
 "service": {
     "profile": "http://iiif.io/api/search/0/search",
-    "@id": "<span data-relative="true">search-api/#{tManifest.shortId}/search</span>",
+    "@id": "<span data-relative="true">search-api/#{user.shortId}/#{tManifest.shortId}/search</span>",
     "@context": "http://iiif.io/api/search/0/context.json"
 },
 </pre>
@@ -37,7 +37,7 @@
     "label": "<h:outputText value="#{tManifest.label}" escape="false" />",
     "service": {
         "profile": "http://iiif.io/api/search/0/search",
-        "@id": <span data-relative="true">search-api/#{tManifest.shortId}/search</span>,
+        "@id": <span data-relative="true">search-api/#{user.shortId}/#{tManifest.shortId}/search</span>,
         "@context": "http://iiif.io/api/search/0/context.json"
     },
     "sequences" : [
@@ -47,23 +47,6 @@
                     var elements = document.querySelectorAll('[data-relative]');
                     for (var i = 0; i &lt; elements.length; i++) {
                         relativeToAbsolute(elements[i]);
-                    }
-                    function relativeToAbsolute(el) {
-                        var url = '';
-                        if (el.tagName.toLowerCase() === 'a') {
-                            url = el.href;
-                        } else {
-                            url = el.textContent.trim();
-                        }
-                        var link  = document.createElement("a");
-                        link.href=url;
-                        var fullURL = link.href;
-                        if (el.tagName.toLowerCase() === 'a') {
-                            el.href = fullURL;
-                        } else {
-                            el.textContent = fullURL;
-                        }
-
                     }
                 </script>
                 </div> 

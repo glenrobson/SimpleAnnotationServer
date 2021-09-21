@@ -38,7 +38,7 @@ public class ListAnnotations extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+        AuthorisationController tAuth = new AuthorisationController(pReq);
         if (tAuth.allowExportAllAnnotations()) {
             AnnotationList tAnnotations = _store.getAllAnnotations();
 

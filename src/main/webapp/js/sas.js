@@ -74,3 +74,39 @@ function clearLoading(buttonName, content) {
     button.innerHTML = content;
     button.disabled = false;
 }
+
+function showURLBar(source) {
+    source.childNodes.forEach(function (element) {
+        if (element.nodeType === Node.ELEMENT_NODE && element.className != 'contentStateLogo') {
+            element.style.display = "inline-block";
+        }
+    });
+}
+
+function hideURLBar(source) {
+    source.childNodes.forEach(function (element) {
+        if (element.nodeType === Node.ELEMENT_NODE && element.className != 'contentStateLogo') {
+            element.style.display = "none";
+        }
+    });
+
+}
+
+function relativeToAbsolute(el) {
+    var url = '';
+    if (el.tagName.toLowerCase() === 'a') {
+        url = el.href;
+    } else {
+        url = el.textContent.trim();
+    }
+    var link  = document.createElement("a");
+    link.href=url;
+    var fullURL = link.href;
+    if (el.tagName.toLowerCase() === 'a') {
+        el.href = fullURL;
+    } else {
+        el.textContent = fullURL;
+    }
+
+}
+

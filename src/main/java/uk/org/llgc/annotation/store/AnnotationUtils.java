@@ -88,12 +88,7 @@ public class AnnotationUtils {
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
 			if (tAnno.get("@id") == null) {
-
-				StringBuffer tBuff = new StringBuffer(pBaseURL);
-				tBuff.append(getHash(getTarget(tAnno), "md5"));
-				tBuff.append("/");
-				tBuff.append(tAnnoCount++);
-				tAnno.put("@id", tBuff.toString());
+				tAnno.put("@id", this.generateAnnoId(pBaseURL, tAnnoCount++));
 			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 
@@ -185,7 +180,7 @@ public class AnnotationUtils {
 		Map<String, Object> tRoot = (Map<String,Object>)tAnnotation;
 
 		if (tRoot.get("@id") == null) {
-			String tID = pBaseURL + "/" + this.generateAnnoId();
+			String tID = this.generateAnnoId(pBaseURL);
 			tRoot.put("@id", tID);
 		}
 		// Change context to local for quick processing
@@ -377,7 +372,22 @@ public class AnnotationUtils {
 		}
 	}
 
-	protected String generateAnnoId() {
-		return "" + new java.util.Date().getTime();
+	protected String generateAnnoId(final String pBaseURL) {
+        StringBuffer tBuff = new StringBuffer(pBaseURL);
+        if (!pBaseURL.endsWith("/")) {
+            tBuff.append("/");
+        }
+        tBuff.append("anno/");
+        tBuff.append("" + new java.util.Date().getTime());
+		return tBuff.toString();
 	}
+
+    // To be used when potenially lots of annotations are added at once
+    protected String generateAnnoId(final String pBaseURL, final int pOffest) {
+        StringBuffer tBuff = new StringBuffer(this.generateAnnoId(pBaseURL));
+        tBuff.append("/");
+        tBuff.append("" + pOffest);
+		return  tBuff.toString();
+	}
+
 }

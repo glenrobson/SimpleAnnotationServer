@@ -61,6 +61,7 @@ public class TestSetup extends TestUtils {
         removeEnv("SAS_repo_url");
         removeEnv("SAS_solr_connection");
         removeEnv("SAS_solr_collection");
+        removeEnv("SAS_admin");
     }
 
     @Test
@@ -73,6 +74,7 @@ public class TestSetup extends TestUtils {
         tProps.setProperty("repo_url", "properties_repo_url");
         tProps.setProperty("solr_connection", "properties_solr_connection");
         tProps.setProperty("solr_collection", "properties_solr_collection");
+        tProps.setProperty("admin", "prop_admin");
 
         setEnv("SAS_baseURI","env_baseuri");
         setEnv("SAS_encoder","env_encoder");
@@ -81,6 +83,7 @@ public class TestSetup extends TestUtils {
         setEnv("SAS_repo_url","env_repo_url");
         setEnv("SAS_solr_connection","env_solr_connection");
         setEnv("SAS_solr_collection","env_solr_collection");
+        setEnv("SAS_admin","env_admin");
         StoreConfig tConfig = new StoreConfig(tProps);
 
         Map<String, String> tNewProps = tConfig.getProps();
@@ -91,6 +94,7 @@ public class TestSetup extends TestUtils {
         assertEquals("repo_url hasn't been picked up from the Enviroment.","env_repo_url", tNewProps.get("repo_url"));
         assertEquals("solr_connection hasn't been picked up from the Enviroment.","env_solr_connection", tNewProps.get("solr_connection"));
         assertEquals("solr_collection hasn't been picked up from the Enviroment.","env_solr_collection", tNewProps.get("solr_collection"));
+        assertEquals("admin email hasn't been picked up from the Enviroment.","env_admin", tNewProps.get("admin"));
     }
     private void setEnv(String key, String value) {
         System.setProperty(key, value);

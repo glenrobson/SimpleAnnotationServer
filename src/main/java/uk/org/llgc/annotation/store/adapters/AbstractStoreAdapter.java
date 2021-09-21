@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Date;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
@@ -203,11 +204,25 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
     public User retrieveUser(final User pUser) throws IOException {
         User tSavedUser = this.getUser(pUser);
-        if (tSavedUser == null) {
+        // overwrite saved user if short ID is out of sync
+        if (tSavedUser == null || !pUser.getShortId().equals(tSavedUser.getShortId())) {
             return this.saveUser(pUser);
         } else {
             return tSavedUser;
         }
+    }
+
+    public List<User> getUsers(final String pGroup) throws IOException { 
+        List<User> tGroup = new ArrayList<User>();
+        if (pGroup.equals("admin")) {
+            List<User> tAllUsers = this.getUsers();
+            for (User tUser : tAllUsers) {
+                if (tUser.isAdmin()) {
+                    tGroup.add(tUser);
+                }
+            }
+        }
+        return tGroup;
     }
 
     public void updateCollection(final Collection pCollection) throws IOException {

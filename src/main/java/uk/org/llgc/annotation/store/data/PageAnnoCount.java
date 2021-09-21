@@ -4,11 +4,7 @@ import uk.org.llgc.annotation.store.data.Manifest;
 
 public class PageAnnoCount {
 	protected int _count = 0;
-    // These three properties should really be a canvas object...
     protected Canvas _canvas = null;
-	protected String _pageId = "";
-    protected String _label = "";
-    protected String _shortId = "";
     protected Manifest _manifest = null;
 
 	public PageAnnoCount(final Canvas pCanvas, final int pCount, final Manifest pManifest) {
@@ -60,6 +56,15 @@ public class PageAnnoCount {
      */
     public void setCanvas(final Canvas pCanvas) {
          _canvas = pCanvas;
+    }
+
+    public boolean equals(final Object pOtherObj) {
+        if (pOtherObj instanceof PageAnnoCount) {
+            PageAnnoCount tOther = (PageAnnoCount)pOtherObj;
+            return _canvas.getId().equals(tOther.getCanvas().getId());
+        } else {
+            return false;
+        }
     }
 
 	public String toString() {

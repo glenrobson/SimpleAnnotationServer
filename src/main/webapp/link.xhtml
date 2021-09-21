@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Link Annotations"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <c:set var="canvas" value="#{storeService.getCanvasId(param['iiif-content'])}" scope="request" />
+                    <h1>Linking Annotations to the Manifest</h1>
+
+                     <p>Download the annotation list below and then you will need to link the annotation list to the correct Canvas or page. This is done by adding an <code>otherContent</code> section to the relevant canvas in the manifest.</p>
+
+                    <c:set var="short_id" value="#{canvas.shortId}" />
+                    <a class="actionLink" href="annotations/#{user.shortId}/#{short_id}.json" download="#{short_id}.json">Annotation List</a>  
+                    <br/>
+                    <br/>
+
+                    <p>Example <code>otherContent</code> section:</p>
+<pre>
+{
+    "@id": "#{canvas.id}",
+    "@type": "sc:Canvas",
+    "images": [
+        ...
+    ],
+    "otherContent": [ {
+        "@id": "<span data-relative="true">/annotations/#{user.shortId}/#{canvas.shortId}.json</span>",
+        "@type": "sc:AnnotationList",
+        "label": "My fantastic annotations"
+    }]
+}
+</pre>
+                    <script>
+                        var elements = document.querySelectorAll('[data-relative]');
+                        for (var i = 0; i &lt; elements.length; i++) {
+                            relativeToAbsolute(elements[i]);
+                        }
+                    </script>
+                </div> 
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>
+

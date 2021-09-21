@@ -194,6 +194,11 @@
             <artifactId>scribejava-apis</artifactId>
             <version>7.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>5.5.2</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>simpleAnnotationStore</finalName>

@@ -154,11 +154,9 @@ ul.nav a.vote {
 }
 
 #main_panel h1 {
-    background-color: #ddd;
-    padding: 15px;
-    color: #6d6d6f;
-    border: 1px solid #ddd;
-    -webkit-border-radius: 7px 10px 0px 0px;
+    padding: 2px 2px 2px 15px;
+    max-width: 80%;
+    display: inline-block;
 }
 
 #main_panel p {
@@ -209,14 +207,7 @@ ul.nav a.vote {
     background: #6d6d6f;/*#6d7fcc;*/
 }
 
-#addCollectionButton {
-    position: absolute;
-    top: 17px;
-    right: 12px;
-    color: #403c3c;
-}
-
-#manifests {
+.media-list {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -242,9 +233,19 @@ ul.nav a.vote {
     margin: 5px;
 }
 
+.site_logo {
+    background-color: white;
+}
+
+.site_logo img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 200px;
+}
 #actionBar {
     border-top: 1px dotted #ddd;
-    text-align: right;
+    vertical-align: top;
 }
 
 #logoBar {
@@ -255,8 +256,12 @@ ul.nav a.vote {
 #actionBar button {
     margin:5px;
 }
-#actionBar a {
+
+.actionLink {
     margin:5px;
+    vertical-align: top;
+    color: black;
+    text-decoration: underline;
 }
 
 #demo_video {
@@ -284,15 +289,49 @@ ul.nav a.vote {
     padding-bottom: 50px;
 }
 
-#deleteCollection {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    color: white;
+.header_bar {
+    background-color: #eaebee;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 7px 10px 0px 0px;
+    width: 100%;
+    overflow: hidden;
+}
+.header_bar h1 {
+    color: #707070;
+    display:inline;
+}
+
+.header_bar a {
+    color: #8e8f91;
+    float:right;
+    font-size: 2em;
+    padding: 2px 15px 2px 2px;
+}
+
+.header_bar .back_header {
+    color:#4f4f4f;
+    font-size: 1.6em;
+}
+
+#collectionCS {
+    padding: 2px 2px 2px 15px;
+    color: #676767;
+    overflow: hidden;
+    float:right;
+}
+.right_options {
+    overflow: hidden;
+    float:right;
+    padding-top: 8px;
+}
+
+.right_options .selected {
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .manifestSummary h5 {
-    padding: 5px 5px 5px 5px;
+    padding: 5px 5px 5px 15px;
 }
 
 .manifestSummary {
@@ -313,13 +352,21 @@ ul.nav a.vote {
 
 .media-header-div {
     width: 100%;
-    height: 35px;
     background-color: #eaebee;
-    padding: 5px 5px 5px 5px;
+    overflow:hidden;
+    height:50px;
+    line-height:50px;
 }
 
-.media-header-div img {
-    margin-left: 15px;
+/*.media-header-div span {
+    color: #676767;
+    padding: 2px 12px 2px 15px;
+}*/
+.media-header-div h3 {
+    display: inline-block;
+    padding-left: 15px;
+    color: #707070;
+    font-size: 1.35rem;
 }
 
 .media-header-div button {
@@ -350,6 +397,121 @@ ul.nav a.vote {
     display: inline;
     margin-right: 10px;
 }
+
 .bg-dark, .fixed-top {
     background-color: #003DA5 !important;
+}
+.tag {
+    background: lightGray;
+    color: #222;
+    border-radius: 6px;
+    padding: 0 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 12;
+    font-weight: bold;
+    border: 1px solid #aaa;
+    display: inline-block;
+}
+
+.options {
+    padding: 10px 15px 5px 15px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.option_links {
+    display: inline-block;
+    padding-top: 8px;
+}
+
+.options a {
+    text-decoration: underline;
+    padding-right: 15px;
+    padding-left: 15px;
+    color:black;
+}
+
+.content_state {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
+}
+
+#contentStateFull {
+    float:right;
+    border-radius: .25rem;
+    height: 100%;
+}
+
+.contentStateLogo {
+    margin: 5px;
+    display: inline-block;
+}
+
+.iiif_logo {
+    height: 25px;
+    vertical-align: bottom;
+    margin-left: 0px !important;
+}
+
+#contentStateFull input {
+    width: 300px;
+}
+
+.cs_text_wrapper {
+    padding:5px;
+}
+
+.cs_text_wrapper a {
+    color: #676767;
+    text-decoration: underline;
+}
+
+.copyToClipboard {
+    margin-left: 0px !important;
+    border: 1px solid #a3a8ac;
+    padding-left: 7px;
+    padding-right: 7px !important;
+}
+
+.copyToClipboard i {
+    color:#6c757d;
+}
+
+.content-state-text {
+    padding-left:5px;
+    color: #676767;
+    text-decoration: underline;
+}
+
+.canvas {
+    display:none;
+}
+
+.anno_canvas {
+}
+
+#editor-container p {
+    padding-top: 5px;
+    padding-left: 5px;
+}
+
+.inline_list {
+    list-style-type: none;
+    overflow: hidden;
+}
+
+.inline_list li {
+    float: left;
+    padding: 10px;
+}
+
+.center_info {
+    width: 100%;
+    padding: 0px;
+    text-align: center;
+    color: #676767;
+    text-decoration: underline;
 }

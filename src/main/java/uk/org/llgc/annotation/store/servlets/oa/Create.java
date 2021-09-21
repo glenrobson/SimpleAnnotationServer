@@ -49,7 +49,7 @@ public class Create extends HttpServlet {
 		_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
 		try {
             Annotation tAnno = new Annotation(tAnnotationJSON);
-            tAnno.setCreator(new UserService(pReq.getSession()).getUser());
+            tAnno.setCreator(new UserService(pReq).getUser());
 			tAnno = _store.addAnnotation(tAnno);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);

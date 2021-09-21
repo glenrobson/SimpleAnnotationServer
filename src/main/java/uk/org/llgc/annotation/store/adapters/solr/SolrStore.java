@@ -34,6 +34,7 @@ import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -325,9 +326,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         tQuery.setHighlight(true);
         tQuery.addHighlightField("text");
 
-        IIIFSearchResults tAnnoList = new IIIFSearchResults();
+        IIIFSearchResults tAnnoList = null;
 		try {
-			tAnnoList.setId(pQuery.toURI().toString());
+            tAnnoList = new IIIFSearchResults(pQuery.toURI());
 			QueryResponse tResponse = _solrClient.query(tQuery);
 			long tResultNo = tResponse.getResults().getNumFound();
 			int tNumberOfPages = (int)(tResultNo / pQuery.getResultsPerPage());
@@ -469,13 +470,31 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		return tResults;
 	}
 
+    public List<User> getUsers() throws IOException {
+        SolrQuery tQuery = new SolrQuery();
+		tQuery.setFields("id", "type", "short_id", "name", "email", "password", "picture", "group", "authenticationMethod", "created", "modified");
+		tQuery.setRows(1000);
+
+		tQuery.set("q", "type:\"User\"");
+
+        List<User> tUsers = new ArrayList<User>();
+
+		try {
+			QueryResponse tResponse  = _solrClient.query(tQuery);
+            for (SolrDocument pDoc : tResponse.getResults()) {
+                tUsers.add(json2user(pDoc));
+            }
+		} catch (SolrServerException tException) {
+			throw new IOException("Failed to run solr query due to " + tException.toString());
+		}
+        return tUsers;
+    }
 
     public User getUser(final User pUser) throws IOException {
         User tUser = new User();
-        tUser.setToken(pUser.getToken());
 
         SolrQuery tQuery = new SolrQuery();
-		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod", "created", "modified");
+		tQuery.setFields("id", "type", "short_id", "name", "email", "password", "picture", "group", "authenticationMethod", "created", "modified");
 		tQuery.setRows(1000);
 
 		tQuery.set("q", "type:\"User\" AND id:\"" + pUser.getId() + "\"");
@@ -484,30 +503,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			QueryResponse tResponse  = _solrClient.query(tQuery);
 
 			if (tResponse.getResults().size() == 1) {
-                SolrDocument pDoc = tResponse.getResults().get(0);
-                // Build helpers to convert from SOLR to annotation
-
-                try {
-                    tUser.setId((String)pDoc.get("id"));
-                } catch (URISyntaxException tExcpt) {
-                    throw new IOException("Id is not a URI: " + pDoc.get("id") + "\"" + tExcpt);
-                }
-                tUser.setShortId((String)pDoc.get("short_id"));
-                tUser.setName((String)pDoc.get("name"));
-                tUser.setEmail(((List<String>)pDoc.get("email")).get(0));
-                tUser.setCreated((Date)pDoc.get("created"));
-                tUser.setLastModified((Date)pDoc.get("modified"));
-                if (pDoc.get("picture") != null && !((List<String>)pDoc.get("picture")).isEmpty()) {
-                    tUser.setPicture(((List<String>)pDoc.get("picture")).get(0));
-                }
-                if (pDoc.get("group") != null) {
-                    for (String tGroup : (List<String>)pDoc.get("group")) {
-                        if (tGroup.equals("admin")) {
-                            tUser.setAdmin(true);
-                        }
-                    }
-                }
-                tUser.setAuthenticationMethod((String)pDoc.get("authenticationMethod"));
+                tUser = json2user(tResponse.getResults().get(0));
 			} else if (tResponse.getResults().size() == 0) {
 				return null; // no annotation found with supplied id
 			} else {
@@ -516,6 +512,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
 		}
+        tUser.setToken(pUser.getToken());
         return tUser;
     }
 
@@ -534,6 +531,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tDoc.addField("email", pUser.getEmail());
 		tDoc.addField("created", pUser.getCreated());
 		tDoc.addField("modified", pUser.getLastModified());
+        if (pUser instanceof LocalUser) {
+            tDoc.addField("password", ((LocalUser)pUser).getPassword());
+        }
         if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tDoc.addField("picture", pUser.getPicture());
         }
@@ -544,6 +544,38 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 		_utils.addDoc(tDoc, true);
         return pUser;
+    }
+
+    protected User json2user(final SolrDocument pDoc) throws IOException {
+        User tUser = new User();
+        if (pDoc.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {
+            tUser = new LocalUser();
+            ((LocalUser)tUser).setPassword((String)pDoc.get("password"),false);
+        }
+
+        try {
+            tUser.setId((String)pDoc.get("id"));
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Id is not a URI: " + pDoc.get("id") + "\"" + tExcpt);
+        }
+        tUser.setShortId((String)pDoc.get("short_id"));
+        tUser.setName((String)pDoc.get("name"));
+        tUser.setEmail(((List<String>)pDoc.get("email")).get(0));
+        tUser.setCreated((Date)pDoc.get("created"));
+        tUser.setLastModified((Date)pDoc.get("modified"));
+        if (pDoc.get("picture") != null && !((List<String>)pDoc.get("picture")).isEmpty()) {
+            tUser.setPicture(((List<String>)pDoc.get("picture")).get(0));
+        }
+        if (pDoc.get("group") != null) {
+            for (String tGroup : (List<String>)pDoc.get("group")) {
+                if (tGroup.equals("admin")) {
+                    tUser.setAdmin(true);
+                }
+            }
+        }
+        tUser.setAuthenticationMethod((String)pDoc.get("authenticationMethod"));
+
+        return tUser;
     }
 
 

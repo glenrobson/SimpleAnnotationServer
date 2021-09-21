@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import java.net.URL;
+import java.net.URISyntaxException;
 
 import java.util.Map;
 import java.util.List;
@@ -41,6 +42,7 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 import uk.org.llgc.annotation.store.controllers.UserService;
+import uk.org.llgc.annotation.store.controllers.StoreService;
 
 
 public class ManifestUpload extends HttpServlet {
@@ -66,7 +68,7 @@ public class ManifestUpload extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         try {
-            User tUser = new UserService(pReq.getSession()).getUser();
+            User tUser = new UserService(pReq).getUser();
             String tID = "";
             Map<String, Object> tManifestJson = null;
             String tCollectionId = "";
@@ -123,7 +125,7 @@ public class ManifestUpload extends HttpServlet {
             if (tCollection == null) {
                 tCollection = _store.getCollection(StoreConfig.getConfig().getBaseURI(pReq) + "/collection/" + tUser.getShortId() + "/inbox.json");
             }
-            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+            AuthorisationController tAuth = new AuthorisationController(pReq);
             if (tAuth.allowCollectionEdit(tCollection)) {
                 Manifest tManifest = new Manifest(tManifestJson, null);
                 if (!tCollection.getManifests().contains(tManifest)) {
@@ -174,37 +176,71 @@ public class ManifestUpload extends HttpServlet {
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         String tCollectionId = pReq.getParameter("collection");
         String tManifestId = pReq.getParameter("manifest");
+        AuthorisationController tAuth = new AuthorisationController(pReq);
 
-        Manifest tManifest = _store.getManifest(tManifestId);
-        if (tManifest == null) {
-            Map<String,Object> tResponse = new HashMap<String,Object>();
-            tResponse.put("code", pRes.SC_NOT_FOUND);
-            tResponse.put("message", "Manifest is not loaded");
-            sendJson(pRes, HttpServletResponse.SC_NOT_FOUND, tResponse);
-        } else {
-            if (tCollectionId != null) {
-                Collection tCollection = _store.getCollection(tCollectionId);
-                if (tCollection != null && !tCollection.contains(tManifest)) {
-                    AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-                    if (tAuth.allowCollectionEdit(tCollection)) {
-                        tCollection.add(tManifest);
-                        _store.updateCollection(tCollection);
-                    } else {
-                        Map<String,Object> tResponse = new HashMap<String,Object>();
-                        tResponse.put("code", pRes.SC_UNAUTHORIZED);
-                        tResponse.put("message", "You can only edit your own collections unless you are Admin");
-                        this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
-                        return;
+        if (tManifestId != null) {
+            Manifest tManifest = _store.getManifest(tManifestId);
+            if (tManifest == null) {
+                Map<String,Object> tResponse = new HashMap<String,Object>();
+                tResponse.put("code", pRes.SC_NOT_FOUND);
+                tResponse.put("message", "Manifest is not loaded");
+                sendJson(pRes, HttpServletResponse.SC_NOT_FOUND, tResponse);
+            } else {
+                if (tCollectionId != null) {
+                    Collection tCollection = _store.getCollection(tCollectionId);
+                    if (tCollection != null && !tCollection.contains(tManifest)) {
+                        if (tAuth.allowCollectionEdit(tCollection)) {
+                            tCollection.add(tManifest);
+                            _store.updateCollection(tCollection);
+                        } else {
+                            Map<String,Object> tResponse = new HashMap<String,Object>();
+                            tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                            tResponse.put("message", "You can only edit your own collections unless you are Admin");
+                            this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                            return;
+                        }
                     }
                 }
-            }
-            Map<String,Object> tJson = new HashMap<String,Object>();
-            Map<String,String> tLinks = new HashMap<String,String>();
-            tJson.put("loaded", tLinks);
-            tLinks.put("uri", tManifest.getURI());
-            tLinks.put("short_id", tManifest.getShortId());
+                Map<String,Object> tJson = new HashMap<String,Object>();
+                Map<String,String> tLinks = new HashMap<String,String>();
+                tJson.put("loaded", tLinks);
+                tLinks.put("uri", tManifest.getURI());
+                tLinks.put("short_id", tManifest.getShortId());
 
-            this.sendJson(pRes, pRes.SC_OK, tJson);
+                this.sendJson(pRes, pRes.SC_OK, tJson);
+            }
+        } else {
+            // Get enriched manifest
+            boolean regenerate = pReq.getParameter("regenerate") != null && pReq.getParameter("regenerate").equals("true");
+            String relativeId = pReq.getRequestURI().substring(pReq.getRequestURI().lastIndexOf("/manifests/") + "/manifests/".length());
+            // 1245635613/1969268/5bbada360fbe7c8f72a8153896686398.json
+            int tLastSlash = relativeId.lastIndexOf("/");
+            User tUser = new User();
+            String tFilename = relativeId.substring(tLastSlash + 1);
+            try {
+                tUser = User.createUserFromShortID(StoreConfig.getConfig().getBaseURI(pReq), relativeId.substring(0, tLastSlash));
+            } catch (URISyntaxException tExcpt) {
+                throw new IOException("Unable to create user due to " + tExcpt);
+            }
+            tUser = _store.getUser(tUser);
+
+            String tURI = _store.getManifestId(tFilename.split("\\.")[0]);
+            Manifest tManifest = new Manifest();
+            tManifest.setURI(tURI);
+
+            if (tAuth.allowReadManifest(tManifest, tUser)) {
+                StoreService tService = new StoreService(pReq);
+
+                Manifest tFullManifest = tService.getEnhancedManifest(tUser, tManifest, regenerate);
+
+                this.sendJson(pRes, pRes.SC_OK, tFullManifest.toJson());
+            } else {
+                Map<String,Object> tResponse = new HashMap<String,Object>();
+                tResponse.put("code", pRes.SC_UNAUTHORIZED);
+                tResponse.put("message", "You are not allowed to see this users annotations");
+                this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+                return;
+            }
         }
     }
 }
