@@ -12,7 +12,7 @@ ARG AWS_DEFAULT_REGION
 ARG AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 ARG AUTH_JSON_LOCATION
 # remove tomcat default webapps and create data directory
-RUN rm -r /usr/local/tomcat/webapps/* 
+RUN rm -rf /usr/local/tomcat/webapps/* 
 # copy SAS from build image
 COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/ROOT
 # copy properties
