@@ -159,6 +159,7 @@
     <field name="email" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="picture" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="group" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="password" type="string" multiValued="false" indexed="true" stored="true"/>
     <field name="authenticationMethod" type="string" multiValued="false" indexed="true" stored="true"/>
     <field name="creator" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="members" type="string" multiValued="true" indexed="true" stored="true"/>
