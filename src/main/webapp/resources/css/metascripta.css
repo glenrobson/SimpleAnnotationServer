@@ -1,6 +1,27 @@
+
+/*
 .metascripta-brand1 {
   background-color: #003DA5; 
 }
 #collection_link {
   float:right;
 }
+.manifest-panel-controls {
+    text-align: right;
+    margin-right:10px;
+}
+.mirador-container #url-load-form {
+    margin-left: 25px;
+}
+.mirador-container #manifest-search-form label {
+    margin-left: 100px;
+}
+#manifest-search-form::before {
+    content: "Your Reserve Shelf";
+    font-weight: 600;
+    font-size: 1.2em;
+}
+.bg-dark {
+    background-color: #003DA5 !important; 
+}
+*/
