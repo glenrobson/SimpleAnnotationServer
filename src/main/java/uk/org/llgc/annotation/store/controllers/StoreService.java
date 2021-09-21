@@ -329,7 +329,6 @@ public class StoreService {
     }
 
     public List<Collection> getCollections(final User pUser) throws IOException {
-        System.out.println("Calling get collection");
         String tKey = "collections_for_user_" + pUser.getShortId();
 
         if (this.isCached(tKey)) {
