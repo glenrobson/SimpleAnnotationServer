@@ -19,7 +19,7 @@
             
             <div class="header_bar">
                 <h1 id="collectionName"><h:outputText value="#{collection.label}"/></h1>
-                <a href="#"><i class="far fa-question-circle"></i></a>
+                <a href="#"  data-toggle="modal" data-target="#help"><i class="far fa-question-circle"></i></a>
             </div>    
             <div class="options">
                 <div class="option_links">
@@ -115,6 +115,7 @@
         <ui:include src="WEB-INF/templates/dialogues/addManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/moveManifest.xhtml"/>
         <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
+        <ui:include src="WEB-INF/templates/help/collections.xhtml"/>
         </ui:define>
     </ui:composition>
 </html>
