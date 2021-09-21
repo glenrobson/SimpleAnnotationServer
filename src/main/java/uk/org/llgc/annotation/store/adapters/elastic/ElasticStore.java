@@ -718,7 +718,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         if (tUserJson.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {
             tSavedUser = new LocalUser();
             if (tUserJson.get("password") != null && ((String)tUserJson.get("password")).isEmpty()) {
-                ((LocalUser)tSavedUser).setPassword((String)tUserJson.get("password"));
+                ((LocalUser)tSavedUser).setPassword((String)tUserJson.get("password"), false);
             }
         }
         try {
