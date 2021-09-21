@@ -56,7 +56,6 @@ public class StoreService {
     }
 
     public List<PageAnnoCount> listAnnoPages(final String pURI) {
-        System.out.println("Looking for annotations from Manifest " + pURI);
         Manifest tManifest = new Manifest();
         tManifest.setURI(pURI);
 
@@ -160,7 +159,6 @@ public class StoreService {
             return (List<PageAnnoCount>)tRequest.getAttribute(pManifest.getURI());
         }
         try {
-            System.out.println("Start Anno Page");
             //new  PageAnnoCount(final Canvas pCanvas, final int pCount, final Manifest pManifest)
             List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest);
             List<PageAnnoCount> tFullCanvasList = new ArrayList<PageAnnoCount>();
@@ -171,7 +169,6 @@ public class StoreService {
                 }
                 tFullCanvasList.add(tCanvasCount);
             }
-            System.out.println("End Anno Page");
             if (tRequest.getAttribute(pManifest.getURI()) == null) {
                 tRequest.setAttribute(pManifest.getURI(), tFullCanvasList);
             }
@@ -201,10 +198,8 @@ public class StoreService {
 
     public Canvas getCanvasId(final String pId) {
         try {
-            System.out.println("Resolving " + pId);
             Canvas tCanvas = new Canvas(pId, "");
             tCanvas = _store.resolveCanvas(tCanvas.getShortId());
-            System.out.println("Found: " + tCanvas);
             return tCanvas;
         } catch (IOException tExcpt) {
             return null;

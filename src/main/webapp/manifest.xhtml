@@ -29,7 +29,8 @@
                 <div class="option_links">
                     Manifest options:
                     <a href="search.xhtml?iiif-content=#{manifest.URI}"><i class="fas fa-wrench"></i> Configure IIIF Search</a> |
-                    <a href="#" data-toggle="modal" data-target="#importAnnotations" onclick="hideMessage('importAnnoMessage');"><i class="fas fa-wrench"></i> Import Annotations</a>
+                    <a href="#" data-toggle="modal" data-target="#importAnnotations" onclick="hideMessage('importAnnoMessage');"><i class="fas fa-wrench"></i> Import Annotations</a> |
+                    <a href="#{manifest.URI}" target="_blank">Manifest Link</a>
                 </div>    
                 <div class="right_options">
                     List: <a href="#" id="all" onClick="toggleAnnotated(this)">all</a> | <a id="annotated" class="selected" href="#" onClick="toggleAnnotated(this)">annotated</a>
@@ -55,12 +56,6 @@
                                     Canvas
                                 </c:if>
                             </h3>
-                            <ui:include src="WEB-INF/templates/content-state.xhtml">
-                                <ui:param name="url" value="#{manifest.URI}" />
-                                <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
-                                <ui:param name="mode" value="full" />
-                            </ui:include>
-
                         </div>
                         <div class="media-heading">
                             <h5>
