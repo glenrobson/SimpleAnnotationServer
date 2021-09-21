@@ -45,7 +45,7 @@ public class Update extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		try {
-            UserService tUserService = new UserService(pReq.getSession());
+            UserService tUserService = new UserService(pReq);
             AuthorisationController tAuth = new AuthorisationController(tUserService);
 
 			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation");

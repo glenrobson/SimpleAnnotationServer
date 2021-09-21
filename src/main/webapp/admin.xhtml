@@ -13,15 +13,20 @@
                 <img class="mb-4" src="/images/sas-gdmr-logo.png" alt="" width="200"/>
                 <h3>Admin Login</h3>
                 <br/>
+                <c:if test="#{not userService.isAdminSetup()}">
+                    <p>There is no password for the admin user. Enter the admin email to get to a screen where you can set the password.</p>
+                </c:if>
                 <div class="oauth_option">
                     <div class="form-group">
                         <label for="exampleInputEmail1">Email address</label>
                         <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email"/>
                       </div>
-                      <div class="form-group">
-                        <label for="exampleInputPassword1">Password</label>
-                        <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password"/>
-                      </div>
+                      <c:if test="#{userService.isAdminSetup()}">
+                          <div class="form-group">
+                            <label for="exampleInputPassword1">Password</label>
+                            <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password"/>
+                          </div>
+                      </c:if>
                       <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>

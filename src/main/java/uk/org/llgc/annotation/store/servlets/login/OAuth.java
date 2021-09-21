@@ -40,6 +40,8 @@ public class OAuth extends HttpServlet {
                         .defaultScope(tTarget.getScopes()) // replace with desired scope
                         .callback(StoreConfig.getConfig().getBaseURI(pReq) + "/login-callback")
                         .build(tTarget.getEndpoints());
+                _logger.debug("Sending callback " + StoreConfig.getConfig().getBaseURI(pReq) + "/login-callback");        
+                System.out.println("Sending callback " + StoreConfig.getConfig().getBaseURI(pReq) + "/login-callback with client_id " + tTarget.getClientId());        
 
                 Map<String, String> additionalParams = new HashMap<>();
                 if (tTarget.getAdditionalParams() != null) {

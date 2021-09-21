@@ -21,7 +21,7 @@
                                 <h:link styleClass="nav-link" icon="fas fa-upload" value="Home" outcome="#{path}collections" ></h:link>
                             </li>
                         </c:if>
-                        <c:if test="#{isAdmin}">
+                        <c:if test="#{isAdmin and user.hasPassword()}">
                             <li class="nav-item">
                                 <h:link styleClass="nav-link" icon="fas fa-upload" value="Admin" outcome="/admin/users" ></h:link>
                             </li>

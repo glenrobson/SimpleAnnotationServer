@@ -68,7 +68,7 @@ public class ManifestUpload extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         try {
-            User tUser = new UserService(pReq.getSession()).getUser();
+            User tUser = new UserService(pReq).getUser();
             String tID = "";
             Map<String, Object> tManifestJson = null;
             String tCollectionId = "";
@@ -125,7 +125,7 @@ public class ManifestUpload extends HttpServlet {
             if (tCollection == null) {
                 tCollection = _store.getCollection(StoreConfig.getConfig().getBaseURI(pReq) + "/collection/" + tUser.getShortId() + "/inbox.json");
             }
-            AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+            AuthorisationController tAuth = new AuthorisationController(pReq);
             if (tAuth.allowCollectionEdit(tCollection)) {
                 Manifest tManifest = new Manifest(tManifestJson, null);
                 if (!tCollection.getManifests().contains(tManifest)) {
@@ -176,7 +176,7 @@ public class ManifestUpload extends HttpServlet {
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         String tCollectionId = pReq.getParameter("collection");
         String tManifestId = pReq.getParameter("manifest");
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+        AuthorisationController tAuth = new AuthorisationController(pReq);
 
         if (tManifestId != null) {
             Manifest tManifest = _store.getManifest(tManifestId);

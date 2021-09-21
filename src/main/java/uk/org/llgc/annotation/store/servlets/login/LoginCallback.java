@@ -29,8 +29,8 @@ import java.util.Random;
 import java.util.Map;
 
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
-import uk.org.llgc.annotation.store.data.login.LocalAuth;
 import uk.org.llgc.annotation.store.controllers.UserService;
 import uk.org.llgc.annotation.store.StoreConfig;
 
@@ -61,7 +61,7 @@ public class LoginCallback extends HttpServlet {
             tUser.setToken(accessToken);
             tUser.setAuthenticationMethod(tTarget.getId());
                 
-            UserService tUsers = new UserService(tSession);
+            UserService tUsers = new UserService(pReq);
             tUsers.setUser(tUser);
             if (tSession.getAttribute("oauth_url") != null) {
                 pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
@@ -81,8 +81,32 @@ public class LoginCallback extends HttpServlet {
         final String tEmail = pReq.getParameter("email");
         final String tPassword = pReq.getParameter("password");
         HttpSession tSession = pReq.getSession();
+        UserService tUsers = new UserService(pReq);
 
-        LocalAuth tAuth = StoreConfig.getConfig().getLocalAuth();
+        LocalUser tUser = tUsers.getLocalUser(tEmail);
+        // If user not set by email is registered as a user
+        // then set password
+        if (tUser != null && !tUser.hasPassword()) {
+            tUsers.setUser(tUser);
+            pRes.sendRedirect("/profile.xhtml");
+        } else if (tUser != null && tUser.authenticate(tPassword)) {
+            tUsers.setUser(tUser);
+            if (tSession.getAttribute("oauth_url") != null) {
+                pRes.sendRedirect((String)tSession.getAttribute("oauth_url"));
+            } else {
+                if (tUser.isAdmin()) {
+                    pRes.sendRedirect("/admin/users.xhtml");
+                } else {
+                    pRes.sendRedirect("/collections.xhtml");
+                }
+            }
+
+        } else {
+            //throw 401
+            pRes.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Failed to authenticate " + tEmail);
+        }
+
+        /*LocalAuth tAuth = StoreConfig.getConfig().getLocalAuth();
         if (tAuth.authenticate(tEmail, tPassword)) {
             try {
                 UserService tUsers = new UserService(tSession);
@@ -101,6 +125,6 @@ public class LoginCallback extends HttpServlet {
         } else {
             //throw 401
             pRes.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Failed to authenticate " + tEmail);
-        }
+        }*/
     }
 }

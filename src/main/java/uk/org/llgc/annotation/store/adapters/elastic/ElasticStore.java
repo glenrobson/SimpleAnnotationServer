@@ -20,6 +20,7 @@ import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -224,6 +225,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                             .field("type", "text")
                         .endObject()
                         .startObject("picture")
+                            .field("type", "keyword")
+                        .endObject()
+                        .startObject("password")
                             .field("type", "keyword")
                         .endObject()
                         .startObject("group")
@@ -711,6 +715,10 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
     protected User json2user(final Map<String,Object> tUserJson) throws IOException {
         User tSavedUser = new User();
+        if (tUserJson.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {
+            tSavedUser = new LocalUser();
+            ((LocalUser)tSavedUser).setPassword((String)tUserJson.get("password"));
+        }
         try {
             tSavedUser.setId((String)tUserJson.get("id"));
         } catch (URISyntaxException tExcpt) {
@@ -747,6 +755,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         // Elastic search could handle this but better to be explicit on the format
         tJson.put("created", super.formatDate(pUser.getCreated())); 
         tJson.put("modified", super.formatDate(pUser.getLastModified()));
+        if (pUser instanceof LocalUser) {
+            tJson.put("password", ((LocalUser)pUser).getPassword());
+        }
         if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tJson.put("picture", pUser.getPicture());
         }

@@ -20,7 +20,6 @@ import uk.org.llgc.annotation.store.adapters.elastic.ElasticStore;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
-import uk.org.llgc.annotation.store.data.login.LocalAuth;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -41,10 +40,9 @@ import com.github.jsonldjava.utils.JsonUtils;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name", "admin"};
     protected AnnotationUtils _annotationUtils = null;
     protected List<OAuthTarget> _authTargets = null;
-    protected LocalAuth _localAuth = null;
 
 	public StoreConfig() {
 		_props = null;
@@ -87,6 +85,7 @@ public class StoreConfig extends HttpServlet {
 			tExcpt.printStackTrace();
 			throw new ServletException("Failed to load auth config file due to: " + tExcpt.getMessage());
         }
+        // Create admin user if it doesn't exist
 		initConfig(this);
     }
 
@@ -99,19 +98,11 @@ public class StoreConfig extends HttpServlet {
             if (tObject instanceof Map) {
                 Map<String,Object> tSingleConfig = (Map<String,Object>)tObject;
                 // Don't add local auth to list of OAuth targets
-                if (tSingleConfig.get("type") == null || !tSingleConfig.get("type").equals("local")) { 
-                    _authTargets.add(new OAuthTarget(tSingleConfig));
-                } else {
-                    _localAuth = LocalAuth.createLocal(tSingleConfig);
-                }
+                _authTargets.add(new OAuthTarget(tSingleConfig));
             } else {
                 List<Map<String,Object>> tConfigs = (List<Map<String,Object>>)tObject;
                 for (Map<String,Object> tConfig : tConfigs) {
-                    if (tConfig.get("type") == null || !tConfig.get("type").equals("local")) { 
-                        _authTargets.add(new OAuthTarget(tConfig));
-                    } else {
-                        _localAuth = LocalAuth.createLocal(tConfig);
-                    }
+                    _authTargets.add(new OAuthTarget(tConfig));
                 }
             }
         }
@@ -119,12 +110,9 @@ public class StoreConfig extends HttpServlet {
 
     // Is auth setup?
     public boolean isAuth() {
-        return _authTargets != null || _localAuth != null;
+        return _authTargets != null;
     }
 
-    public LocalAuth getLocalAuth() {
-        return _localAuth;
-    }
 
     public List<OAuthTarget> getAuthTargets() {
         return _authTargets;
@@ -164,6 +152,13 @@ public class StoreConfig extends HttpServlet {
         } else {
             return _props.get("default_collection_name");
         }
+    }
+
+    /** 
+     * Returns null if there is no admin configured
+     */
+    public String getAdminEmail() {
+        return _props.get("admin");
     }
 
     public File getDataDir() {

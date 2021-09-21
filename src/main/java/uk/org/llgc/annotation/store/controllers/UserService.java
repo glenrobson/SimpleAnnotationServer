@@ -7,8 +7,10 @@ import javax.annotation.PostConstruct;
 import javax.faces.context.FacesContext;
 
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -25,13 +27,15 @@ import java.net.URISyntaxException;
 public class UserService {
     protected StoreAdapter _store = null;
     protected HttpSession _session = null;
+    protected HttpServletRequest _request = null;
 
     public UserService() {
         init();
     }
 
-    public UserService(final HttpSession pSession) {
-        _session = pSession;
+    public UserService(final HttpServletRequest pRequest) {
+        _request = pRequest;
+        _session = pRequest.getSession();
         init();
     }
 
@@ -47,6 +51,15 @@ public class UserService {
             return tSession;
         } else {
             return _session;
+        }
+    }
+
+    protected HttpServletRequest getRequest() {
+        if (_request == null) {
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            return (HttpServletRequest)facesContext.getExternalContext().getRequest();
+        } else {
+            return _request;
         }
     }
 
@@ -71,6 +84,24 @@ public class UserService {
         return tUsers;
     }
 
+    public boolean isAdminSetup() {
+        try {
+            // Is there at least one Admin with a password?
+            List<User> tAdminUsers = _store.getUsers("admin");
+
+            for (User tUser : tAdminUsers) {
+                if (tUser instanceof LocalUser && ((LocalUser)tUser).hasPassword()) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (IOException pExcpt) {
+            System.err.println("Failed to get Admin users due to:");
+            pExcpt.printStackTrace();
+            return false;
+        }
+    }
+
     public User getUser(final String pID) {
         User tUser = this.getUser();
         if (tUser.isAdmin()) {
@@ -91,6 +122,10 @@ public class UserService {
         }
     }
 
+    public boolean isLocal(final User pUser) {
+        return pUser instanceof LocalUser;
+    }
+
     public User getUser() {
         HttpSession tSession = this.getSession();
         if (tSession.getAttribute("user") != null) {
@@ -98,6 +133,44 @@ public class UserService {
         } else {
             return null;
         }
+    }
+
+    public LocalUser getLocalUser(final String pEmail) {
+        try {
+            List<User> tUsers = _store.getUsers("admin");
+            for (User tUser : tUsers) {
+                if (tUser instanceof LocalUser) {
+                    LocalUser tAdminUser = (LocalUser)tUser;
+                    if (tAdminUser.getEmail().equals(pEmail)) {
+                        return tAdminUser;
+                    }
+                }
+            }
+            // if there is a admin set but not present in the DB create it.
+            if (StoreConfig.getConfig().getAdminEmail() != null && pEmail.equals(StoreConfig.getConfig().getAdminEmail())) {
+                LocalUser tAdmin = new LocalUser();
+                try {
+
+                    tAdmin.setId(User.createUserFromShortID(StoreConfig.getConfig().getBaseURI(this.getRequest()), "admin").getId());
+                    tAdmin.setShortId("admin");
+                    tAdmin.setEmail(StoreConfig.getConfig().getAdminEmail());
+                    tAdmin.setPassword("", false);
+                    tAdmin.setName("Admin User");
+                    tAdmin.setAdmin(true);
+                    tAdmin.setPicture("/images/AdminIcon.svg");
+
+                    User tSavedUser = _store.saveUser(tAdmin);
+                    return (LocalUser)tSavedUser;
+                } catch (URISyntaxException tExcpt) {
+                    System.err.println("Failed to create admin user due to an issue with the ID");
+                    tExcpt.printStackTrace();
+                }
+            }
+        } catch (IOException pExcpt) {
+            System.err.println("Failed to get local user by email due to:");
+            pExcpt.printStackTrace();
+        }
+        return null;
     }
 
     public String getRelativeId() {

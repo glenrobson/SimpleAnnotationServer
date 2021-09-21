@@ -50,7 +50,7 @@ public class AnnotationListServlet extends HttpServlet {
 
         Canvas tCanvas = _store.resolveCanvas(tFilename.split("\\.")[0]);
 
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+        AuthorisationController tAuth = new AuthorisationController(pReq);
         if (tAuth.allowReadAnnotations(tCanvas, tUser)) {
             AnnotationList tList = new AnnotationList();
             String tAnnoId = StoreConfig.getConfig().getBaseURI(pReq) + "/annotations/" + relativeId;

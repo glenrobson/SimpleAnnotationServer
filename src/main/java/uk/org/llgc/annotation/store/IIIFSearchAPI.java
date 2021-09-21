@@ -98,7 +98,7 @@ public class IIIFSearchAPI extends HttpServlet {
 			return;
         }
 
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+        AuthorisationController tAuth = new AuthorisationController(pReq);
         if (tAuth.allowSearchManifest(tManifest, tUser)) {
             URL tSearchURL = tManifest.getSearchURL(StoreConfig.getConfig().getBaseURI(pReq), tUser);
 

@@ -45,7 +45,7 @@ public class CanvasAnnotations extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        UserService tUserService = new UserService(pReq.getSession());
+        UserService tUserService = new UserService(pReq);
 
 		_logger.debug("Annotations for page: " + pReq.getParameter("uri"));
 		_logger.debug("media " + pReq.getParameter("media"));
@@ -62,7 +62,7 @@ public class CanvasAnnotations extends HttpServlet {
     }
 
 	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        UserService tUserService = new UserService(pReq.getSession());
+        UserService tUserService = new UserService(pReq);
         AuthorisationController tAuth = new AuthorisationController(tUserService);
 
         Canvas tCanvas = new Canvas(pReq.getParameter("canvas"), "");

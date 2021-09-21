@@ -50,6 +50,7 @@ public interface StoreAdapter {
     public User getUser(final User pUser) throws IOException;
     public User saveUser(final User pUser) throws IOException;
     public List<User> getUsers() throws IOException;
+    public List<User> getUsers(final String pGroup) throws IOException;
 
     // CRUD Collections
     public Collection createCollection(final Collection pCollection) throws IOException;

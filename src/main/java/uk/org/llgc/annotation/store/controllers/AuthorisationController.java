@@ -6,7 +6,7 @@ import javax.annotation.PostConstruct;
 
 import javax.faces.context.FacesContext;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
@@ -29,15 +29,14 @@ import java.io.IOException;
 @ManagedBean
 public class AuthorisationController {
     protected UserService _users = null;
-    protected HttpSession _session = null;
 
     public AuthorisationController() {
         _users = new UserService();
         init();
     }
 
-    public AuthorisationController(final HttpSession pSession) {
-        _users = new UserService(pSession);
+    public AuthorisationController(final HttpServletRequest pRequest) {
+        _users = new UserService(pRequest);
         init();
     }
     public AuthorisationController(final UserService pService) {

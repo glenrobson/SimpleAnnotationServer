@@ -39,7 +39,7 @@ public class AdminFilter implements Filter {
         HttpServletRequest pReq = (HttpServletRequest)pRequest; 
         if (StoreConfig.getConfig().isAuth()) {
             HttpSession tSession = pReq.getSession();
-            UserService tUsers = new UserService(tSession);
+            UserService tUsers = new UserService(pReq);
             AuthorisationController tAuth = new AuthorisationController(tUsers);
             if (!tUsers.isAuthenticated() && !tAuth.allowThrough((HttpServletRequest)pRequest)) {
                 String tCallingURL = pReq.getRequestURI();

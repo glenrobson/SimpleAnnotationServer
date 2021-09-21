@@ -102,7 +102,7 @@ public class Populate extends HttpServlet {
 
 		try {
             AnnotationList tList = new AnnotationList(pAnnotationListJSON);
-            tList.setCreator(new UserService(pReq.getSession()).getUser());
+            tList.setCreator(new UserService(pReq).getUser());
 			_store.addAnnotationList(tList);
 
 			pRes.setStatus(HttpServletResponse.SC_CREATED);

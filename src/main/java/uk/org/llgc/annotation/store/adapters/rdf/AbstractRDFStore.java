@@ -27,6 +27,7 @@ import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -36,6 +37,8 @@ import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -63,6 +66,10 @@ import java.net.URISyntaxException;
 
 public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractRDFStore.class.getName());
+    private static final Model m = ModelFactory.createDefaultModel();
+    private static final String NS = "http://com.gdmrdigital.sas/#";
+    private static final Property PASSWORD = m.createProperty(NS+"password");
+
 	protected AnnotationUtils _annoUtils = null;
     public AbstractRDFStore(final AnnotationUtils pUtils) {
         _annoUtils = pUtils;
@@ -518,6 +525,9 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         } else {
             this.begin(ReadWrite.READ);
             User tSavedUser = new User();
+            if (tUserModel.getProperty((Resource)null, FOAF.accountName).getObject().toString().equals(LocalUser.AUTH_METHOD)) {
+                tSavedUser = new LocalUser();
+            }
             tSavedUser.setToken(pUser.getToken());
             StmtIterator tStatements = tUserModel.listStatements();
             while (tStatements.hasNext()) {
@@ -539,6 +549,9 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
                 }
                 if (tStatement.getPredicate().equals(FOAF.mbox)) {
                     tSavedUser.setEmail(tStatement.getObject().toString());
+                }
+                if (tSavedUser instanceof LocalUser && tStatement.getPredicate().equals(PASSWORD)) {
+                    ((LocalUser)tSavedUser).setPassword(tStatement.getObject().toString(), false);
                 }
                 if (tStatement.getPredicate().equals(FOAF.accountName)) {
                     tSavedUser.setAuthenticationMethod(tStatement.getObject().toString());
@@ -605,6 +618,9 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         tModel.add(tModel.createStatement(tPersonURI, DCTerms.modified, formatDate(pUser.getLastModified())));
         if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tModel.add(tModel.createStatement(tPersonURI, FOAF.img, pUser.getPicture()));
+        }
+        if (pUser instanceof LocalUser && ((LocalUser)pUser).hasPassword()) {
+            tModel.add(tModel.createStatement(tPersonURI, PASSWORD, ((LocalUser)pUser).getPassword()));
         }
 
         Resource tAccount = tModel.createResource();

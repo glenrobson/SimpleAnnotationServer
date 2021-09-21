@@ -295,7 +295,7 @@ public class StoreService {
     }
 
     public List<Collection> getCollections(final HttpServletRequest pRequest) throws IOException {
-        UserService tService = new UserService(pRequest.getSession(true));
+        UserService tService = new UserService(pRequest);
         User tUser = tService.getUser();
         List<Collection> tCollections = _store.getCollections(tUser);
         // if empty create the default collection
@@ -351,7 +351,7 @@ public class StoreService {
 
     public Collection getCollection(final String pID, final HttpServletRequest pRequest) throws IOException {
         if (pID == null || pID.length() == 0) {
-            UserService tService = new UserService(pRequest.getSession(true));
+            UserService tService = new UserService(pRequest);
             User tUser = tService.getUser();
             // Get default collection
             Collection tDefaultCollection = new Collection();

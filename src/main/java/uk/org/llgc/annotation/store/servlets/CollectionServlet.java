@@ -45,7 +45,7 @@ public class CollectionServlet extends HttpServlet {
 	}
 
    	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        User tUser = new UserService(pReq.getSession()).getUser();
+        User tUser = new UserService(pReq).getUser();
         if (pReq.getRequestURI().endsWith("collection/all.json")) {
             // get list of Collections
             // TODO get from helper!!!
@@ -97,7 +97,7 @@ public class CollectionServlet extends HttpServlet {
                 tCollection = null;
             }*/
             if (tCollection != null) {
-                AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+                AuthorisationController tAuth = new AuthorisationController(pReq);
                 if (tAuth.allowViewCollection(tCollection)) {
                     pRes.setStatus(HttpServletResponse.SC_OK);
                     pRes.setContentType("application/ld+json; charset=UTF-8");
@@ -119,7 +119,7 @@ public class CollectionServlet extends HttpServlet {
     }
 
     public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        User tUser = new UserService(pReq.getSession()).getUser();
+        User tUser = new UserService(pReq).getUser();
        
         String relativeId = pReq.getRequestURI().substring(pReq.getRequestURI().lastIndexOf("/collection/"));
         if (relativeId.endsWith("inbox.json")) {
@@ -136,7 +136,7 @@ public class CollectionServlet extends HttpServlet {
                 tResponse.put("message", "Collection with URI " + tCollectionId + " not found");
                 this.sendJson(pRes, pRes.SC_NOT_FOUND, tResponse);
             } else {
-                AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+                AuthorisationController tAuth = new AuthorisationController(pReq);
                 if (tAuth.allowDeleteCollection(tExistingCollection)) {
                     _store.deleteCollection(tExistingCollection);
                     pRes.setStatus(HttpServletResponse.SC_OK);
@@ -156,7 +156,7 @@ public class CollectionServlet extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         // create collection usually empty just with id and label
-        User tUser = new UserService(pReq.getSession()).getUser();
+        User tUser = new UserService(pReq).getUser();
 
         Collection tCollection = new Collection();
         tCollection.setUser(tUser);
@@ -171,7 +171,7 @@ public class CollectionServlet extends HttpServlet {
     }
 
 	public void doPut(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
+        AuthorisationController tAuth = new AuthorisationController(pReq);
 
         if (pReq.getParameter("name") != null && pReq.getParameter("rename_id") != null) {
             // This is a rename collection request
@@ -197,7 +197,7 @@ public class CollectionServlet extends HttpServlet {
             Map<String, String> tParams = (Map<String, String>)JsonUtils.fromInputStream(pReq.getInputStream());
             System.out.println("From: '" + tParams.get("from") + "' To: '" + tParams.get("to") + "' Manifest: '" + tParams.get("manifest") + "'");
             // Update collection typically moving manifests
-            User tUser = new UserService(pReq.getSession()).getUser();
+            User tUser = new UserService(pReq).getUser();
             Collection tFrom = _store.getCollection(tParams.get("from"));
             if (tParams.get("to") != null) {
                 // this is a move request

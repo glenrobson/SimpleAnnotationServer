@@ -34,6 +34,7 @@ import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -471,7 +472,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
     public List<User> getUsers() throws IOException {
         SolrQuery tQuery = new SolrQuery();
-		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod", "created", "modified");
+		tQuery.setFields("id", "type", "short_id", "name", "email", "password", "picture", "group", "authenticationMethod", "created", "modified");
 		tQuery.setRows(1000);
 
 		tQuery.set("q", "type:\"User\"");
@@ -493,7 +494,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         User tUser = new User();
 
         SolrQuery tQuery = new SolrQuery();
-		tQuery.setFields("id", "type", "short_id", "name", "email", "picture", "group", "authenticationMethod", "created", "modified");
+		tQuery.setFields("id", "type", "short_id", "name", "email", "password", "picture", "group", "authenticationMethod", "created", "modified");
 		tQuery.setRows(1000);
 
 		tQuery.set("q", "type:\"User\" AND id:\"" + pUser.getId() + "\"");
@@ -530,6 +531,9 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		tDoc.addField("email", pUser.getEmail());
 		tDoc.addField("created", pUser.getCreated());
 		tDoc.addField("modified", pUser.getLastModified());
+        if (pUser instanceof LocalUser) {
+            tDoc.addField("password", ((LocalUser)pUser).getPassword());
+        }
         if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
             tDoc.addField("picture", pUser.getPicture());
         }
@@ -544,6 +548,10 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
     protected User json2user(final SolrDocument pDoc) throws IOException {
         User tUser = new User();
+        if (pDoc.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {
+            tUser = new LocalUser();
+            ((LocalUser)tUser).setPassword((String)pDoc.get("password"),false);
+        }
 
         try {
             tUser.setId((String)pDoc.get("id"));
