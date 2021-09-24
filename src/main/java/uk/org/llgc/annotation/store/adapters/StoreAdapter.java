@@ -14,6 +14,7 @@ import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import java.io.IOException;
 
@@ -63,4 +64,11 @@ public interface StoreAdapter {
 	public AnnotationList getAllAnnotations() throws IOException;
     // Stats
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException; // TODO
+
+    // Pass in null user to get total annotations
+    public int getTotalAnnotations(final User pUser) throws IOException;
+    public int getTotalManifests(final User pUser) throws IOException;
+    public int getTotalAnnoCanvases(final User pUser) throws IOException;
+    public Map<String,Integer> getTotalAuthMethods() throws IOException;
+
 }

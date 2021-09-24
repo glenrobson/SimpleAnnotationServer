@@ -190,6 +190,15 @@ public class UserService {
         return StoreConfig.getConfig().getAuthTargets();
     }
 
+    public String getAuthMethodLogo(final String pMethod) {
+        for (OAuthTarget tTarget : this.getConfig()) {
+            if (tTarget.getId().equals(pMethod)) {
+                return tTarget.getButton().getLogo();
+            }
+        }
+        return "";
+    }
+
     public boolean isAdmin() {
         HttpSession tSession = this.getSession();
         if (tSession.getAttribute("user") == null) {
