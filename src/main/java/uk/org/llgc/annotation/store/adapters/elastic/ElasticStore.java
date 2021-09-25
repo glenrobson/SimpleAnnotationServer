@@ -947,8 +947,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
         List<String> tCanvases = new ArrayList<String>();
         for (SearchHit tHit : searchResponse.getHits().getHits()) {
-            List<String> tTargetCanvas = (List<String>)tHit.getSourceAsMap().get("target");
-            for (String tCanvas : tTargetCanvas) {
+            List<Map<String,Object>> tTargetCanvas = (List<Map<String,Object>>)tHit.getSourceAsMap().get("target");
+            for (Map<String,Object> tCanvasMap : tTargetCanvas) {
+                String tCanvas = (String)tCanvasMap.get("id");
                 if (!tCanvases.contains(tCanvas)) {
                     tCanvases.add(tCanvas);
                 }
