@@ -9,3 +9,5 @@ src/main/webapp/stats/*.json
 .aws-credentials
 auth.json
 *auth.json
+node
+node_modules

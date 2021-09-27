@@ -723,3 +723,9 @@ function copyClipboard(event) {
     document.body.removeChild(data);
     return true;
 }
+
+// Export node module for testing.
+if ( typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
+    
+    module.exports.isObject = isObject;
+}

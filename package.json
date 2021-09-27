@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "test": "jasmine --config=src/test/javascript/jasmine.json"
+  },
+  "devDependencies": {
+    "jasmine": "^3.9.0"
+  }
+}
