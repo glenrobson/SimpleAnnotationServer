@@ -126,4 +126,8 @@ public class AuthorisationController {
         }
         return false;
     }
+
+    public boolean deleteUser(final User pAdmin, final User pTarget) {
+        return pAdmin.isAdmin();
+    }
 }
