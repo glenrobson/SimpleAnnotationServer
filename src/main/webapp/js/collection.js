@@ -592,9 +592,15 @@ function createCollection() {
 
 function renameCollection() {
     setLoading("renameCollectionMessage", "Renaming");
+    let renameId = document.getElementById('rename_id').value;
+    let name = document.getElementById('rename_name').value
     $.ajax({
         url: '/collection/',
-        data: $("#rename_form").serialize(),
+        data: JSON.stringify({
+            "name": name,
+            "rename_id": renameId
+        }),
+        contentType: "application/json",
         type: 'PUT',
         success: function(data) {
             showMessage("renameCollectionMessage", "info", "Renamed collection succesfully.");
@@ -604,7 +610,7 @@ function renameCollection() {
             window.location.href = 'collections.xhtml?collection=' + data['@id'];
         },
         error: function(data) {
-            clearLoading("createCollectionbutton", "Create");
+            clearLoading("renameCollectionbutton", "Rename");
             if (data.responseJSON) {
                 if ("reason" in data.responseJSON) {
                     message = "Failed to add collection due to: " + data.responseJSON.reason;
@@ -618,8 +624,8 @@ function renameCollection() {
             } else {
                 message = "Failed to add collection.";
             }
-            showMessage("createCollectionMessage", "error", message);
-            console.log('Failed to load collection: ' + data);
+            showMessage("renameCollectionMessage", "error", message);
+            console.log('Failed to rename: ' + data);
         }
     });
 }
