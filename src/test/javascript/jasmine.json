@@ -1,0 +1,9 @@
+{
+  "spec_dir": "src/test/javascript",
+
+  "spec_files": [
+    "**/*[sS]pec.js",
+    "!**/*nospec.js"
+  ]
+}
+

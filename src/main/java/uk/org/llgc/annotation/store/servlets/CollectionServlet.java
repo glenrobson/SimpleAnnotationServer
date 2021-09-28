@@ -173,11 +173,14 @@ public class CollectionServlet extends HttpServlet {
 	public void doPut(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         AuthorisationController tAuth = new AuthorisationController(pReq);
 
-        if (pReq.getParameter("name") != null && pReq.getParameter("rename_id") != null) {
+        Map<String, String> tParams = (Map<String, String>)JsonUtils.fromInputStream(pReq.getInputStream());
+        System.out.println("Params " + tParams);
+
+        if (tParams.get("name") != null && tParams.get("rename_id") != null) {
             // This is a rename collection request
-            Collection tCollection = _store.getCollection(pReq.getParameter("rename_id"));
+            Collection tCollection = _store.getCollection(tParams.get("rename_id"));
             if (tAuth.allowCollectionEdit(tCollection)) {
-                tCollection.setLabel(pReq.getParameter("name"));
+                tCollection.setLabel(tParams.get("name"));
 
                 _store.updateCollection(tCollection);
 
@@ -193,8 +196,6 @@ public class CollectionServlet extends HttpServlet {
                 this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
             }
         } else {
-            System.out.println("From: '" + pReq.getParameter("from") + "' To: '" + pReq.getParameter("to") + "' Manifest: '" + pReq.getParameter("manifest") + "'");
-            Map<String, String> tParams = (Map<String, String>)JsonUtils.fromInputStream(pReq.getInputStream());
             System.out.println("From: '" + tParams.get("from") + "' To: '" + tParams.get("to") + "' Manifest: '" + tParams.get("manifest") + "'");
             // Update collection typically moving manifests
             User tUser = new UserService(pReq).getUser();
