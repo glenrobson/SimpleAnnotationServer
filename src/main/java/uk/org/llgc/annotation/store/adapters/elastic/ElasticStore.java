@@ -889,4 +889,73 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         tDelete.setRefreshPolicy(_policy);
         _client.delete(tDelete, RequestOptions.DEFAULT);
     }
+
+    public int getTotalAnnotations(final User pUser) throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        if (pUser == null) {
+            searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));
+        } else {
+            BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+            tBuilder.must(QueryBuilders.termQuery("type", "oa:Annotation"));
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+            searchSourceBuilder.query(tBuilder);
+        }
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+
+        return Math.toIntExact(searchResponse.getHits().getTotalHits().value);
+    }
+
+    public int getTotalManifests(final User pUser) throws IOException {
+        if (pUser == null) {
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.query(QueryBuilders.termQuery("type", "sc:Manifest"));
+            
+            SearchRequest searchRequest = new SearchRequest(_index);
+            searchRequest.source(searchSourceBuilder);
+            SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+
+            return Math.toIntExact(searchResponse.getHits().getTotalHits().value);
+        } else {
+            List<Collection> tCollections = this.getCollections(pUser);
+            List<String> tManifests = new ArrayList<String>();
+            for (Collection tColl : tCollections) {
+                for (Manifest tManifest : tColl.getManifests()) {
+                    if (!tManifests.contains(tManifest)) {
+                        tManifests.add(tManifest.getURI());
+                    }
+                }
+            }
+            return tManifests.size();
+        }
+    }
+
+    public int getTotalAnnoCanvases(final User pUser) throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        if (pUser == null) {
+            searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));
+        } else {
+            BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+            tBuilder.must(QueryBuilders.termQuery("type", "oa:Annotation"));
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+            searchSourceBuilder.query(tBuilder);
+        }
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+
+        List<String> tCanvases = new ArrayList<String>();
+        for (SearchHit tHit : searchResponse.getHits().getHits()) {
+            List<Map<String,Object>> tTargetCanvas = (List<Map<String,Object>>)tHit.getSourceAsMap().get("target");
+            for (Map<String,Object> tCanvasMap : tTargetCanvas) {
+                String tCanvas = (String)tCanvasMap.get("id");
+                if (!tCanvases.contains(tCanvas)) {
+                    tCanvases.add(tCanvas);
+                }
+            }
+        }
+
+        return tCanvases.size();
+    }
 }

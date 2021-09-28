@@ -148,7 +148,7 @@ public class StoreConfig extends HttpServlet {
 
     public String getDefaultCollectionName() {
         if (_props.get("default_collection_name") == null) {
-            return "Inbox";
+            return "Default";
         } else {
             return _props.get("default_collection_name");
         }

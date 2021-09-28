@@ -678,4 +678,79 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 			throw new IOException("Failed to remove collection due to " + tException);
 		}
     }
+
+    public int getTotalAnnotations(final User pUser) throws IOException {
+        SolrQuery tQuery = _utils.getQuery();
+        StringBuffer tQueryStr = new StringBuffer("type:oa\\:Annotation");
+
+        if (pUser != null) {
+            tQueryStr.append(" AND creator:");
+            tQueryStr.append(pUser.getId());
+        }
+		tQuery.set("q", tQueryStr.toString());
+
+        try {
+            QueryResponse tResponse = _solrClient.query(tQuery);
+            return Math.toIntExact(tResponse.getResults().getNumFound());
+        } catch (SolrServerException tExcpt) {
+            tExcpt.printStackTrace();
+            throw new IOException(tExcpt.getMessage());
+        }
+    }
+
+    public int getTotalManifests(final User pUser) throws IOException {
+        SolrQuery tQuery = _utils.getQuery();
+        if (pUser == null) {
+            StringBuffer tQueryStr = new StringBuffer("");
+            tQuery.set("q", "type:sc\\:Manifest");
+
+            try {
+                QueryResponse tResponse = _solrClient.query(tQuery);
+                return Math.toIntExact(tResponse.getResults().getNumFound());
+            } catch (SolrServerException tExcpt) {
+                tExcpt.printStackTrace();
+                throw new IOException(tExcpt.getMessage());
+            }
+        } else {
+            List<Collection> tCollections = this.getCollections(pUser);
+            List<String> tManifests = new ArrayList<String>();
+            for (Collection tColl : tCollections) {
+                for (Manifest tManifest : tColl.getManifests()) {
+                    if (!tManifests.contains(tManifest)) {
+                        tManifests.add(tManifest.getURI());
+                    }
+                }
+            }
+            return tManifests.size();
+        }
+    }
+
+    public int getTotalAnnoCanvases(final User pUser) throws IOException {
+        SolrQuery tQuery = _utils.getQuery();
+        StringBuffer tQueryStr = new StringBuffer("type:oa\\:Annotation");
+
+        if (pUser != null) {
+            tQueryStr.append(" AND creator:");
+            tQueryStr.append(pUser.getId());
+        }
+		tQuery.set("q", tQueryStr.toString());
+
+        List<String> tCanvases = new ArrayList<String>();
+        try {
+            QueryResponse tResponse = _solrClient.query(tQuery);
+            // Now collect unique canvas
+            for (SolrDocument pDoc : tResponse.getResults()) {
+                String tCanvas = (String)pDoc.get("target");
+                if (!tCanvases.contains(tCanvas)) {
+                    tCanvases.add(tCanvas);
+                }
+            }
+
+        } catch (SolrServerException tExcpt) {
+            tExcpt.printStackTrace();
+            throw new IOException(tExcpt.getMessage());
+        }
+
+        return tCanvases.size();
+    }
 }

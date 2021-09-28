@@ -26,9 +26,13 @@ import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.controllers.StatsService;
 
 import com.github.jsonldjava.utils.JsonUtils;
+
+import java.net.URISyntaxException;
 
 import java.util.Map;
 import java.util.List;
@@ -115,5 +119,57 @@ public class TestStats extends TestUtils {
         assertEquals("Mistmatch with canvas label ",  "[Aberystwyth] - page 1", tPage1.getCanvas().getLabel());
         assertEquals("Mistmatch between annotation count and expected manifest", "https://damsssl.llgc.org.uk/iiif/2.0/1132230/manifest.json", tPage1.getManifest().getURI());
         assertEquals("Mistmatch between expected Manifest label", "[Aberystwyth]", tPage1.getManifest().getLabel());
+    }
+
+    @Test
+    public void testTopLevel() throws IOException, IDConflictException, MalformedAnnotation {
+         List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/stats_AL_MultipleCanvas.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+        
+        AnnotationList tList = new AnnotationList(tAnnotationListJSON);
+        _store.addAnnotationList(tList);
+
+        // 5 anno canvas, 8 annotations
+
+		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/stats_manifest.json").getFile())); //annotaiton list
+        String tShortId = _store.indexManifest(new Manifest(tManifest));
+
+        assertEquals("Unexpected number of annos", 8, _store.getTotalAnnotations(null));
+        assertEquals("Unexpected number of canvases", 5, _store.getTotalAnnoCanvases(null));
+        assertEquals("Unexpected number of Manifests", 1, _store.getTotalManifests(null));
+    }
+
+
+    @Test
+    public void testUserStats() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("Glen");
+        tUser1.setEmail("glen@glen.com");
+        tUser1.setAuthenticationMethod("google");
+        _store.saveUser(tUser1);
+
+        User tUser2 = new User();
+        tUser2.setId("http://example.com/user2");
+        tUser2.setShortId("user2");
+        tUser2.setName("Glen");
+        tUser2.setEmail("glen@glen.com");
+        tUser2.setAuthenticationMethod("github");
+        _store.saveUser(tUser2);
+
+        User tUser3 = new User();
+        tUser3.setId("http://example.com/user3");
+        tUser3.setShortId("user3");
+        tUser3.setName("Glen");
+        tUser3.setEmail("glen@glen.com");
+        tUser3.setAuthenticationMethod(LocalUser.AUTH_METHOD);
+        _store.saveUser(tUser3);
+
+
+        Map<String,Integer> tAuthMethods = _store.getTotalAuthMethods();
+
+        assertEquals("Unexpected number of Github users", new Integer(1), tAuthMethods.get("github"));
+        assertEquals("Unexpected number of Google users", new Integer(1), tAuthMethods.get("google"));
+        assertEquals("Unexpected number of Local users", new Integer(1), tAuthMethods.get(LocalUser.AUTH_METHOD));
     }
 }

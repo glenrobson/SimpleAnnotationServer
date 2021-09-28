@@ -17,7 +17,7 @@ COPY docker/sas-solr-cloud/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 
 # Used for testing:
 COPY . /usr/src/sas
-RUN apt-get update && apt-get -y install maven
+RUN apt-get update && apt-get -y install maven npm
 COPY docker/sas-solr-cloud/sas.properties /usr/src/sas/src/test/resources/test.properties
 
 # use default port and entrypoint

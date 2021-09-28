@@ -24,6 +24,7 @@ import java.util.HashMap;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.stats.TopLevel;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
@@ -148,5 +149,27 @@ public class StatsService {
             tExcpt.printStackTrace();
         }
         return model;
+    }
+
+    public TopLevel getTopLevelStats() {
+        TopLevel tStats = new TopLevel();
+        try {
+            tStats.setTotalAnnotations(_store.getTotalAnnotations(null));
+            tStats.setTotalManifests(_store.getTotalManifests(null));
+            tStats.setTotalAnnoCanvases(_store.getTotalAnnoCanvases(null));
+        } catch (IOException tExcpt) {
+            tExcpt.printStackTrace();
+        }
+
+        return tStats;
+    }
+
+    public Map<String, Integer> getAuthMethodStats() {
+        try {
+            return _store.getTotalAuthMethods();
+        } catch (IOException tExcpt) {
+            tExcpt.printStackTrace();
+        }
+        return new HashMap<String,Integer>();
     }
 }

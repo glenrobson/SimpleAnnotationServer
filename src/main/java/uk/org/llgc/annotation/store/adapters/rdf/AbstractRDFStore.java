@@ -924,4 +924,120 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		return tShortId;
 	}
+
+    public int getTotalAnnotations(final User pUser) {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        sparql.append("select (count(distinct ?anno) as ?count) where { \n");
+        sparql.append("\tGRAPH ?graph {\n");
+        sparql.append("\t\t?anno rdf:type <http://www.w3.org/ns/oa#Annotation> .\n"); 
+        if (pUser != null) {
+            sparql.append("\t\t?anno <http://purl.org/dc/terms/creator> <");
+            sparql.append(pUser.getId());
+            sparql.append("> .\n");
+        }
+        sparql.append("\t\tFILTER NOT EXISTS {?canvas rdf:first ?anno}");  
+        sparql.append("\t}");
+        sparql.append("}");
+
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+
+            return soln.getLiteral("count").getInt();
+        }
+        return 0;
+    }
+
+    public int getTotalManifests(final User pUser) {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        if (pUser == null) {
+            sparql.append("select (count(distinct ?manifest) as ?count) where { \n");
+            sparql.append("\tGRAPH ?graph {\n");
+            sparql.append("\t\t?manifest rdf:type <http://iiif.io/api/presentation/2#Manifest> .\n"); 
+            sparql.append("\t}");
+            sparql.append("}");
+        } else {    
+            sparql.append("select (count(distinct ?manifest) as ?count) where {\n");
+            sparql.append("\tGRAPH ?collection {\n");
+            sparql.append("\t\t?coll <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Collection> .\n");
+            sparql.append("\t\t?coll <http://purl.org/dc/terms/creator> <");
+            sparql.append(pUser.getId());
+            sparql.append("> .\n");
+            sparql.append("\t\t?coll <http://iiif.io/api/presentation/2#hasManifests> ?list .\n");
+            sparql.append("\t\t?list rdf:rest*/rdf:first ?manifest \n");
+            sparql.append("\t}");
+            sparql.append("}");
+        }
+
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+
+            return soln.getLiteral("count").getInt();
+        }
+        return 0;
+    }
+
+    public int getTotalAnnoCanvases(final User pUser) {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        sparql.append("select (count(distinct ?source) as ?count) where { \n");
+        sparql.append("\tGRAPH ?graph {\n");
+        sparql.append("\t\t?anno rdf:type <http://www.w3.org/ns/oa#Annotation> .\n"); 
+        if (pUser != null) {
+            sparql.append("\t\t?anno <http://purl.org/dc/terms/creator> <");
+            sparql.append(pUser.getId());
+            sparql.append("> .\n");
+        }
+        sparql.append("\t\t?anno <http://www.w3.org/ns/oa#hasTarget> ?target .\n");  
+        sparql.append("\t\t?target <http://www.w3.org/ns/oa#hasSource> ?source\n");  
+        sparql.append("\t}");
+        sparql.append("}");
+
+        
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+
+            return soln.getLiteral("count").getInt();
+        }
+        return 0;
+
+    }
+    public Map<String,Integer> getTotalAuthMethods() {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        sparql.append("select ?accountType (count(distinct ?accountType) as ?count) where {\n");
+        sparql.append("\tGRAPH ?graph {\n");
+        sparql.append("\t\t?person rdf:type <http://xmlns.com/foaf/0.1/Person> .\n"); 
+        sparql.append("\t\t?person <http://xmlns.com/foaf/0.1/account> ?account .\n");  
+        sparql.append("\t\t?account <http://xmlns.com/foaf/0.1/accountName> ?accountType\n");  
+        sparql.append("\t}");
+        sparql.append("} group by ?accountType");
+
+        
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+
+        Map<String,Integer> tStats = new HashMap<String, Integer>();
+		if (results != null) {
+            while (results.hasNext()) {
+                QuerySolution soln = results.nextSolution() ;
+                String tType = soln.getLiteral("accountType").getString();
+                int tCount = soln.getLiteral("count").getInt();
+
+                tStats.put(tType, tCount);
+            }
+        }
+        return tStats;
+    }
 }

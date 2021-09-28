@@ -13,6 +13,7 @@ import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.stats.TopLevel;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -27,6 +28,7 @@ import org.apache.jena.query.ReadWrite;
 import java.io.IOException;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
@@ -228,6 +230,26 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
     public void updateCollection(final Collection pCollection) throws IOException {
         this.deleteCollection(pCollection);
         this.createCollection(pCollection);
+    }
+
+    public abstract int getTotalAnnotations(final User pUser) throws IOException;
+    public abstract int getTotalManifests(final User pUser) throws IOException;
+    public abstract int getTotalAnnoCanvases(final User pUser) throws IOException;
+
+    public Map<String,Integer> getTotalAuthMethods() throws IOException {
+        Map<String, Integer> tStats = new HashMap<String,Integer>();
+        List<User> tUsers = this.getUsers();
+
+        for (User tUser : tUsers) {
+            if (tStats.get(tUser.getAuthenticationMethod()) == null) {
+                tStats.put(tUser.getAuthenticationMethod(), 1);
+            } else {
+                int tCurrent = tStats.get(tUser.getAuthenticationMethod());
+                tStats.put(tUser.getAuthenticationMethod(), tCurrent + 1);
+            }
+        }
+        
+        return tStats;
     }
 
 	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;
