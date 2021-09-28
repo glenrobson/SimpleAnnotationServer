@@ -47,9 +47,16 @@ public interface StoreAdapter {
 	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException;
 
     // CRUD users
+    /**
+     * This will save the user if it doesnt exist
+     */
     public User retrieveUser(final User pUser) throws IOException;
+    /**
+     * This will get the user using the ID
+     */
     public User getUser(final User pUser) throws IOException;
     public User saveUser(final User pUser) throws IOException;
+    public User deleteUser(final User pUser) throws IOException;
     public List<User> getUsers() throws IOException;
     public List<User> getUsers(final String pGroup) throws IOException;
 

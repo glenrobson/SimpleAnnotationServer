@@ -546,6 +546,19 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         return pUser;
     }
 
+    public User deleteUser(final User pUser) throws IOException {
+        List<String> tOldIds = new ArrayList<String>();
+		tOldIds.add(pUser.getId());
+		try {
+			_solrClient.deleteById(tOldIds);
+			_solrClient.commit();
+		} catch(SolrServerException tException) {
+			tException.printStackTrace();
+			throw new IOException("Failed to remove user due to " + tException);
+		}
+        return pUser;
+    }
+
     protected User json2user(final SolrDocument pDoc) throws IOException {
         User tUser = new User();
         if (pDoc.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {
