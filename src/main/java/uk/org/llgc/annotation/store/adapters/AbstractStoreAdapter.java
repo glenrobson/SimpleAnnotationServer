@@ -25,6 +25,8 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import org.apache.jena.query.ReadWrite;
 
+import java.net.URISyntaxException;
+
 import java.io.IOException;
 
 import java.util.Map;
@@ -206,8 +208,23 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
 
     public User retrieveUser(final User pUser) throws IOException {
         User tSavedUser = this.getUser(pUser);
+        if (tSavedUser == null) {
+            // first try changing from https to http
+            try {
+                pUser.setId(pUser.getId().replaceAll("https://","http://"));
+                tSavedUser = this.getUser(pUser);
+                if (tSavedUser == null) {
+                    return this.saveUser(pUser);
+                } else {
+                    return tSavedUser;
+                }
+            } catch (URISyntaxException tExcpt) {
+                _logger.error("Failed to replace http uri with https for " + pUser.getId());
+                tExcpt.printStackTrace();
+                return this.saveUser(pUser);
+            }
         // overwrite saved user if short ID is out of sync
-        if (tSavedUser == null || !pUser.getShortId().equals(tSavedUser.getShortId())) {
+        } else if (!pUser.getShortId().equals(tSavedUser.getShortId())) {
             return this.saveUser(pUser);
         } else {
             return tSavedUser;
