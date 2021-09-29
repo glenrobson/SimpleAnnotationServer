@@ -370,7 +370,15 @@ function showConfirm(event) {
         id.dataset.collection = dataEl.dataset.collection;
 
         confirmButton.onclick = deleteAnnotation;
+    } else if (mode === 'delete_user') {
+        header.innerHTML = 'Delete User';
+        text.innerHTML = 'Are you sure you want to remove "' + dataEl.dataset.label + '"?';
+        text.innerHTML += '<br/><br/>';
+        text.innerHTML += "<b>Note:</b> this will not delete any of the user's data and the user will be recreated if they login again. This delete will mostly be of use when developing the Annotation server to delete test users.";
 
+        id.value = dataEl.dataset.url;
+
+        confirmButton.onclick = deleteUser;
     }
 
     $('#confirm').modal('toggle');
@@ -384,7 +392,7 @@ function deleteAnnotations() {
         method:'DELETE',
         }).then(res => {
             if (res.ok) {
-                setLoading("confirmButton", "Confirm")
+                clearLoading("confirmButton", "Delete");
                 window.location.href = 'manifest.xhtml?collection=' + canvas_id.dataset.collection + "&iiif-content=" + canvas_id.dataset.manifest
             } else {
                 throw new Error('Failed to delete annotations: ' + res.status + " " + res.statusText);
@@ -400,8 +408,24 @@ function deleteAnnotation() {
         method:'DELETE',
         }).then(res => {
             if (res.ok) {
-                setLoading("confirmButton", "Confirm");
+                clearLoading("confirmButton", "Delete");
                 window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas;
+            } else {
+                throw new Error('Failed to delete annotation: ' + res.status + " " + res.statusText);
+            }
+        });
+}
+
+function deleteUser() {
+    let data = document.getElementById("confirmId");
+    setLoading("confirmButton", "Deleting");
+
+    fetch('/user/delete?uri=' + data.value, {
+        method:'DELETE',
+        }).then(res => {
+            if (res.ok) {
+                clearLoading("confirmButton", "Delete");
+                window.location.href = '/admin/users.xhtml';
             } else {
                 throw new Error('Failed to delete annotation: ' + res.status + " " + res.statusText);
             }

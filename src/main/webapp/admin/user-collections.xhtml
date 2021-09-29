@@ -31,6 +31,8 @@
                         <li><b>Created</b>: <h:outputText value="#{collUser.created}"/></li>
                         <li><b>Modified</b>: <h:outputText value="#{collUser.lastModified}"/></li>
                     </ul>
+
+                    <a href="users.xhtml" class="btn btn-danger mb-2" data-mode="delete_user" data-label="#{collUser.name}" data-url="#{collUser.id}" onclick="showConfirm(event); return false;"><i class="fas secondary"></i> Delete User</a>
                     <hr/>
                     <script src="/js/collection.js"></script>
                     <h2>Collections</h2>
@@ -95,6 +97,8 @@
                         link.href = url + link.href;
                     }
                 </script>
+
+                <ui:include src="/WEB-INF/templates/dialogues/confirm.xhtml"/>
             </main>
         </ui:define>
     </ui:composition>
