@@ -713,6 +713,15 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         return pUser;
     }
 
+    public User deleteUser(final User pUser) throws IOException {
+        DeleteRequest tDelete = new DeleteRequest(_index);
+        tDelete.id(pUser.getId());
+
+        tDelete.setRefreshPolicy(_policy);
+        _client.delete(tDelete, RequestOptions.DEFAULT);
+        return pUser;
+    }
+
     protected User json2user(final Map<String,Object> tUserJson) throws IOException {
         User tSavedUser = new User();
         if (tUserJson.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {

@@ -477,4 +477,70 @@ public class TestUsers extends TestUtils {
         }
         assertTrue("I didn't find all of the expected users in: " + tLocalUsers, tFoundUser1 && tFoundUser2);
     }
+
+    /**
+     * This is useful if you have switch the baseURI from http to https and need 
+     * to retain the users
+     */ 
+    @Test 
+    public void testBaseURISwitch() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        _store.saveUser(tUser1);
+
+        User tHttpsUser = new User();
+        tHttpsUser.setId("https://example.com/user1");
+            
+        User tFoundUser = _store.retrieveUser(tHttpsUser);
+
+        assertNotNull("Couldn't retrieve user using the https url", tFoundUser);
+        assertEquals("Unexpected id, expected to find http id", tUser1.getId(), tFoundUser.getId());
+
+        assertTrue("Expected to find an admin user", tFoundUser.isAdmin());
+    }
+
+    @Test 
+    public void testHttpsURL() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("https://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        User tFoundUser = _store.retrieveUser(tUser1);
+
+        assertEquals("Expected https URL", "https://example.com/user1", tFoundUser.getId());
+    }
+
+
+     @Test 
+    public void testDeleteUser() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        _store.saveUser(tUser1);
+
+        User tSearchUser = new User();
+        tSearchUser.setId(tUser1.getId());
+        User tFoundUser = _store.retrieveUser(tSearchUser);
+
+        assertNotNull("Couldn't retrieve user before deleting it", tFoundUser);
+
+        _store.deleteUser(tSearchUser);
+
+        tFoundUser = _store.getUser(tSearchUser);
+
+        assertNull("Found user but expected it to be deleted.", tFoundUser);
+    }
+
 }

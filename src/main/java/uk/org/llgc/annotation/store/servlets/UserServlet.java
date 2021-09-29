@@ -37,6 +37,29 @@ public class UserServlet extends HttpServlet {
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
     }
 
+	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        AuthorisationController tAuth = new AuthorisationController(pReq);
+        User tLoggedInUser = new UserService(pReq).getUser();
+
+        User tUser = new User();
+        try {
+            tUser.setId(pReq.getParameter("uri"));
+        } catch (URISyntaxException tExcpt) {
+            _logger.debug("failed to delete " + tLoggedInUser + "due to: " + tLoggedInUser);
+        }
+
+        Map<String,Object> tResponse = new HashMap<String,Object>();
+        if (tAuth.deleteUser(tLoggedInUser, tUser)) {
+            _store.deleteUser(tUser);
+            tResponse.put("code", pRes.SC_OK);
+            tResponse.put("message", "User deleted");
+            this.sendJson(pRes, pRes.SC_OK, tResponse);
+        } else {
+            tResponse.put("code", pRes.SC_UNAUTHORIZED);
+            tResponse.put("message", "You can only delete users if you are Admin");
+            this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+        }
+    }
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
         AuthorisationController tAuth = new AuthorisationController(pReq);

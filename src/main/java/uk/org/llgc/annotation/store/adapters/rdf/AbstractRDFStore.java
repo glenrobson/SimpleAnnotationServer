@@ -639,6 +639,11 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         return pUser;
     }
 
+    public User deleteUser(final User pUser) throws IOException {
+        this.deleteAnnotation(pUser.getId());
+        return pUser;
+    }
+
     public Collection createCollection(final Collection pCollection) throws IOException {
         while (true) {
             if (this.getNamedModel(pCollection.getId()) != null){
