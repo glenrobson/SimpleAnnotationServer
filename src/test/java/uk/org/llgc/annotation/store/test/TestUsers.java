@@ -504,6 +504,21 @@ public class TestUsers extends TestUtils {
         assertTrue("Expected to find an admin user", tFoundUser.isAdmin());
     }
 
+    @Test 
+    public void testHttpsURL() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("https://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        User tFoundUser = _store.retrieveUser(tUser1);
+
+        assertEquals("Expected https URL", "https://example.com/user1", tFoundUser.getId());
+    }
+
+
      @Test 
     public void testDeleteUser() throws IOException, URISyntaxException {
         User tUser1 = new User();

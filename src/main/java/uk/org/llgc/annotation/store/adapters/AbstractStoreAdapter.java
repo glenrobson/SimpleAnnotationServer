@@ -211,9 +211,11 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
         if (tSavedUser == null) {
             // first try changing from https to http
             try {
+                String tOriginalId = pUser.getId();
                 pUser.setId(pUser.getId().replaceAll("https://","http://"));
                 tSavedUser = this.getUser(pUser);
                 if (tSavedUser == null) {
+                    pUser.setId(tOriginalId);
                     return this.saveUser(pUser);
                 } else {
                     return tSavedUser;
