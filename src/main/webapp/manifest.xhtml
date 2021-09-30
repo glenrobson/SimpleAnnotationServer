@@ -81,7 +81,7 @@
                                 <div id="actionBar">
                                     <span>
                                         <c:if test="#{not isEmpty}">
-                                            <a class="actionLink" href="annotation/list/#{short_id}.json">Download annotations</a> | 
+                                            <a class="actionLink" href="annotations/#{user.shortId}/#{short_id}.json" download="#{short_id}.json">Download annotations</a> | 
                                             <a class="actionLink" href="#" data-count="#{annoPage.count}" data-canvas-id="#{annoPage.canvas.id}" data-mode="remove_annotations" data-manifest="#{param['iiif-content']}" data-collection="#{param['collection']}" onClick="showConfirm(event); return false;">Remove annotations</a>
                                         </c:if>
                                     </span>    
