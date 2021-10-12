@@ -70,7 +70,8 @@ public interface StoreAdapter {
     // Used in ListAnnotations can we get rid?
 	public AnnotationList getAllAnnotations() throws IOException;
     // Stats
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException; // TODO
+    // If user is null then all user annotations will be returned
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException; // TODO
 
     // Pass in null user to get total annotations
     public int getTotalAnnotations(final User pUser) throws IOException;

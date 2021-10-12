@@ -414,7 +414,12 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 		}
 	}
 
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException {
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException {
+        String tUserQuery = "";
+        if (!pUser.isAdmin()) {
+            tUserQuery = " AND creator:\"" + pUser.getId() + "\"";
+        }
+
         SolrQuery tQuery = new SolrQuery();
         tQuery.setRows(0);
         tQuery.setFacet(true);
@@ -422,7 +427,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
         tQuery.setFacetLimit(-1);
         tQuery.setFacetMinCount(1);
         tQuery.setFacetSort("index");
-        tQuery.set("q", "type:\"oa:Annotation\" AND within:\"" + pManifest.getURI() + "\"");
+        tQuery.set("q", "type:\"oa:Annotation\" AND within:\"" + pManifest.getURI() + "\"" + tUserQuery);
         try {
             QueryResponse tResponse = _solrClient.query(tQuery);
             long tTotalAnnos = tResponse.getResults().getNumFound();

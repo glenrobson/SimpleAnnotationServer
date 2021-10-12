@@ -63,7 +63,8 @@ public class StatsService {
         if (_manifestAnnoCount.containsKey(pManifest.getShortId())) {
             return _manifestAnnoCount.get(pManifest.getShortId());
         } else {
-            List<PageAnnoCount> tPageCounts = _store.listAnnoPages(pManifest);
+            UserService tUserService = new UserService();
+            List<PageAnnoCount> tPageCounts = _store.listAnnoPages(pManifest, tUserService.getUser());
             _manifestAnnoCount.put(pManifest.getShortId(), tPageCounts);
             return tPageCounts;
         }

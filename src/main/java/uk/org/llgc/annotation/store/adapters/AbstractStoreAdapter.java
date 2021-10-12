@@ -226,7 +226,7 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
                 return this.saveUser(pUser);
             }
         // overwrite saved user if short ID is out of sync
-        } else if (!pUser.getShortId().equals(tSavedUser.getShortId())) {
+        } else if (!pUser.getShortId().equals(tSavedUser.getShortId()) || !pUser.getName().equals(tSavedUser.getName())) {
             return this.saveUser(pUser);
         } else {
             return tSavedUser;
