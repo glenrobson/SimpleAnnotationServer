@@ -60,7 +60,8 @@ public class StoreService {
         tManifest.setURI(pURI);
 
         try {
-            return _store.listAnnoPages(tManifest);
+            UserService tService = new UserService();
+            return _store.listAnnoPages(tManifest, tService.getUser());
         } catch (IOException tExcpt) {
             System.err.println("Failed to retrieve stats for " + pURI);
             tExcpt.printStackTrace();
@@ -79,7 +80,8 @@ public class StoreService {
         tStats.put("canvas_count", 0);
         tStats.put("total_annos", 0);
         try {
-            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest);
+            UserService tService = new UserService();
+            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest, tService.getUser());
             tStats.put("canvas_count", tCount.size());
 
             int tTotalAnnos = 0;
@@ -160,7 +162,8 @@ public class StoreService {
         }
         try {
             //new  PageAnnoCount(final Canvas pCanvas, final int pCount, final Manifest pManifest)
-            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest);
+            UserService tService = new UserService();
+            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest, tService.getUser());
             List<PageAnnoCount> tFullCanvasList = new ArrayList<PageAnnoCount>();
             for (Canvas tCanvas : pManifest.getCanvases()) {
                 PageAnnoCount tCanvasCount = new PageAnnoCount(tCanvas, 0, pManifest);

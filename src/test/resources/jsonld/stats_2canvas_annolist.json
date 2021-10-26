@@ -1,0 +1,88 @@
+[
+    {
+        "@id": "http://localhost:8888/annotation/1540081304134",
+        "@type": "oa:Annotation",
+        "dcterms:created": "2018-10-21T01:21:44",
+        "resource": [
+            {
+                "@id": "_:b2",
+                "@type": "dctypes:Text",
+                "http://dev.llgc.org.uk/sas/full_text": "boat1",
+                "format": "text/html",
+                "chars": "<p>boat1</p>"
+            }
+        ],
+        "on": [
+            {
+                "@id": "_:b0",
+                "@type": "oa:SpecificResource",
+                "within": {
+                    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/manifest.json",
+                    "@type": "sc:Manifest"
+                },
+                "selector": {
+                    "@id": "_:b1",
+                    "@type": "oa:Choice",
+                    "default": {
+                        "@id": "_:b3",
+                        "@type": "oa:FragmentSelector",
+                        "value": "xywh=798,1171,226,183"
+                    },
+                    "item": {
+                        "@id": "_:b4",
+                        "@type": "oa:SvgSelector",
+                        "value": "<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M797.88338,1171.36086h112.78929v0h112.78929v91.45546v91.45546h-112.78929h-112.78929v-91.45546z\" data-paper-data=\"{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null,&quot;editable&quot;:true,&quot;annotation&quot;:null}\" id=\"rectangle_e8295432-b443-44cf-9e71-609d0cf2891d\" fill-opacity=\"0\" fill=\"#00bfff\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"1\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"
+                    }
+                },
+                "full": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132232.json"
+            }
+        ],
+        "motivation": [
+            "oa:commenting"
+        ],
+        "@context": "http://iiif.io/api/presentation/2/context.json"
+    },
+    {
+        "@id": "http://localhost:8888/annotation/1540081316028",
+        "@type": "oa:Annotation",
+        "dcterms:created": "2018-10-21T01:21:56",
+        "resource": [
+            {
+                "@id": "_:b2",
+                "@type": "dctypes:Text",
+                "http://dev.llgc.org.uk/sas/full_text": "boat2",
+                "format": "text/html",
+                "chars": "<p>boat2</p>"
+            }
+        ],
+        "on": [
+            {
+                "@id": "_:b0",
+                "@type": "oa:SpecificResource",
+                "within": {
+                    "@id": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/manifest.json",
+                    "@type": "sc:Manifest"
+                },
+                "selector": {
+                    "@id": "_:b1",
+                    "@type": "oa:Choice",
+                    "default": {
+                        "@id": "_:b3",
+                        "@type": "oa:FragmentSelector",
+                        "value": "xywh=1964,828,238,224"
+                    },
+                    "item": {
+                        "@id": "_:b4",
+                        "@type": "oa:SvgSelector",
+                        "value": "<svg xmlns='http://www.w3.org/2000/svg'><path xmlns=\"http://www.w3.org/2000/svg\" d=\"M1963.56406,828.31281h118.76276v0h118.76276v111.93594v111.93594h-118.76276h-118.76276v-111.93594z\" data-paper-data=\"{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null,&quot;editable&quot;:true,&quot;annotation&quot;:null}\" id=\"rectangle_759a1c4e-c56c-4da8-8221-169aa5cbcfa1\" fill-opacity=\"0\" fill=\"#00bfff\" fill-rule=\"nonzero\" stroke=\"#00bfff\" stroke-width=\"1\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\" stroke-miterlimit=\"10\" stroke-dasharray=\"\" stroke-dashoffset=\"0\" font-family=\"none\" font-weight=\"none\" font-size=\"none\" text-anchor=\"none\" style=\"mix-blend-mode: normal\"/></svg>"
+                    }
+                },
+                "full": "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132230.json"
+            }
+        ],
+        "motivation": [
+            "oa:commenting"
+        ],
+        "@context": "http://iiif.io/api/presentation/2/context.json"
+    }
+]

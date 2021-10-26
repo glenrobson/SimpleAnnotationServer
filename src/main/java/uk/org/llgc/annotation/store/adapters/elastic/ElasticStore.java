@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.URISyntaxException;
 import java.net.URI;
+import java.net.SocketTimeoutException;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -135,127 +136,132 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     protected void createIndex() throws IOException {
-        if (!_client.indices().exists(new GetIndexRequest(_index), RequestOptions.DEFAULT)) {
-            // Index doesn't exist so create it with mapping
-            CreateIndexRequest tRequest = new CreateIndexRequest(_index);
+        try {
+            if (!_client.indices().exists(new GetIndexRequest(_index), RequestOptions.DEFAULT)) {
+                // Index doesn't exist so create it with mapping
+                CreateIndexRequest tRequest = new CreateIndexRequest(_index);
 
-            XContentBuilder tMapping = XContentFactory.jsonBuilder()
-                .startObject()
-                    .startObject("properties")
-                        .startObject("id")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("type")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("creator")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("created")
-                            .field("type", "date")
-                        .endObject()
-                        .startObject("modified")
-                            .field("type", "date")
-                        .endObject()
-                        .startObject("motivation")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("body")
-                            .field("type", "text")
-                        .endObject()
-                        .startObject("target")
-                            .startObject("properties")
-                                .startObject("id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("type")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("short_id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("within")
-                                    .startObject("properties")
-                                        .startObject("id")
-                                            .field("type", "keyword")
-                                        .endObject()
-                                        .startObject("type")
-                                            .field("type", "keyword")
-                                        .endObject()
-                                        .startObject("label")
-                                            .field("type", "text")
+                XContentBuilder tMapping = XContentFactory.jsonBuilder()
+                    .startObject()
+                        .startObject("properties")
+                            .startObject("id")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("type")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("creator")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("created")
+                                .field("type", "date")
+                            .endObject()
+                            .startObject("modified")
+                                .field("type", "date")
+                            .endObject()
+                            .startObject("motivation")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("body")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("target")
+                                .startObject("properties")
+                                    .startObject("id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("type")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("short_id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("within")
+                                        .startObject("properties")
+                                            .startObject("id")
+                                                .field("type", "keyword")
+                                            .endObject()
+                                            .startObject("type")
+                                                .field("type", "keyword")
+                                            .endObject()
+                                            .startObject("label")
+                                                .field("type", "text")
+                                            .endObject()
                                         .endObject()
                                     .endObject()
                                 .endObject()
                             .endObject()
-                        .endObject()
-                        // Manifest
-                        .startObject("json")
-                            .field("type", "object")
-                            .field("enabled", "false")
-                        .endObject()
-                        .startObject("short_id")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("label")
-                            .field("type", "text")
-                        .endObject()
-                        .startObject("canvases")
-                            .field("type", "object")
-                            .startObject("properties")
-                                .startObject("id")
-                                    .field("type", "keyword")
+                            // Manifest
+                            .startObject("json")
+                                .field("type", "object")
+                                .field("enabled", "false")
+                            .endObject()
+                            .startObject("short_id")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("label")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("canvases")
+                                .field("type", "object")
+                                .startObject("properties")
+                                    .startObject("id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("type")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("short_id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("label")
+                                        .field("type", "text")
+                                    .endObject()
                                 .endObject()
-                                .startObject("type")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("short_id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("label")
-                                    .field("type", "text")
+                            .endObject()
+                            // User
+                            .startObject("name")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("email")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("picture")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("password")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("group")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("authenticationMethod")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("members")
+                                .field("type", "object")
+                                .startObject("properties")
+                                    .startObject("id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("type")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("label")
+                                        .field("type", "text")
+                                    .endObject()
                                 .endObject()
                             .endObject()
                         .endObject()
-                        // User
-                        .startObject("name")
-                            .field("type", "text")
-                        .endObject()
-                        .startObject("email")
-                            .field("type", "text")
-                        .endObject()
-                        .startObject("picture")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("password")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("group")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("authenticationMethod")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("members")
-                            .field("type", "object")
-                            .startObject("properties")
-                                .startObject("id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("type")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("label")
-                                    .field("type", "text")
-                                .endObject()
-                            .endObject()
-                        .endObject()
-                    .endObject()
-                .endObject();
-            tRequest.mapping(tMapping);
+                    .endObject();
+                tRequest.mapping(tMapping);
 
-            _client.indices().create(tRequest, RequestOptions.DEFAULT);
+                _client.indices().create(tRequest, RequestOptions.DEFAULT);
 
+            }
+        } catch (SocketTimeoutException tExcpt) {
+            _logger.error("Failed to connect to Elastic search instance: " + _index);
+            throw new IOException("Failed to connect to Elastic search instance: " + _index);
         }
     }
 
@@ -642,9 +648,14 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         }
 	}
 
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException {
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException {
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("target.within.id", pManifest.getURI()));
+        if (pUser != null) {
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+        }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.termQuery("target.within.id", pManifest.getURI()));
+        searchSourceBuilder.query(tBuilder);
         searchSourceBuilder.aggregation(AggregationBuilders.terms("pages").field("target.id").size(10000));
         searchSourceBuilder.size(0);
         SearchRequest searchRequest = new SearchRequest(_index);
