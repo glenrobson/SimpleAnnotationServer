@@ -93,12 +93,12 @@ public class TestStats extends TestUtils {
         StatsService tStats = new StatsService();
         tStats.init(_annotationUtils);
 
-        List<PageAnnoCount> tPageCounts = tStats.getAnnoCountData(tManifest);
+        List<PageAnnoCount> tPageCounts = tStats.getAnnoCountData(tManifest, null);
         assertEquals("Expected size of 1.", 1, tPageCounts.size());
         assertEquals("Expected 8 annotations for the first page.", 8, tPageCounts.get(0).getCount());
 
         // Now test how many images are left to do.
-        PieChartModel tModel = tStats.getPercentAnnotated(tManifest.getURI());
+        PieChartModel tModel = tStats.getPercentAnnotated(tManifest, null);
         assertEquals("Expected a pie chart of size 2",tModel.getData().size(), 2);
         Set<String> tKeys = tModel.getData().keySet();
         int tDone = 0;
