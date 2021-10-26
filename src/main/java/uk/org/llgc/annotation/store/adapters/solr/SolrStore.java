@@ -416,7 +416,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException {
         String tUserQuery = "";
-        if (!pUser.isAdmin()) {
+        if (pUser != null && !pUser.isAdmin()) {
             tUserQuery = " AND creator:\"" + pUser.getId() + "\"";
         }
 
