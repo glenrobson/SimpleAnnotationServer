@@ -26,7 +26,7 @@
                     Canvas options:
                     <a href="view.xhtml?collection=#{param['collection']}&amp;manifest=#{manifest.URI}&amp;canvas=#{canvas.id}" title="Open manifest for editing"><i class="far fa-edit"></i> Annotate this page</a> |
                     <a href="link.xhtml?iiif-content=#{param['iiif-content']}"><i class="fas fa-wrench"></i> Link Annotations to Manifest</a> |
-                    <a href="/annotation/list/#{canvas.shortId}.json" download="#{canvas.shortId}.json"><i class="fas fa-wrench"></i> Download Annotations</a>
+                    <a href="/annotations/#{user.shortId}/#{canvas.shortId}.json" download="#{canvas.shortId}.json"><i class="fas fa-wrench"></i> Download Annotations</a>
                 </div>    
             </div>
 
@@ -59,7 +59,7 @@
                                     </c:if>
                                 </c:forEach>
                                 <div id="actionBar">
-                                    <a class="actionLink" href="#" data-manifest="#{param['manifest']}" data-collection="#{param['collection']}" data-canvas="#{canvas.id}" data-fragment="#{anno.targets[0].region}" data-anno="#{anno.id}" data-text="#{text}" data-tags="#{tags}" data-anno-list="/annotation/list/#{canvas.shortId}.json" onClick="showAnno(this)">Edit text</a> | 
+                                    <a class="actionLink" href="#" data-manifest="#{param['manifest']}" data-collection="#{param['collection']}" data-canvas="#{canvas.id}" data-fragment="#{anno.targets[0].region}" data-anno="#{anno.id}" data-text="#{text}" data-tags="#{tags}" data-anno-list="/annotations/#{user.shortId}/#{canvas.shortId}.json" onClick="showAnno(this)">Edit text</a> | 
                                     <a class="actionLink" href="#"  data-canvas-id="#{canvas.id}" data-anno-id="#{anno.id}" data-mode="remove_annotation" data-manifest="#{param['manifest']}" data-collection="#{param['collection']}" data-text="#{anno.bodies[0].chars}" onClick="showConfirm(event); return false;">Remove annotation</a> 
 
                                 </div>
