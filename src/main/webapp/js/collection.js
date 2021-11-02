@@ -213,8 +213,7 @@ function saveAnno() {
                              // annotation updated
                              
                               clearLoading("save_anno", "Save");
-                              window.location.reload();
-                              //window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas;
+                              window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas + "&t=" + new Date().getTime();
                           });
                 }
             });
