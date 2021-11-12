@@ -9,6 +9,8 @@ import java.io.IOException;
 
 import org.apache.jena.rdf.model.Model;
 
+import com.github.jsonldjava.utils.JsonUtils;
+
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.users.User;
 
@@ -104,4 +106,13 @@ public class AnnotationList {
         return tJson;
     }
     
+    public String toString() {
+        try { 
+            Map<String, Object> tJson = this.toJson();
+
+            return JsonUtils.toPrettyString(tJson);
+        } catch (Exception tExcpt) {
+            return "Failed to convert to JSON due to: " + tExcpt;
+        }
+    }
 }

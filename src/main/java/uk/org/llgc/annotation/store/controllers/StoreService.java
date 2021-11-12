@@ -244,6 +244,8 @@ public class StoreService {
         HttpServletRequest tRequest = this.getRequest();
         String tStoreKey = "al_" + pCanvasURI;
         if (tRequest.getAttribute(tStoreKey) != null) {
+            System.out.println("From cache");
+            System.out.println(tRequest.getAttribute(tStoreKey));
             return (AnnotationList)tRequest.getAttribute(tStoreKey);
         }
 
@@ -270,6 +272,9 @@ public class StoreService {
             
             // sort and store in request
             tRequest.setAttribute(tStoreKey, tAnnos);
+
+            System.out.println("From db");
+            System.out.println(tAnnos);
             return tAnnos;
         } catch (IOException tExcpt) {
             return new AnnotationList();
