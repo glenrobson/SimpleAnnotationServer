@@ -357,7 +357,14 @@ public class StoreService {
         if (pID == null || pID.length() == 0) {
             UserService tService = new UserService(pRequest);
             User tUser = tService.getUser();
-            // Get default collection
+
+            List<Collection> tCollections = this.getCollections(pRequest);
+            for (Collection tCollection : tCollections) {
+                if (tCollection.isDefaultCollection()) {
+                    return tCollection;
+                }
+            }
+            // Create default collection
             Collection tDefaultCollection = new Collection();
             tDefaultCollection.setUser(tUser);
             tDefaultCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pRequest));
