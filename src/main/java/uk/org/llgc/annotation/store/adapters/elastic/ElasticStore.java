@@ -94,7 +94,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	protected RestHighLevelClient _client = null;
     protected String _index = "";
-    protected RefreshPolicy _policy = RefreshPolicy.NONE;
+    protected RefreshPolicy _policy = RefreshPolicy.WAIT_UNTIL;
 
     // http://host:port
 	public ElasticStore(final String pConnectionURL) throws URISyntaxException, IOException {
