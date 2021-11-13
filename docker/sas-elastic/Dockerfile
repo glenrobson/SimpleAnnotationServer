@@ -14,6 +14,6 @@ RUN rm -rf /usr/local/tomcat/webapps/* && \
 # copy SAS from build image
 COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/ROOT
 # copy properties
-COPY docker/sas-tomcat/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
+COPY docker/sas-elastic/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 
 # use default port and entrypoint

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-    echo "What backend do you want to use? Jena / Solr / Cloud"
+    echo "What backend do you want to use? Jena / Solr / Cloud / Elastic"
     read backend
 else
     backend="$1"
