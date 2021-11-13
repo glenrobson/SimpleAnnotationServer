@@ -36,9 +36,13 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.FileInputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @ApplicationScoped
 @ManagedBean
 public class StoreService {
+	protected static Logger _logger = LogManager.getLogger(StoreService.class.getName());
     protected StoreAdapter _store = null;
     protected HttpServletRequest _request = null;
 
@@ -244,8 +248,7 @@ public class StoreService {
         HttpServletRequest tRequest = this.getRequest();
         String tStoreKey = "al_" + pCanvasURI;
         if (tRequest.getAttribute(tStoreKey) != null) {
-            System.out.println("From cache");
-            System.out.println(tRequest.getAttribute(tStoreKey));
+            _logger.debug("Getting annotations from cache");
             return (AnnotationList)tRequest.getAttribute(tStoreKey);
         }
 
@@ -273,8 +276,7 @@ public class StoreService {
             // sort and store in request
             tRequest.setAttribute(tStoreKey, tAnnos);
 
-            System.out.println("From db");
-            System.out.println(tAnnos);
+            _logger.debug("Getting annotations from db");
             return tAnnos;
         } catch (IOException tExcpt) {
             return new AnnotationList();
