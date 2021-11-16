@@ -213,7 +213,7 @@ function saveAnno() {
                              // annotation updated
                              
                               clearLoading("save_anno", "Save");
-                              window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas;
+                              window.location.href = 'annotations.xhtml?collection=' + data.dataset.collection + "&manifest=" + data.dataset.manifest + "&iiif-content=" + data.dataset.canvas + "&t=" + new Date().getTime();
                           });
                 }
             });
@@ -714,7 +714,7 @@ function setupContentState(uri, description) {
     a.title = description;
 
     var img = document.createElement("img");
-    img.src = "https://iiif.io/img/logo-iiif-34x30.png";
+    img.src = "/images/logo-iiif-34x30.png";
     img.draggable = true;
     img.ondragstart = drag;
     img.dataset.link = uri;

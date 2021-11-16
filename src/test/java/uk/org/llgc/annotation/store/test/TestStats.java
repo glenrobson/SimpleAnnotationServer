@@ -93,12 +93,12 @@ public class TestStats extends TestUtils {
         StatsService tStats = new StatsService();
         tStats.init(_annotationUtils);
 
-        List<PageAnnoCount> tPageCounts = tStats.getAnnoCountData(tManifest);
+        List<PageAnnoCount> tPageCounts = tStats.getAnnoCountData(tManifest, null);
         assertEquals("Expected size of 1.", 1, tPageCounts.size());
         assertEquals("Expected 8 annotations for the first page.", 8, tPageCounts.get(0).getCount());
 
         // Now test how many images are left to do.
-        PieChartModel tModel = tStats.getPercentAnnotated(tManifest.getURI());
+        PieChartModel tModel = tStats.getPercentAnnotated(tManifest, null);
         assertEquals("Expected a pie chart of size 2",tModel.getData().size(), 2);
         Set<String> tKeys = tModel.getData().keySet();
         int tDone = 0;
@@ -171,5 +171,51 @@ public class TestStats extends TestUtils {
         assertEquals("Unexpected number of Github users", new Integer(1), tAuthMethods.get("github"));
         assertEquals("Unexpected number of Google users", new Integer(1), tAuthMethods.get("google"));
         assertEquals("Unexpected number of Local users", new Integer(1), tAuthMethods.get(LocalUser.AUTH_METHOD));
+    }
+
+    @Test
+    public void testUserListAnnoPages() throws IOException, URISyntaxException, IDConflictException, MalformedAnnotation  {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("Glen");
+        tUser1.setEmail("glen@glen.com");
+        tUser1.setAuthenticationMethod("google");
+        _store.saveUser(tUser1);
+
+        User tUser2 = new User();
+        tUser2.setId("http://example.com/user2");
+        tUser2.setShortId("user2");
+        tUser2.setName("Glen");
+        tUser2.setEmail("glen@glen.com");
+        tUser2.setAuthenticationMethod("github");
+        _store.saveUser(tUser2);
+
+		Map<String, Object> tManifestJson = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/stats_manifest.json").getFile())); //annotaiton list
+        Manifest tManifest = new Manifest(tManifestJson);
+        String tShortId = _store.indexManifest(tManifest);
+
+        List<Map<String, Object>> tAnnotationListJSON = _annotationUtils.readAnnotationList(new FileInputStream(getClass().getResource("/jsonld/stats_2canvas_annolist.json").getFile()), StoreConfig.getConfig().getBaseURI(null)); //annotaiton list
+        // Canvas1: https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132230.json
+        // Canvas2: https://damsssl.llgc.org.uk/iiif/2.0/1132232/canvas/1132232.json
+        Annotation tAnnoUser1 = new Annotation(tAnnotationListJSON.get(0));
+        tAnnoUser1.setCreator(tUser1);
+        _store.addAnnotation(tAnnoUser1);
+
+        Annotation tAnnoUser2 = new Annotation(tAnnotationListJSON.get(1));
+        tAnnoUser2.setCreator(tUser2);
+        _store.addAnnotation(tAnnoUser2);
+
+        List<PageAnnoCount> tPages = _store.listAnnoPages(tManifest, tUser1); // TODO need to pass user1 here
+
+        assertEquals("For user1 there should only be 1 page annotated.", 1, tPages.size());
+        assertEquals("For user1 annotation pointing to the wrong page", "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132232.json", tPages.get(0).getCanvas().getId());
+        assertEquals("There should only be 1 annotation For user1", 1, tPages.get(0).getCount());
+
+        tPages = _store.listAnnoPages(tManifest, tUser2); // TODO need to pass user2 here
+
+        assertEquals("For user2 there should only be 1 page annotated.", 1, tPages.size());
+        assertEquals("For user2 annotation pointing to the wrong page", "https://damsssl.llgc.org.uk/iiif/2.0/1132230/canvas/1132230.json", tPages.get(0).getCanvas().getId());
+        assertEquals("There should only be 1 annotation For user2", 1, tPages.get(0).getCount());
     }
 }

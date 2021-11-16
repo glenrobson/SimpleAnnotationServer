@@ -433,6 +433,18 @@ ul.nav a.vote {
     color:black;
 }
 
+.option_links #contentStateFull div {
+    line-height: unset;
+}
+
+.option_links .contentStateLogo {
+    margin: 0px;
+}
+
+.option_links #iiifURL {
+    margin-left: 15px;
+}
+
 .content_state {
     display: inline-block;
     vertical-align: middle;

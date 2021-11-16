@@ -30,7 +30,13 @@
                     Manifest options:
                     <a href="search.xhtml?iiif-content=#{manifest.URI}"><i class="fas fa-wrench"></i> Configure IIIF Search</a> |
                     <a href="#" data-toggle="modal" data-target="#importAnnotations" onclick="hideMessage('importAnnoMessage');"><i class="fas fa-wrench"></i> Import Annotations</a> |
-                    <a href="#{manifest.URI}" target="_blank">Manifest Link</a>
+<!--                    <a href="#{manifest.URI}" target="_blank">Manifest Link</a>-->
+
+                    <ui:include src="WEB-INF/templates/content-state.xhtml">
+                        <ui:param name="url" value="#{manifest.URI}" />
+                        <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
+                        <ui:param name="mode" value="full" />
+                    </ui:include>
                 </div>    
                 <div class="right_options">
                     List: <a href="#" id="all" onClick="toggleAnnotated(this)">all</a> | <a id="annotated" class="selected" href="#" onClick="toggleAnnotated(this)">annotated</a>
@@ -81,7 +87,7 @@
                                 <div id="actionBar">
                                     <span>
                                         <c:if test="#{not isEmpty}">
-                                            <a class="actionLink" href="annotation/list/#{short_id}.json">Download annotations</a> | 
+                                            <a class="actionLink" href="annotations/#{user.shortId}/#{short_id}.json" download="#{short_id}.json">Download annotations</a> | 
                                             <a class="actionLink" href="#" data-count="#{annoPage.count}" data-canvas-id="#{annoPage.canvas.id}" data-mode="remove_annotations" data-manifest="#{param['iiif-content']}" data-collection="#{param['collection']}" onClick="showConfirm(event); return false;">Remove annotations</a>
                                         </c:if>
                                     </span>    

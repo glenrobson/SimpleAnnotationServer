@@ -754,10 +754,16 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         this.deleteAnnotation(pCollection.getId());
     }
 
-    public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
+    public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) {
+        String tUserTest = "";
+        if (pUser != null) {
+            tUserTest = " ?annoId <http://purl.org/dc/terms/creator> <" + pUser.getId() + "> .";
+        }
+
         String tQueryString = "select ?pageId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
                                   "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
+                                  tUserTest + 
                                   "  ?target <http://purl.org/dc/terms/isPartOf> <" + pManifest.getURI() + "> " +
                                   "}" +
                                   "OPTIONAL {GRAPH <" + pManifest.getURI() + "> {" +

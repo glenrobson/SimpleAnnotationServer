@@ -18,7 +18,12 @@
                     <ul class="navbar-nav mr-auto">
                         <c:if test="#{isAuth and not isAdmin}">
                             <li class="nav-item">
-                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Home" outcome="#{path}collections" ></h:link>
+                                <c:if test="#{ param['collection'] == null}">
+                                    <h:link styleClass="nav-link" icon="fas fa-upload" value="Home" outcome="#{path}collections" ></h:link>
+                                </c:if>    
+                                <c:if test="#{param['collection'] != null}">
+                                    <a href="#{path}collections.xhtml?collection=#{param['collection']}" class="nav-link" icon="fas fa-upload">Home</a>
+                                </c:if>    
                             </li>
                         </c:if>
                         <c:if test="#{isAdmin and user.hasPassword()}">

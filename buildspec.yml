@@ -16,13 +16,13 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - echo Image_tag $IMAGE_TAG
-      - docker build --build-arg AUTH_JSON_LOCATION=$AUTH_JSON_LOCATION --build-arg AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --build-arg AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI -t $REPOSITORY_URI:$IMAGE_TAG -f docker/sas-auth/Dockerfile .
-      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest 
+      - docker build --build-arg AUTH_JSON_LOCATION=$AUTH_JSON_LOCATION --build-arg AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --build-arg AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest -f docker/sas-auth/Dockerfile .
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI
+      - docker push $REPOSITORY_URI:latest 
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
       - printf '[{"name":"SAS-container-8080","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 artifacts:

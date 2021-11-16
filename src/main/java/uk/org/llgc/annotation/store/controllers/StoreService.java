@@ -36,9 +36,13 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.FileInputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @ApplicationScoped
 @ManagedBean
 public class StoreService {
+	protected static Logger _logger = LogManager.getLogger(StoreService.class.getName());
     protected StoreAdapter _store = null;
     protected HttpServletRequest _request = null;
 
@@ -60,7 +64,8 @@ public class StoreService {
         tManifest.setURI(pURI);
 
         try {
-            return _store.listAnnoPages(tManifest);
+            UserService tService = new UserService();
+            return _store.listAnnoPages(tManifest, tService.getUser());
         } catch (IOException tExcpt) {
             System.err.println("Failed to retrieve stats for " + pURI);
             tExcpt.printStackTrace();
@@ -79,7 +84,8 @@ public class StoreService {
         tStats.put("canvas_count", 0);
         tStats.put("total_annos", 0);
         try {
-            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest);
+            UserService tService = new UserService();
+            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest, tService.getUser());
             tStats.put("canvas_count", tCount.size());
 
             int tTotalAnnos = 0;
@@ -160,7 +166,8 @@ public class StoreService {
         }
         try {
             //new  PageAnnoCount(final Canvas pCanvas, final int pCount, final Manifest pManifest)
-            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest);
+            UserService tService = new UserService();
+            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest, tService.getUser());
             List<PageAnnoCount> tFullCanvasList = new ArrayList<PageAnnoCount>();
             for (Canvas tCanvas : pManifest.getCanvases()) {
                 PageAnnoCount tCanvasCount = new PageAnnoCount(tCanvas, 0, pManifest);
@@ -241,6 +248,7 @@ public class StoreService {
         HttpServletRequest tRequest = this.getRequest();
         String tStoreKey = "al_" + pCanvasURI;
         if (tRequest.getAttribute(tStoreKey) != null) {
+            _logger.debug("Getting annotations from cache");
             return (AnnotationList)tRequest.getAttribute(tStoreKey);
         }
 
@@ -267,6 +275,8 @@ public class StoreService {
             
             // sort and store in request
             tRequest.setAttribute(tStoreKey, tAnnos);
+
+            _logger.debug("Getting annotations from db");
             return tAnnos;
         } catch (IOException tExcpt) {
             return new AnnotationList();
@@ -347,7 +357,14 @@ public class StoreService {
         if (pID == null || pID.length() == 0) {
             UserService tService = new UserService(pRequest);
             User tUser = tService.getUser();
-            // Get default collection
+
+            List<Collection> tCollections = this.getCollections(pRequest);
+            for (Collection tCollection : tCollections) {
+                if (tCollection.isDefaultCollection()) {
+                    return tCollection;
+                }
+            }
+            // Create default collection
             Collection tDefaultCollection = new Collection();
             tDefaultCollection.setUser(tUser);
             tDefaultCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pRequest));

@@ -7,12 +7,12 @@
     <ui:composition>
         <c:if test="#{mode eq 'logo'}">
             <a href="#{url}" title="#{description}" target="_blank">
-                <img src="https://iiif.io/img/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/>
+                <img src="/images/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/>
             </a>
         </c:if>
         <c:if test="#{mode eq 'open'}">
             <a href="#{url}" title="#{description}" target="_blank">
-                <img src="https://iiif.io/img/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}"/>
+                <img src="/images/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}"/>
             </a>
             <span class="cs_text_wrapper">
                 <a href="#{url}" target="_blank"><h:outputText value="#{text}" /></a>
@@ -36,7 +36,7 @@
                             <c:set var="textValue" value="#{text}" />
                         </c:if>
                         
-                        <img class="iiif_logo" src="https://iiif.io/img/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/><span class="content-state-text"><h:outputText value="#{textValue}" /></span>
+                        <img class="iiif_logo" src="/images/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/><span class="content-state-text"><h:outputText value="#{textValue}" /></span>
                     </a>
                 </div>        
             </span>
