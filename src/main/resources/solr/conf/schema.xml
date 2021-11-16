@@ -144,7 +144,6 @@
     <field name="body" type="text_general" multiValued="true" indexed="true" stored="true"/>
     <field name="canvas" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="created" type="date" multiValued="false" indexed="true" stored="true"/>
-    <field name="creator" type="date" multiValued="false" indexed="true" stored="true"/>
     <field name="data" type="string" multiValued="false" indexed="false" stored="true"/>
     <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
     <field name="label" type="string" multiValued="true" indexed="true" stored="true"/>
@@ -156,6 +155,14 @@
     <field name="text" type="stripHTML_en" multiValued="true" indexed="true" stored="true"/>
     <field name="type" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="within" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="name" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="email" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="picture" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="group" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="password" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="authenticationMethod" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="creator" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="members" type="string" multiValued="true" indexed="true" stored="true"/>
     <dynamicField name="*_coordinate" type="tdouble" indexed="true" stored="false" useDocValuesAsStored="false"/>
     <dynamicField name="ignored_*" type="ignored" multiValued="true"/>
     <dynamicField name="random_*" type="random"/>

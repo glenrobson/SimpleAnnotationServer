@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.data.AnnotationList;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 public class ListAnnotations extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(ListAnnotations.class.getName()); 
@@ -37,14 +38,17 @@ public class ListAnnotations extends HttpServlet {
 	}
 
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-		AnnotationList tAnnotations = _store.getAllAnnotations();
+        AuthorisationController tAuth = new AuthorisationController(pReq);
+        if (tAuth.allowExportAllAnnotations()) {
+            AnnotationList tAnnotations = _store.getAllAnnotations();
 
-		StringBuffer tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
-		tURI.append("/annotation/");
-		tAnnotations.setId(tURI.toString());
+            StringBuffer tURI = new StringBuffer(StoreConfig.getConfig().getBaseURI(pReq));
+            tURI.append("/annotation/");
+            tAnnotations.setId(tURI.toString());
 
-		pRes.setContentType("application/ld+json; charset=UTF-8");
-		pRes.setCharacterEncoding("UTF-8");
-		pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotations.toJson()));
+            pRes.setContentType("application/ld+json; charset=UTF-8");
+            pRes.setCharacterEncoding("UTF-8");
+            pRes.getWriter().println(JsonUtils.toPrettyString(tAnnotations.toJson()));
+        }
 	}
 }

@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import java.io.IOException;
 
@@ -19,9 +22,12 @@ import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
+import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.data.rdf.RDFManifest;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
@@ -31,12 +37,16 @@ import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
 
@@ -52,16 +62,44 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 
+import java.net.URISyntaxException;
+
 public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 	protected static Logger _logger = LogManager.getLogger(AbstractRDFStore.class.getName());
+    private static final Model m = ModelFactory.createDefaultModel();
+    private static final String NS = "http://com.gdmrdigital.sas/#";
+    private static final Property PASSWORD = m.createProperty(NS+"password");
+
 	protected AnnotationUtils _annoUtils = null;
     public AbstractRDFStore(final AnnotationUtils pUtils) {
         _annoUtils = pUtils;
     }
 
 	public Annotation addAnnotationSafe(final Annotation pAnno) throws IOException {
-        Model tAnno = addAnnotationSafe(pAnno.toJson());
+        // As creator isn't in OA add something to the context to handle it correctly.
+        Map<String, Object> tCreatorContext = new HashMap<String,Object>();
+        Map<String, Object> tCreatorType = new HashMap<String,Object>();
+        tCreatorType.put("@type", "@id");
+        tCreatorContext.put("dcterms", "http://purl.org/dc/terms/");
+        tCreatorContext.put("dcterms:creator", tCreatorType);
+
+        Map<String, Object> tAnnoJson = pAnno.toJson();
+        if (tAnnoJson.get("@context") instanceof List) {
+            List tContext = (List)tAnnoJson.get("@context");
+            tContext.add(tCreatorContext);
+        } else {
+            Object tOrigContext = tAnnoJson.get("@context");
+            List tContext = new ArrayList();
+            tContext.add(tCreatorContext);
+            tContext.add(tOrigContext);
+
+            tAnnoJson.put("@context", tContext);
+        }
+
+        Model tAnno = addAnnotationSafe(tAnnoJson);
+        //RDFDataMgr.write(System.out, tAnno, Lang.TURTLE);
         Annotation tAfter = this.convertModel(tAnno);
+        //System.out.println("Anno after read back " + JsonUtils.toPrettyString(tAfter.toJson()));
         return tAfter;
     }
 
@@ -75,19 +113,33 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
     protected Annotation convertModel(final Model pModel) throws IOException {
         Map<String,Object> tJson = _annoUtils.frameAnnotation(pModel, false);
+        if (tJson.get("http://purl.org/dc/terms/creator") != null) {
+            tJson.put("dcterms:creator", tJson.get("http://purl.org/dc/terms/creator"));
+            tJson.remove("http://purl.org/dc/terms/creator");
+        }
+        if (tJson.get("dcterms:creator") instanceof Map) {
+            Map<String, Object> tCreator = (Map<String,Object>)tJson.get("dcterms:creator");
+            tJson.put("dcterms:creator", tCreator.get("@id"));
+        }
+        
         return new Annotation(tJson);
     }
 
 	protected abstract Model getNamedModel(final String pContext) throws IOException;
 	protected abstract Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException;
 
-	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException {
+	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException {
+        String tUserTest = "";
+        if (!pUser.isAdmin()) {
+            tUserTest = " ?annoId <http://purl.org/dc/terms/creator> <" + pUser.getId() + "> .";
+        }
 		String tQueryString = "select ?annoId ?graph where {"
 										+ " GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> <" + pPage.getId() + "> ."
+                                        + tUserTest
 										+ " ?annoId <http://www.w3.org/ns/oa#hasTarget> ?on } "
 									+ "}";
 
-	//	_logger.debug("Query " + tQueryString);
+		_logger.debug("Query " + tQueryString);
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
 		this.begin(ReadWrite.READ);
@@ -145,10 +197,16 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 		return tManifests;
 	}
 
-	public List<Manifest> getSkeletonManifests() throws IOException {
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
+        String tUserTest = "";
+        if (!pUser.isAdmin()) {
+            tUserTest = " ?annoId <http://purl.org/dc/terms/creator> <" + pUser.getId() + "> . ";
+        }
+
         String tQueryString = "select ?manifestId ?manifestLabel  where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
                                   "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
+                                  tUserTest + 
                                   "  OPTIONAL { ?target <http://purl.org/dc/terms/isPartOf> ?manifestId } ." +
                                   "  OPTIONAL { ?manifestId <http://www.w3.org/2000/01/rdf-schema#label> ?manifestLabel }" +
                                   "}" +
@@ -218,27 +276,33 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 	}
 
-	public Manifest getManifest(final String pShortId) throws IOException {
-		String tManifestURI = this.getManifestId(pShortId);
-		if (tManifestURI == null || tManifestURI.trim().length() == 0) {
-			_logger.debug("Manifest URI not found for short id " + pShortId);
-			return null;
-		}
-		Model tModel = this.getNamedModel(tManifestURI);
-        Manifest tManifest = new RDFManifest(tModel);
-        tManifest.setURI(tManifestURI);
-        tManifest.setShortId(pShortId);
+	public Manifest getManifest(final String pId) throws IOException {
+		Model tModel = this.getNamedModel(pId);
+        if (tModel == null) {
+            return null;
+        } else {    
+            Manifest tManifest = new RDFManifest(tModel);
+            tManifest.setURI(pId);
 
-		return tManifest;
+            return tManifest;
+        }
 	}
 
 	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException {
+        String tUserTest = "";
+        if (pQuery.getUsers() != null) {
+            User tUser = pQuery.getUsers().get(0);
+            if (!tUser.isAdmin()) {
+                tUserTest = " ?annoId <http://purl.org/dc/terms/creator> <" + tUser.getId() + "> .";
+            }
+        }    
 		String tQueryString = "PREFIX oa: <http://www.w3.org/ns/oa#> "
 									 + "PREFIX cnt: <http://www.w3.org/2011/content#> "
                                      + "PREFIX dcterms: <http://purl.org/dc/terms/> "
 									 + "select ?anno ?content ?graph where { "
 									 + "  GRAPH ?graph { ?anno oa:hasTarget ?target . "
 									 + "  ?anno oa:hasBody ?body . "
+                                     + tUserTest
                                      + "  ?target dcterms:isPartOf <" + pQuery.getScope() + "> ."
 									 + "  ?body <" + Annotation.FULL_TEXT_PROPERTY + "> ?content ."
 									 + "  FILTER regex(str(?content), \".*" + pQuery.getQuery() + ".*\")"
@@ -247,12 +311,14 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		QueryExecution tExec = this.getQueryExe(tQueryString);
 
-		IIIFSearchResults tAnnotationList = new IIIFSearchResults();
 
 		this.begin(ReadWrite.READ);
 		List<QuerySolution> tResults = ResultSetFormatter.toList(tExec.execSelect());
 		this.end();
+        IIIFSearchResults tAnnotationList = null;
 		try {
+            tAnnotationList = new IIIFSearchResults(pQuery.toURI());
+
 			if (tResults != null) {
 				int tStart = pQuery.getIndex();
 				int tEnd = tStart + pQuery.getResultsPerPage();
@@ -407,7 +473,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         return tCanvas;
     }
 
-    protected abstract void storeCanvas(final String pGraphName, final Model pModel) throws IOException;
+    protected abstract void storeModel(final String pGraphName, final Model pModel) throws IOException;
 
     public void storeCanvas(final Canvas pCanvas) throws IOException {
 		Model tModel = ModelFactory.createDefaultModel();
@@ -418,33 +484,286 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
             tModel.add(tModel.createStatement(tCanvasURI, RDFS.label, pCanvas.getLabel()));
         }
 
-        storeCanvas(pCanvas.getId(), tModel);
+        storeModel(pCanvas.getId(), tModel);
     }
 
-	public List<PageAnnoCount> listAnnoPages() {
-        String tQueryString = "select ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
-                                  "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
-                                  "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
-                                  "  OPTIONAL { ?target <http://purl.org/dc/terms/isPartOf> ?manifestId }" +
-                                  "}" +
-                                  "OPTIONAL {GRAPH ?manifestId {" +
-                                  "  ?manifestId <http://www.w3.org/2000/01/rdf-schema#label> ?manifestLabel ." +
-                                  "  ?manifestId <http://purl.org/dc/elements/1.1/identifier> ?shortId ." +
-                                  "  ?pageId <http://www.w3.org/2000/01/rdf-schema#label> ?canvasLabel " +
-                                  "  }}" +
-                                  "OPTIONAL { GRAPH ?{ " +
-                                  "	 ?canvas <http://purl.org/dc/elements/1.1/identifier> ?canvasShortId ." +
-                                  "	 ?canvas <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Canvas> " +
-                                  "  }}" +
-                                "}group by ?pageId ?manifestId ?manifestLabel ?shortId ?canvasLabel ?canvasShortId order by ?pageId"; 
+    public List<User> getUsers() throws IOException {
+        // Could optimise this to get all users and their details instead of calling getUser
+        String tQueryString =   "select ?user where {" +
+										"   GRAPH ?user { " +
+										"	 ?user_id <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + FOAF.Person + ">" + 
+										"   } " +
+										"}";
 		QueryExecution tExec = this.getQueryExe(tQueryString);
-        return listAnnoPagesQuery(tExec, null);
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+        List<User> tUsers = new ArrayList<User>();
+		if (results != null && results.hasNext()) {
+			while (results.hasNext()) {
+				QuerySolution soln = results.nextSolution() ;
+                Resource tUserResource = soln.getResource("user");
+
+                // Now get full details of user:
+                User tUser = new User();
+                try {
+                    tUser.setId(tUserResource.getURI());
+                } catch (URISyntaxException tExcpt) {
+                    // This shouldn't happen in here
+                    System.err.println("Failed to get user ID: " + tUserResource.getURI() + " as a URI");
+                }
+                tUsers.add(this.getUser(tUser));
+            }
+		}
+        return tUsers;
     }
 
-    public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) {
+    public User getUser(final User pUser) throws IOException {
+        Model tUserModel = getNamedModel(pUser.getId());
+        if (tUserModel == null) {
+            return null;
+        } else {
+            this.begin(ReadWrite.READ);
+            User tSavedUser = new User();
+            if (tUserModel.getProperty((Resource)null, FOAF.accountName).getObject().toString().equals(LocalUser.AUTH_METHOD)) {
+                tSavedUser = new LocalUser();
+            }
+            tSavedUser.setToken(pUser.getToken());
+            StmtIterator tStatements = tUserModel.listStatements();
+            while (tStatements.hasNext()) {
+                Statement tStatement = tStatements.nextStatement();
+                //System.out.println("User statement " + tStatement.toString());
+                if (tStatement.getPredicate().equals(RDF.type) && tStatement.getObject().equals(FOAF.Person)) {
+                    try {
+                        tSavedUser.setId(tStatement.getSubject().getURI());
+                    } catch (URISyntaxException tExcpt) {
+                        // This shouldn't happen in here
+                        System.err.println("Failed to get user ID as a URI");
+                    }
+                }
+                if (tStatement.getPredicate().equals(DC.identifier)) {
+                    tSavedUser.setShortId(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.name)) {
+                    tSavedUser.setName(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.mbox)) {
+                    tSavedUser.setEmail(tStatement.getObject().toString());
+                }
+                if (tSavedUser instanceof LocalUser && tStatement.getPredicate().equals(PASSWORD)) {
+                    ((LocalUser)tSavedUser).setPassword(tStatement.getObject().toString(), false);
+                }
+                if (tStatement.getPredicate().equals(FOAF.accountName)) {
+                    tSavedUser.setAuthenticationMethod(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.img)) {
+                    tSavedUser.setPicture(tStatement.getObject().toString());
+                }
+                if (tStatement.getPredicate().equals(FOAF.member) && tStatement.getSubject().getURI().equals("sas.permissions.admin")) {
+                    tSavedUser.setAdmin(true);
+                }
+                if (tStatement.getPredicate().equals(DCTerms.created)) {
+                    tSavedUser.setCreated(parseDate(tStatement.getObject().toString()));
+                }
+                if (tStatement.getPredicate().equals(DCTerms.modified)) {
+                    tSavedUser.setLastModified(parseDate(tStatement.getObject().toString()));
+                }
+            }
+            this.end();
+            return tSavedUser;
+        }
+    }
+
+    protected String formatDate(final Date pDate) {
+        SimpleDateFormat tDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        return tDateFormatter.format(pDate);
+    }
+
+    protected Date parseDate(final String pDate) {
+        try {
+            SimpleDateFormat tDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            return tDateFormatter.parse(pDate);
+        } catch (ParseException tExcpt) {
+            tExcpt.printStackTrace();
+            System.err.println("Failed to parse date " + pDate);
+            return null;
+        }
+    }
+
+    public User saveUser(final User pUser) throws IOException {
+        Model tSavedUser = getNamedModel(pUser.getId());
+        this.begin(ReadWrite.READ);
+        if (tSavedUser != null) {
+            // This is an update
+            pUser.updateLastModified();
+            /*System.out.println("**** Updateding created ******");
+            RDFDataMgr.write(System.out, tSavedUser, Lang.TRIG) ;
+            System.out.println("**** Saved user ******" + tSavedUser.listStatements().toList());*/
+            Statement tDateStatement = tSavedUser.getProperty(tSavedUser.createResource(pUser.getId()), DCTerms.created);
+            if (tDateStatement != null && tDateStatement.getObject() != null) {
+                pUser.setCreated(parseDate(tDateStatement.getObject().toString()));
+            }
+            this.end();
+            this.deleteAnnotation(pUser.getId());
+            this.begin(ReadWrite.READ);
+        }
+        this.end();
+        Model tModel = ModelFactory.createDefaultModel();
+        Resource tPersonURI = tModel.createResource(pUser.getId());
+        tModel.add(tModel.createStatement(tPersonURI, RDF.type, FOAF.Person));
+        tModel.add(tModel.createStatement(tPersonURI, DC.identifier, pUser.getShortId()));
+        tModel.add(tModel.createStatement(tPersonURI, FOAF.name, pUser.getName()));
+        tModel.add(tModel.createStatement(tPersonURI, FOAF.mbox, pUser.getEmail()));
+        tModel.add(tModel.createStatement(tPersonURI, DCTerms.created, formatDate(pUser.getCreated())));
+        tModel.add(tModel.createStatement(tPersonURI, DCTerms.modified, formatDate(pUser.getLastModified())));
+        if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
+            tModel.add(tModel.createStatement(tPersonURI, FOAF.img, pUser.getPicture()));
+        }
+        if (pUser instanceof LocalUser && ((LocalUser)pUser).hasPassword()) {
+            tModel.add(tModel.createStatement(tPersonURI, PASSWORD, ((LocalUser)pUser).getPassword()));
+        }
+
+        Resource tAccount = tModel.createResource();
+        tModel.add(tModel.createStatement(tPersonURI, FOAF.account, tAccount));
+        tModel.add(tModel.createStatement(tAccount, RDF.type, FOAF.OnlineAccount));
+        tModel.add(tModel.createStatement(tAccount, FOAF.accountName, pUser.getAuthenticationMethod()));
+
+        if (pUser.isAdmin()) {
+            Resource tAdminGroup = tModel.createResource("sas.permissions.admin");
+            tModel.add(tModel.createStatement(tAdminGroup, FOAF.member, tPersonURI));
+            tModel.add(tModel.createStatement(tAdminGroup, RDF.type, FOAF.Group));
+        }
+
+        this.storeModel(pUser.getId(), tModel);
+
+        return pUser;
+    }
+
+    public User deleteUser(final User pUser) throws IOException {
+        this.deleteAnnotation(pUser.getId());
+        return pUser;
+    }
+
+    public Collection createCollection(final Collection pCollection) throws IOException {
+        while (true) {
+            if (this.getNamedModel(pCollection.getId()) != null){
+                pCollection.setId(pCollection.getId() + "1");    
+                System.out.println("Found model trying " + pCollection.getId());
+            } else {
+                break; // Id is unique
+            }
+        }
+        Model tResult = addAnnotationSafe(pCollection.toJson());
+        return new Collection(_annoUtils.frameCollection(tResult));
+    }
+
+
+    public List<Collection> getCollections(final User pUser) throws IOException {
+         String tQueryString = "select ?collectionId where {" +
+                                  "GRAPH ?collectionId { " +
+                                  "  ?coll <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Collection> . " +
+                                  "  ?coll <http://purl.org/dc/terms/creator> <" + pUser.getId() + "> " +
+                                  "}" +
+                                "}"; 
+		QueryExecution tExec = this.getQueryExe(tQueryString);
+        this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+        List<Collection> tCollections = new ArrayList<Collection>();
+		if (results != null) {
+            while (results.hasNext()) {
+                QuerySolution soln = results.nextSolution() ;
+                Resource tCollectionResource = soln.getResource("collectionId");
+                tCollections.add(this.getCollection(tCollectionResource.getURI()));
+            }
+		}
+        return tCollections;
+    }
+
+    protected void walkList(final Model pModel, final Resource pKey, final List<String> pResults) {
+        org.apache.jena.rdf.model.RDFNode tNode = null;
+        StmtIterator tStatements = pModel.listStatements(pKey, null, tNode);
+        while (tStatements.hasNext()) {
+            Statement tStatement = tStatements.nextStatement();
+            if (tStatement.getPredicate().equals(RDF.first)) {
+                System.out.println("Adding " + tStatement.toString());
+                if (!pResults.contains(tStatement.getObject().toString())) {
+                    pResults.add(tStatement.getObject().toString());
+                }
+            }
+            if (tStatement.getPredicate().equals(RDF.rest)) {
+                System.out.println("Looping on " + tStatement.toString());
+                walkList(pModel, tStatement.getObject().asResource(),pResults);
+            }
+        }
+    }
+
+    public Collection getCollection(final String pId) throws IOException {
+        Model tCollModel = this.getNamedModel(pId);
+        if (tCollModel != null) {
+            this.begin(ReadWrite.READ);
+            org.apache.jena.rdf.model.RDFNode tNode = null;
+            StmtIterator tStatements = tCollModel.listStatements(null, tCollModel.createProperty("http://iiif.io/api/presentation/2#", "hasManifests"), tNode);
+            List<Statement> tManifests = new ArrayList<Statement>();
+            while (tStatements.hasNext()) {
+                tManifests.add(tStatements.nextStatement());
+            }
+            this.end();
+            Collection tCollection = null;
+            if (tManifests.size() > 1) {
+                System.out.println("***************************************************");
+                System.out.println("***         somehow got multiple hasManifests   ***");
+                System.out.println("***************************************************");
+             // If we've reached here then somehow we have two sets of hasManifests which means the framing will break
+                List<String> tManifestsIds = new ArrayList<String>();
+                for (Statement tStatement : tManifests) { 
+                    walkList(tCollModel, tStatement.getObject().asResource(), tManifestsIds);
+                }    
+
+                this.begin(ReadWrite.WRITE);
+                tCollModel.removeAll(null,  tCollModel.createProperty("http://iiif.io/api/presentation/2#", "hasManifests"), tNode);
+                tCollModel.removeAll(null,  tCollModel.createProperty("http://iiif.io/api/presentation/2#", "hasParts"), tNode);
+                tCollModel.commit();    
+
+                tCollection = new Collection(_annoUtils.frameCollection(tCollModel));
+                for (String tURI : tManifestsIds) {
+                    Manifest tManifest = new Manifest();
+                    tManifest.setURI(tURI);
+
+                    StmtIterator tStatementsIter = tCollModel.listStatements(tCollModel.createResource(tURI), RDFS.label, tNode);
+                    if (tStatementsIter != null && tStatementsIter.hasNext()) {
+                        tManifest.setLabel(tStatementsIter.next().getObject().toString());
+                    }
+
+                    tCollection.add(tManifest);
+                }
+                this.updateCollection(tCollection);
+                return tCollection;
+            } else {
+                tCollection = new Collection(_annoUtils.frameCollection(tCollModel));
+            }
+
+            return tCollection;
+
+        } else {
+            return null;
+        }
+    }
+
+    public void deleteCollection(final Collection pCollection) throws IOException {
+        this.deleteAnnotation(pCollection.getId());
+    }
+
+    public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) {
+        String tUserTest = "";
+        if (pUser != null) {
+            tUserTest = " ?annoId <http://purl.org/dc/terms/creator> <" + pUser.getId() + "> .";
+        }
+
         String tQueryString = "select ?pageId ?canvasLabel ?canvasShortId (count(?annoId) as ?count) where {" +
                                   "GRAPH ?graph { ?on <http://www.w3.org/ns/oa#hasSource> ?pageId ." +
                                   "  ?annoId <http://www.w3.org/ns/oa#hasTarget> ?target . " +
+                                  tUserTest + 
                                   "  ?target <http://purl.org/dc/terms/isPartOf> <" + pManifest.getURI() + "> " +
                                   "}" +
                                   "OPTIONAL {GRAPH <" + pManifest.getURI() + "> {" +
@@ -616,4 +935,120 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 
 		return tShortId;
 	}
+
+    public int getTotalAnnotations(final User pUser) {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        sparql.append("select (count(distinct ?anno) as ?count) where { \n");
+        sparql.append("\tGRAPH ?graph {\n");
+        sparql.append("\t\t?anno rdf:type <http://www.w3.org/ns/oa#Annotation> .\n"); 
+        if (pUser != null) {
+            sparql.append("\t\t?anno <http://purl.org/dc/terms/creator> <");
+            sparql.append(pUser.getId());
+            sparql.append("> .\n");
+        }
+        sparql.append("\t\tFILTER NOT EXISTS {?canvas rdf:first ?anno}");  
+        sparql.append("\t}");
+        sparql.append("}");
+
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+
+            return soln.getLiteral("count").getInt();
+        }
+        return 0;
+    }
+
+    public int getTotalManifests(final User pUser) {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        if (pUser == null) {
+            sparql.append("select (count(distinct ?manifest) as ?count) where { \n");
+            sparql.append("\tGRAPH ?graph {\n");
+            sparql.append("\t\t?manifest rdf:type <http://iiif.io/api/presentation/2#Manifest> .\n"); 
+            sparql.append("\t}");
+            sparql.append("}");
+        } else {    
+            sparql.append("select (count(distinct ?manifest) as ?count) where {\n");
+            sparql.append("\tGRAPH ?collection {\n");
+            sparql.append("\t\t?coll <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://iiif.io/api/presentation/2#Collection> .\n");
+            sparql.append("\t\t?coll <http://purl.org/dc/terms/creator> <");
+            sparql.append(pUser.getId());
+            sparql.append("> .\n");
+            sparql.append("\t\t?coll <http://iiif.io/api/presentation/2#hasManifests> ?list .\n");
+            sparql.append("\t\t?list rdf:rest*/rdf:first ?manifest \n");
+            sparql.append("\t}");
+            sparql.append("}");
+        }
+
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+
+            return soln.getLiteral("count").getInt();
+        }
+        return 0;
+    }
+
+    public int getTotalAnnoCanvases(final User pUser) {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        sparql.append("select (count(distinct ?source) as ?count) where { \n");
+        sparql.append("\tGRAPH ?graph {\n");
+        sparql.append("\t\t?anno rdf:type <http://www.w3.org/ns/oa#Annotation> .\n"); 
+        if (pUser != null) {
+            sparql.append("\t\t?anno <http://purl.org/dc/terms/creator> <");
+            sparql.append(pUser.getId());
+            sparql.append("> .\n");
+        }
+        sparql.append("\t\t?anno <http://www.w3.org/ns/oa#hasTarget> ?target .\n");  
+        sparql.append("\t\t?target <http://www.w3.org/ns/oa#hasSource> ?source\n");  
+        sparql.append("\t}");
+        sparql.append("}");
+
+        
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+		if (results != null && results.hasNext()) {
+            QuerySolution soln = results.nextSolution() ;
+
+            return soln.getLiteral("count").getInt();
+        }
+        return 0;
+
+    }
+    public Map<String,Integer> getTotalAuthMethods() {
+        StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
+        sparql.append("select ?accountType (count(distinct ?accountType) as ?count) where {\n");
+        sparql.append("\tGRAPH ?graph {\n");
+        sparql.append("\t\t?person rdf:type <http://xmlns.com/foaf/0.1/Person> .\n"); 
+        sparql.append("\t\t?person <http://xmlns.com/foaf/0.1/account> ?account .\n");  
+        sparql.append("\t\t?account <http://xmlns.com/foaf/0.1/accountName> ?accountType\n");  
+        sparql.append("\t}");
+        sparql.append("} group by ?accountType");
+
+        
+        QueryExecution tExec = this.getQueryExe(sparql.toString().replaceAll("[\\n\\t]", ""));
+		this.begin(ReadWrite.READ);
+		ResultSet results = tExec.execSelect(); // Requires Java 1.7
+		this.end();
+
+        Map<String,Integer> tStats = new HashMap<String, Integer>();
+		if (results != null) {
+            while (results.hasNext()) {
+                QuerySolution soln = results.nextSolution() ;
+                String tType = soln.getLiteral("accountType").getString();
+                int tCount = soln.getLiteral("count").getInt();
+
+                tStats.put(tType, tCount);
+            }
+        }
+        return tStats;
+    }
 }

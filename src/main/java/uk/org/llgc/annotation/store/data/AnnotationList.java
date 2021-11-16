@@ -9,7 +9,10 @@ import java.io.IOException;
 
 import org.apache.jena.rdf.model.Model;
 
+import com.github.jsonldjava.utils.JsonUtils;
+
 import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.data.users.User;
 
 public class AnnotationList {
     protected List<Annotation> _annotations = null;
@@ -65,6 +68,10 @@ public class AnnotationList {
         return null;
     }
 
+    public Annotation get(final int pIndex) {
+        return _annotations.get(pIndex);
+    }
+
     public int size() {
         return _annotations.size();
     }
@@ -75,6 +82,12 @@ public class AnnotationList {
     
     public void setAnnotations(final List<Annotation> pAnnos) {
         _annotations = pAnnos;
+    }
+
+    public void setCreator(final User pUser) {
+        for (Annotation tAnno : _annotations) {
+            tAnno.setCreator(pUser);
+        }
     }
 
     public Map<String, Object> toJson() throws IOException {
@@ -93,4 +106,13 @@ public class AnnotationList {
         return tJson;
     }
     
+    public String toString() {
+        try { 
+            Map<String, Object> tJson = this.toJson();
+
+            return JsonUtils.toPrettyString(tJson);
+        } catch (Exception tExcpt) {
+            return "Failed to convert to JSON due to: " + tExcpt;
+        }
+    }
 }

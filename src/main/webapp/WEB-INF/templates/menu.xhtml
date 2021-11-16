@@ -6,34 +6,66 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <body>
         <ui:composition>
-            <div role="navigation" class="navbar navbar-inverse navbar-fixed-top">
-                <div class="container-fluid">
-                    <div class="navbar-collapse collapse">
-                        <ul class="nav navbar-nav">
-                            <li>
-                                <c:if test="#{empty path}">
-                                    <a class="headerLink" href="index.html">Home</a>
-                                </c:if>
-                                <c:if test="#{not empty path}">
-                                    <a class="headerLink" href="../index.html">Home</a>
-                                </c:if>
+            <c:set var="isAuth" value="#{userService.authenticated}" scope="request" />
+            <c:set var="isAdmin" value="#{userService.admin}" scope="request" />
+
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+                <span class="navbar-brand">SAS</span>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav mr-auto">
+                        <c:if test="#{isAuth and not isAdmin}">
+                            <li class="nav-item">
+                                <c:if test="#{ param['collection'] == null}">
+                                    <h:link styleClass="nav-link" icon="fas fa-upload" value="Home" outcome="#{path}collections" ></h:link>
+                                </c:if>    
+                                <c:if test="#{param['collection'] != null}">
+                                    <a href="#{path}collections.xhtml?collection=#{param['collection']}" class="nav-link" icon="fas fa-upload">Home</a>
+                                </c:if>    
                             </li>
-                            <li>
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Stats" outcome="#{path}stats/index" ></h:link>
+                        </c:if>
+                        <c:if test="#{isAdmin and user.hasPassword()}">
+                            <li class="nav-item">
+                                <h:link styleClass="nav-link" icon="fas fa-upload" value="Admin" outcome="/admin/users" ></h:link>
                             </li>
-                            <li>
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Load Annotation List" outcome="#{path}populate" ></h:link>
-                            </li>
-                            <li>
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="Index Manifest" outcome="#{path}uploadManifest" ></h:link>
-                            </li>
-                            <li>
-                                <h:link styleClass="headerLink" icon="fas fa-upload" value="View Annotations" outcome="#{path}manifests" ></h:link>
-                            </li>
-                        </ul>
+                        </c:if>
+
+                    </ul>
+                        <c:if test="#{not isAuth and not path.equals('login')}">
+                            <div class="mt-2 mt-md-0">
+                            <c:if test="#{empty path}">
+                                <a href="collections.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
+                            </c:if>
+                            <c:if test="#{not empty path}">
+                                <a href="#{path}collections.xhtml" class="btn btn-outline-info" role="button">Log In / Sign Up</a>
+                            </c:if>
                     </div>
+                        </c:if>
+                        <c:if test="#{isAuth}">
+                            <div class="dropdown">
+                                <c:if test="#{not empty userService.user.picture}">
+                                    <a  id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <div class="image-cropper">
+                                            <img src="#{userService.user.picture}" alt="user avatar" class="user_image"/>
+                                        </div>
+                                    </a>
+                                </c:if>
+                                <c:if test="#{empty userService.user.picture}">
+                                    <button class="user_info btn btn btn-secondary" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <h:outputText value="#{userService.user.avatar}" />
+                                    </button>
+                                </c:if>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu2">
+                                    <a href="/profile.xhtml" class="dropdown-item" type="button">Profile</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="/logout" class="dropdown-item" type="button">Logout</a>
+                                </div>
+                            </div>
+                        </c:if>
                 </div>
-            </div>
+            </nav>
          </ui:composition>	
     </body>
 </html>    

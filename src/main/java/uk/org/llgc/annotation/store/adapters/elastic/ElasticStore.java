@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.URISyntaxException;
 import java.net.URI;
+import java.net.SocketTimeoutException;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -14,10 +15,13 @@ import uk.org.llgc.annotation.store.data.Canvas;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.Annotation;
+import uk.org.llgc.annotation.store.data.Collection;
 import uk.org.llgc.annotation.store.data.AnnoListNav;
 import uk.org.llgc.annotation.store.data.Body;
 import uk.org.llgc.annotation.store.data.Target;
 import uk.org.llgc.annotation.store.data.SearchQuery;
+import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
@@ -90,7 +94,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
 	protected RestHighLevelClient _client = null;
     protected String _index = "";
-    protected RefreshPolicy _policy = RefreshPolicy.NONE;
+    protected RefreshPolicy _policy = RefreshPolicy.WAIT_UNTIL;
 
     // http://host:port
 	public ElasticStore(final String pConnectionURL) throws URISyntaxException, IOException {
@@ -132,91 +136,132 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     protected void createIndex() throws IOException {
-        if (!_client.indices().exists(new GetIndexRequest(_index), RequestOptions.DEFAULT)) {
-            // Index doesn't exist so create it with mapping
-            CreateIndexRequest tRequest = new CreateIndexRequest(_index);
+        try {
+            if (!_client.indices().exists(new GetIndexRequest(_index), RequestOptions.DEFAULT)) {
+                // Index doesn't exist so create it with mapping
+                CreateIndexRequest tRequest = new CreateIndexRequest(_index);
 
-            XContentBuilder tMapping = XContentFactory.jsonBuilder()
-                .startObject()
-                    .startObject("properties")
-                        .startObject("id")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("type")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("created")
-                            .field("type", "date")
-                        .endObject()
-                        .startObject("modified")
-                            .field("type", "date")
-                        .endObject()
-                        .startObject("motivation")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("body")
-                            .field("type", "text")
-                        .endObject()
-                        .startObject("target")
-                            .startObject("properties")
-                                .startObject("id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("type")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("short_id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("within")
-                                    .startObject("properties")
-                                        .startObject("id")
-                                            .field("type", "keyword")
-                                        .endObject()
-                                        .startObject("type")
-                                            .field("type", "keyword")
-                                        .endObject()
-                                        .startObject("label")
-                                            .field("type", "text")
+                XContentBuilder tMapping = XContentFactory.jsonBuilder()
+                    .startObject()
+                        .startObject("properties")
+                            .startObject("id")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("type")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("creator")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("created")
+                                .field("type", "date")
+                            .endObject()
+                            .startObject("modified")
+                                .field("type", "date")
+                            .endObject()
+                            .startObject("motivation")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("body")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("target")
+                                .startObject("properties")
+                                    .startObject("id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("type")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("short_id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("within")
+                                        .startObject("properties")
+                                            .startObject("id")
+                                                .field("type", "keyword")
+                                            .endObject()
+                                            .startObject("type")
+                                                .field("type", "keyword")
+                                            .endObject()
+                                            .startObject("label")
+                                                .field("type", "text")
+                                            .endObject()
                                         .endObject()
                                     .endObject()
                                 .endObject()
                             .endObject()
-                        .endObject()
-                        // Manifest
-                        .startObject("json")
-                            .field("type", "object")
-                            .field("enabled", "false")
-                        .endObject()
-                        .startObject("short_id")
-                            .field("type", "keyword")
-                        .endObject()
-                        .startObject("label")
-                            .field("type", "text")
-                        .endObject()
-                        .startObject("canvases")
-                            .field("type", "object")
-                            .startObject("properties")
-                                .startObject("id")
-                                    .field("type", "keyword")
+                            // Manifest
+                            .startObject("json")
+                                .field("type", "object")
+                                .field("enabled", "false")
+                            .endObject()
+                            .startObject("short_id")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("label")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("canvases")
+                                .field("type", "object")
+                                .startObject("properties")
+                                    .startObject("id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("type")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("short_id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("label")
+                                        .field("type", "text")
+                                    .endObject()
                                 .endObject()
-                                .startObject("type")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("short_id")
-                                    .field("type", "keyword")
-                                .endObject()
-                                .startObject("label")
-                                    .field("type", "text")
+                            .endObject()
+                            // User
+                            .startObject("name")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("email")
+                                .field("type", "text")
+                            .endObject()
+                            .startObject("picture")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("password")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("group")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("authenticationMethod")
+                                .field("type", "keyword")
+                            .endObject()
+                            .startObject("members")
+                                .field("type", "object")
+                                .startObject("properties")
+                                    .startObject("id")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("type")
+                                        .field("type", "keyword")
+                                    .endObject()
+                                    .startObject("label")
+                                        .field("type", "text")
+                                    .endObject()
                                 .endObject()
                             .endObject()
                         .endObject()
-                    .endObject()
-                .endObject();
-            tRequest.mapping(tMapping);
+                    .endObject();
+                tRequest.mapping(tMapping);
 
-            _client.indices().create(tRequest, RequestOptions.DEFAULT);
+                _client.indices().create(tRequest, RequestOptions.DEFAULT);
 
+            }
+        } catch (SocketTimeoutException tExcpt) {
+            _logger.error("Failed to connect to Elastic search instance: " + _index);
+            throw new IOException("Failed to connect to Elastic search instance: " + _index);
         }
     }
 
@@ -242,6 +287,9 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 		tJson.put("created", pAnno.getCreated());
 		tJson.put("modified", pAnno.getModified());
 		tJson.put("motivation", pAnno.getMotivations());
+        if (pAnno.getCreator() != null && !pAnno.getCreator().isAdmin()) {
+            tJson.put("creator", pAnno.getCreator().getId());
+        }
 
         List<String> tBodies = new ArrayList<String>();
         for (Body tBody : pAnno.getBodies()) {
@@ -283,11 +331,18 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         _client.delete(tDelete, RequestOptions.DEFAULT);
 	}
 
-	public AnnotationList getAnnotationsFromPage(final Canvas pPage) throws IOException {
+	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException {
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("target.id", pPage.getId()));
+
+        if (!pUser.isAdmin()) {
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+        }
+
         AnnotationList tList = new AnnotationList();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.size(10000);
-        searchSourceBuilder.query(QueryBuilders.termQuery("target.id", pPage.getId()));
+        searchSourceBuilder.query(tBuilder);
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
@@ -328,7 +383,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         for (Canvas tCanvas : pManifest.getCanvases()) {
             BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
             tBuilder.mustNot(QueryBuilders.existsQuery("target.within.id"));
-            tBuilder.must(QueryBuilders.matchQuery("target.id", tCanvas.getId()));
+            tBuilder.must(QueryBuilders.termQuery("target.id", tCanvas.getId()));
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.query(tBuilder);
@@ -375,20 +430,32 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
 	public String getManifestId(final String pShortId) throws IOException {
-        Manifest tManifest = this.getManifest(pShortId);
-        if (tManifest != null) {
-            return tManifest.getURI();
-        } else {
-            return null;
-        } 
-	}
-
-	public Manifest getManifest(final String pShortId) throws IOException {
         GetRequest tRequest = new GetRequest(_index, pShortId);
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
         if (tResponse != null && tResponse.isExists()) {
-            return json2Manifest(tResponse.getSourceAsMap());
+            Manifest tManifest = json2Manifest(tResponse.getSourceAsMap());
+            return tManifest.getURI();
+        } else {
+            return null;
+        }
+	}
+
+	public Manifest getManifest(final String pId) throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.termQuery("id", pId));
+        searchSourceBuilder.size(1);
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        if (searchHits != null && searchHits.length > 0) {
+            Manifest tManifest = null;
+            for (SearchHit hit : searchHits) {
+                tManifest = json2Manifest(hit.getSourceAsMap());
+            }
+            return tManifest;
         } else {
             return null;
         }
@@ -427,9 +494,12 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     // TODO note this will return indexed manifests as well as non indexed..
-	public List<Manifest> getSkeletonManifests() throws IOException {
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(AggregationBuilders.terms("manifests").field("target.within.id").size(10000));
+        if (!pUser.isAdmin()) {
+            searchSourceBuilder.query(QueryBuilders.termQuery("creator", pUser.getId()));
+        }
         searchSourceBuilder.size(0);
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(searchSourceBuilder);
@@ -499,6 +569,20 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 		if (pQuery.getMotivations() != null && !pQuery.getMotivations().isEmpty()) {
             tBuilder.must(QueryBuilders.termsQuery("motivation", pQuery.getMotivations()));
         }    
+		if (pQuery.getUsers() != null && !pQuery.getUsers().isEmpty()) {
+            List<String> tUserIds = new ArrayList<String>();
+            boolean tFoundAdmin = false;
+            for (User tUser : pQuery.getUsers()) {
+                tUserIds.add(tUser.getId());
+                if (tUser.isAdmin()) {
+                    tFoundAdmin = true;
+                }
+            }
+            if (!tFoundAdmin) {
+                tBuilder.must(QueryBuilders.termsQuery("creator", tUserIds));
+                // if we found an admin then they can access all results
+            }
+        }    
         tBuilder.must(QueryBuilders.termQuery("target.within.id", pQuery.getScope()));
         if (pQuery.getQuery() != null && !pQuery.getQuery().isEmpty()) {
             tBuilder.must(QueryBuilders.matchQuery("body", pQuery.getQuery()).operator(Operator.AND));
@@ -515,8 +599,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         SearchHits hits = tResponse.getHits();
             
         try {
-            IIIFSearchResults tAnnoList = new IIIFSearchResults();
-            tAnnoList.setId(pQuery.toURI().toString());
+            IIIFSearchResults tAnnoList = new IIIFSearchResults(pQuery.toURI());
             long tResultNo = hits.getTotalHits().value;
             int tNumberOfPages = (int)(tResultNo / pQuery.getResultsPerPage());
 
@@ -565,10 +648,14 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         }
 	}
 
-
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException {
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException {
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("target.within.id", pManifest.getURI()));
+        if (pUser != null) {
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+        }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.termQuery("target.within.id", pManifest.getURI()));
+        searchSourceBuilder.query(tBuilder);
         searchSourceBuilder.aggregation(AggregationBuilders.terms("pages").field("target.id").size(10000));
         searchSourceBuilder.size(0);
         SearchRequest searchRequest = new SearchRequest(_index);
@@ -589,22 +676,306 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         return tAnnoPageCount;
     }    
 
-	public List<PageAnnoCount> listAnnoPages() throws IOException {
+    public List<User> getUsers() throws IOException {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.aggregation(AggregationBuilders.terms("pages").field("target.id").size(10000));
-        searchSourceBuilder.size(0);
+        searchSourceBuilder.query(QueryBuilders.termQuery("type", "User"));
+        searchSourceBuilder.size(10000);
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
-        Terms tFacets = searchResponse.getAggregations().get("pages");
-        List<PageAnnoCount> tAnnoPageCount = new ArrayList<PageAnnoCount>();
-        for (Bucket tFacet : tFacets.getBuckets()) {
-            String tLabel = "";
-            Canvas tCanvas = new Canvas(tFacet.getKeyAsString(), tLabel);
-            this.storeCanvas(tCanvas);
-            tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacet.getDocCount(), null));
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+
+        List<User> tUsers = new ArrayList<User>();
+        for (SearchHit tHit : searchHits) {
+            tUsers.add(this.json2user((Map<String,Object>)tHit.getSourceAsMap()));
+        }
+        return tUsers;
+    }
+
+    public User getUser(final User pUser) throws IOException {
+        GetRequest tRequest = new GetRequest(_index, pUser.getId());
+        GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
+
+        if (tResponse != null && tResponse.getSource() != null) {
+            User tSavedUser = this.json2user((Map<String,Object>)tResponse.getSourceAsMap());
+            tSavedUser.setToken(pUser.getToken());
+
+            return tSavedUser;         
+        } else {
+            return null;
+        }
+    }
+    public User saveUser(final User pUser) throws IOException {
+        User tSavedUser = getUser(pUser);
+        if (tSavedUser != null) {
+            // This is an update
+            pUser.setCreated(tSavedUser.getCreated());
+            pUser.updateLastModified();
+        }
+        IndexRequest tIndex = new IndexRequest(_index);
+        tIndex.id(pUser.getId());
+        Map<String, Object> tJson = this.user2json(pUser);
+        tIndex.source(tJson);
+	
+        tIndex.setRefreshPolicy(_policy);
+        _client.index(tIndex, RequestOptions.DEFAULT);
+
+        return pUser;
+    }
+
+    public User deleteUser(final User pUser) throws IOException {
+        DeleteRequest tDelete = new DeleteRequest(_index);
+        tDelete.id(pUser.getId());
+
+        tDelete.setRefreshPolicy(_policy);
+        _client.delete(tDelete, RequestOptions.DEFAULT);
+        return pUser;
+    }
+
+    protected User json2user(final Map<String,Object> tUserJson) throws IOException {
+        User tSavedUser = new User();
+        if (tUserJson.get("authenticationMethod").equals(LocalUser.AUTH_METHOD)) {
+            tSavedUser = new LocalUser();
+            if (tUserJson.get("password") != null && !((String)tUserJson.get("password")).isEmpty()) {
+                ((LocalUser)tSavedUser).setPassword((String)tUserJson.get("password"), false);
+            }
+        }
+        try {
+            tSavedUser.setId((String)tUserJson.get("id"));
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Unable to create user as ID was not a URI: " + tExcpt);
+        }
+        tSavedUser.setShortId((String)tUserJson.get("short_id"));
+        tSavedUser.setName((String)tUserJson.get("name"));
+        tSavedUser.setEmail((String)tUserJson.get("email"));
+        if (tUserJson.get("created") != null) {
+            tSavedUser.setCreated(super.parseDate((String)tUserJson.get("created")));
+        }
+        tSavedUser.setLastModified(super.parseDate((String)tUserJson.get("modified")));
+        if (tUserJson.get("created") == null && tUserJson.get("modified") != null) {
+            tSavedUser.setCreated(tSavedUser.getLastModified());
+        }
+        if (tUserJson.get("picture") != null) {
+            tSavedUser.setPicture((String)tUserJson.get("picture"));
+        }
+        if (tUserJson.get("group") != null && tUserJson.get("group").toString().equals("admin")) {
+            tSavedUser.setAdmin(true);
+        }
+        tSavedUser.setAuthenticationMethod((String)tUserJson.get("authenticationMethod"));
+
+        return tSavedUser;
+    }
+
+    protected Map<String, Object> user2json(final User pUser) {
+        Map<String,Object> tJson = new HashMap<String,Object>();
+        tJson.put("id", pUser.getId());
+        tJson.put("type", "User");
+        tJson.put("short_id", pUser.getShortId());
+        tJson.put("name", pUser.getName());
+        tJson.put("email", pUser.getEmail());
+        // Elastic search could handle this but better to be explicit on the format
+        tJson.put("created", super.formatDate(pUser.getCreated())); 
+        tJson.put("modified", super.formatDate(pUser.getLastModified()));
+        if (pUser instanceof LocalUser) {
+            tJson.put("password", ((LocalUser)pUser).getPassword());
+        }
+        if (pUser.getPicture() != null && !pUser.getPicture().isEmpty()) {
+            tJson.put("picture", pUser.getPicture());
+        }
+        if (pUser.isAdmin()) {
+            tJson.put("group", "admin");
+        }
+        tJson.put("authenticationMethod", pUser.getAuthenticationMethod());
+
+        return tJson;
+    }
+
+    protected Map<String, Object> object2json(final Collection pCollection) {
+        Map<String,Object> tJson = new HashMap<String,Object>();
+        tJson.put("id", pCollection.getId());
+        tJson.put("type", "Collection");
+        tJson.put("short_id", pCollection.getShortId());
+        tJson.put("label", pCollection.getLabel());
+        tJson.put("creator", pCollection.getUser().getId());
+
+        List<Map<String,Object>> tMembers = new ArrayList<Map<String, Object>>();
+        for (Manifest tManifest : pCollection.getManifests()) {
+            Map<String, Object> tManifestJson = new HashMap<String, Object>();
+            tManifestJson.put("id", tManifest.getURI());
+            tManifestJson.put("type", "Manifest");
+            tManifestJson.put("label", tManifest.getLabel());
+
+            tMembers.add(tManifestJson);
+        }
+        tJson.put("members", tMembers);
+        return tJson;
+    }
+
+    protected Collection collectionFromMap(final Map<String, Object> pJson) throws IOException {
+        Collection tCollection = new Collection();
+
+        tCollection.setId((String)pJson.get("id"));
+        tCollection.setShortId((String)pJson.get("short_id"));
+        tCollection.setLabel((String)pJson.get("label"));
+
+        User tUser = new User();
+        try {
+            tUser.setId((String)pJson.get("creator"));
+        } catch (URISyntaxException tExcpt) {
+            throw new IOException("Unable to create user as the ID is not a valid URI: " + pJson.get("creator"));
+        }
+        tCollection.setUser(tUser);
+        List<Map<String,Object>> tManifests = (List<Map<String,Object>>)pJson.get("members");
+        for (Map<String,Object> tManifestJson : tManifests) {
+            Manifest tManifest = new Manifest();
+            tManifest.setURI((String)tManifestJson.get("id"));
+            tManifest.setLabel((String)tManifestJson.get("label"));
+            tCollection.add(tManifest);
         }
 
-        return tAnnoPageCount;
-	}
+        return tCollection;
+    }
+
+    public Collection createCollection(final Collection pCollection) throws IOException {
+        IndexRequest tIndex = new IndexRequest(_index);
+        tIndex.id(pCollection.getId());
+        Map<String, Object> tJson = this.object2json(pCollection);
+        tIndex.source(tJson);
+	
+        tIndex.setRefreshPolicy(_policy);
+        _client.index(tIndex, RequestOptions.DEFAULT);
+
+        return pCollection;
+    }
+
+    public List<Collection> getCollections(final User pUser) throws IOException {
+        BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+        tBuilder.must(QueryBuilders.termQuery("type", "Collection"));
+        tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(tBuilder);
+        searchSourceBuilder.size(10000);
+
+        List<Collection> tCollections = this.getCollections(searchSourceBuilder);
+        if (tCollections == null) {
+            tCollections = new ArrayList<Collection>();
+        } else {
+            // Make sure the fully populated user is added rather than just the ID
+            for (Collection tCollection : tCollections) {
+                if (!tCollection.getUser().getId().equals(pUser.getId())) {
+                    throw new IOException("The collections search returned collections not owned by this user. You may need to recreate your index");
+                }
+                tCollection.setUser(pUser);
+            }
+        }
+        return tCollections;
+    }
+        
+    public List<Collection> getCollections(final SearchSourceBuilder tQuery) throws IOException { 
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(tQuery);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        List<Collection> tCollections = new ArrayList<Collection>();
+        if (searchHits.length == 0) {
+            return null; // No user saved
+        } else {
+            for (int i = 0; i < searchHits.length; i++) {
+                tCollections.add(this.collectionFromMap(searchHits[i].getSourceAsMap()));
+            }
+        }
+             
+        return tCollections;         
+    }
+
+    public Collection getCollection(final String pId) throws IOException {
+        GetRequest tRequest = new GetRequest(_index, pId);
+        GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
+
+        if (tResponse != null && tResponse.getSource() != null && tResponse.getSourceAsMap() != null && tResponse.getSourceAsMap() != null) {
+            return this.collectionFromMap((Map<String,Object>)tResponse.getSourceAsMap());
+        } else {    
+            return null;
+        }
+    }
+
+    public void deleteCollection(final Collection pCollection) throws IOException {
+        DeleteRequest tDelete = new DeleteRequest(_index);
+        tDelete.id(pCollection.getId());
+
+        tDelete.setRefreshPolicy(_policy);
+        _client.delete(tDelete, RequestOptions.DEFAULT);
+    }
+
+    public int getTotalAnnotations(final User pUser) throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        if (pUser == null) {
+            searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));
+        } else {
+            BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+            tBuilder.must(QueryBuilders.termQuery("type", "oa:Annotation"));
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+            searchSourceBuilder.query(tBuilder);
+        }
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+
+        return Math.toIntExact(searchResponse.getHits().getTotalHits().value);
+    }
+
+    public int getTotalManifests(final User pUser) throws IOException {
+        if (pUser == null) {
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.query(QueryBuilders.termQuery("type", "sc:Manifest"));
+            
+            SearchRequest searchRequest = new SearchRequest(_index);
+            searchRequest.source(searchSourceBuilder);
+            SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+
+            return Math.toIntExact(searchResponse.getHits().getTotalHits().value);
+        } else {
+            List<Collection> tCollections = this.getCollections(pUser);
+            List<String> tManifests = new ArrayList<String>();
+            for (Collection tColl : tCollections) {
+                for (Manifest tManifest : tColl.getManifests()) {
+                    if (!tManifests.contains(tManifest)) {
+                        tManifests.add(tManifest.getURI());
+                    }
+                }
+            }
+            return tManifests.size();
+        }
+    }
+
+    public int getTotalAnnoCanvases(final User pUser) throws IOException {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        if (pUser == null) {
+            searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));
+        } else {
+            BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
+            tBuilder.must(QueryBuilders.termQuery("type", "oa:Annotation"));
+            tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
+            searchSourceBuilder.query(tBuilder);
+        }
+        SearchRequest searchRequest = new SearchRequest(_index);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
+
+        List<String> tCanvases = new ArrayList<String>();
+        for (SearchHit tHit : searchResponse.getHits().getHits()) {
+            List<Map<String,Object>> tTargetCanvas = (List<Map<String,Object>>)tHit.getSourceAsMap().get("target");
+            for (Map<String,Object> tCanvasMap : tTargetCanvas) {
+                String tCanvas = (String)tCanvasMap.get("id");
+                if (!tCanvases.contains(tCanvas)) {
+                    tCanvases.add(tCanvas);
+                }
+            }
+        }
+
+        return tCanvases.size();
+    }
 }

@@ -2,6 +2,7 @@ package uk.org.llgc.annotation.store.adapters.solr;
 
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.users.User;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrDocument;
@@ -39,10 +40,10 @@ public class SolrManifestStore {
 		return tQuery;
 	}
 
-	public Manifest getManifest(final String pShortId) throws IOException {
+	public Manifest getManifest(final String pId) throws IOException {
         SolrQuery tQuery = this.getManifestQuery();
 
-		tQuery.set("q", "short_id:\"" + pShortId + "\"");
+		tQuery.set("q", "id:" + _utils.escapeChars(pId));
 
 		try {
 			QueryResponse tResponse  = _solrClient.query(tQuery);
@@ -64,7 +65,7 @@ public class SolrManifestStore {
 			} else if (tResponse.getResults().size() == 0) {
 				return null; // no annotation found with supplied id
 			} else {
-				throw new IOException("Found " + tResponse.getResults().size() + " manifests with ID " + pShortId);
+				throw new IOException("Found " + tResponse.getResults().size() + " manifests with ID " + pId);
 			}
 		} catch (SolrServerException tException) {
 			throw new IOException("Failed to run solr query due to " + tException.toString());
@@ -116,9 +117,13 @@ public class SolrManifestStore {
 		return tManifests;
     }
 
-	public List<Manifest> getSkeletonManifests() throws IOException {
+	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
         SolrQuery tQuery = this.getManifestQuery();
-		tQuery.set("q", "within:*");
+        String tUserQuery = "";
+        if (!pUser.isAdmin()) {
+            tUserQuery = " AND creator:\"" + pUser.getId() + "\"";
+        }
+		tQuery.set("q", "within:*" + tUserQuery);
         tQuery.setFacet(true);
         tQuery.addFacetField("within");
 
@@ -127,9 +132,11 @@ public class SolrManifestStore {
 			QueryResponse tResponse = _solrClient.query(tQuery);
             FacetField tFacetCounts = tResponse.getFacetField("within");
             for (FacetField.Count tFacetValue : tFacetCounts.getValues()) {
-                Manifest tManifest = new Manifest();
-                tManifest.setURI(tFacetValue.getName());
-                tManifests.add(tManifest);
+                if (tFacetValue.getCount() > 0) {
+                    Manifest tManifest = new Manifest();
+                    tManifest.setURI(tFacetValue.getName());
+                    tManifests.add(tManifest);
+                }
             }
 		} catch (SolrServerException tExcpt) {
 			tExcpt.printStackTrace();

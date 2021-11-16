@@ -88,12 +88,7 @@ public class AnnotationUtils {
 		int tAnnoCount = 0;
 		for (Map<String, Object> tAnno : tAnnotations) {
 			if (tAnno.get("@id") == null) {
-
-				StringBuffer tBuff = new StringBuffer(pBaseURL);
-				tBuff.append(getHash(getTarget(tAnno), "md5"));
-				tBuff.append("/");
-				tBuff.append(tAnnoCount++);
-				tAnno.put("@id", tBuff.toString());
+				tAnno.put("@id", this.generateAnnoId(pBaseURL, tAnnoCount++));
 			}
 			tAnno.put("@context", this.getContext()); // need to add context to each annotation fixes issue #18
 
@@ -185,7 +180,7 @@ public class AnnotationUtils {
 		Map<String, Object> tRoot = (Map<String,Object>)tAnnotation;
 
 		if (tRoot.get("@id") == null) {
-			String tID = pBaseURL + "/" + this.generateAnnoId();
+			String tID = this.generateAnnoId(pBaseURL);
 			tRoot.put("@id", tID);
 		}
 		// Change context to local for quick processing
@@ -308,6 +303,19 @@ public class AnnotationUtils {
 		return this.frame(pManifest, tContextJson);
 	}
 
+    public Map<String,Object> frameCollection(final Model pCollection) throws JsonLdError, IOException  {
+		final Map<String,Object> tFrameJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(new File(_contextDir,"collection_frame.json")));
+		Map<String,Object> tCollectionsJson = this.frame(pCollection, tFrameJson);
+        tCollectionsJson.remove("sc:hasCollections");
+        tCollectionsJson.remove("sc:hasManifests");
+        tCollectionsJson.remove("sc:hasParts");
+        if (tCollectionsJson.get("dcterms:creator") instanceof Map) {
+            tCollectionsJson.put("dcterms:creator", ((Map<String,Object>)tCollectionsJson.get("dcterms:creator")).get("@id"));
+        }
+        return tCollectionsJson;
+	}
+
+
 	public Map<String,Object> frame(final Model pModel, final Map<String,Object> pFrame) throws JsonLdError, IOException {
 		pFrame.put("@context", this.getContext());
 
@@ -324,7 +332,6 @@ public class AnnotationUtils {
             pModel.commit();
         }
 		Map<String,Object> tFramed = (Map<String,Object>)JsonLdProcessor.frame(JsonUtils.fromString(tStringOut.toString()), pFrame,  tOptions);
-
 		Map<String,Object> tJsonLd = (Map<String,Object>)((List)tFramed.get("@graph")).get(0);
 		if (tJsonLd.get("@context") == null) {
 			tJsonLd.put("@context", this.getExternalContext());
@@ -365,7 +372,22 @@ public class AnnotationUtils {
 		}
 	}
 
-	protected String generateAnnoId() {
-		return "" + new java.util.Date().getTime();
+	protected String generateAnnoId(final String pBaseURL) {
+        StringBuffer tBuff = new StringBuffer(pBaseURL);
+        if (!pBaseURL.endsWith("/")) {
+            tBuff.append("/");
+        }
+        tBuff.append("anno/");
+        tBuff.append("" + new java.util.Date().getTime());
+		return tBuff.toString();
 	}
+
+    // To be used when potenially lots of annotations are added at once
+    protected String generateAnnoId(final String pBaseURL, final int pOffest) {
+        StringBuffer tBuff = new StringBuffer(this.generateAnnoId(pBaseURL));
+        tBuff.append("/");
+        tBuff.append("" + pOffest);
+		return  tBuff.toString();
+	}
+
 }

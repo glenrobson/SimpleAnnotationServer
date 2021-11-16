@@ -83,7 +83,7 @@ public class TestModel extends TestUtils {
 		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
 		String tShortId = _store.indexManifest(new Manifest(tManifestJson));
 
-        Manifest tManifest = _store.getManifest(tShortId);
+        Manifest tManifest = _store.getManifest((String)tManifestJson.get("@id"));
 
         assertNotNull("Manifest not found", tManifest);
         assertEquals("Indexed manifest title doesn't match the original", "http://example.com/manfiest/test/manifest.json", tManifest.getURI());
@@ -108,17 +108,51 @@ public class TestModel extends TestUtils {
     } 
 
     @Test
+	public void testManifestLabels() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/list_label.json").getFile()));
+
+        String tShortId = "short_id";
+        Manifest tManifest = new Manifest(tManifestJson, tShortId);
+
+        assertEquals("Manifest wasn't able to parse label", "Carex blepharicarpa Franch.", tManifest.getLabel());
+    } 
+    @Test
+	public void testWorkshopManifest() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/workshop.json").getFile()));
+
+        String tShortId = "short_id";
+        Manifest tManifest = new Manifest(tManifestJson, tShortId);
+
+        assertEquals("Manifest wasn't able to parse label", "Glen's fantastic October Manifest", tManifest.getLabel());
+    } 
+
+
+    @Test
+	public void test30Manifest() throws IOException, IDConflictException, MalformedAnnotation {
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/3.0manifest.json").getFile()));
+
+        String tShortId = "short_id";
+        try {
+            Manifest tManifest = new Manifest(tManifestJson, tShortId);
+            assertFalse("Manifest should have thrown an IOException when supplied with a 3.0 mainfest",true);
+        } catch (IOException tExcpt) {
+            assertEquals("Exception should mention 3.0 error.", "SAS Currently only works with IIIF version 2.0 manifests",  tExcpt.getMessage());
+        }
+    } 
+
+
+    @Test
     public void testSkeletonManifests() throws IOException, IDConflictException, MalformedAnnotation {
 		Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
 
         _store.addAnnotation(new Annotation(tAnnotation));
-        List<Manifest> tManifests = _store.getSkeletonManifests();
+        List<Manifest> tManifests = _store.getSkeletonManifests(super.createAdminUser());
         assertEquals("Unexpected amount of manifests in store.", 1, tManifests.size());
         assertEquals("ID doesn't match", "http://example.com/manfiest/test/manifest.json", tManifests.get(0).getURI());
 
         Manifest tManifest = new Manifest();
         tManifest.setURI("http://example.com/manfiest/test/manifest.json");
-        List<PageAnnoCount> tAnnoList = _store.listAnnoPages(tManifest);
+        List<PageAnnoCount> tAnnoList = _store.listAnnoPages(tManifest, null);
         assertEquals("Unexpected amount of annotations for this manifest.", 1, tAnnoList.size());
         assertEquals("Unexpected canvas ID", "http://example.com/manfiest/test/canvas/1.json", tAnnoList.get(0).getCanvas().getId());
 

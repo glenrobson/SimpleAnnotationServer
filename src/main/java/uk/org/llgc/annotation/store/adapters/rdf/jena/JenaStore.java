@@ -8,6 +8,7 @@ import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.JenaTransactionException;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.Lang;
@@ -43,7 +44,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	protected Model addAnnotationSafe(final Map<String,Object> pJson) throws IOException {
 		String tJson = JsonUtils.toString(pJson);
 
-        _logger.debug("Converting: " + tJson);
+        _logger.debug("Converting: " + JsonUtils.toPrettyString(pJson));
 		Model tJsonLDModel = ModelFactory.createDefaultModel();
 
 		RDFDataMgr.read(tJsonLDModel, new ByteArrayInputStream(tJson.getBytes(Charset.forName("UTF-8"))), Lang.JSONLD);
@@ -56,7 +57,7 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 		return tJsonLDModel;
 	}
 
-    protected void storeCanvas(final String pGraphName, final Model pModel) throws IOException {
+    protected void storeModel(final String pGraphName, final Model pModel) throws IOException {
 		_dataset.begin(ReadWrite.WRITE) ;
 		_dataset.addNamedModel(pGraphName, pModel);
 		_dataset.commit();
@@ -87,7 +88,14 @@ public class JenaStore extends AbstractRDFStore implements StoreAdapter {
 	}
 
 	protected void begin(final ReadWrite pWrite) {
-		_dataset.begin(pWrite);
+        try {
+            _dataset.begin(pWrite);
+        } catch (JenaTransactionException tExcpt) {
+            System.err.println("In transaction so going to try and close it before re-openning");
+            tExcpt.printStackTrace();
+            this.end();
+            _dataset.begin(pWrite);
+        }
 	}
 	protected void end() {
 		_dataset.end();

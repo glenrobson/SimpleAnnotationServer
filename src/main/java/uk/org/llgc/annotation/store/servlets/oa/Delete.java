@@ -17,7 +17,11 @@ import org.apache.jena.rdf.model.Model;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.controllers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 public class Delete extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Delete.class.getName()); 
@@ -32,9 +36,21 @@ public class Delete extends HttpServlet {
 	}
 
 	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        UserService tUserService = new UserService(pReq);
+        AuthorisationController tAuth = new AuthorisationController(tUserService);
 		_logger.debug("uri " + pReq.getParameter("uri"));
 		String tURI = pReq.getParameter("uri");
-		_store.deleteAnnotation(tURI);
-		pRes.setStatus(pRes.SC_NO_CONTENT);
+
+        Annotation tSavedAnno = _store.getAnnotation(tURI);
+        if (tSavedAnno != null) {
+            if (tAuth.allowDelete(tSavedAnno)) {
+                _store.deleteAnnotation(tURI);
+                pRes.setStatus(pRes.SC_NO_CONTENT);
+            } else {
+                pRes.sendError(pRes.SC_FORBIDDEN, "You must be the owner of the annotation to delete it.");
+            }
+        } else {
+            pRes.setStatus(pRes.SC_NO_CONTENT, "Partly succeeded in that the annoation is no longer present but.. it wasn't there in the first place.");
+        }
 	}
 }

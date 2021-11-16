@@ -23,6 +23,9 @@ import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.controllers.UserService;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 public class Update extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(Update.class.getName());
@@ -42,22 +45,29 @@ public class Update extends HttpServlet {
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
 		try {
+            UserService tUserService = new UserService(pReq);
+            AuthorisationController tAuth = new AuthorisationController(tUserService);
+
 			Map<String, Object> tAnnotationJSON = _annotationUtils.readAnnotaion(pReq.getInputStream(), StoreConfig.getConfig().getBaseURI(pReq) + "/annotation");
-			if (tAnnotationJSON.get("@context") instanceof String) {
-				Map<String,Object> tJsonContext = (Map<String,Object>)JsonUtils.fromInputStream(super.getServletContext().getResourceAsStream("/contexts/iiif-2.0.json"));
-				tAnnotationJSON.put("@context",tJsonContext.get("@context"));//"http://localhost:8080/bor/contexts/iiif-2.0.json"); // must have a remote context for a remote repo
-			}
+
 			_logger.debug("JSON in:");
 			_logger.debug(JsonUtils.toPrettyString(tAnnotationJSON));
             Annotation tUpdate = new Annotation(tAnnotationJSON);
-			Annotation tSavedAnno = _store.updateAnnotation(tUpdate);
+            tUpdate.setCreator(tUserService.getUser());
 
-			pRes.setStatus(HttpServletResponse.SC_CREATED);
-			pRes.setContentType("application/ld+json; charset=UTF-8");
-			pRes.setCharacterEncoding("UTF-8");
-			_logger.debug("JSON out:");
-			_logger.debug(JsonUtils.toPrettyString(tSavedAnno.toJson()));
-			pRes.getWriter().println(JsonUtils.toPrettyString(tSavedAnno.toJson()));
+            Annotation tSavedAnno = _store.getAnnotation(tUpdate.getId());
+            if (tAuth.allowUpdate(tSavedAnno, tUpdate)) {
+                tSavedAnno = _store.updateAnnotation(tUpdate);
+
+                pRes.setStatus(HttpServletResponse.SC_CREATED);
+                pRes.setContentType("application/ld+json; charset=UTF-8");
+                pRes.setCharacterEncoding("UTF-8");
+                _logger.debug("JSON out:");
+                _logger.debug(JsonUtils.toPrettyString(tSavedAnno.toJson()));
+                pRes.getWriter().println(JsonUtils.toPrettyString(tSavedAnno.toJson()));
+            } else {
+                pRes.sendError(pRes.SC_FORBIDDEN, "You must be the owner of the annotation to edit it.");
+            }
 		} catch (IOException tException) {
 			System.err.println("Exception occured trying to add annotation:");
 			tException.printStackTrace();

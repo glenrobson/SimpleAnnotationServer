@@ -1,0 +1,78 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="/WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Users"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "content">
+            <main xmlns="http://www.w3.org/1999/xhtml" tabindex="-1" role="main" id="content" class="bs-docs-masthead">
+                <div class="container">
+                    <c:set var="collUser" value="#{userService.getUser(param['user'])}" scope="request" />
+                    <c:set var="manifest" value="#{storeService.getManifestId(param['manifest'])}" scope="request" />
+                    <h1>Annotated Canvases for user: <h:outputText value="#{collUser.name}"/></h1>
+
+                    <ul id="canvases" class="media-list">
+                        <c:forEach items="#{storeService.listAnnoPages(param['manifest'])}" var="annoPage" varStatus="iterMetadata">
+                            <li class="manifestSummary #{className}" id="shortId">
+                                <c:set var="short_id" value="#{annoPage.canvas.shortId}" />
+                                <c:set var="isEmpty" value="#{annoPage.count == 0}" />
+                                <c:set var="className" value="anno_canvas" />
+                                <div class="media-header-div">
+                                    <h3 class="box_type">   
+                                        Annotated Canvas
+                                    </h3>
+                                </div>
+                                <div class="media-heading">
+                                    <h5>
+                                        <c:if test="#{not empty annoPage.canvas.label}">
+                                            Label: <h:outputText value="#{annoPage.canvas.label}"/>
+                                        </c:if>
+                                        <c:if test="#{empty annoPage.canvas.label}">
+                                            Label: unlabelled
+                                        </c:if>
+                                    </h5>
+                                </div>    
+                                <div class="media">
+                                    <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
+                                        <img class="align-self-center mr-3 media-img canvas_thum" data-canvas-id="#{annoPage.canvas.id}" src=""/>
+                                    </a>
+                                    <div class="media-body">
+                                        <a href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}&amp;manifest=#{param['manifest']}&amp;user=#{param['user']}" class="btn btn-secondary mb-2" ><i class="fas fa-list"></i> List Annotations (<h:outputText value="#{annoPage.count}"/>)</a>
+
+                                        <p></p><p></p>
+                                        <div id="actionBar">
+                                            <span>
+                                                <c:if test="#{not isEmpty}">
+                                                    <a class="actionLink" href="/annotations/#{collUser.shortId}/#{short_id}.json" target="_blank">Download annotations</a>
+                                                </c:if>
+                                            </span>    
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </li>
+                        </c:forEach>
+                    </ul>
+                    <script src="/js/collection.js"></script>
+                    <script>
+                        let canvas_ids = document.getElementsByClassName("canvas_thum");
+                        fetch('#{manifest.URI}')
+                            .then(response => response.json())
+                                .then(function(manifest) {
+                                    for (let thumb of canvas_ids) {
+                                        let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 100);
+                                        thumb.src = url;
+                                    };
+                                });
+
+                    </script>
+
+                </div>
+            </main>
+        </ui:define>
+    </ui:composition>
+</html>

@@ -6,6 +6,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - echo Logging in to Docker Hub...
+      - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
       - IMAGE_NAME="sas"
       - REPOSITORY_URI=082101253860.dkr.ecr.eu-west-2.amazonaws.com/sas-live
       - IMAGE_TAG=prod_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
@@ -14,13 +16,13 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - echo Image_tag $IMAGE_TAG
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG -f docker/sas-tomcat/Dockerfile .
-      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest 
+      - docker build --build-arg AUTH_JSON_LOCATION=$AUTH_JSON_LOCATION --build-arg AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --build-arg AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI -t $REPOSITORY_URI:$IMAGE_TAG -t $REPOSITORY_URI:latest -f docker/sas-auth/Dockerfile .
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI
+      - docker push $REPOSITORY_URI:latest 
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
       - printf '[{"name":"sas-gdmrdigital-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 artifacts:

@@ -9,11 +9,11 @@ RUN mvn $MVN_ARGS package
 # runnable container stage
 FROM tomcat:9-jre11 AS runstage
 # remove tomcat default webapps and create data directory
-RUN rm -r /usr/local/tomcat/webapps/* && \
+RUN rm -rf /usr/local/tomcat/webapps/* && \
   mkdir /annotation-data
 # copy SAS from build image
 COPY --from=buildstage /usr/src/sas/target/simpleAnnotationStore /usr/local/tomcat/webapps/ROOT
 # copy properties
-COPY docker/sas-tomcat/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
+COPY docker/sas-elastic/sas.properties /usr/local/tomcat/webapps/ROOT/WEB-INF
 
 # use default port and entrypoint

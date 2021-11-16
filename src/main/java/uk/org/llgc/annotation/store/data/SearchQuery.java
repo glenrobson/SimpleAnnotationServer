@@ -18,11 +18,13 @@ import org.apache.http.NameValuePair;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+import uk.org.llgc.annotation.store.data.users.User;
+
 public class SearchQuery {
 	protected String _query = "";
 	protected List<String> _motivations = null;
 	protected List<DateRange> _dates = null;
-	protected List<String> _users = null;
+	protected List<User> _users = null;
 	protected int _resultsPerPage = 1000;
 	protected int _page = 0;
 	protected String _scope = "";
@@ -32,7 +34,7 @@ public class SearchQuery {
 		this.setQuery(pQuery);
 	}
 
-	public SearchQuery(final URI pURI) throws ParseException {
+	public SearchQuery(final URI pURI) throws ParseException, URISyntaxException {
 		this.setBaseURI(pURI);
 
 		List<NameValuePair> tParamsList = URLEncodedUtils.parse(pURI, Charset.forName("UTF-8"));
@@ -57,16 +59,18 @@ public class SearchQuery {
 		} 
 	}
 
-	protected String convertListToString(final String pKey, final List pList) {
+	protected String convertListToString(final String pKey, final List pList) throws UnsupportedEncodingException {
 		if (pList != null && !pList.isEmpty()) {
-			StringBuffer tBuff = new StringBuffer("&");
-			tBuff.append(pKey);
-			tBuff.append("=");
+			StringBuffer tBuff = new StringBuffer();
 			for (Object tChild: pList) {
-				tBuff.append(tChild);
+                if (tChild instanceof User) {
+                    tBuff.append(((User)tChild).getId());
+                } else {
+                    tBuff.append(tChild);
+                }
 				tBuff.append(" ");
 			}
-			return tBuff.toString().trim();
+			return "&" + pKey + "=" + URLEncoder.encode(tBuff.toString().trim(), "UTF-8");
 		} else {
 			return "";
 		}
@@ -81,20 +85,17 @@ public class SearchQuery {
         try {
             tBuff.append(URLEncoder.encode(_query, "UTF-8"));
             if (_motivations != null) {
-                tBuff.append("&");
-                tBuff.append(URLEncoder.encode(this.convertListToString("motivation", _motivations), "UTF-8"));
+                tBuff.append(this.convertListToString("motivation", _motivations));
             }
             if (_dates != null) {
-                tBuff.append("&");
                 tBuff.append(this.convertListToString("date", _dates));
             }	
             if (_users != null) {
-                tBuff.append("&");
-                tBuff.append(URLEncoder.encode(this.convertListToString("user", _users), "UTF-8"));
+                tBuff.append(this.convertListToString("user", _users));
             }	
             if (_page != 0) {
-                tBuff.append("&");
-                tBuff.append("page=" + _page);
+                tBuff.append("&page=");
+                tBuff.append(_page);
             }	
         } catch (UnsupportedEncodingException tExcpt) {
             // shouldn't happen as UTF-8 should be supported.
@@ -181,15 +182,32 @@ public class SearchQuery {
 		return _dates;
 	}
 
-	public void setUsers(final String pUsers) {
+	public void setUsers(final String pUsers) throws URISyntaxException {
 		StringTokenizer tTokenizer = new StringTokenizer(pUsers);
-		_users = new ArrayList<String>();
+		_users = new ArrayList<User>();
 		while (tTokenizer.hasMoreTokens()) {
-			_users.add(tTokenizer.nextToken());
+            User tUser = new User();
+            tUser.setId(tTokenizer.nextToken());
+			_users.add(tUser);
 		}
 	}
-
-	public List<String> getUsers() {
+    public void addUser(final User pUser) {
+        if (_users == null) {
+            _users = new ArrayList<User>();
+        }
+        boolean tFoundUser = false;
+        for (User tSearchUser : _users) {
+            if(tSearchUser.getId().equals(pUser.getId())) {
+                tFoundUser = true;
+                break;
+            }
+        }
+        if (!tFoundUser) {
+            _users.add(pUser);
+        }
+    }
+        
+	public List<User> getUsers() {
 		return _users;
 	}
 }

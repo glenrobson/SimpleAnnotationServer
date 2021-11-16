@@ -1,0 +1,24 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:param name="title" value="Login"></ui:param>
+        <ui:param name="path" value="login"></ui:param>
+        <ui:define name = "content">
+            <form class="mainbox" style="text-align: center !important;">
+                <img class="mb-4" src="/images/sas-gdmr-logo.png" alt="" width="200"/>
+                <h3>Sign in to SimpleAnnotationServer</h3>
+                <br/>
+                <div class="oauth_option">
+                    <c:forEach var="config" items="#{userService.config}">
+                        <a class="btn btn-lg btn-google btn-block btn-outline" href="login?type=#{ config.id}"><img src="#{config.button.logo}" height="25px"/> <h:outputText value="#{config.button.text}" escape="false" /></a>
+                    </c:forEach>
+                </div>
+            </form>
+        </ui:define>
+    </ui:composition>
+</html>

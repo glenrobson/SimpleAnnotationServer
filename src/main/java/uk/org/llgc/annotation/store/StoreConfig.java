@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -17,6 +19,7 @@ import uk.org.llgc.annotation.store.adapters.solr.SolrStore;
 import uk.org.llgc.annotation.store.adapters.elastic.ElasticStore;
 import uk.org.llgc.annotation.store.encoders.Encoder;
 import uk.org.llgc.annotation.store.AnnotationUtils;
+import uk.org.llgc.annotation.store.data.login.OAuthTarget;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,11 +35,14 @@ import java.net.URISyntaxException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.jsonldjava.utils.JsonUtils;
+
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name", "admin"};
     protected AnnotationUtils _annotationUtils = null;
+    protected List<OAuthTarget> _authTargets = null;
 
 	public StoreConfig() {
 		_props = null;
@@ -73,8 +79,53 @@ public class StoreConfig extends HttpServlet {
 		this.overloadConfigFromEnviroment(tProps);
         _annotationUtils = new AnnotationUtils(this.getRealPath("/contexts"), getEncoder());
         
+        try {
+            this.loadAuthConfig(this.getServletContext().getResourceAsStream("/WEB-INF/auth.json"));
+        } catch (IOException tExcpt) {
+			tExcpt.printStackTrace();
+			throw new ServletException("Failed to load auth config file due to: " + tExcpt.getMessage());
+        }
+        // Create admin user if it doesn't exist
 		initConfig(this);
-	}
+    }
+
+    protected void loadAuthConfig(final InputStream pConfigFile) throws IOException {
+        if (pConfigFile == null) {
+            _authTargets = null;
+        } else {    
+            Object tObject = JsonUtils.fromInputStream(pConfigFile);
+            _authTargets = new ArrayList<OAuthTarget>();
+            if (tObject instanceof Map) {
+                Map<String,Object> tSingleConfig = (Map<String,Object>)tObject;
+                // Don't add local auth to list of OAuth targets
+                _authTargets.add(new OAuthTarget(tSingleConfig));
+            } else {
+                List<Map<String,Object>> tConfigs = (List<Map<String,Object>>)tObject;
+                for (Map<String,Object> tConfig : tConfigs) {
+                    _authTargets.add(new OAuthTarget(tConfig));
+                }
+            }
+        }
+    }
+
+    // Is auth setup?
+    public boolean isAuth() {
+        return _authTargets != null;
+    }
+
+
+    public List<OAuthTarget> getAuthTargets() {
+        return _authTargets;
+    }
+
+    public OAuthTarget getAuthTarget(final String pType) {
+        for (OAuthTarget tTarget : _authTargets) {
+            if (tTarget.getId().equals(pType)) {
+                return tTarget;
+            }
+        }
+        return null; // no target found
+    }
 
     public AnnotationUtils getAnnotationUtils() {
         return _annotationUtils;
@@ -82,6 +133,36 @@ public class StoreConfig extends HttpServlet {
 
     public void setAnnotationUtils(final AnnotationUtils pAnnoUtils) {
         _annotationUtils = pAnnoUtils;
+    }
+
+    /**
+     * Default to true if config not present
+     */
+    public boolean isPublicCollections() {
+        if (_props.get("public_collections") == null) {
+            return true;
+        } else {
+            return _props.get("public_collections").equals("true");
+        }
+    }
+
+    public String getDefaultCollectionName() {
+        if (_props.get("default_collection_name") == null) {
+            return "Default";
+        } else {
+            return _props.get("default_collection_name");
+        }
+    }
+
+    /** 
+     * Returns null if there is no admin configured
+     */
+    public String getAdminEmail() {
+        return _props.get("admin");
+    }
+
+    public File getDataDir() {
+        return new File(_props.get("data_dir"));
     }
 
     public File getRealPath(final String pPath) {
@@ -128,9 +209,13 @@ public class StoreConfig extends HttpServlet {
 			String tServletName = "";
 			if (pReq.getServletPath().matches(".*/[a-zA-Z0-9.]*$")) {
 				tServletName = pReq.getServletPath().replaceAll("/[a-zA-Z0-9.]*$","").replaceAll("/","");
+                if (tServletName.isEmpty()) {
+                    tServletName = pReq.getServletPath().replaceAll("/","");
+                }
 			} else {
-				tServletName = pReq.getServletPath().replaceAll("/","");
+				tServletName = pReq.getServletPath().replaceAll("\\/","");
 			}
+
 			for (int i = tURL.length - 1; i >=0 ; i--) {
 				if (tURL[i].equals(tServletName)) {
 					tBase = i;

@@ -1,5 +1,0 @@
-dist: xenial
-language: java
-jdk:
-  - openjdk11
-script: chmod 755 ./travis/integration_tests.sh && ./travis/integration_tests.sh
