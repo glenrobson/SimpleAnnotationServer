@@ -23,9 +23,9 @@ import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.adapters.AbstractStoreAdapter;
 
-import org.elasticsearch.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.text.Text;
-import org.elasticsearch.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.RestClientBuilder;
