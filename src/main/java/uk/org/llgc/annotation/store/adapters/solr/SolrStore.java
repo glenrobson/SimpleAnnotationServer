@@ -438,7 +438,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
                     tLabel = pManifest.getCanvas(tFacetValue.getName()).getLabel();
                 }
                 Canvas tCanvas = new Canvas(tFacetValue.getName(), tLabel);
-                this.storeCanvas(tCanvas);
+                //this.storeCanvas(tCanvas);
                 tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacetValue.getCount(), pManifest)); 
             }
             return tAnnoPageCount;

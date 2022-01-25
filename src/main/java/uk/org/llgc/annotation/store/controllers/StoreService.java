@@ -360,6 +360,7 @@ public class StoreService {
     }
 
     public Collection getCollection(final String pID, final HttpServletRequest pRequest) throws IOException {
+        String tCollectionKey = "collection_";
         if (pID == null || pID.length() == 0) {
             UserService tService = new UserService(pRequest);
             User tUser = tService.getUser();
@@ -374,9 +375,17 @@ public class StoreService {
             Collection tDefaultCollection = new Collection();
             tDefaultCollection.setUser(tUser);
             tDefaultCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pRequest));
-            return _store.getCollection(tDefaultCollection.getId());
+            Collection tResponse = _store.getCollection(tDefaultCollection.getId());
+            this.putCacheObject(tCollectionKey + tResponse.getId(), tResponse);
+            return tResponse;
         } else {
-            return _store.getCollection(pID);
+            if (this.isCached(tCollectionKey + pID)) {
+                return (Collection)this.getCacheObject(tCollectionKey + pID);
+            } else {
+                Collection tResponse = _store.getCollection(pID);
+                this.putCacheObject(tCollectionKey + tResponse.getId(), tResponse);
+                return tResponse;
+            }
         }
     }
 }

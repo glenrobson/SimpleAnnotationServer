@@ -692,7 +692,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                 tLabel = pManifest.getCanvas(tFacet.getKeyAsString()).getLabel();
             }
             Canvas tCanvas = new Canvas(tFacet.getKeyAsString(), tLabel);
-            this.storeCanvas(tCanvas);
+            //this.storeCanvas(tCanvas);
             tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacet.getDocCount(), pManifest));
         }
 
