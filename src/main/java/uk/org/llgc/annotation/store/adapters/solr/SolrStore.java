@@ -204,7 +204,6 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	protected String indexManifestNoCheck(final String pShortId, final Manifest pManifest) throws IOException {
         pManifest.setShortId(pShortId);
         _manifestStore.indexManifestNoCheck(pManifest);
-        this.linkupOrphanCanvas(pManifest);
         return pManifest.getShortId();
     }
 
@@ -439,7 +438,7 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
                     tLabel = pManifest.getCanvas(tFacetValue.getName()).getLabel();
                 }
                 Canvas tCanvas = new Canvas(tFacetValue.getName(), tLabel);
-                this.storeCanvas(tCanvas);
+                //this.storeCanvas(tCanvas);
                 tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacetValue.getCount(), pManifest)); 
             }
             return tAnnoPageCount;

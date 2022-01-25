@@ -876,7 +876,12 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
         pManifest.setShortId(pShortId);
         pManifest.toJson().put(DC.identifier.getURI(), pShortId);
 		String tShortId = this.indexManifestOnly(pShortId, pManifest.toJson());
-		// Now update any annotations which don't contain a link to this manifest.
+		
+		return tShortId;
+	}
+
+    public void linkupOrphanCanvas(final Manifest pManifest) throws IOException {
+        // Now update any annotations which don't contain a link to this manifest.
 		String tQueryString =   "PREFIX oa: <http://www.w3.org/ns/oa#> " +
 										"PREFIX sc: <http://iiif.io/api/presentation/2#> " +
 										"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -933,8 +938,7 @@ public abstract class AbstractRDFStore extends AbstractStoreAdapter {
 			// found no annotations that weren't linked to this manifest
 		}
 
-		return tShortId;
-	}
+    }   
 
     public int getTotalAnnotations(final User pUser) {
         StringBuffer sparql = new StringBuffer("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n");
