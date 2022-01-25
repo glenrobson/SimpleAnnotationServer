@@ -204,7 +204,6 @@ public class SolrStore extends AbstractStoreAdapter implements StoreAdapter {
 	protected String indexManifestNoCheck(final String pShortId, final Manifest pManifest) throws IOException {
         pManifest.setShortId(pShortId);
         _manifestStore.indexManifestNoCheck(pManifest);
-        this.linkupOrphanCanvas(pManifest);
         return pManifest.getShortId();
     }
 

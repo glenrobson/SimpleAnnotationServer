@@ -302,6 +302,11 @@ public class StoreService {
     public List<Collection> getCollections(final HttpServletRequest pRequest) throws IOException {
         UserService tService = new UserService(pRequest);
         User tUser = tService.getUser();
+        String tKey = "get_collections_from_request_" + tService.getUser().getShortId();
+        if (this.isCached(tKey)) {
+            return (List<Collection>)this.getCacheObject(tKey);
+        }
+        _logger.debug("getCollections(pRequest)");
         List<Collection> tCollections = _store.getCollections(tUser);
         // if empty create the default collection
         if (tCollections.isEmpty()) {
@@ -314,7 +319,7 @@ public class StoreService {
         }
 
         Collections.sort(tCollections);
-
+        this.putCacheObject(tKey, tCollections);
         return tCollections;
     }
 
@@ -334,6 +339,7 @@ public class StoreService {
     }
 
     public List<Collection> getCollections(final User pUser) throws IOException {
+        _logger.debug("getCollections(pUser)");
         String tKey = "collections_for_user_" + pUser.getShortId();
 
         if (this.isCached(tKey)) {
