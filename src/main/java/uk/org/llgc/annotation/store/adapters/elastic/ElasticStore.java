@@ -267,6 +267,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
 // id, motivation, body, target, selector, within, data, short_id, label
 	public Annotation addAnnotationSafe(final Annotation pAnno) throws IOException {
+        _logger.debug("addAnnotationSafe");
         IndexRequest tIndex = new IndexRequest(_index);
         tIndex.id(pAnno.getId());
 
@@ -324,6 +325,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
 	public void deleteAnnotation(final String pAnnoId) throws IOException {
+        _logger.debug("deleteAnnotation");
         DeleteRequest tDelete = new DeleteRequest(_index);
         tDelete.id(pAnnoId);
 
@@ -332,6 +334,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException {
+        _logger.debug("getAnnotationsFromPage");
         BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
         tBuilder.must(QueryBuilders.termQuery("target.id", pPage.getId()));
 
@@ -353,6 +356,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
 	public Annotation getAnnotation(final String pId) throws IOException {
+        _logger.debug("getAnnotation");
         GetRequest tRequest = new GetRequest(_index, pId);
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
         if (tResponse != null && tResponse.getSource() != null) {
@@ -364,6 +368,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
 
 	public AnnotationList getAllAnnotations() throws IOException {
+        _logger.debug("getAllAnnotations");
         AnnotationList tList = new AnnotationList();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));
@@ -380,6 +385,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
     public void linkupOrphanCanvas(final Manifest pManifest) throws IOException {
+        _logger.debug("linkupOrphanCanvas");
         for (Canvas tCanvas : pManifest.getCanvases()) {
             BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
             tBuilder.mustNot(QueryBuilders.existsQuery("target.within.id"));
@@ -390,6 +396,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
             searchSourceBuilder.size(10000);
             SearchRequest searchRequest = new SearchRequest(_index);
             searchRequest.source(searchSourceBuilder);
+            _logger.debug("callingSearch");
             SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
             SearchHit[] searchHits = hits.getHits();
@@ -414,22 +421,28 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
 	protected String indexManifestNoCheck(final String pShortId, final Manifest pManifest) throws IOException {
+        _logger.debug("indexManifestNoCheck");
         pManifest.setShortId(pShortId);
         IndexRequest tIndex = new IndexRequest(_index);
         tIndex.id(pShortId);
         tIndex.source(manifest2Json(pManifest));
+        RefreshPolicy tGeneralPolicy = _policy;
+        _policy = RefreshPolicy.NONE;
 	
-        tIndex.setRefreshPolicy(_policy);
-        _client.index(tIndex, RequestOptions.DEFAULT);
 
-        this.linkupOrphanCanvas(pManifest);
+        //this.linkupOrphanCanvas(pManifest);
         for (Canvas tCanvas : pManifest.getCanvases()) {
             this.storeCanvas(tCanvas);
         }
+
+        _policy = tGeneralPolicy;
+        tIndex.setRefreshPolicy(_policy);
+        _client.index(tIndex, RequestOptions.DEFAULT);
         return pShortId;
     }
 
 	public String getManifestId(final String pShortId) throws IOException {
+        _logger.debug("getManifestId");
         GetRequest tRequest = new GetRequest(_index, pShortId);
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
@@ -442,6 +455,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	public Manifest getManifest(final String pId) throws IOException {
+        _logger.debug("getManifest");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.termQuery("id", pId));
         searchSourceBuilder.size(1);
@@ -462,6 +476,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	public Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException {
+        _logger.debug("getManifestCanvas");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.termQuery("canvases.id", pCanvas.getId()));
         SearchRequest searchRequest = new SearchRequest(_index);
@@ -477,6 +492,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	public List<Manifest> getManifests() throws IOException {
+        _logger.debug("getManifests");
         List<Manifest> tManifests = new ArrayList<Manifest>();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.size(10000);
@@ -495,6 +511,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 
     // TODO note this will return indexed manifests as well as non indexed..
 	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException {
+        _logger.debug("getSkeletonManifests");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(AggregationBuilders.terms("manifests").field("target.within.id").size(10000));
         if (!pUser.isAdmin()) {
@@ -516,6 +533,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public void storeCanvas(final Canvas pCanvas) throws IOException {
+        _logger.debug("storeCanvas: " + pCanvas.getId());
         IndexRequest tIndex = new IndexRequest(_index);
         tIndex.id(pCanvas.getShortId());
         Map<String, Object> tJson = pCanvas.toJson();
@@ -523,11 +541,14 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         tIndex.source(tJson);
 	
         tIndex.setRefreshPolicy(_policy);
+        _logger.debug("Index");
         _client.index(tIndex, RequestOptions.DEFAULT);
+        _logger.debug("done");
     }
 
 
     public Canvas resolveCanvas(final String pShortId) throws IOException {
+        _logger.debug("resolveCanvas");
         GetRequest tRequest = new GetRequest(_index, pShortId);
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
@@ -565,6 +586,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
 	public IIIFSearchResults search(final SearchQuery pQuery) throws IOException {
+        _logger.debug("search");
         BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
 		if (pQuery.getMotivations() != null && !pQuery.getMotivations().isEmpty()) {
             tBuilder.must(QueryBuilders.termsQuery("motivation", pQuery.getMotivations()));
@@ -649,6 +671,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
 	}
 
 	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException {
+        _logger.debug("listAnnoPages");
         BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
         tBuilder.must(QueryBuilders.termQuery("target.within.id", pManifest.getURI()));
         if (pUser != null) {
@@ -669,7 +692,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
                 tLabel = pManifest.getCanvas(tFacet.getKeyAsString()).getLabel();
             }
             Canvas tCanvas = new Canvas(tFacet.getKeyAsString(), tLabel);
-            this.storeCanvas(tCanvas);
+            //this.storeCanvas(tCanvas);
             tAnnoPageCount.add(new PageAnnoCount(tCanvas, (int)tFacet.getDocCount(), pManifest));
         }
 
@@ -677,6 +700,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }    
 
     public List<User> getUsers() throws IOException {
+        _logger.debug("getUsers");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.termQuery("type", "User"));
         searchSourceBuilder.size(10000);
@@ -694,6 +718,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public User getUser(final User pUser) throws IOException {
+        _logger.debug("getUser");
         GetRequest tRequest = new GetRequest(_index, pUser.getId());
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
@@ -707,6 +732,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
         }
     }
     public User saveUser(final User pUser) throws IOException {
+        _logger.debug("saveUser");
         User tSavedUser = getUser(pUser);
         if (tSavedUser != null) {
             // This is an update
@@ -725,6 +751,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public User deleteUser(final User pUser) throws IOException {
+        _logger.debug("deleteUser");
         DeleteRequest tDelete = new DeleteRequest(_index);
         tDelete.id(pUser.getId());
 
@@ -838,6 +865,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public Collection createCollection(final Collection pCollection) throws IOException {
+        _logger.debug("createCollection");
         IndexRequest tIndex = new IndexRequest(_index);
         tIndex.id(pCollection.getId());
         Map<String, Object> tJson = this.object2json(pCollection);
@@ -850,6 +878,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public List<Collection> getCollections(final User pUser) throws IOException {
+        _logger.debug("getCollections(pUser)");
         BoolQueryBuilder tBuilder = QueryBuilders.boolQuery();
         tBuilder.must(QueryBuilders.termQuery("type", "Collection"));
         tBuilder.must(QueryBuilders.termQuery("creator", pUser.getId()));
@@ -874,6 +903,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
         
     public List<Collection> getCollections(final SearchSourceBuilder tQuery) throws IOException { 
+        _logger.debug("getCollections(SearchSourceBuilder)");
         SearchRequest searchRequest = new SearchRequest(_index);
         searchRequest.source(tQuery);
         SearchResponse searchResponse = _client.search(searchRequest, RequestOptions.DEFAULT);
@@ -892,6 +922,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public Collection getCollection(final String pId) throws IOException {
+        _logger.debug("getCollection(id)");
         GetRequest tRequest = new GetRequest(_index, pId);
         GetResponse tResponse = _client.get(tRequest, RequestOptions.DEFAULT);
 
@@ -903,6 +934,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public void deleteCollection(final Collection pCollection) throws IOException {
+        _logger.debug("deleteCollection()");
         DeleteRequest tDelete = new DeleteRequest(_index);
         tDelete.id(pCollection.getId());
 
@@ -911,6 +943,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public int getTotalAnnotations(final User pUser) throws IOException {
+        _logger.debug("getTotalAnnotations()");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         if (pUser == null) {
             searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));
@@ -928,6 +961,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public int getTotalManifests(final User pUser) throws IOException {
+        _logger.debug("getTotalManifests()");
         if (pUser == null) {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.query(QueryBuilders.termQuery("type", "sc:Manifest"));
@@ -952,6 +986,7 @@ public class ElasticStore extends AbstractStoreAdapter implements StoreAdapter {
     }
 
     public int getTotalAnnoCanvases(final User pUser) throws IOException {
+        _logger.debug("getTotalAnnoCanvases()");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         if (pUser == null) {
             searchSourceBuilder.query(QueryBuilders.termQuery("type", "oa:Annotation"));

@@ -32,9 +32,15 @@ public interface StoreAdapter {
 
     // CRUD manifests
 	public String indexManifest(final Manifest pManifest) throws IOException;
+    /**
+     * Check for any canvases that have been annotated before the Manifest was loaded
+     * Call after index Manifest
+     */ 
+    public void linkupOrphanCanvas(final Manifest pManifest) throws IOException;
+
 	public List<Manifest> getManifests() throws IOException;
 	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException;
-	public String getManifestId(final String pShortId) throws IOException;
+    public String getManifestId(final String pShortId) throws IOException;
 	public Manifest getManifest(final String pId) throws IOException;
 	public Manifest getManifestForCanvas(final Canvas pCanvasId) throws IOException; 
 

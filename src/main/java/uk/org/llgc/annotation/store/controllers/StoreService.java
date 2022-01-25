@@ -302,6 +302,11 @@ public class StoreService {
     public List<Collection> getCollections(final HttpServletRequest pRequest) throws IOException {
         UserService tService = new UserService(pRequest);
         User tUser = tService.getUser();
+        String tKey = "get_collections_from_request_" + tService.getUser().getShortId();
+        if (this.isCached(tKey)) {
+            return (List<Collection>)this.getCacheObject(tKey);
+        }
+        _logger.debug("getCollections(pRequest)");
         List<Collection> tCollections = _store.getCollections(tUser);
         // if empty create the default collection
         if (tCollections.isEmpty()) {
@@ -314,7 +319,7 @@ public class StoreService {
         }
 
         Collections.sort(tCollections);
-
+        this.putCacheObject(tKey, tCollections);
         return tCollections;
     }
 
@@ -334,6 +339,7 @@ public class StoreService {
     }
 
     public List<Collection> getCollections(final User pUser) throws IOException {
+        _logger.debug("getCollections(pUser)");
         String tKey = "collections_for_user_" + pUser.getShortId();
 
         if (this.isCached(tKey)) {
@@ -354,6 +360,7 @@ public class StoreService {
     }
 
     public Collection getCollection(final String pID, final HttpServletRequest pRequest) throws IOException {
+        String tCollectionKey = "collection_";
         if (pID == null || pID.length() == 0) {
             UserService tService = new UserService(pRequest);
             User tUser = tService.getUser();
@@ -368,9 +375,17 @@ public class StoreService {
             Collection tDefaultCollection = new Collection();
             tDefaultCollection.setUser(tUser);
             tDefaultCollection.createDefaultId(StoreConfig.getConfig().getBaseURI(pRequest));
-            return _store.getCollection(tDefaultCollection.getId());
+            Collection tResponse = _store.getCollection(tDefaultCollection.getId());
+            this.putCacheObject(tCollectionKey + tResponse.getId(), tResponse);
+            return tResponse;
         } else {
-            return _store.getCollection(pID);
+            if (this.isCached(tCollectionKey + pID)) {
+                return (Collection)this.getCacheObject(tCollectionKey + pID);
+            } else {
+                Collection tResponse = _store.getCollection(pID);
+                this.putCacheObject(tCollectionKey + tResponse.getId(), tResponse);
+                return tResponse;
+            }
         }
     }
 }
