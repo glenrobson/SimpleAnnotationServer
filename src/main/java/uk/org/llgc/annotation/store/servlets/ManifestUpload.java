@@ -224,7 +224,7 @@ public class ManifestUpload extends HttpServlet {
             }
             tUser = _store.getUser(tUser);
 
-            String tURI = _store.getManifestId(tFilename.split("\\.")[0]);
+            String tURI = _store.getManifestId(tFilename.split("\\.json")[0]);
             Manifest tManifest = new Manifest();
             tManifest.setURI(tURI);
 
