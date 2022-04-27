@@ -66,8 +66,8 @@
                                         <div class="media-body">
                                             <a href="canvases.xhtml?manifest=#{manifest.URI}&amp;user=#{collUser.id}" class="btn btn-secondary mb-2"><i class="fas fa-eye"></i> Browse Annotations</a>
 
-                                            <p><b>Number of annotated canvases: </b> <h:outputText value='#{storeService.countAnnotations(manifest).get("canvas_count")}'/></p>
-                                            <p><b>Number of annotations: </b> <h:outputText value='#{storeService.countAnnotations(manifest).get("total_annos")}'/></p>
+                                            <p><b>Number of annotated canvases: </b> <h:outputText value='#{storeService.countAnnotations(manifest, collUser).get("canvas_count")}'/></p>
+                                            <p><b>Number of annotations: </b> <h:outputText value='#{storeService.countAnnotations(manifest, collUser).get("total_annos")}'/></p>
                                             <div id="actionBar">
                                                 <span>
                                                     <a class="actionLink" href="/manifests/#{collUser.shortId}/#{manifest.shortId}.json" target="_blank">Manifest URL</a>

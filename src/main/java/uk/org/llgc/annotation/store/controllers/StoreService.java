@@ -74,6 +74,11 @@ public class StoreService {
     }
 
     public Map<String,Integer> countAnnotations(final Manifest pManifest) {
+        UserService tService = new UserService();
+        return countAnnotations(pManifest, tService.getUser());
+    }
+
+    public Map<String,Integer> countAnnotations(final Manifest pManifest, final User pUser) {
         String tKey = "stats_" + pManifest.getShortId();
         HttpServletRequest tRequest = this.getRequest();
         if (tRequest.getAttribute(tKey) != null) {
@@ -84,8 +89,7 @@ public class StoreService {
         tStats.put("canvas_count", 0);
         tStats.put("total_annos", 0);
         try {
-            UserService tService = new UserService();
-            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest, tService.getUser());
+            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest, pUser);
             tStats.put("canvas_count", tCount.size());
 
             int tTotalAnnos = 0;
