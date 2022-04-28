@@ -22,14 +22,19 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.exceptions.PermissionDenied;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.controllers.AuthorisationController;
+import uk.org.llgc.annotation.store.controllers.StoreService;
+import uk.org.llgc.annotation.store.test.mocks.ControllerMocks;
+
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -541,6 +546,58 @@ public class TestUsers extends TestUtils {
         tFoundUser = _store.getUser(tSearchUser);
 
         assertNull("Found user but expected it to be deleted.", tFoundUser);
+    }
+
+    @Test 
+    public void testAuthLevelListAnnos() throws IOException, IDConflictException, MalformedAnnotation, URISyntaxException, PermissionDenied {
+        // test listAnnoPages with non admin user but retrieving annos of someone else. 
+        // Should be refused
+        User tUser = new User();
+        tUser.setId("http://example.com/user1");
+        tUser.setShortId("user1");
+        tUser.setName("Glen");
+        tUser.setEmail("glen@glen.com");
+        tUser.setAuthenticationMethod("test");
+        tUser.setAdmin(false);
+        tUser.setPicture("http://picture.net");
+        _store.saveUser(tUser);
+
+         Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+         Annotation tAnno = new Annotation(tAnnotation);
+         tAnno.setCreator(tUser);
+
+         Annotation tStoredAnno = _store.addAnnotation(tAnno);
+
+         User tNormalUser = new User();
+         tNormalUser.setId("http://example.com/normal");
+         tNormalUser.setShortId("normal");
+         tNormalUser.setAuthenticationMethod("test");
+         tNormalUser.setAdmin(false);
+         _store.saveUser(tNormalUser);
+
+
+        StoreService storeService = ControllerMocks.getStoreServiceWithUser(tUser);
+        List<PageAnnoCount> tAnnos = storeService.listAnnoPages("http://example.com/manfiest/test/manifest.json", tUser);
+
+        assertEquals("With same user there should be 1 result. ", 1, tAnnos.size());
+
+        Exception exception = assertThrows(PermissionDenied.class, () -> {
+            final StoreService tNormalUserService = ControllerMocks.getStoreServiceWithUser(tNormalUser);
+            tNormalUserService.listAnnoPages("http://example.com/manfiest/test/manifest.json", tUser);
+        });    
+         
+        User tAdmin = new User();
+        tAdmin.setId("http://example.com/admin");
+        tAdmin.setShortId("admin");
+        tAdmin.setAuthenticationMethod("test");
+        tAdmin.setAdmin(true);
+        _store.saveUser(tAdmin);
+
+        storeService = ControllerMocks.getStoreServiceWithUser(tAdmin);
+        tAnnos = storeService.listAnnoPages("http://example.com/manfiest/test/manifest.json", tUser);
+
+        assertEquals("Admin should be able to see the 1 result. ", 1, tAnnos.size());
+
     }
 
 }

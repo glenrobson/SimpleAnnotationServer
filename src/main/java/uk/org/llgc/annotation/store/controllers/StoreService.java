@@ -13,6 +13,8 @@ import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.StoreConfig;
+import uk.org.llgc.annotation.store.exceptions.PermissionDenied;
+import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 
 import java.util.Base64;
 import java.util.zip.Deflater;
@@ -59,26 +61,46 @@ public class StoreService {
         _store = StoreConfig.getConfig().getStore();
     }
 
-    public List<PageAnnoCount> listAnnoPages(final String pURI) {
-        Manifest tManifest = new Manifest();
-        tManifest.setURI(pURI);
-
-        try {
-            UserService tService = new UserService();
-            return _store.listAnnoPages(tManifest, tService.getUser());
-        } catch (IOException tExcpt) {
-            System.err.println("Failed to retrieve stats for " + pURI);
-            tExcpt.printStackTrace();
-        }
-        return new ArrayList<PageAnnoCount>();
-    }
-
-    public Map<String,Integer> countAnnotations(final Manifest pManifest) {
+    protected User getCurrentUser() {
         UserService tService = new UserService();
-        return countAnnotations(pManifest, tService.getUser());
+        return tService.getUser();
     }
 
-    public Map<String,Integer> countAnnotations(final Manifest pManifest, final User pUser) {
+    protected AuthorisationController getAuth() {
+        return new AuthorisationController();
+    }
+
+    protected User getCurrentUser(final HttpServletRequest pRequest) {
+        UserService tService = new UserService(pRequest);
+        return tService.getUser();
+    }
+
+    public List<PageAnnoCount> listAnnoPages(final String pURI) throws PermissionDenied {
+        return listAnnoPages(pURI, this.getCurrentUser());
+    }
+
+    public List<PageAnnoCount> listAnnoPages(final String pURI, final User pUser) throws PermissionDenied {
+        if (this.getAuth().allowReadSomeoneElseAnnos(pUser, this.getCurrentUser())) { 
+            Manifest tManifest = new Manifest();
+            tManifest.setURI(pURI);
+
+            try {
+                return _store.listAnnoPages(tManifest, pUser);
+            } catch (IOException tExcpt) {
+                System.err.println("Failed to retrieve stats for " + pURI);
+                tExcpt.printStackTrace();
+            }
+            return new ArrayList<PageAnnoCount>();
+        } else {
+            throw new PermissionDenied("User " + this.getCurrentUser().getName() + "(" + this.getCurrentUser().getId() + ") cannot access " + pUser.getName() + "(" + pUser.getId() + ") annotations as user is not an admin");
+        }
+    }
+
+    public Map<String,Integer> countAnnotations(final Manifest pManifest) throws PermissionDenied {
+        return countAnnotations(pManifest, this.getCurrentUser());
+    }
+
+    public Map<String,Integer> countAnnotations(final Manifest pManifest, final User pUser) throws PermissionDenied {
         String tKey = "stats_" + pManifest.getShortId();
         HttpServletRequest tRequest = this.getRequest();
         if (tRequest.getAttribute(tKey) != null) {
@@ -88,22 +110,17 @@ public class StoreService {
         Map<String,Integer> tStats = new HashMap<String,Integer>();
         tStats.put("canvas_count", 0);
         tStats.put("total_annos", 0);
-        try {
-            List<PageAnnoCount> tCount = _store.listAnnoPages(pManifest, pUser);
-            tStats.put("canvas_count", tCount.size());
+        List<PageAnnoCount> tCount = this.listAnnoPages(pManifest.getURI(), pUser);
+        tStats.put("canvas_count", tCount.size());
 
-            int tTotalAnnos = 0;
-            for (PageAnnoCount tPageCount : tCount) {
-                tTotalAnnos += tPageCount.getCount();
-            }
-            tStats.put("total_annos", tTotalAnnos);
+        int tTotalAnnos = 0;
+        for (PageAnnoCount tPageCount : tCount) {
+            tTotalAnnos += tPageCount.getCount();
+        }
+        tStats.put("total_annos", tTotalAnnos);
 
-            if (tRequest.getAttribute(tKey) == null) {
-                tRequest.setAttribute(tKey, tStats);
-            }
-        } catch (IOException tExcpt) {
-            System.err.println("Failed to retrieve stats for " + pManifest.getURI());
-            tExcpt.printStackTrace();
+        if (tRequest.getAttribute(tKey) == null) {
+            tRequest.setAttribute(tKey, tStats);
         }
         return tStats;
     }
@@ -119,8 +136,7 @@ public class StoreService {
 
     public Manifest getEnhancedManifest(final String pManifestURI) throws IOException {
         Manifest tManifest = this.getManifestId(pManifestURI);
-        UserService tService = new UserService();
-        return this.getEnhancedManifest(tService.getUser(), tManifest, false);
+        return this.getEnhancedManifest(this.getCurrentUser(), tManifest, false);
     }
 
     public Manifest getEnhancedManifest(final User pUser, final Manifest pManifest, final boolean regenerate) throws IOException {
@@ -170,8 +186,7 @@ public class StoreService {
         }
         try {
             //new  PageAnnoCount(final Canvas pCanvas, final int pCount, final Manifest pManifest)
-            UserService tService = new UserService();
-            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest, tService.getUser());
+            List<PageAnnoCount> tAnnosCount =  _store.listAnnoPages(pManifest, this.getCurrentUser());
             List<PageAnnoCount> tFullCanvasList = new ArrayList<PageAnnoCount>();
             for (Canvas tCanvas : pManifest.getCanvases()) {
                 PageAnnoCount tCanvasCount = new PageAnnoCount(tCanvas, 0, pManifest);
@@ -227,8 +242,7 @@ public class StoreService {
 
     public List<Manifest> getAnnoManifests() {
         try {
-            UserService tService = new UserService();
-            return _store.getSkeletonManifests(tService.getUser());
+            return _store.getSkeletonManifests(this.getCurrentUser());
         } catch (IOException tExcpt) {
             return new ArrayList<Manifest>();
         }
@@ -244,8 +258,7 @@ public class StoreService {
     }
 
     public AnnotationList getAnnotations(final String pCanvasURI) {
-        UserService tUserService = new UserService();
-        return this.getAnnotations(pCanvasURI, tUserService.getUser());
+        return this.getAnnotations(pCanvasURI, this.getCurrentUser());
     }
 
     public AnnotationList getAnnotations(final String pCanvasURI, final User pUser) {
@@ -304,9 +317,8 @@ public class StoreService {
     }
 
     public List<Collection> getCollections(final HttpServletRequest pRequest) throws IOException {
-        UserService tService = new UserService(pRequest);
-        User tUser = tService.getUser();
-        String tKey = "get_collections_from_request_" + tService.getUser().getShortId();
+        User tUser = this.getCurrentUser(pRequest);
+        String tKey = "get_collections_from_request_" + tUser.getShortId();
         if (this.isCached(tKey)) {
             return (List<Collection>)this.getCacheObject(tKey);
         }
@@ -352,8 +364,7 @@ public class StoreService {
 
         List<Collection> tCollections = new ArrayList<Collection>();
 
-        UserService tService = new UserService();
-        User tUser = tService.getUser();
+        User tUser = this.getCurrentUser();
         if (tUser.isAdmin()) {
             tCollections = _store.getCollections(pUser);
 
@@ -366,8 +377,7 @@ public class StoreService {
     public Collection getCollection(final String pID, final HttpServletRequest pRequest) throws IOException {
         String tCollectionKey = "collection_";
         if (pID == null || pID.length() == 0) {
-            UserService tService = new UserService(pRequest);
-            User tUser = tService.getUser();
+            User tUser = this.getCurrentUser(pRequest);
 
             List<Collection> tCollections = this.getCollections(pRequest);
             for (Collection tCollection : tCollections) {

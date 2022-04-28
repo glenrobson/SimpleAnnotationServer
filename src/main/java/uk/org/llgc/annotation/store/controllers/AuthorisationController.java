@@ -130,4 +130,12 @@ public class AuthorisationController {
     public boolean deleteUser(final User pAdmin, final User pTarget) {
         return pAdmin.isAdmin();
     }
+
+    public boolean allowReadSomeoneElseAnnos(final User pAnnoOwner, final User pRequester) {
+        if (pAnnoOwner.getId().equals(pRequester.getId())) {
+            return true;
+        } else {
+            return pRequester.isAdmin();
+        }    
+    }
 }
