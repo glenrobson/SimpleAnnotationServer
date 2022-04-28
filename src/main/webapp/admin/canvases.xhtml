@@ -16,7 +16,7 @@
                     <h1>Annotated Canvases for user: <h:outputText value="#{collUser.name}"/></h1>
 
                     <ul id="canvases" class="media-list">
-                        <c:forEach items="#{storeService.listAnnoPages(param['manifest'])}" var="annoPage" varStatus="iterMetadata">
+                        <c:forEach items="#{storeService.listAnnoPages(param['manifest'], collUser)}" var="annoPage" varStatus="iterMetadata">
                             <li class="manifestSummary #{className}" id="shortId">
                                 <c:set var="short_id" value="#{annoPage.canvas.shortId}" />
                                 <c:set var="isEmpty" value="#{annoPage.count == 0}" />
@@ -47,7 +47,7 @@
                                         <div id="actionBar">
                                             <span>
                                                 <c:if test="#{not isEmpty}">
-                                                    <a class="actionLink" href="/annotations/#{collUser.shortId}/#{short_id}.json" target="_blank">Download annotations</a>
+                                                    <a class="actionLink" href="/annotations/#{collUser.shortId}/#{short_id}.json" download="#{short_id}.json">Download annotations</a>
                                                 </c:if>
                                             </span>    
                                         </div>
