@@ -22,8 +22,10 @@ import java.util.Map;
 import java.util.HashMap;
 
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
+import uk.org.llgc.annotation.store.data.stats.TopLevel;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
@@ -58,12 +60,16 @@ public class StatsService {
         }
     }
 
-    public List<PageAnnoCount> getAnnoCountData(final Manifest pManifest) throws IOException {
-        if (_manifestAnnoCount.containsKey(pManifest.getShortId())) {
-            return _manifestAnnoCount.get(pManifest.getShortId());
+    public List<PageAnnoCount> getAnnoCountData(final Manifest pManifest, final User pUser) throws IOException {
+        String tKey = "anno-count-" + pManifest.getShortId();
+        if (pUser != null) {
+            tKey += "-" + pUser.getShortId();
+        }
+        if (_manifestAnnoCount.containsKey(tKey)) {
+            return _manifestAnnoCount.get(tKey);
         } else {
-            List<PageAnnoCount> tPageCounts = _store.listAnnoPages(pManifest);
-            _manifestAnnoCount.put(pManifest.getShortId(), tPageCounts);
+            List<PageAnnoCount> tPageCounts = _store.listAnnoPages(pManifest, pUser);
+            _manifestAnnoCount.put(tKey, tPageCounts);
             return tPageCounts;
         }
     }
@@ -74,9 +80,14 @@ public class StatsService {
     }
 
     public PieChartModel getPercentAnnotated(final Manifest pManifest) {
+        UserService tUserService = new UserService();
+        return this.getPercentAnnotated(pManifest, tUserService.getUser());
+    }
+
+    public PieChartModel getPercentAnnotated(final Manifest pManifest, final User pUser) {
         PieChartModel tModel = new PieChartModel();
         try {
-            int tTranscribedTotal = this.getAnnoCountData(pManifest).size();
+            int tTranscribedTotal = this.getAnnoCountData(pManifest, pUser).size();
             int tCanvasTotal = pManifest.getCanvases().size();
             int tToDoTotal = tCanvasTotal - tTranscribedTotal;
             tModel.set("Canvases with annotations: " + (int)(((double)tTranscribedTotal / tCanvasTotal) * 100) + "%", tTranscribedTotal);
@@ -97,11 +108,16 @@ public class StatsService {
     }
 
     public BarChartModel getManifestAnnoCount(final Manifest pManifest) {
+        UserService tUserService = new UserService();
+        return getManifestAnnoCount(pManifest, tUserService.getUser());
+    }
+
+    public BarChartModel getManifestAnnoCount(final Manifest pManifest, final User pUser) {
         BarChartModel model = new BarChartModel();
         try {
 
             // Get list of all annotations
-            List<PageAnnoCount> tPageCounts = this.getAnnoCountData(pManifest);
+            List<PageAnnoCount> tPageCounts = this.getAnnoCountData(pManifest, pUser);
             System.out.println(tPageCounts);
      
             ChartSeries annoCounts = new ChartSeries();
@@ -148,5 +164,27 @@ public class StatsService {
             tExcpt.printStackTrace();
         }
         return model;
+    }
+
+    public TopLevel getTopLevelStats() {
+        TopLevel tStats = new TopLevel();
+        try {
+            tStats.setTotalAnnotations(_store.getTotalAnnotations(null));
+            tStats.setTotalManifests(_store.getTotalManifests(null));
+            tStats.setTotalAnnoCanvases(_store.getTotalAnnoCanvases(null));
+        } catch (IOException tExcpt) {
+            tExcpt.printStackTrace();
+        }
+
+        return tStats;
+    }
+
+    public Map<String, Integer> getAuthMethodStats() {
+        try {
+            return _store.getTotalAuthMethods();
+        } catch (IOException tExcpt) {
+            tExcpt.printStackTrace();
+        }
+        return new HashMap<String,Integer>();
     }
 }

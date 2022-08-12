@@ -14,6 +14,7 @@ import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import java.io.IOException;
 
@@ -31,9 +32,15 @@ public interface StoreAdapter {
 
     // CRUD manifests
 	public String indexManifest(final Manifest pManifest) throws IOException;
+    /**
+     * Check for any canvases that have been annotated before the Manifest was loaded
+     * Call after index Manifest
+     */ 
+    public void linkupOrphanCanvas(final Manifest pManifest) throws IOException;
+
 	public List<Manifest> getManifests() throws IOException;
 	public List<Manifest> getSkeletonManifests(final User pUser) throws IOException;
-	public String getManifestId(final String pShortId) throws IOException;
+    public String getManifestId(final String pShortId) throws IOException;
 	public Manifest getManifest(final String pId) throws IOException;
 	public Manifest getManifestForCanvas(final Canvas pCanvasId) throws IOException; 
 
@@ -46,9 +53,18 @@ public interface StoreAdapter {
 	public AnnotationList getAnnotationsFromPage(final User pUser, final Canvas pPage) throws IOException;
 
     // CRUD users
+    /**
+     * This will save the user if it doesnt exist
+     */
     public User retrieveUser(final User pUser) throws IOException;
+    /**
+     * This will get the user using the ID
+     */
     public User getUser(final User pUser) throws IOException;
     public User saveUser(final User pUser) throws IOException;
+    public User deleteUser(final User pUser) throws IOException;
+    public List<User> getUsers() throws IOException;
+    public List<User> getUsers(final String pGroup) throws IOException;
 
     // CRUD Collections
     public Collection createCollection(final Collection pCollection) throws IOException;
@@ -60,5 +76,13 @@ public interface StoreAdapter {
     // Used in ListAnnotations can we get rid?
 	public AnnotationList getAllAnnotations() throws IOException;
     // Stats
-	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest) throws IOException; // TODO
+    // If user is null then all user annotations will be returned
+	public List<PageAnnoCount> listAnnoPages(final Manifest pManifest, final User pUser) throws IOException; // TODO
+
+    // Pass in null user to get total annotations
+    public int getTotalAnnotations(final User pUser) throws IOException;
+    public int getTotalManifests(final User pUser) throws IOException;
+    public int getTotalAnnoCanvases(final User pUser) throws IOException;
+    public Map<String,Integer> getTotalAuthMethods() throws IOException;
+
 }

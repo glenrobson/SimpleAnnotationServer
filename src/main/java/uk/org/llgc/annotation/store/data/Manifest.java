@@ -5,12 +5,15 @@ import com.github.jsonldjava.utils.JsonUtils;
 import java.io.IOException;
 
 import java.net.URL;
+import java.net.MalformedURLException;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.AnnotationUtils;
        
 public class Manifest {
@@ -104,11 +107,124 @@ public class Manifest {
         }
     }
 
+    public String getAnnoListURL(final Canvas pCanvas, final String pBaseURI, final User pUser) {
+        StringBuffer tAnnoListURL = new StringBuffer(pBaseURI);
+        if (!pBaseURI.endsWith("/")) {
+            tAnnoListURL.append("/");
+        }
+
+        tAnnoListURL.append("annotations/");
+        tAnnoListURL.append(pUser.getShortId());
+        tAnnoListURL.append("/");
+        tAnnoListURL.append(pCanvas.getShortId());
+        tAnnoListURL.append(".json");
+
+        return tAnnoListURL.toString();
+    }
+
+    public void addAnnotationLists(final String pBaseURI, final User pUser) {
+        Map<String,Object> tSequence = null;
+        if (_json.get("sequences") instanceof List ) {
+            if (!((List)_json.get("sequences")).isEmpty()) {
+                tSequence = ((List<Map<String, Object>>)_json.get("sequences")).get(0);
+            }
+        } else {
+            tSequence = (Map<String, Object>)_json.get("sequences");
+        }
+
+        if (tSequence != null) {
+            StringBuffer tAnnoListURL = new StringBuffer(pBaseURI);
+            if (!pBaseURI.endsWith("/")) {
+                tAnnoListURL.append("/");
+            }
+
+            tAnnoListURL.append("annotations/");
+            tAnnoListURL.append(pUser.getShortId());
+            tAnnoListURL.append("/##CANVAS_SHORT##.json");
+
+            for (Map<String, Object> tCanvasJson : (List<Map<String, Object>>)tSequence.get("canvases")) {
+                /*  "otherContent": [ {
+                        "@id": "http://localhost:8888/annotation/list/41eef9939cd722b17ef4c177c2afa12d.json",
+                        "@type": "sc:AnnotationList",
+                        "label": "My fantastic annotations"
+                    }]*/
+                Canvas tCanvas = new Canvas((String)tCanvasJson.get("@id"), (String)tCanvasJson.get("label"));
+
+                Map<String, Object> tOtherContent = new HashMap<String, Object>();
+                tOtherContent.put("@id", tAnnoListURL.toString().replace("##CANVAS_SHORT##", tCanvas.getShortId()));
+                tOtherContent.put("@type", "sc:AnnotationList");
+                tOtherContent.put("label", "Annotations for canvas " + tCanvas.getLabel());
+
+                this.addKey(tCanvasJson, "otherContent", tOtherContent, true);
+            }
+        }
+    }
+
+    /**
+     * Add key but if it already exists add it to a list
+     * @param alwaysList if true then always set data as a list.
+     */
+    protected void addKey(final Map<String,Object> pParent, final String pKey, final Map<String,Object> pData, final boolean alwaysList) {
+        List tValueList = new ArrayList();
+
+        // If service already exists then add to it. 
+        if (pParent.containsKey(pKey)) {
+            if (pParent.get(pKey) instanceof Map) {
+                tValueList.add(pParent.get(pKey));
+                pParent.put(pKey, tValueList);
+            }
+
+            ((List)pParent.get(pKey)).add(pData);
+        } else {
+            if (alwaysList) {
+                tValueList.add(pData);
+                pParent.put(pKey, tValueList);
+            } else {
+                pParent.put(pKey, pData);
+            }
+        }
+    }
+
+    public URL getSearchURL(final String pBaseURI, final User pUser) {
+        StringBuffer tSearchURL = new StringBuffer(pBaseURI);
+        if (!pBaseURI.endsWith("/")) {
+            tSearchURL.append("/");
+        }
+
+        tSearchURL.append("search-api/");
+        tSearchURL.append(pUser.getShortId());
+        tSearchURL.append("/");
+        tSearchURL.append(this.getShortId());
+        tSearchURL.append("/search");
+        try {
+            return new URL(tSearchURL.toString());
+        } catch (MalformedURLException tExcpt) {
+            System.out.println("Unable to create URL from " + tSearchURL.toString());
+            tExcpt.printStackTrace();
+        }
+        return null;
+    }
+
+    public void addSearchService(final String pBaseURI, final User pUser) {
+        /* "service": {
+            "@context": "http://iiif.io/api/search/0/context.json"
+            "@id": "http://localhost:8888/search-api/5bbada360fbe7c8f72a8153896686398/search",
+            "profile": "http://iiif.io/api/search/0/search",
+        },*/
+
+        Map<String,Object> tService = new HashMap<String,Object>();
+        tService.put("@context", "http://iiif.io/api/search/0/context.json");
+        tService.put("@id", this.getSearchURL(pBaseURI, pUser).toString());
+        tService.put("profile", "http://iiif.io/api/search/0/search");
+
+        this.addKey(_json, "service", tService, false);
+    }
+
     public String getType() {
         try {
             return (String)getJson().get("@type");
         } catch (IOException tExcpt) {
-            tExcpt.printStackTrace();
+            //tExcpt.printStackTrace();
             return null;
         }
     }
@@ -148,6 +264,9 @@ public class Manifest {
 	 */
 	public void setURI(final String pURI) {
 	     _URI = pURI;
+         if (_json != null) {
+             _json.put("@id", pURI);
+         }
 	}
 	
 	/**
@@ -198,6 +317,37 @@ public class Manifest {
 	     _label = pLabel;
 	}
 
+    public String getLogo() {
+        String tLogo = null;
+        
+        if (_json != null && _json.containsKey("logo")) {
+            if (_json.get("logo") instanceof Map && ((Map)_json.get("logo")).containsKey("@id")) {
+                tLogo = (String)((Map<String,Object>)_json.get("logo")).get("@id");
+            } else if (_json.get("logo") instanceof String) {
+                tLogo = (String)_json.get("logo");
+            }
+        }
+
+        return tLogo;
+    }
+
+    public String getDescription(){
+        String tDesc = null;
+        if (_json != null && _json.containsKey("description")) {
+            tDesc = (String)_json.get("description");
+        }
+
+        return tDesc;
+    }
+    
+    public String getAttribution() {
+        String tAtt = null;
+        if (_json != null && _json.containsKey("attribution")) {
+            tAtt = (String)_json.get("attribution");
+        }
+
+        return tAtt;
+    }
     
     public List<Canvas> getCanvases() {
         return _canvases;

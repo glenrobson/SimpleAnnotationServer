@@ -112,8 +112,10 @@ public class TestSearch extends TestUtils {
 		List<Manifest> tLoadedManifests = _store.getManifests();
 		assertTrue("Store shouldn't have any manifests registered but answered " + tLoadedManifests, tLoadedManifests != null && tLoadedManifests.isEmpty());
 
-		Map<String, Object> tManifest = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
-		String tShortId = _store.indexManifest(new Manifest(tManifest));
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifest.json").getFile()));
+        Manifest tManifest = new Manifest(tManifestJson);
+		String tShortId = _store.indexManifest(tManifest);
+        _store.linkupOrphanCanvas(tManifest);
 
 		tLoadedManifests = _store.getManifests();
 		assertEquals("Store should have 1 manifests registered but answered " + tLoadedManifests, 1, tLoadedManifests.size());
@@ -320,8 +322,10 @@ public class TestSearch extends TestUtils {
         _store.addAnnotationList(new AnnotationList(tAnnotationListJSON));
 
         // Upload Manifest
-		Map<String, Object> tManifest = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/examples/Cambrian_1804-01-28.json").getFile())); //annotaiton list
-        String tShortId = _store.indexManifest(new Manifest(tManifest));
+		Map<String, Object> tManifestJson = (Map<String, Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/examples/Cambrian_1804-01-28.json").getFile())); //annotaiton list
+        Manifest tManifest = new Manifest(tManifestJson);
+        String tShortId = _store.indexManifest(tManifest);
+        _store.linkupOrphanCanvas(tManifest);
 
         SearchQuery tQuery = new SearchQuery("chimney");
 		tQuery.setScope("http://dams.llgc.org.uk/iiif/newspaper/issue/3320640/manifest.json");

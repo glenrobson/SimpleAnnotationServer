@@ -21,11 +21,15 @@
                 if(typeof(iiifcontent) == "string" && iiifcontent.length > 0) {
                     mirador += "?iiif-content=" + iiifcontent;
                 } else {
+                    var canvas = getURLParameter("canvas");
                     var manifest = getURLParameter("manifest");
                     var manifestAdded = false;
                     if(typeof(manifest) == "string" && manifest.length > 0) {
                         miradorURl += "?manifest=" + manifest;
                         manifestAdded = true;
+                        if (typeof(canvas) == "string" && canvas.length > 0) {
+                            miradorURl += "&amp;canvas=" + canvas;
+                        }
                     }
                     var collection = getURLParameter("collection");
                     if(typeof(collection) == "string" && collection.length > 0) {

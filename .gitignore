@@ -10,4 +10,5 @@ src/main/webapp/stats/*.json
 auth.json
 *auth.json
 node_modules
-src/main/webapp/js/mirador/*
+node
+node_modules

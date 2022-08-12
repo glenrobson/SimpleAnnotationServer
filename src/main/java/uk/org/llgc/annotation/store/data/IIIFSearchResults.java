@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.net.URI;
+
 import java.io.IOException;
 
 public class IIIFSearchResults extends AnnotationList {
@@ -12,8 +14,9 @@ public class IIIFSearchResults extends AnnotationList {
     protected int _startIndex = -1;
     protected String _next = "";
 
-    public IIIFSearchResults() {
+    public IIIFSearchResults(final URI pID) {
         super();
+        super.setId(pID.toString());
     }
 
     public Map<String, Object> toJson() throws IOException {

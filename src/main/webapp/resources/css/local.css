@@ -52,6 +52,9 @@ body {
     padding-bottom: 0px;
     margin-bottom: 0px;
 }
+.container h1 {
+    margin-top: 10px;
+}
 .mainform {
     height:100%;
     margin-right: auto;
@@ -146,8 +149,26 @@ ul.nav a.vote {
 }
 #main_panel {
     position: absolute;
-    left: 265px;
-    right: 10px;
+    left: 250px;
+    right: 0px;
+}
+
+#main_panel h1 {
+    padding: 2px 2px 2px 15px;
+    max-width: 80%;
+    display: inline-block;
+}
+
+#main_panel p {
+    padding: 2px 2px 2px 15px;
+}
+
+#main_panel button {
+    margin-left: 15px;
+}
+
+#main_panel ul {
+    padding: 2px 15px 2px 15px;
 }
 
 #sidebar {
@@ -186,14 +207,7 @@ ul.nav a.vote {
     background: #6d6d6f;/*#6d7fcc;*/
 }
 
-#addCollectionButton {
-    position: absolute;
-    top: 17px;
-    right: 12px;
-    color: #403c3c;
-}
-
-#manifests {
+.media-list {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -211,37 +225,43 @@ ul.nav a.vote {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.manifestSummary {
-    position: relative;
-    padding: 5px 5px 5px 20px;
-    margin-bottom: 5px;
-    border: 1px solid #ddd;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
-    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
-    -webkit-transition: all 0.2s ease-in-out;
-    -moz-transition: all 0.2s ease-in-out;
-    -o-transition: all 0.2s ease-in-out;
-    transition: all 0.2s ease-in-out;
-}
 
 .logo {
     height: 30px;
+    box-shadow: 1px 1px 1px #888;
+    float:right;
+    margin: 5px;
 }
 
+.site_logo {
+    background-color: white;
+}
+
+.site_logo img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 200px;
+}
 #actionBar {
     border-top: 1px dotted #ddd;
+    vertical-align: top;
+}
+
+#logoBar {
     text-align: right;
+    padding: 5px;
 }
 
 #actionBar button {
     margin:5px;
 }
-#actionBar a {
+
+.actionLink {
     margin:5px;
+    vertical-align: top;
+    color: black;
+    text-decoration: underline;
 }
 
 #demo_video {
@@ -269,30 +289,90 @@ ul.nav a.vote {
     padding-bottom: 50px;
 }
 
-#deleteCollection {
-    position: absolute;
-    right: 10px;
-    top: 10px
+.header_bar {
+    background-color: #eaebee;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 7px 10px 0px 0px;
+    width: 100%;
+    overflow: hidden;
+}
+.header_bar h1 {
+    color: #707070;
+    display:inline;
+}
+
+.header_bar a {
+    color: #8e8f91;
+    float:right;
+    font-size: 2em;
+    padding: 2px 15px 2px 2px;
+}
+
+.header_bar .back_header {
+    color:#4f4f4f;
+    font-size: 1.6em;
+}
+
+#collectionCS {
+    padding: 2px 2px 2px 15px;
+    color: #676767;
+    overflow: hidden;
+    float:right;
+}
+.right_options {
+    overflow: hidden;
+    float:right;
+    padding-top: 8px;
+}
+
+.right_options .selected {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.manifestSummary h5 {
+    padding: 5px 5px 5px 15px;
+}
+
+.manifestSummary {
+    position: relative;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 }
 
 .media-header-div {
     width: 100%;
+    background-color: #eaebee;
+    overflow:hidden;
+    height:50px;
+    line-height:50px;
 }
 
-.media-header-div img {
-    position:relative;
-    float:right;
+/*.media-header-div span {
+    color: #676767;
+    padding: 2px 12px 2px 15px;
+}*/
+.media-header-div h3 {
+    display: inline-block;
+    padding-left: 15px;
+    color: #707070;
+    font-size: 1.35rem;
 }
 
 .media-header-div button {
     position:relative;
     right:0px;
-    float:none;
-}
-
-.manifestSummary h5 {
-    border-bottom: 1px dotted #ddd;
-    padding: 12px 40px 12px 40px;
+    float:right;
 }
 
 .media-header-div h5 {
@@ -303,7 +383,144 @@ ul.nav a.vote {
     width: 80%;
 }
 
+.media-heading {
+    border-bottom: 1px dotted #ddd;
+}
+
 .media a {
     margin-bottom: 10px;
     margin-top: 5px;
+    margin-left: 5px;
+}
+
+#collection_link span {
+    display: inline;
+    margin-right: 10px;
+}
+
+.tag {
+    background: lightGray;
+    color: #222;
+    border-radius: 6px;
+    padding: 0 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 12;
+    font-weight: bold;
+    border: 1px solid #aaa;
+    display: inline-block;
+}
+
+.options {
+    padding: 10px 15px 5px 15px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.option_links {
+    display: inline-block;
+    padding-top: 8px;
+}
+
+.options a {
+    text-decoration: underline;
+    padding-right: 15px;
+    padding-left: 15px;
+    color:black;
+}
+
+.option_links #contentStateFull div {
+    line-height: unset;
+}
+
+.option_links .contentStateLogo {
+    margin: 0px;
+}
+
+.option_links #iiifURL {
+    margin-left: 15px;
+}
+
+.content_state {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
+}
+
+#contentStateFull {
+    float:right;
+    border-radius: .25rem;
+    height: 100%;
+}
+
+.contentStateLogo {
+    margin: 5px;
+    display: inline-block;
+}
+
+.iiif_logo {
+    height: 25px;
+    vertical-align: bottom;
+    margin-left: 0px !important;
+}
+
+#contentStateFull input {
+    width: 300px;
+}
+
+.cs_text_wrapper {
+    padding:5px;
+}
+
+.cs_text_wrapper a {
+    color: #676767;
+    text-decoration: underline;
+}
+
+.copyToClipboard {
+    margin-left: 0px !important;
+    border: 1px solid #a3a8ac;
+    padding-left: 7px;
+    padding-right: 7px !important;
+}
+
+.copyToClipboard i {
+    color:#6c757d;
+}
+
+.content-state-text {
+    padding-left:5px;
+    color: #676767;
+    text-decoration: underline;
+}
+
+.canvas {
+    display:none;
+}
+
+.anno_canvas {
+}
+
+#editor-container p {
+    padding-top: 5px;
+    padding-left: 5px;
+}
+
+.inline_list {
+    list-style-type: none;
+    overflow: hidden;
+}
+
+.inline_list li {
+    float: left;
+    padding: 10px;
+}
+
+.center_info {
+    width: 100%;
+    padding: 0px;
+    text-align: center;
+    color: #676767;
+    text-decoration: underline;
 }

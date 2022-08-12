@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <ui:composition template="WEB-INF/templates/collectionBarLayout.xhtml">
+        <ui:param name="title" value="Annotations"></ui:param>
+        <ui:param name="path" value="/"></ui:param>
+        <ui:define name = "main">
+            <c:set var="manifest" value="#{storeService.getEnhancedManifest(param['manifest'])}" scope="request" />
+
+            <div class="header_bar">
+                <a class="back_header" href="collections.xhtml?collection=#{param['collection']}">&lt; Back to Collection</a>
+                <h1 id="collectionName">Share this Manifest</h1>
+            </div>
+
+            <p>In order to share your annotations outside of SAS, we create a copy of the original manifest and link all of the annotation files. Each annotation file is associated with a particular canvas (e.g. a page or image).</p>
+
+            <p>This link will always load the latest version of your work. If you remove an annotation, the next time someone loads this URL, that annotation will no longer appear. If you add an annotation, the next time someone loads the URL, the new annotation will be part of the manifest.</p>
+            <p>
+                <ui:include src="WEB-INF/templates/content-state.xhtml">
+                    <ui:param name="url" value="#{manifest.URI}" />
+                    <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
+                    <ui:param name="mode" value="open" />
+                    <ui:param name="text" value="Manifest with Annotations" />
+                </ui:include>
+            </p>
+
+            <p><strong>You can use this link with the following viewers:</strong></p>
+
+            <ul class="inline_list">
+                <li>
+                    <a href="https://projectmirador.org/embed/?iiif-content=#{manifest.URI}" target="_blank">
+                        <img src="images/mirador_large.png"/>
+                        
+                        <p class="center_info">Mirador 3 Viewer</p>
+                    </a>    
+                </li>
+
+                <li>
+                    <a href="http://universalviewer.io/uv.html?manifest=#{manifest.URI}" target="_blank">
+                        <img src="images/uv_large.png"/>
+
+                        <p class="center_info">Universal Viewer</p>
+                    </a>    
+                </li>
+            </ul>
+
+            <hr/>
+
+            <p>If the source of the manifest updates their metadata you may want to re-generate this copy of the manifest. Click the button below to regenerate the SAS copy of the manifest with the annotation and search links included:
+            </p>
+
+            <p>
+                <a href="#" class="btn btn-primary mb-2" onclick="regenerate(); return false">Regenerate</a>
+            </p>
+
+            <script>
+                function regenerate() {
+                    hideMessage("regenerateMessage");
+                    setLoading("regenerateButton", "Regenerating");
+                    $('#regenerate').modal('toggle');
+
+                    fetch("#{manifest.URI}?regenerate=true", {
+                        method: 'GET', // or 'PUT'
+                    })
+                    .then(response => response.json())
+                    .then(manifest => {
+                        showMessage("regenerateMessage", "info", "Manifest Updated");
+                        clearLoading("regenerateButton", "Done");
+                    });
+                }
+            </script>
+            <ui:include src="WEB-INF/templates/dialogues/regenerate.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+</html>
+

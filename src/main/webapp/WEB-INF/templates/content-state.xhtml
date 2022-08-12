@@ -1,0 +1,47 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <ui:composition>
+        <c:if test="#{mode eq 'logo'}">
+            <a href="#{url}" title="#{description}" target="_blank">
+                <img src="/images/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/>
+            </a>
+        </c:if>
+        <c:if test="#{mode eq 'open'}">
+            <a href="#{url}" title="#{description}" target="_blank">
+                <img src="/images/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}"/>
+            </a>
+            <span class="cs_text_wrapper">
+                <a href="#{url}" target="_blank"><h:outputText value="#{text}" /></a>
+                <a class="copyToClipboard" data-link="#{url}" onclick="copyClipboard(event)">
+                    <i class="fas fa-paste"></i>
+                </a>
+            </span>
+
+            <ui:include src="dialogues/copy.xhtml"/>
+        </c:if>
+        <c:if test="#{mode eq 'full'}">
+            <span id="contentStateFull" >
+                <div class="content_state" onmouseover="showURLBar(this)" onmouseout="hideURLBar(this)">
+                    <input type="text" id="iiifURL" placeHolder="#{url}" value="#{url}" readonly="readonly" style="display:none"/>
+                    <a class="copyToClipboard" data-link="#{url}" onclick="copyClipboard(event)" style="display:none">
+                        <i class="fas fa-paste"></i>
+                    </a>
+                    <a class="contentStateLogo" href="#{url}" title="#{description}" target="_blank">
+                        <c:set var="textValue" value="Manifest Link" />
+                        <c:if test="#{not empty text}">
+                            <c:set var="textValue" value="#{text}" />
+                        </c:if>
+                        
+                        <img class="iiif_logo" src="/images/logo-iiif-34x30.png" draggable="true" ondragstart="drag()" data-link="#{url}" onClick="copyClipboard"/><span class="content-state-text"><h:outputText value="#{textValue}" /></span>
+                    </a>
+                </div>        
+            </span>
+            <ui:include src="dialogues/copy.xhtml"/>
+        </c:if>
+
+    </ui:composition>
+</html>    

@@ -13,6 +13,7 @@ import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.IIIFSearchResults;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.stats.TopLevel;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
 import uk.org.llgc.annotation.store.AnnotationUtils;
@@ -24,10 +25,14 @@ import com.github.jsonldjava.utils.JsonUtils;
 
 import org.apache.jena.query.ReadWrite;
 
+import java.net.URISyntaxException;
+
 import java.io.IOException;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Date;
 
 public abstract class AbstractStoreAdapter implements StoreAdapter {
@@ -204,15 +209,66 @@ public abstract class AbstractStoreAdapter implements StoreAdapter {
     public User retrieveUser(final User pUser) throws IOException {
         User tSavedUser = this.getUser(pUser);
         if (tSavedUser == null) {
+            // first try changing from https to http
+            try {
+                String tOriginalId = pUser.getId();
+                pUser.setId(pUser.getId().replaceAll("https://","http://"));
+                tSavedUser = this.getUser(pUser);
+                if (tSavedUser == null) {
+                    pUser.setId(tOriginalId);
+                    return this.saveUser(pUser);
+                } else {
+                    return tSavedUser;
+                }
+            } catch (URISyntaxException tExcpt) {
+                _logger.error("Failed to replace http uri with https for " + pUser.getId());
+                tExcpt.printStackTrace();
+                return this.saveUser(pUser);
+            }
+        // overwrite saved user if short ID is out of sync
+        } else if (!pUser.getShortId().equals(tSavedUser.getShortId()) || !pUser.getName().equals(tSavedUser.getName())) {
             return this.saveUser(pUser);
         } else {
             return tSavedUser;
         }
     }
 
+    public List<User> getUsers(final String pGroup) throws IOException { 
+        List<User> tGroup = new ArrayList<User>();
+        if (pGroup.equals("admin")) {
+            List<User> tAllUsers = this.getUsers();
+            for (User tUser : tAllUsers) {
+                if (tUser.isAdmin()) {
+                    tGroup.add(tUser);
+                }
+            }
+        }
+        return tGroup;
+    }
+
     public void updateCollection(final Collection pCollection) throws IOException {
         this.deleteCollection(pCollection);
         this.createCollection(pCollection);
+    }
+
+    public abstract int getTotalAnnotations(final User pUser) throws IOException;
+    public abstract int getTotalManifests(final User pUser) throws IOException;
+    public abstract int getTotalAnnoCanvases(final User pUser) throws IOException;
+
+    public Map<String,Integer> getTotalAuthMethods() throws IOException {
+        Map<String, Integer> tStats = new HashMap<String,Integer>();
+        List<User> tUsers = this.getUsers();
+
+        for (User tUser : tUsers) {
+            if (tStats.get(tUser.getAuthenticationMethod()) == null) {
+                tStats.put(tUser.getAuthenticationMethod(), 1);
+            } else {
+                int tCurrent = tStats.get(tUser.getAuthenticationMethod());
+                tStats.put(tUser.getAuthenticationMethod(), tCurrent + 1);
+            }
+        }
+        
+        return tStats;
     }
 
 	public abstract Manifest getManifestForCanvas(final Canvas pCanvas) throws IOException;

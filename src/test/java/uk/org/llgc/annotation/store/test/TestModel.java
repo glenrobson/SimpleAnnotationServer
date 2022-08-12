@@ -152,7 +152,7 @@ public class TestModel extends TestUtils {
 
         Manifest tManifest = new Manifest();
         tManifest.setURI("http://example.com/manfiest/test/manifest.json");
-        List<PageAnnoCount> tAnnoList = _store.listAnnoPages(tManifest);
+        List<PageAnnoCount> tAnnoList = _store.listAnnoPages(tManifest, null);
         assertEquals("Unexpected amount of annotations for this manifest.", 1, tAnnoList.size());
         assertEquals("Unexpected canvas ID", "http://example.com/manfiest/test/canvas/1.json", tAnnoList.get(0).getCanvas().getId());
 

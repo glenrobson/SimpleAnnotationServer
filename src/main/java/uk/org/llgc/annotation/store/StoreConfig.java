@@ -40,7 +40,7 @@ import com.github.jsonldjava.utils.JsonUtils;
 public class StoreConfig extends HttpServlet {
 	protected static Logger _logger = LogManager.getLogger(StoreConfig.class.getName());
 	protected Map<String,String> _props = null;
-    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name"};
+    public final String[] ALLOWED_PROPS = {"baseURI","encoder","store","data_dir","store","repo_url","solr_connection","elastic_connection", "public_collections", "default_collection_name", "admin"};
     protected AnnotationUtils _annotationUtils = null;
     protected List<OAuthTarget> _authTargets = null;
 
@@ -85,8 +85,9 @@ public class StoreConfig extends HttpServlet {
 			tExcpt.printStackTrace();
 			throw new ServletException("Failed to load auth config file due to: " + tExcpt.getMessage());
         }
+        // Create admin user if it doesn't exist
 		initConfig(this);
-	}
+    }
 
     protected void loadAuthConfig(final InputStream pConfigFile) throws IOException {
         if (pConfigFile == null) {
@@ -95,7 +96,9 @@ public class StoreConfig extends HttpServlet {
             Object tObject = JsonUtils.fromInputStream(pConfigFile);
             _authTargets = new ArrayList<OAuthTarget>();
             if (tObject instanceof Map) {
-                _authTargets.add(new OAuthTarget((Map<String,Object>)tObject));
+                Map<String,Object> tSingleConfig = (Map<String,Object>)tObject;
+                // Don't add local auth to list of OAuth targets
+                _authTargets.add(new OAuthTarget(tSingleConfig));
             } else {
                 List<Map<String,Object>> tConfigs = (List<Map<String,Object>>)tObject;
                 for (Map<String,Object> tConfig : tConfigs) {
@@ -109,6 +112,7 @@ public class StoreConfig extends HttpServlet {
     public boolean isAuth() {
         return _authTargets != null;
     }
+
 
     public List<OAuthTarget> getAuthTargets() {
         return _authTargets;
@@ -144,10 +148,21 @@ public class StoreConfig extends HttpServlet {
 
     public String getDefaultCollectionName() {
         if (_props.get("default_collection_name") == null) {
-            return "Inbox";
+            return "Default";
         } else {
             return _props.get("default_collection_name");
         }
+    }
+
+    /** 
+     * Returns null if there is no admin configured
+     */
+    public String getAdminEmail() {
+        return _props.get("admin");
+    }
+
+    public File getDataDir() {
+        return new File(_props.get("data_dir"));
     }
 
     public File getRealPath(final String pPath) {

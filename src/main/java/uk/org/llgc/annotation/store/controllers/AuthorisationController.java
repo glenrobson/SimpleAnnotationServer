@@ -6,7 +6,7 @@ import javax.annotation.PostConstruct;
 
 import javax.faces.context.FacesContext;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 
 import uk.org.llgc.annotation.store.data.users.User;
 import uk.org.llgc.annotation.store.data.login.OAuthTarget;
@@ -15,6 +15,8 @@ import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.Collection;
+import uk.org.llgc.annotation.store.data.Manifest;
+import uk.org.llgc.annotation.store.data.Canvas;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -27,15 +29,14 @@ import java.io.IOException;
 @ManagedBean
 public class AuthorisationController {
     protected UserService _users = null;
-    protected HttpSession _session = null;
 
     public AuthorisationController() {
         _users = new UserService();
         init();
     }
 
-    public AuthorisationController(final HttpSession pSession) {
-        _users = new UserService(pSession);
+    public AuthorisationController(final HttpServletRequest pRequest) {
+        _users = new UserService(pRequest);
         init();
     }
     public AuthorisationController(final UserService pService) {
@@ -100,6 +101,18 @@ public class AuthorisationController {
         }
     }
 
+    // currently just allow but this could be made more complicated
+    public boolean allowReadManifest(final Manifest pManifest, final User pRequestedUser) {
+        return true;
+    }
+
+    public boolean allowSearchManifest(final Manifest pManifest, final User pRequestedUser) {
+        return true;
+    }
+    public boolean allowReadAnnotations(final Canvas pCanvas, final User pRequestedUser) {
+        return true;
+    }
+
     public boolean allowExportAllAnnotations() {
         User tLoggedInUser = this.getUser();
         return tLoggedInUser.isAdmin(); // Only admin can do this
@@ -112,5 +125,17 @@ public class AuthorisationController {
             }
         }
         return false;
+    }
+
+    public boolean deleteUser(final User pAdmin, final User pTarget) {
+        return pAdmin.isAdmin();
+    }
+
+    public boolean allowReadSomeoneElseAnnos(final User pAnnoOwner, final User pRequester) {
+        if (pAnnoOwner.getId().equals(pRequester.getId())) {
+            return true;
+        } else {
+            return pRequester.isAdmin();
+        }    
     }
 }

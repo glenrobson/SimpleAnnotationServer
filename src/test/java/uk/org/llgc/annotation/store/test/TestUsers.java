@@ -22,13 +22,19 @@ import uk.org.llgc.annotation.store.AnnotationUtils;
 import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.exceptions.IDConflictException;
 import uk.org.llgc.annotation.store.exceptions.MalformedAnnotation;
+import uk.org.llgc.annotation.store.exceptions.PermissionDenied;
 import uk.org.llgc.annotation.store.data.Manifest;
 import uk.org.llgc.annotation.store.data.Annotation;
 import uk.org.llgc.annotation.store.data.AnnotationList;
 import uk.org.llgc.annotation.store.data.SearchQuery;
 import uk.org.llgc.annotation.store.data.Canvas;
+import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.controllers.AuthorisationController;
+import uk.org.llgc.annotation.store.controllers.StoreService;
+import uk.org.llgc.annotation.store.test.mocks.ControllerMocks;
+
 
 import com.github.jsonldjava.utils.JsonUtils;
 
@@ -393,6 +399,205 @@ public class TestUsers extends TestUtils {
         }
         assertTrue("Hoped to find user1's annos in list but it wasn't found.",tAnnoIds.contains("http://example.com/user1/anno1"));
         assertTrue("Hoped to find user2's annos in list but it wasn't found.",tAnnoIds.contains("http://example.com/user2/anno1"));
+    }
+
+
+    @Test
+    public void testGetAllUser() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAuthenticationMethod("test");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        _store.saveUser(tUser1);
+
+        User tUser2 = new User();
+        tUser2.setId("http://example.com/user2");
+        tUser2.setShortId("user2");
+        tUser2.setName("name2");
+        tUser2.setEmail("name2@glen.com");
+        tUser2.setAuthenticationMethod("test");
+        tUser2.setAdmin(false);
+        tUser2.setPicture("http://picture.net");
+        _store.saveUser(tUser2);
+
+        List<User> tAllUsers = _store.getUsers();
+        assertEquals("Expected two users.", 2, tAllUsers.size());
+
+        assertTrue("Unexpected user ID for first user: " + tAllUsers.get(0).getId(), tAllUsers.get(0).getId().equals(tUser1.getId()) || tAllUsers.get(0).getId().equals(tUser2.getId()));
+        assertTrue("Unexpected user ID for second user: " + tAllUsers.get(1).getId(), tAllUsers.get(1).getId().equals(tUser1.getId()) || tAllUsers.get(1).getId().equals(tUser2.getId()));
+        assertTrue("Somehow duplicated user... " + tAllUsers.get(0).getId(), !tAllUsers.get(0).getId().equals(tAllUsers.get(1).getId()));
+    }
+
+    @Test
+    public void testGetAdminUser() throws IOException, URISyntaxException {
+        LocalUser tUser1 = new LocalUser();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        tUser1.setPassword("password1");
+        _store.saveUser(tUser1);
+
+        LocalUser tUser2 = new LocalUser();
+        tUser2.setId("http://example.com/user2");
+        tUser2.setShortId("user2");
+        tUser2.setName("name2");
+        tUser2.setEmail("name2@glen.com");
+        tUser2.setAdmin(true);
+        tUser2.setPicture("http://picture.net");
+        tUser2.setPassword("password2");
+        _store.saveUser(tUser2);
+
+        User tUser3 = new LocalUser();
+        tUser3.setId("http://example.com/user3");
+        tUser3.setShortId("user3");
+        tUser3.setName("name3");
+        tUser3.setEmail("name3@glen.com");
+        tUser3.setAdmin(false);
+        tUser3.setPicture("http://picture.net");
+        _store.saveUser(tUser3);
+
+        List<User> tLocalUsers = _store.getUsers("admin");
+        assertEquals("Expected two users.", 2, tLocalUsers.size());
+
+        boolean tFoundUser1 = false;
+        boolean tFoundUser2 = false;
+        for (User tUser : tLocalUsers) {
+            assertTrue("Found unexpected User when I expected LocalUser: " + tUser, tUser instanceof LocalUser);
+            LocalUser tLocalUser = (LocalUser)tUser;
+            if (tLocalUser.getId().equals(tUser1.getId())) {
+                assertTrue("Failed to authenticate user1", tLocalUser.authenticate("password1")); 
+                tFoundUser1 = true;
+            }
+            if (tLocalUser.getId().equals(tUser2.getId())) {
+                assertTrue("Failed to authenticate user2", tLocalUser.authenticate("password2")); 
+                tFoundUser2 = true;
+            }
+        }
+        assertTrue("I didn't find all of the expected users in: " + tLocalUsers, tFoundUser1 && tFoundUser2);
+    }
+
+    /**
+     * This is useful if you have switch the baseURI from http to https and need 
+     * to retain the users
+     */ 
+    @Test 
+    public void testBaseURISwitch() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        _store.saveUser(tUser1);
+
+        User tHttpsUser = new User();
+        tHttpsUser.setId("https://example.com/user1");
+            
+        User tFoundUser = _store.retrieveUser(tHttpsUser);
+
+        assertNotNull("Couldn't retrieve user using the https url", tFoundUser);
+        assertEquals("Unexpected id, expected to find http id", tUser1.getId(), tFoundUser.getId());
+
+        assertTrue("Expected to find an admin user", tFoundUser.isAdmin());
+    }
+
+    @Test 
+    public void testHttpsURL() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("https://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        User tFoundUser = _store.retrieveUser(tUser1);
+
+        assertEquals("Expected https URL", "https://example.com/user1", tFoundUser.getId());
+    }
+
+
+     @Test 
+    public void testDeleteUser() throws IOException, URISyntaxException {
+        User tUser1 = new User();
+        tUser1.setId("http://example.com/user1");
+        tUser1.setShortId("user1");
+        tUser1.setName("name1");
+        tUser1.setEmail("name1@glen.com");
+        tUser1.setAdmin(true);
+        tUser1.setPicture("http://picture.net");
+        _store.saveUser(tUser1);
+
+        User tSearchUser = new User();
+        tSearchUser.setId(tUser1.getId());
+        User tFoundUser = _store.retrieveUser(tSearchUser);
+
+        assertNotNull("Couldn't retrieve user before deleting it", tFoundUser);
+
+        _store.deleteUser(tSearchUser);
+
+        tFoundUser = _store.getUser(tSearchUser);
+
+        assertNull("Found user but expected it to be deleted.", tFoundUser);
+    }
+
+    @Test 
+    public void testAuthLevelListAnnos() throws IOException, IDConflictException, MalformedAnnotation, URISyntaxException, PermissionDenied {
+        // test listAnnoPages with non admin user but retrieving annos of someone else. 
+        // Should be refused
+        User tUser = new User();
+        tUser.setId("http://example.com/user1");
+        tUser.setShortId("user1");
+        tUser.setName("Glen");
+        tUser.setEmail("glen@glen.com");
+        tUser.setAuthenticationMethod("test");
+        tUser.setAdmin(false);
+        tUser.setPicture("http://picture.net");
+        _store.saveUser(tUser);
+
+         Map<String, Object> tAnnotation = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/testManifestWithin.json").getFile()));
+         Annotation tAnno = new Annotation(tAnnotation);
+         tAnno.setCreator(tUser);
+
+         Annotation tStoredAnno = _store.addAnnotation(tAnno);
+
+         User tNormalUser = new User();
+         tNormalUser.setId("http://example.com/normal");
+         tNormalUser.setShortId("normal");
+         tNormalUser.setAuthenticationMethod("test");
+         tNormalUser.setAdmin(false);
+         _store.saveUser(tNormalUser);
+
+
+        StoreService storeService = ControllerMocks.getStoreServiceWithUser(tUser);
+        List<PageAnnoCount> tAnnos = storeService.listAnnoPages("http://example.com/manfiest/test/manifest.json", tUser);
+
+        assertEquals("With same user there should be 1 result. ", 1, tAnnos.size());
+
+        Exception exception = assertThrows(PermissionDenied.class, () -> {
+            final StoreService tNormalUserService = ControllerMocks.getStoreServiceWithUser(tNormalUser);
+            tNormalUserService.listAnnoPages("http://example.com/manfiest/test/manifest.json", tUser);
+        });    
+         
+        User tAdmin = new User();
+        tAdmin.setId("http://example.com/admin");
+        tAdmin.setShortId("admin");
+        tAdmin.setAuthenticationMethod("test");
+        tAdmin.setAdmin(true);
+        _store.saveUser(tAdmin);
+
+        storeService = ControllerMocks.getStoreServiceWithUser(tAdmin);
+        tAnnos = storeService.listAnnoPages("http://example.com/manfiest/test/manifest.json", tUser);
+
+        assertEquals("Admin should be able to see the 1 result. ", 1, tAnnos.size());
+
     }
 
 }

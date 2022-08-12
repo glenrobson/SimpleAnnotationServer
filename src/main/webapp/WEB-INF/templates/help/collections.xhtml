@@ -1,0 +1,27 @@
+<div class="modal fade" id="help" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmTitle">Help</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class='far fa-window-close'></i></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Welcome to Simple Annotation Server (SAS), a tool that lets you organize, annotate, transcribe, and share your work with IIIF materials.</p>
+
+        <p>SAS is built around the concept of collections. You start with "Collection 1", and can begin importing IIIF manifests into the collection. A manifest is simply a JSON file that you access via a URL, like:</p>
+
+        <p><a href="http://metascripta.org/iiif/VFL_VTL_03199_01.json" target="_blank">http://metascripta.org/iiif/VFL_VTL_03199_01.json</a>.</p>
+
+        <p>You can add and remove manifests from this first collection, and also you can rename it to whatever makes sense for your research or work purposes.</p>
+
+        <p>You can create additional collections as needed, for instance if you are creating a collection of manifests for a class. In each collection, there is a IIIF collection link available in the top right. This lets you share the entire set of manifests all at once. Viewers such as <a href="https://projectmirador.org/" target="_blank">Mirador 3</a> and the <a href="https://universalviewer.io/" target="_blank">Universal Viewer</a> are compatible with IIIF collection links.</p>
+        <p>Once you have a manifest added to a collection, you can begin using Mirador to create annotations and transcriptions by choosing "Annotate in Mirador". Alternatively, once you have worked with your materials and generated annotations, you can choose "Browse Annotations" to see which canvases are annotated, and how many annotations there are. A canvas is generally the equivalent of 1 image, or 1 page in a document - but it can be more complex (e.g. multiple images on 1 canvas) depending on the object you are working with.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

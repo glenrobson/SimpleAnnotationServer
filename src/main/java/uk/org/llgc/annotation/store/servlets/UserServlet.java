@@ -14,6 +14,7 @@ import uk.org.llgc.annotation.store.StoreConfig;
 import uk.org.llgc.annotation.store.adapters.StoreAdapter;
 import uk.org.llgc.annotation.store.controllers.AuthorisationController;
 import uk.org.llgc.annotation.store.data.users.User;
+import uk.org.llgc.annotation.store.data.users.LocalUser;
 import uk.org.llgc.annotation.store.controllers.UserService;
 
 import java.util.Map;
@@ -36,15 +37,44 @@ public class UserServlet extends HttpServlet {
 	public void doGet(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
     }
 
+	public void doDelete(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
+        AuthorisationController tAuth = new AuthorisationController(pReq);
+        User tLoggedInUser = new UserService(pReq).getUser();
+
+        User tUser = new User();
+        try {
+            tUser.setId(pReq.getParameter("uri"));
+        } catch (URISyntaxException tExcpt) {
+            _logger.debug("failed to delete " + tLoggedInUser + "due to: " + tLoggedInUser);
+        }
+
+        Map<String,Object> tResponse = new HashMap<String,Object>();
+        if (tAuth.deleteUser(tLoggedInUser, tUser)) {
+            _store.deleteUser(tUser);
+            tResponse.put("code", pRes.SC_OK);
+            tResponse.put("message", "User deleted");
+            this.sendJson(pRes, pRes.SC_OK, tResponse);
+        } else {
+            tResponse.put("code", pRes.SC_UNAUTHORIZED);
+            tResponse.put("message", "You can only delete users if you are Admin");
+            this.sendJson(pRes, pRes.SC_UNAUTHORIZED, tResponse);
+        }
+    }
 
 	public void doPost(final HttpServletRequest pReq, final HttpServletResponse pRes) throws IOException {
-        AuthorisationController tAuth = new AuthorisationController(pReq.getSession());
-        User tLoggedInUser = new UserService(pReq.getSession()).getUser();
+        AuthorisationController tAuth = new AuthorisationController(pReq);
+        User tLoggedInUser = new UserService(pReq).getUser();
         User tUser = getUser(pReq);
+        System.out.println("Saved user " + tUser);
         Map<String,Object> tResponse = new HashMap<String,Object>();
         if (tAuth.changeUserDetails(tUser)) {
             tUser.setName(pReq.getParameter("name"));
             tUser.setEmail(pReq.getParameter("email"));
+            if (pReq.getParameter("password") != null && pReq.getParameter("password").trim().length() != 0) {
+                ((LocalUser)tUser).setPassword(pReq.getParameter("password"));
+            }
+
+            System.out.println("Updated User " + tUser);
 
             User tUpdated = _store.saveUser(tUser);
             if (tLoggedInUser.getId().equals(tUser.getId())) {
