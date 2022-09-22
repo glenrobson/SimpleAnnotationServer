@@ -10,5 +10,4 @@ src/main/webapp/stats/*.json
 auth.json
 *auth.json
 node_modules
-node
 node_modules
