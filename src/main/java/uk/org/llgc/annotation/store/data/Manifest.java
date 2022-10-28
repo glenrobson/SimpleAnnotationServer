@@ -276,16 +276,19 @@ public class Manifest {
 	 */
 	public String getShortId() {
         if (_shortId == null || _shortId.isEmpty()) {
-            if (_URI.endsWith("manifest.json")) {
+            // Its no longer safe to use this NLW shortcut 
+            // as it fails the workbench:
+            // https://glenrobson.github.io/workbench/manifests/projectmanifest.json"
+            /*if (_URI.endsWith("manifest.json")) {
                 String[] tURI = _URI.split("/");
                 _shortId = tURI[tURI.length - 2];
-            } else {
-                try {
-                    _shortId = AnnotationUtils.getHash(_URI, "md5");
-                } catch (IOException tExcpt) {
-                    tExcpt.printStackTrace();
-                }
+            } else {*/
+            try {
+                _shortId = AnnotationUtils.getHash(_URI, "md5");
+            } catch (IOException tExcpt) {
+                tExcpt.printStackTrace();
             }
+            //}
         }
 	    return _shortId;
 	}
