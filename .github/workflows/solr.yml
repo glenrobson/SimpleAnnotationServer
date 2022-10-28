@@ -15,7 +15,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Starting SOLR
-        run:  mkdir home && chmod 777 home && docker-compose -f docker/sas-solr/docker-compose.yml --project-directory . up -d solr
+        run:  mkdir solr-data && chmod 777 solr-data && docker-compose -f docker/sas-solr/docker-compose.yml --project-directory . up -d solr
 
       - name: checking docker
         run:  docker ps && docker logs sas_solr
