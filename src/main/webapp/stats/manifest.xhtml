@@ -28,13 +28,13 @@
                 </div>
             </main>
             <p:panel header="Percentage of items transcribed">
-                <c:if test="#{not tManifest}">
+                <c:if test="#{tManifest != null}">
                     <p:chart type="pie" model="#{statsService.getPercentAnnotated(tManifest)}" style="height:300px; width:500px;"/>
                 </c:if>    
             </p:panel>
 
             <p:panel header="Annotations per Canvas">
-                <c:if test="#{not tManifest}">
+                <c:if test="#{tManifest != null}">
                     <p:chart type="bar" model="#{statsService.getManifestAnnoCount(tManifest)}" style="height500px;"/>
                 </c:if>    
             </p:panel>

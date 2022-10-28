@@ -25,120 +25,125 @@
                 <h1 id="collectionName"><h:outputText value="#{manifest.label}" escape="false" /></h1>
             </div>
 
-            <div class="options">
-                <div class="option_links">
-                    Manifest options:
-                    <a href="search.xhtml?iiif-content=#{manifest.URI}"><i class="fas fa-wrench"></i> Configure IIIF Search</a> |
-                    <a href="#" data-toggle="modal" data-target="#importAnnotations" onclick="hideMessage('importAnnoMessage');"><i class="fas fa-wrench"></i> Import Annotations</a> |
-<!--                    <a href="#{manifest.URI}" target="_blank">Manifest Link</a>-->
+            <c:if test="#{manifest != null}">
+                <div class="options">
+                    <div class="option_links">
+                        Manifest options:
+                        <a href="search.xhtml?iiif-content=#{manifest.URI}"><i class="fas fa-wrench"></i> Configure IIIF Search</a> |
+                        <a href="#" data-toggle="modal" data-target="#importAnnotations" onclick="hideMessage('importAnnoMessage');"><i class="fas fa-wrench"></i> Import Annotations</a> |
+    <!--                    <a href="#{manifest.URI}" target="_blank">Manifest Link</a>-->
 
-                    <ui:include src="WEB-INF/templates/content-state.xhtml">
-                        <ui:param name="url" value="#{manifest.URI}" />
-                        <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
-                        <ui:param name="mode" value="full" />
-                    </ui:include>
-                </div>    
-                <div class="right_options">
-                    List: <a href="#" id="all" onClick="toggleAnnotated(this)">all</a> | <a id="annotated" class="selected" href="#" onClick="toggleAnnotated(this)">annotated</a>
+                        <ui:include src="WEB-INF/templates/content-state.xhtml">
+                            <ui:param name="url" value="#{manifest.URI}" />
+                            <ui:param name="description" value="Link to Manifest. Also draggable using IIIF Content State." />
+                            <ui:param name="mode" value="full" />
+                        </ui:include>
+                    </div>    
+                    <div class="right_options">
+                        List: <a href="#" id="all" onClick="toggleAnnotated(this)">all</a> | <a id="annotated" class="selected" href="#" onClick="toggleAnnotated(this)">annotated</a>
+                    </div>
                 </div>
-            </div>
-            <hr/>
-            <c:set var="canvases" value="#{storeService.listAnnoPages(manifest)}" />
-            <ul id="canvases" class="media-list">
-                <c:forEach items="#{canvases}" var="annoPage" varStatus="iterMetadata">
-                    <c:set var="short_id" value="#{annoPage.canvas.shortId}" />
-                    <c:set var="isEmpty" value="#{annoPage.count == 0}" />
-                    <c:set var="className" value="canvas" />
-                    <c:if test="#{not isEmpty}">
-                        <c:set var="className" value="anno_canvas" />
-                    </c:if>
-                    <li class="manifestSummary #{className}" id="shortId">
-                        <div class="media-header-div">
-                            <h3 class="box_type">   
-                                <c:if test="#{not isEmpty}">
-                                    Annotated Canvas
-                                </c:if>
-                                <c:if test="#{isEmpty}">
-                                    Canvas
-                                </c:if>
-                            </h3>
-                        </div>
-                        <div class="media-heading">
-                            <h5>
-                                <c:if test="#{not empty annoPage.canvas.label}">
-                                    Label: <h:outputText value="#{annoPage.canvas.label}"/>
-                                </c:if>
-                                <c:if test="#{empty annoPage.canvas.label}">
-                                    Label: unlabelled
-                                </c:if>
-                            </h5>
-                        </div>    
-                        <div class="media">
-                            <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
-                                <img class="align-self-center mr-3 media-img canvas_thum" data-canvas-id="#{annoPage.canvas.id}" src=""/>
-                            </a>
-                            <div class="media-body">
-                                <a href="view.xhtml?collection=#{collection.id}&amp;manifest=#{manifest.URI}&amp;canvas=#{annoPage.canvas.id}" class="btn btn-primary mb-2" title="Open manifest for editing"><i class="far fa-edit"></i> Annotate this page</a>
-                                <c:if test="#{not isEmpty}">
-                                    <a href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}&amp;collection=#{request.getParameter('collection')}&amp;manifest=#{param['iiif-content']}" class="btn btn-secondary mb-2" ><i class="fas fa-list"></i> List Annotations (<h:outputText value="#{annoPage.count}"/>)</a>
-                                </c:if>
+                <hr/>
+                <c:set var="canvases" value="#{storeService.listAnnoPages(manifest)}" />
+                <ul id="canvases" class="media-list">
+                    <c:forEach items="#{canvases}" var="annoPage" varStatus="iterMetadata">
+                        <c:set var="short_id" value="#{annoPage.canvas.shortId}" />
+                        <c:set var="isEmpty" value="#{annoPage.count == 0}" />
+                        <c:set var="className" value="canvas" />
+                        <c:if test="#{not isEmpty}">
+                            <c:set var="className" value="anno_canvas" />
+                        </c:if>
+                        <li class="manifestSummary #{className}" id="shortId">
+                            <div class="media-header-div">
+                                <h3 class="box_type">   
+                                    <c:if test="#{not isEmpty}">
+                                        Annotated Canvas
+                                    </c:if>
+                                    <c:if test="#{isEmpty}">
+                                        Canvas
+                                    </c:if>
+                                </h3>
+                            </div>
+                            <div class="media-heading">
+                                <h5>
+                                    <c:if test="#{not empty annoPage.canvas.label}">
+                                        Label: <h:outputText value="#{annoPage.canvas.label}"/>
+                                    </c:if>
+                                    <c:if test="#{empty annoPage.canvas.label}">
+                                        Label: unlabelled
+                                    </c:if>
+                                </h5>
+                            </div>    
+                            <div class="media">
+                                <a class="align-self-center" href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}">
+                                    <img class="align-self-center mr-3 media-img canvas_thum" data-canvas-id="#{annoPage.canvas.id}" src=""/>
+                                </a>
+                                <div class="media-body">
+                                    <a href="view.xhtml?collection=#{collection.id}&amp;manifest=#{manifest.URI}&amp;canvas=#{annoPage.canvas.id}" class="btn btn-primary mb-2" title="Open manifest for editing"><i class="far fa-edit"></i> Annotate this page</a>
+                                    <c:if test="#{not isEmpty}">
+                                        <a href="annotations.xhtml?iiif-content=#{annoPage.canvas.id}&amp;collection=#{request.getParameter('collection')}&amp;manifest=#{param['iiif-content']}" class="btn btn-secondary mb-2" ><i class="fas fa-list"></i> List Annotations (<h:outputText value="#{annoPage.count}"/>)</a>
+                                    </c:if>
 
-                                <p></p><p></p>
-                                <div id="actionBar">
-                                    <span>
-                                        <c:if test="#{not isEmpty}">
-                                            <a class="actionLink" href="annotations/#{user.shortId}/#{short_id}.json" download="#{short_id}.json">Download annotations</a> | 
-                                            <a class="actionLink" href="#" data-count="#{annoPage.count}" data-canvas-id="#{annoPage.canvas.id}" data-mode="remove_annotations" data-manifest="#{param['iiif-content']}" data-collection="#{param['collection']}" onClick="showConfirm(event); return false;">Remove annotations</a>
-                                        </c:if>
-                                    </span>    
+                                    <p></p><p></p>
+                                    <div id="actionBar">
+                                        <span>
+                                            <c:if test="#{not isEmpty}">
+                                                <a class="actionLink" href="annotations/#{user.shortId}/#{short_id}.json" download="#{short_id}.json">Download annotations</a> | 
+                                                <a class="actionLink" href="#" data-count="#{annoPage.count}" data-canvas-id="#{annoPage.canvas.id}" data-mode="remove_annotations" data-manifest="#{param['iiif-content']}" data-collection="#{param['collection']}" onClick="showConfirm(event); return false;">Remove annotations</a>
+                                            </c:if>
+                                        </span>    
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </li>
-                </c:forEach>
-            </ul>
+                        </li>
+                    </c:forEach>
+                </ul>
 
-            <script>
-                let canvas_ids = document.getElementsByClassName("canvas_thum");
-                fetch('#{manifest.URI}')
-                    .then(response => response.json())
-                        .then(function(manifest) {
-                            for (let thumb of canvas_ids) {
-                                let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 100);
-                                thumb.src = url;
-                            };
-                        });
+                <script>
+                    let canvas_ids = document.getElementsByClassName("canvas_thum");
+                    fetch('#{manifest.URI}')
+                        .then(response => response.json())
+                            .then(function(manifest) {
+                                for (let thumb of canvas_ids) {
+                                    let url = getCanvasThumbnail(manifest, thumb.dataset.canvasId, 0, 100);
+                                    thumb.src = url;
+                                };
+                            });
 
-                if (document.getElementsByClassName("anno_canvas").length === 0) {
-                    toggleAnnotated(document.getElementById("all"));
-                }
-
-                function toggleAnnotated(link) {
-                    let mode = "";
-                    if (link.id === "all") {
-                        link.className = "selected";
-
-                        let annotatedLink = document.getElementById("annotated");
-                        annotatedLink.className = "";
-
-                        mode = "block";
-                    } else {
-                        link.className = "selected";
-
-                        let annotatedLink = document.getElementById("all");
-                        annotatedLink.className = "";
-
-                        mode = "none";
+                    if (document.getElementsByClassName("anno_canvas").length === 0) {
+                        toggleAnnotated(document.getElementById("all"));
                     }
-                    let canvases = document.getElementsByClassName("canvas");
-                    Array.prototype.forEach.call(canvases, function (canvas) {
-                        canvas.style.display = mode;
-                    })
-                }
-                
-            </script>
-            <ui:include src="WEB-INF/templates/dialogues/importAnnotations.xhtml"/>
-            <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
+
+                    function toggleAnnotated(link) {
+                        let mode = "";
+                        if (link.id === "all") {
+                            link.className = "selected";
+
+                            let annotatedLink = document.getElementById("annotated");
+                            annotatedLink.className = "";
+
+                            mode = "block";
+                        } else {
+                            link.className = "selected";
+
+                            let annotatedLink = document.getElementById("all");
+                            annotatedLink.className = "";
+
+                            mode = "none";
+                        }
+                        let canvases = document.getElementsByClassName("canvas");
+                        Array.prototype.forEach.call(canvases, function (canvas) {
+                            canvas.style.display = mode;
+                        })
+                    }
+                    
+                </script>
+                <ui:include src="WEB-INF/templates/dialogues/importAnnotations.xhtml"/>
+                <ui:include src="WEB-INF/templates/dialogues/confirm.xhtml"/>
+            </c:if>
+            <c:if test="#{manifest == null}">
+                <p>It looks like there was a problem finding your manifest. Please add it again in the <a class="back_header" href="collections.xhtml?collection=#{param['collection']}">Collections screen.</a></p>
+            </c:if>
         </ui:define>
     </ui:composition>
 </html>
