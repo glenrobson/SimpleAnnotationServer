@@ -14,7 +14,7 @@ services:
       - "8983:8983" 
     volumes:
       - "./src/main/resources/solr:/tmp/config:ro"
-      - "./home:/var/solr"
+      - "./home:/var/solr/data"
     entrypoint:
       - bash
       - "-c"
