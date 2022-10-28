@@ -17,6 +17,9 @@ jobs:
       - name: Starting SOLR
         run:  docker-compose -f docker/sas-solr/docker-compose.yml --project-directory . up -d solr
 
+      - name: checking docker
+        run:  docker ps && docker logs sas_solr
+
       - name: Wait for SOLR to start
         run:  docker exec -t sas_solr /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 10 --solr-url http://0.0.0.0:8983/
 
