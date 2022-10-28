@@ -9,12 +9,13 @@ services:
       - "8888:8080"
   solr:
     container_name: sas_solr
-    image: "solr:latest"
+    image: "solr:8"
     ports:
       - "8983:8983" 
     volumes:
       - "./src/main/resources/solr:/tmp/config:ro"
+      - "./solr-data:/var/solr/data"
     entrypoint:
       - bash
       - "-c"
-      - "precreate-core testannotations /tmp/config; precreate-core annotations /tmp/config; exec solr -f"
+      - "solr-precreate testannotations /tmp/config; solr-precreate annotations /tmp/config; exec solr -f"
