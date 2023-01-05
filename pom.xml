@@ -285,9 +285,12 @@
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>1.10.4</version>
+                <configuration>
+                    <installDirectory>target</installDirectory>
+                    <workingDirectory>src/main/node</workingDirectory>
+                </configuration>
                 <executions>
                     <execution>
-                        <!-- optional: you don't really need execution ids, but it looks nice in your build log. -->
                         <id>install node and npm</id>
                         <goals>
                             <goal>install-node-and-npm</goal>

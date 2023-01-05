@@ -42,6 +42,7 @@
         <url-pattern>/collections.xhtml</url-pattern>
         <url-pattern>/manifest.xhtml</url-pattern>
         <url-pattern>/view.xhtml</url-pattern>
+        <url-pattern>/mirador3.html</url-pattern>
         <url-pattern>/populate.xhtml</url-pattern>
         <url-pattern>/annotations.xhtml</url-pattern>
         <url-pattern>/link.xhtml</url-pattern>
