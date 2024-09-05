@@ -103,6 +103,7 @@ public class ManifestUpload extends HttpServlet {
                 }
                 
                 try {
+                    // This calls the fromReader anyway so probably more efficient to pass the reader above.
                     tManifestJson = (Map<String,Object>)JsonUtils.fromString(tManifestStr);
                 } catch (JsonParseException tExcpt) {
                     System.out.println("Failed to load the following manifest: ");
