@@ -129,7 +129,7 @@ public class TestModel extends TestUtils {
 
     @Test
 	public void test30Manifest() throws IOException, IDConflictException, MalformedAnnotation {
-		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/manifests/3.0manifest.json").getFile()));
+		Map<String, Object> tManifestJson = (Map<String,Object>)JsonUtils.fromInputStream(new FileInputStream(getClass().getResource("/jsonld/3.0/manifests/0001-mvm-image.json").getFile()));
 
         String tShortId = "short_id";
         try {
