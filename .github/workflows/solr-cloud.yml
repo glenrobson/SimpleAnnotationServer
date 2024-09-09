@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Starting SOLR
-        run: docker-compose -f docker/sas-solr-cloud/docker-compose.yml --project-directory . up -d 
+        run: docker compose -f docker/sas-solr-cloud/compose.yaml --project-directory . up -d 
 
       - name: Wait for SOLR to start
         run:  docker exec -t solr1 /opt/docker-solr/scripts/wait-for-solr.sh --max-attempts 10 --wait-seconds 5 --solr-url http://0.0.0.0:8983/
