@@ -57,7 +57,6 @@ public class CanvasAnnotations extends HttpServlet {
 
         pRes.setContentType("application/ld+json; charset=UTF-8");
         pRes.setCharacterEncoding("UTF-8");
-        /**/_logger.debug(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
         pRes.getWriter().println(JsonUtils.toPrettyString(tAnnoList.toJson().get("resources")));
     }
 
