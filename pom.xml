@@ -43,29 +43,26 @@
             <artifactId>primefaces</artifactId>
             <version>${primefaces.version}</version>
         </dependency>
-        <dependency>
+        <!-- -->
+        <!-- <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
             <version>4.3.1</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-tdb</artifactId>
-            <version>4.3.1</version>
+            <version>4.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>4.3.1</version>
+            <version>4.10.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.jena</groupId>
                     <artifactId>jena-shaded-guava</artifactId>
                 </exclusion>
-                <!--<exclusion>
-                    <groupId>javax.annotation</groupId>
-                    <artifactId>javax.annotation-api</artifactId>
-                </exclusion>-->
             </exclusions>
         </dependency>
         <dependency>
