@@ -12,6 +12,7 @@
         <jsf.version>2.2.15</jsf.version>
         <primefaces.version>7.0</primefaces.version>
         <jetty.version>9.4.29.v20200521</jetty.version>
+        <log4j.version>2.24.2</log4j.version>
     </properties>
     <dependencies>
         <dependency>
@@ -144,17 +145,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.17.1</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.17.1</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.16.0</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.solr</groupId>
