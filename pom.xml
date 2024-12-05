@@ -13,7 +13,7 @@
 
         <jsf.version>2.2.15</jsf.version>
         <primefaces.version>7.0</primefaces.version>
-        <jetty.version>9.4.29.v20200521</jetty.version>
+        <jetty.version>9.4.56.v20240826</jetty.version>
     </properties>
     <dependencies>
         <dependency>
@@ -226,7 +226,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.30.v20200611</version>
+                <version>${jetty.version}</version>
                 <configuration>
                     <httpConnector>
                         <port>8888</port>
@@ -244,7 +244,7 @@
                     <dependency>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>apache-jstl</artifactId>
-                        <version>9.4.29.v20200521</version>
+                        <version>${jetty.version}</version>
                         <exclusions>
                             <exclusion>
                                 <groupId>org.apache.taglibs</groupId>
