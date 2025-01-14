@@ -10,7 +10,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Syntax;
 
@@ -251,7 +251,7 @@ public class SesameStore extends AbstractRDFStore implements StoreAdapter {
 
 
 	protected QueryExecution getQueryExe(final String pQuery) {
-		return new QueryEngineHTTP(((HTTPRepository)_repo).getRepositoryURL(),pQuery);
+		return QueryExecutionHTTP.service(((HTTPRepository)_repo).getRepositoryURL(), pQuery);
 	}
 
 	protected Resource createIRI(final String pURI) {

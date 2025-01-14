@@ -2,7 +2,7 @@ package uk.org.llgc.annotation.store.controllers;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ApplicationScoped;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import uk.org.llgc.annotation.store.data.PageAnnoCount;
 import uk.org.llgc.annotation.store.data.Manifest;

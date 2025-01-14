@@ -2,7 +2,7 @@ package uk.org.llgc.annotation.store.controllers;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.PieChartModel;
