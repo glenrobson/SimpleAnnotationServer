@@ -11,10 +11,10 @@ Mirador is included in the SimpleAnnotationServer to aid quick deployment. If yo
 
 ## Overloading config using Environment variables
 
-It is possible to overload any of the configuration specified in [src/main/webapp/WEB-INF/sas.properties](../src/main/webapp/WEB-INF/sas.properties) using environmental variables by prepending `SAS.` to any of the properties in sas.properties e.g:
+It is possible to overload any of the configuration specified in [src/main/webapp/WEB-INF/sas.properties](../src/main/webapp/WEB-INF/sas.properties) using environmental variables by prepending `SAS_` to any of the properties in sas.properties e.g:
 
 ```
-export SAS.store="solr"
+export SAS_store="solr"
 ```
 
 This is useful to configure the backend properties while deploying docker instances to AWS.
