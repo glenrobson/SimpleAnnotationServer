@@ -12,7 +12,7 @@
         <jsf.version>2.2.15</jsf.version>
         <primefaces.version>7.0</primefaces.version>
         <jetty.version>9.4.56.v20240826</jetty.version>
-        <log4j.version>2.24.2</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
     </properties>
     <dependencies>
         <dependency>
